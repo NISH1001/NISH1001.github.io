@@ -1,0 +1,17 @@
+title: Bits and Paradoxes 
+email: nishanpantha@gmail.com 
+description: > 
+    All about programming, technology, philosophy, life, love and shit
+baseurl: "/blog" 
+url: "" 
+twitter_username: nishparadox
+github_username:  NISH1001
+
+# Build settings
+markdown: kramdown
+theme: minima
+gems:
+  - jekyll-feed
+exclude:
+  - Gemfile
+  - Gemfile.lock
