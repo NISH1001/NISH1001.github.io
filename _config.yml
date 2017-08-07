@@ -1,17 +1,25 @@
+# Site settings
 title: Bits and Paradoxes 
+header-img: img/home-bg.jpg
 email: nishanpantha@gmail.com 
-description: > 
-    All about programming, technology, philosophy, life, love and shit
-baseurl: "" 
-url: "" 
+copyright_name: Bits and Paradoxes 
+description: "All about programming, technology, philosophy, life, love and shit"
+baseurl: ""
+url: ""
 twitter_username: nishparadox
-github_username:  NISH1001
+github_username: NISH1001 
+facebook_username: nishparadox 
+email_username: nishanpantha@gmail.com 
+
+# Google Analytics
+# To enable google analytics, uncomment below line with a valid Google Tracking ID
+# google_tracking_id:
 
 # Build settings
 markdown: kramdown
-theme: minima
-gems:
-  - jekyll-feed
-exclude:
-  - Gemfile
-  - Gemfile.lock
+highlighter: rouge
+permalink: pretty
+paginate: 5
+exclude: ["less","node_modules","Gruntfile.js","package.json","README.md"]
+
+gems: [jekyll-paginate, jekyll-feed]
