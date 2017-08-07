@@ -3,6 +3,7 @@ layout: post
 title:  "On Codes and Cleanliness"
 date:   2017-08-04 13:55:37 +0545
 categories: programming lessons
+subtitle: Writing no code is better than buggy ones. Minimalism should be the essence of coding. Just Keep It Simple Stupid(KISS).
 header-img: img/post-headers/2017-08-04-codes-and-cleanliness.jpg
 ---
 
@@ -30,34 +31,34 @@ All the programmers go through the similar phases :
 
 Here’s what I do to write clean codes (at least try to write the codes cleaner)
 
-### I. Proper coding convention for the programming language
+## I. Proper coding convention for the programming language
 This helps other developers to collaborate easily.
 
-### II. Proper variable and method naming convention
+## II. Proper variable and method naming convention
 Naming the variables properly surely avoids stressful thinking if you are reading your codes some time later. It makes the codes more verbose.
 
-### III. Prevent code duplication
+## III. Prevent code duplication
 If there are same parts of codes that are written repeatedly, I try to separate them and put them in a separate place to prevent duplicatoin.
 
-### IV. Modularity
+## IV. Modularity
 My codes follow Object Oriented Programming paradigms most of the time so that the components are as modular as possible. In fact, one doesn’t necessarily have to follow OOP while doing simple tasks.  
 
 Modularity in a sense make it more functional like a component. It doesn’t have to be the object itself but can be functions.
 However, if the tasks to be done isn’t complex, OOP adds more complexity to the codes. So, keep it simple.
 
-### V. Write proper documentation
+## V. Write proper documentation
 A proper documentation guides any developers through the vastness of the codes.  
 In fact, in the past I used to scratch my head over the old codes due to lack of documentation and had to literally spend hours to just make sense on what the codes do.
 
-### VI. Proper structuring of packages
+## VI. Proper structuring of packages
 This is also crucial for me. In a bigger project, structure matters more. Because the structuring is actually based on the overall architecture of the project itself.  
 A project that’s structured properly tend to represent a good architecture.
 
-### VII. Keep It Simple Stupid (KISS)
+## VII. Keep It Simple Stupid (KISS)
 As I have said in (IV), in the name of OOP people tend to neglect the fundamentals of coding that is — just make the things work simply.
 So, in a simple project that tends to do just one thing (such as automation, etc). I keep it simple and try to avoid OOP itself.
 
-### But
+## But
 No code is better than buggy ones. Cheers. Minimalism should be the essence of coding.
 
 PS: I’d like to add a quote:
