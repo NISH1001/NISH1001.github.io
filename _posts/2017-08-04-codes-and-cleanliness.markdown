@@ -4,6 +4,7 @@ title:  "On Codes and Cleanliness"
 date:   2017-08-04 13:55:37 +0545
 categories: programming lessons
 subtitle: Writing no code is better than buggy ones. Minimalism should be the essence of coding. Just Keep It Simple Stupid(KISS).
+comments: true
 header-img: img/post-headers/2017-08-04-codes-and-cleanliness.jpg
 ---
 
