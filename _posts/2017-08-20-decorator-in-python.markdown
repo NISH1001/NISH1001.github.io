@@ -15,15 +15,15 @@ itself. That is, a wrapper to an existing function.
 Sometimes it happens to us that we want to add some features to an existing one. Like there is some kind of library function that you are using it.
 However, you are not satisfied by its mechanism. So, you want to add some more features to it. But here's the dilemma. 
 
-I. *You want to alter the existing feature itself. But you have to touch the codes in a third-party library.*  
+I. *You want to alter the existing feature itself. But you have to touch the code in a third-party library.*  
 
-II. *You want to touch your old codes. But you are afraid that you might brick the overall system in the process.*
+II. *You want to touch your old code. But you are afraid that you might brick the overall system in the process.*
 
-III. *You can't just keep on changing old codes. You might have to do it at multiple locations where the old functions are being called.*
+III. *You can't just keep on changing old code. You might have to do it at multiple locations where the old functions are being called.*
 
 
 ## Solution? Decorators
-Decorator provides a means of altering or adding more codes to an existing function. But you don't really have to touch the old codes. 
+Decorator provides a means of altering or adding more code to an existing function. But you don't really have to touch the old code. 
 It's like:
 
 I. *You take a function.*
