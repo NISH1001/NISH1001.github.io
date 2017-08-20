@@ -95,7 +95,7 @@ def evolve_pokemon(name="Pikachu", level=5):
 But this is rubbish. We don't want to make changes to original code.
 
 **Here comes our hero decorator**  
-Now, let's create a new function `evolve` that accepts the original function `pokemon` and wraps with with evolution
+Now, let's create a new function `evolve` that accepts the original function `pokemon` and wraps with evolution
 ```python
 EVOLUTION_MULTIPLIER = 2
 
