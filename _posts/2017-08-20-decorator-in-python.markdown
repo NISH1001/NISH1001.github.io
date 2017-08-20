@@ -132,7 +132,7 @@ def pokemon(name="Pikachu", level=5):
     return "{0} --> {1}".format(name, level)
 ```
 
-Did you notice anything? We took the first version of the decorator `evolve` and reanmed it to `inner`. 
+Did you notice anything? We took the first version of the decorator `evolve` and renamed it to `inner`. 
 And then we wrapped it with new function `evolve` that takes the numerical value `n`.
 
 **You are seeing the pattern, right?**  
