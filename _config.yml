@@ -8,8 +8,9 @@ baseurl: ""
 url: "http://www.nishanpantha.com.np/"
 twitter_username: nishparadox
 github_username: NISH1001 
+medium_username : nishparadox
 facebook_username: nishparadox 
-email_username: nishanpantha@gmail.com 
+#email_username: nishanpantha@gmail.com 
 
 # Google Analytics
 # To enable google analytics, uncomment below line with a valid Google Tracking ID
