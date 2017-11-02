@@ -101,6 +101,12 @@ a neuron outputs a real number.
 # Let's build a perceptron
 We will be using `python3` and `numpy`. Other libraries/modules can be installed accordingly from `pip3`.
 
+## Import numpy
+Numpy is a python library for performing vector (matrix) operations efficiently.
+```python
+import numpy as np
+```
+
 ## Training Inputs
 The inputs are **numpy arrays**
 ```python
@@ -125,7 +131,7 @@ This weight is actually obtained after training the perceptron. The above is wha
 ## Sigmoid
 ```python
 def sigmoid(x):
-    return 1 / (1 + exp(-x))
+    return 1 / (1 + np.exp(-x))
 ```
 
 ## Prediction
