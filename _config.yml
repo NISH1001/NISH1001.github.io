@@ -15,7 +15,7 @@ linkedin_username : nishan-pantha
 
 # Google Analytics
 # To enable google analytics, uncomment below line with a valid Google Tracking ID
-# google_tracking_id:
+google_tracking_id: UA-63014279-2
 
 # Build settings
 markdown: kramdown
