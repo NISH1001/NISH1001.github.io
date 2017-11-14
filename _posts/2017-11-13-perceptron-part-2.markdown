@@ -127,7 +127,7 @@ w2  -> w2 + error1 * x21 + error2 * x22 + ...     ==> w2 + (error1 + error2 +...
 Where,
 j   ->  individual training instance
 x11, x12, ...    ->  input x1 at each training instance 'j'
-y11, y12, ...    ->  input y1 at each training instance 'j'
+x21, x22, ...    ->  input x2 at each training instance 'j'
 ```
 
 Generally,
