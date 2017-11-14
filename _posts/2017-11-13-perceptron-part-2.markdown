@@ -120,8 +120,13 @@ w2  ->  w2 + error * x2
 For each training set (X_train, Y_train):
 
 ```bash
-w1  -> w1 + error1 * x1 + error2 * x1 + ...     ==> w1 + (error1 + error2 +...) * x1
-w2  -> w2 + error1 * x2 + error2 * x2 + ...     ==> w2 + (error1 + error2 +...) * x2
+w1  -> w1 + error1 * x11 + error2 * x12 + ...     ==> w1 + (error1 + error2 +...) * x1j
+w2  -> w2 + error1 * x21 + error2 * x22 + ...     ==> w2 + (error1 + error2 +...) * x2j  
+
+Where,
+j   ->  individual training instance
+x11, x12, ...    ->  input x1 at each training instance 'j'
+y11, y12, ...    ->  input y1 at each training instance 'j'
 ```
 
 Generally,
