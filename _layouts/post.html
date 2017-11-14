@@ -9,7 +9,15 @@ layout: default
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
                 <div class="post-heading">
                     <h1>{{ page.title }}</h1>
-                    <span class="meta">Posted by {% if page.author %}{{ page.author }}{% else %}{{ site.title }}{% endif %} on {{ page.date | date: "%B %-d, %Y" }}</span>
+                    <span class="meta">
+                        Posted on
+                        {{ page.date | date: "%B %-d, %Y" }}
+                        <br/>
+                        {% if page.last_edited_on %}
+                            Last Edited on
+                        {{ page.last_edited_on| date: "%B %-d, %Y" }}
+                        {% endif %}
+                    </span>
                 </div>
             </div>
         </div>
@@ -21,6 +29,17 @@ layout: default
     <div class="container">
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+
+                <div>
+                    <em>Categories: </em>
+                    {% for category in page.categories %}
+                        <span class="badge">
+                            {{ category }}
+                        </span>
+                    {% endfor %}
+                </div>
+
+                <hr>
 
 				{{ content }}
 

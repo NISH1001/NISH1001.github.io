@@ -15,7 +15,20 @@ description: "All about programming, technology, philosophy, life, love and shit
         <p> <span style="color:#1e88e5">Read More...</span></p>
         {% endif %}
     </a>
-    <p class="post-meta">Posted by {% if post.author %}{{ post.author }}{% else %}{{ site.title }}{% endif %} on {{ post.date | date: "%B %-d, %Y" }}</p>
+    <p class="post-meta">
+        Posted on
+        {{ post.date | date: "%B %-d, %Y" }} || 
+        Last edited on 
+        {% if post.last_edited_on %}{{ post.last_edited_on| date: "%B %-d, %Y" }}
+        {% else %}{{ post.date | date: "%B %-d, %Y" }}
+        {% endif %}
+        <br/>
+        {% for category in post.categories %}
+            <span class="badge">
+                {{ category }}
+            </span>
+        {% endfor %}
+    </p>
 </div>
 <hr>
 {% endfor %}
