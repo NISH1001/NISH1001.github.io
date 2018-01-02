@@ -2,7 +2,7 @@
 layout: post
 title:  "A Child Inside a Maturing Soul"
 date:   2017-09-14 13:55:37 +0545
-categories: life
+categories: writing life
 subtitle: Every child is a man and every man is a child.
 comments: true
 header-img: img/post-headers/2017-09-14-child-in-maturing-soul.jpeg
