@@ -3,7 +3,8 @@ layout: post
 title:  "Let's learn perceptron the noob way - Part 2"
 date:   2017-11-13 00:01:00 +0545
 last_edited_on:   2017-11-14 00:01:00 +0545
-categories: programming machine-learning
+categories: programming
+tags: programming machine-learning perceptron
 subtitle: "The  Weights are updated by using the error/deviation in predicted values."
 comments: true
 header-img: img/post-headers/2017-11-03-perceptron-part-2.jpg"

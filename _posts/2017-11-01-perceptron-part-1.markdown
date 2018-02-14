@@ -2,7 +2,8 @@
 layout: post
 title:  "Let's learn perceptron the noob way"
 date:   2017-11-01 00:55:37 +0545
-categories: programming machine-learning
+categories: programming
+tags: programming machine-learning perceptron
 subtitle: "A perceptron is a decision maker. It outputs certain number which can be interpreted as yes/no or 0/1 or similar range of decision."
 comments: true
 header-img: img/post-headers/2017-11-01-perceptron-part-1.png"

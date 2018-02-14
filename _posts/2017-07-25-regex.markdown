@@ -3,7 +3,8 @@ layout: post
 title:  "Lookaround in Regex"
 date:   2017-07-25 13:55:37 +0545
 subtitle: Lookarounds in regex are awesome non-capturing group. It is used to match pattern but not included in the matching list.  
-categories: programming regex
+categories: programming
+tags: programming regex
 ---
 
 

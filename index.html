@@ -23,9 +23,9 @@ description: "All about programming, technology, philosophy, life, love and shit
         {% else %}{{ post.date | date: "%B %-d, %Y" }}
         {% endif %}
         <br/>
-        {% for category in post.categories %}
+        {% for tag in post.tags%}
             <span class="badge">
-                {{ category }}
+                {{ tag }}
             </span>
         {% endfor %}
     </p>

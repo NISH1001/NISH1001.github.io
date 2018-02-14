@@ -2,7 +2,8 @@
 layout: post
 title:  "Responsibility"
 date:   2017-09-15 13:55:37 +0545
-categories: writing life
+categories: writing
+tags: writing life responsibility
 subtitle: Responsibility isn’t about having great power. Great power sprouts where responsibility thrives.
 comments: true
 header-img: img/post-headers/2017-09-15-responsibility.jpeg

@@ -2,7 +2,8 @@
 layout: post
 title:  "Tonight"
 date:   2017-08-27 13:55:37 +0545
-categories: writing poetry life 
+categories: poetry
+tags: poetry life writing
 subtitle: Tonight I'm on a date with Peace and Chaos
 comments: true 
 header-img: img/post-headers/2017-08-27-tonight.png

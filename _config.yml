@@ -21,7 +21,12 @@ google_tracking_id: UA-63014279-2
 markdown: kramdown
 highlighter: rouge
 #permalink: pretty
-permalink: /:year/:month/:day/:title.html
+#permalink: /:year/:month/:day/:title.html
+permalinks:
+    year: '/:year/'
+    month: '/:year/:month/'
+    day: '/:year/:month/:day/'
+    tag: '/tag/:name/'
 paginate: 8
 exclude: ["less","node_modules","Gruntfile.js","package.json","README.md"]
 

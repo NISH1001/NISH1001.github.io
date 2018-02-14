@@ -3,7 +3,8 @@ layout: post
 title:  "Decorator in Python"
 date:   2017-08-20 01:15:37 +0545
 subtitle:   A python decorator is just a wrapper to an existing function to add more functionality to it.
-categories: programming python
+categories: programming
+tags: programming python decorator
 comments: true
 header-img: img/post-headers/2017-08-20-decorator-in-python.jpg
 ---

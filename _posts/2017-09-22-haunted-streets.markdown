@@ -2,7 +2,8 @@
 layout: post
 title:  "Haunted Streets"
 date:   2017-09-21 13:55:37 +0545
-categories: writing poetry
+categories: poetry
+tags: poetry life haunted-streets
 subtitle: "As I wander, often, something follows me behind"
 comments: true
 header-img: img/post-headers/2017-09-22-haunted-streets.jpg

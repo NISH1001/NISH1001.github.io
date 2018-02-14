@@ -2,7 +2,8 @@
 layout: post
 title:  "Imposed"
 date:   2017-10-22 01:55:37 +0545
-categories: writing poetry
+categories: poetry
+tags: poetry life reality
 subtitle: "What is a truth? The lies through the tooth?"
 comments: true
 header-img: img/post-headers/2017-10-22-imposed.jpg

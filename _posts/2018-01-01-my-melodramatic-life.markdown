@@ -3,7 +3,8 @@ layout: post
 title:  "My Melodramatic Life"
 date:   2018-01-01 00:01:00 +0545
 last_edited_on:   2018-01-01 00:01:00 +0545
-categories: writing life
+categories: writing
+tags: writing life existence
 subtitle: "My life is oscillating with melodramatic frequencies of love, hatred, friendship, emotions, thoughts and shit..."
 comments: true
 header-img: img/post-headers/2018-01-01-my-melodramatic-life.jpg"

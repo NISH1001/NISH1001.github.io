@@ -3,7 +3,8 @@ layout: post
 title:  "When Walking Becomes More Than Just A Habit"
 date:   2018-01-29 00:01:00 +0545
 last_edited_on:   2018-01-29 00:01:00 +0545
-categories: writing life
+categories: writing
+tags: writing life existence self-identity
 subtitle: "I guess walking alone has become more than just a habit. A way of life."
 comments: true
 header-img: img/post-headers/2018-01-29-when-walking-is-more-than-habit.jpg"

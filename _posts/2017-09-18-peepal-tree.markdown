@@ -2,7 +2,8 @@
 layout: post
 title:  "पीपलको बोट"
 date:   2017-09-15 13:55:37 +0545
-categories: writing life
+categories: poetry
+tags: poetry life
 subtitle: त्यो पीपलको बोटमुनि बसेर त्यो मानिस धुरुधुरु रुन्छ ..
 comments: true
 header-img: img/post-headers/2017-09-18-peepal-tree.jpeg
