@@ -42,6 +42,18 @@
                         </a>
                     </li>
                     {% endif %}
+
+                    {% if site.quora_username%}
+                    <li>
+                        <a href="https://quora.com/{{ site.quora_username}}">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-quora fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    {% endif %}
+
                     {% if site.medium_username %}
                     <li>
                         <a href="https://medium.com/@{{ site.medium_username}}">
