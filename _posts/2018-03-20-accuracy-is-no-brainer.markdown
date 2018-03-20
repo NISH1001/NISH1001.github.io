@@ -2,7 +2,7 @@
 layout: post
 title:  "Accuracy Is a No-Brainer: Precision and Recall"
 date:   2018-03-20 00:01:00 +0545
-last_edited_on:   2018-03-20 00:01:00 +0545
+last_edited_on:   2018-03-20 00:01:20 +0545
 categories: programming
 tags: programming machine-learning metric evaluation
 subtitle: "Accuracy is not always a good metric to evaluate a system/model."
@@ -158,6 +158,33 @@ the area under the curve.  (Look at the 'Further Read' section)
 
 ![ROC Curve](/img/post-images/2018-03-20-accuracy-is-no-brainer/roc-curve.png){:class="img-responsive"}
 
+## When is the time to switch from Accuracy to other metric?
+Use Accuracy whenever it doesn't matter if you miss some of the Positive cases:  
+- cat vs dog
+- hot-dog?
+- sentiment analysis
+- chocolate classification
+- text generation
+
+But the usage varies based on actual problem space. If you think failing to identiy a chocolate type in a supermart sometimes 
+doesn't harm, just stick to accuracy. Else find other metrics to evaluate the classifier.  
+As seen in this [SO's Post](https://stats.stackexchange.com/questions/89299/when-to-use-accuracy-and-precision-to-evaluate-binary-classifiers) 
+always try to get statistics of your training dataset - its skewness, the distribution, etc. 
+And see if you need to go beyond. 
+
+In cases like **text generation** there isn't any metric to actually know what the text is supposed to be since the whole idea 
+is based on probabilities of occurence of next token (character/word/ngram) which is based on frequency distribution. For this problem, 
+to what 'real output' can you compare to measure if the model is doing fine? One metric might be to use 
+[**Markov Chain**](https://en.wikipedia.org/wiki/Markov_chain) and calculate probility of the generated text as a metric.
+
+Similarly, in a system like **linear regression** that tries to predict real values (not probabilities), accuracy doesn't seem to make sense. 
+In such case metrics like [**Mean Squared Error (MSE)**](https://en.wikipedia.org/wiki/Mean_squared_error) might give clear idea on 
+how much "lossy" the system's output is.  
+
+There are more metrics beyond what traditionally are known. Sometimes, it's even possible to invent your own metric that will make sense 
+of the input and output. Choose wisely. Don't hesitate to experiment with your system. 
+
+> **Side Note**: Please, don't forget to share this post if you think it makes **sense**
 
 
 # Further Reads
@@ -166,6 +193,7 @@ the area under the curve.  (Look at the 'Further Read' section)
 - [The Class Imbalance Problem](http://www.chioka.in/class-imbalance-problem){:class="paradox"}
 - [Difference between ROC Curve adn PR Curve](http://www.chioka.in/differences-between-roc-auc-and-pr-auc){:class="paradox"}
 - [Confusion Matrix](https://en.wikipedia.org/wiki/Confusion_matrix){:class="paradox"}
+- [Metrics To Evaluate ML Models](https://machinelearningmastery.com/metrics-evaluate-machine-learning-algorithms-python/){:class="paradox"}
 
 
 
