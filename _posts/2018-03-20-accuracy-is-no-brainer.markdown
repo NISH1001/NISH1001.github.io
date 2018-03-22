@@ -2,7 +2,7 @@
 layout: post
 title:  "Accuracy Is a No-Brainer: Precision and Recall"
 date:   2018-03-20 00:01:00 +0545
-last_edited_on:   2018-03-20 00:01:20 +0545
+last_edited_on:   2018-03-22 00:01:20 +0545
 categories: programming
 tags: programming machine-learning metric evaluation
 subtitle: "Accuracy is not always a good metric to evaluate a system/model."
@@ -175,7 +175,7 @@ And see if you need to go beyond.
 In cases like **text generation** there isn't any metric to actually know what the text is supposed to be since the whole idea 
 is based on probabilities of occurence of next token (character/word/ngram) which is based on frequency distribution. For this problem, 
 to what 'real output' can you compare to measure if the model is doing fine? One metric might be to use 
-[**Markov Chain**](https://en.wikipedia.org/wiki/Markov_chain) and calculate probility of the generated text as a metric.
+[**Markov Chain**](https://en.wikipedia.org/wiki/Markov_chain) and calculate probability of the generated text as a metric.
 
 Similarly, in a system like **linear regression** that tries to predict real values (not probabilities), accuracy doesn't seem to make sense. 
 In such case metrics like [**Mean Squared Error (MSE)**](https://en.wikipedia.org/wiki/Mean_squared_error) might give clear idea on 
