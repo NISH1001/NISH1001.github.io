@@ -2,7 +2,7 @@
 layout: post
 title:  "मानिसको भिड, म अनि मेरा बिलिन हुन लागेका बिचारहरु"
 date:   2018-03-31 00:01:00 +0545
-last_edited_on:   2018-03-31 00:01:20 +0545
+last_edited_on:   2018-04-08 00:01:20 +0545
 categories: poetry
 tags: poetry life
 subtitle: "अनजान यो समयमाम फसिरहेको छुशून्यताको दलदलमाम निस्सासिरहेको छुयी बिचारहरु भित्रसन्तुलन गुमाइरहेको छु"
@@ -10,7 +10,9 @@ comments: true
 header-img: img/post-headers/2018-03-31-thoughts-lost-in-crowd.jpg
 ---
 
-[*image source*: [dualshockers](https://www.dualshockers.com/enjoy-this-set-of-dark-souls-prepare-to-die-edition-screens-for-launch/)]
+[*image source*: [dualshockers](https://www.dualshockers.com/enjoy-this-set-of-dark-souls-prepare-to-die-edition-screens-for-launch/)]  
+
+>> The title roughly translates to **The Crowd, Me and My Vanishing Thoughts**.
 
 
 अनजान यो समयमा  
