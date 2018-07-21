@@ -18,6 +18,8 @@ quora_username : nishan-pantha
 # To enable google analytics, uncomment below line with a valid Google Tracking ID
 google_tracking_id: UA-63014279-2
 
+google_ad_client: ca-pub-7918070781803326
+
 # Build settings
 markdown: kramdown
 highlighter: rouge
