@@ -6,7 +6,7 @@ last_edited_on:   2018-11-14 00:01:20 +0545
 categories: programming
 tags: programming machine-learning nlp word2vec text
 subtitle: "I have analyzed all of my blog posts from medium"
-comments: false
+comments: true
 header-img: img/post-headers/2018-11-13-thought-analysis.png"
 ---
 
