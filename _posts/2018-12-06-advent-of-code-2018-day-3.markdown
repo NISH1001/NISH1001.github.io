@@ -62,7 +62,7 @@ for cn, x, y, w, h in claims:
 
 **Part 1**  
 When each claim has been seen, I simply find the locations in the **1000x1000** fabric matrix where value is greater than 1. 
-This is done by using `np.where` function which returns the boolean values for every location fo the mentioned condition.  
+This is done by using `np.where` function which returns the boolean values for every location for the mentioned condition.  
 And finally, I take the sum of that which gives total number of overlapping regions.  
 This makes "sense" since any increment that exceeds `1` is telling us that the region is being incremented by another claim (sub matrix).  
 ```python
@@ -71,7 +71,7 @@ print(np.sum(np.where(fabric > 1, 1, 0)))
 
 
 **Part 2**  
-Like part 1, I loop through each claim one more time - each time extracting the sub-matrix (claim matrix) and finding the max max value 
+Like part 1, I loop through each claim one more time - each time extracting the sub-matrix (claim matrix) and finding the max value 
 within the sub matrix. If the max value is exactly equal to 1 I simply know that the region is not being overlapped with any other claims.
 ```python
 for cn, x, y, w, h in claims:
