@@ -7,7 +7,7 @@ categories: programming
 tags: programming python nlp natural-language-processing word-embeddings
 subtitle: "Universal Sentence Encoder is the model for encoding sentences into embedding vectors."
 comments: true
-header-img: "img/post-headers/2019-01-11-universal-sentence-encoder-semantic-search.png"
+header-img: "img/post-headers/2019-01-10-universal-sentence-encoder-semantic-search.png"
 ---
 
 # TL;DR
