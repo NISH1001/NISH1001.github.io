@@ -13,7 +13,9 @@ header-img: "img/post-headers/2019-01-10-universal-sentence-encoder-semantic-sea
 # TL;DR
 Here I demonstrate how powerful sentence embeddings from Universal Sentence Encoder are.  
 I have a bunch of textual data and query in an arbitary text to find the nearest match that is semantically similar. I am not diving 
-into the architecture of the model itself. But rather focus its usecase for end-user.
+into the architecture of the model itself. But rather focus its usecase for end-user.  
+<br/>
+The notebook can be found [here](https://github.com/NISH1001/machine-learning-into-the-void/blob/master/nlp/universal-sentence-encocder-semantic-similarity.ipynb){:class="paradox"}.
 #### *Import*ant Stuff
 
 ```python
