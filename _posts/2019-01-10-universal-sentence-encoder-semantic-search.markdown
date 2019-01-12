@@ -2,7 +2,7 @@
 layout: post
 title:  "Semantic Similarity using Universal Sentence Encoder"
 date:   2019-01-10 00:01:00 +0545
-last_edited_on:   2019-01-11 00:03:20 +0545
+last_edited_on:   2019-01-12 00:03:20 +0545
 categories: programming
 tags: programming python nlp natural-language-processing word-embeddings
 subtitle: "Universal Sentence Encoder is the model for encoding sentences into embedding vectors."
@@ -265,7 +265,7 @@ Get similarities between different test texts.
 Following function wraps the calls to feature extraction and cosine similarity measure.
 
 ```python
-def test_similiarity(text1, text2):
+def test_similarity(text1, text2):
     vec1 = get_features(text1)[0]
     vec2 = get_features(text2)[0]
     print(vec1.shape)
@@ -274,22 +274,23 @@ def test_similiarity(text1, text2):
 
 **Now, we test some texts to see the semantic similarity**  
 ```python
-test_similiarity('that cat eats shit', 'that cat drinks')
+test_similarity('that cat eats shit', 'that cat drinks')
 ```
 **Similarity Score**: 0.7456401  
 
 ```python
-test_similiarity('he made that food', 'that food was made by him')
+test_similarity('he made that food', 'that food was made by him')
 ```
 **Similarity Score**: 0.9147358
 
 ```python
-test_similiarity('life is an abstraction that everyone feels infatuated to', 'i am hungry')
+test_similarity('life is an abstraction that everyone feels infatuated to', 'i am hungry')
 ```
 **Similarity Score**: 0.34186253
 
-> **Note**: 
-> As seen from this test, the semantic matching is low for texts that are out of context with each other.
+As seen from this test, the semantic matching is low for texts that are out of context with each other. 
+Not only that, the score is high when the same sentence is written in some other format preserving the overall semantics of 
+the text as seen in the `second` test which gave a score of `0.91`.
 
 ## Semantic Matching/Search
 Use the data we defined earlier
@@ -415,15 +416,38 @@ Hence it has many powerful usecases that outperform previous tecniques, some of 
 However, the model is very **heavy** and it takes some time to extract the vector for the text. So, if your system isn't that complex 
 and not very sensitive, and has short textual data, then you can direcly use word embeddings for representation of the text. Since, these 
 word embedding models give fixed-size vector for each word, you can average the vectors for all the words in the text. That gives 
-an approximate (yet correct to some level) representation of the whole text.
+an approximate (yet correct to some level) representation of the whole text.  
+
+Although, Universal Sentence Encoder is better than traditional embeddings, it's not the latest breakthrough. Google has released 
+**BERT**[4] - `Bidirectional Encoder Representations from Transformers` which has outperformed previous models. 
+These latest models all make use of `attention mechanism`[5].
+
+As of writing this blog post, running BERT on my local machine is not possible because of high-end spec. My RAM gives up and 
+laptop freezes. So, yeah! Not so awesome for AI enthusiast like me who wants to try latest state of the art models. 
+Universal Sentence Encoder is already a heavy model, I cannot bet my tasks on BERT. 
+For now, UST does fine and BERT is not a necessity. 
+
+> **Self-Note**: 
+> Being a research-oriented AI enthusiast, I feel that only the ones with good amount of money can afford to try these type of breakthroughs. 
+> I do not have any sort of EC2 machines. Neither I have TPU (cannot afford to do as per current situation, at the time of writing this blog). 
+> Training these sort of models is not feasible. However, it's good to see pre-trained models being open-sourced so that people like me do not have to train the models from scratch. 
+> And I don't have to worry about collecting the enormous chunks of data. 
+> If you want to try these sort of models, the concerned authorities (most of them) release some sort of jupyter notebooks which you can run yourself in the cloud that even have GPU. 
+> That's the reason I love using [google colab](https://colab.research.google.com/). 
+> If you are self-motivated, you can try Kaggle kernels. Kaggle also provides. GPU for the kernels[6], so that you can run your code efficiently.
 
 ## References
 [1] [Word2Vec](https://en.wikipedia.org/wiki/Word2vec){:class="paradox"}  
 [2] [GloVe](https://nlp.stanford.edu/projects/glove/){:class="paradox"}  
 [3] [Universal Language Models](http://nlp.fast.ai/){:class="paradox"}  
+[4] [Open Sourcing BERT: State-of-the-Art Pre-training for Natural Language Processing](https://ai.googleblog.com/2018/11/open-sourcing-bert-state-of-art-pre.html){:class="paradox"}  
+[5] [Attention is all you need](https://arxiv.org/pdf/1706.03762.pdf)  
+[6] [Running Kaggle Kernels with GPU](https://www.kaggle.com/dansbecker/running-kaggle-kernels-with-a-gpu){:class="paradox"}  
 
 ## Further Reads
 - [Advances in Semantic Textual Similarity](https://ai.googleblog.com/2018/05/advances-in-semantic-textual-similarity.html){:class="paradox"}
 - [Global Vectors for Word Representations](https://nlp.stanford.edu/pubs/glove.pdf){:class="paradox"}
 - [The secret ingredients of word2vec](http://ruder.io/secret-word2vec/){:class="paradox"}
 - [How NLP Cracked Transfer Learning](https://jalammar.github.io/illustrated-bert/){:class="paradox"}
+- [Code for BERT](https://github.com/google-research/bert){:class="paradox"}
+- [The Illustrated Transfer](https://jalammar.github.io/illustrated-transformer/){:class="paradox"}
