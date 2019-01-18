@@ -14,7 +14,7 @@ Previously, we have used the weights that were  already solved.
 So, this time we will be formulating on how those weights are actually updated to an optimal configurations.
 
 ## Training
-In the [previous post](http://www.nishanpantha.com.np/2017/11/01/perceptron-part-1.html), 
+In the [previous post](http://www.nishanpantha.com.np/programming/2017/10/31/perceptron-part-1.html), 
 we have used the weights that were  already available from a trained system. 
 But we don't get such *stable* weights always. And randomly guessing or doing brute-force solution is pretty much expensive (computationally).
 
