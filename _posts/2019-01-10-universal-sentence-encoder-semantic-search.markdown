@@ -2,7 +2,7 @@
 layout: post
 title:  "Semantic Similarity using Universal Sentence Encoder"
 date:   2019-01-10 00:01:00 +0545
-last_edited_on:   2019-01-12 00:03:20 +0545
+last_edited_on:   2019-03-11 00:03:20 +0545
 categories: programming
 tags: programming python nlp natural-language-processing word-embeddings
 subtitle: "Universal Sentence Encoder is the model for encoding sentences into embedding vectors."
@@ -64,7 +64,7 @@ def get_features(texts):
     
 ```
 
-## Preprocess Textual Shit
+## Preprocess Textual Mess
 We just preprocess some things from the text such as:
 - remove unwanted characters (punctuations)
 - expand standard acronyms like **we'll**, **they're**, ...
@@ -116,6 +116,10 @@ def process_all(text):
     text = process_text(text)
     return ' '.join(remove_stopwords(stop_words, text.split()))
 ```
+
+Note, I haven't actually used the functions `remove_stopwords` and `lemmatize`. Those are here just for references on various ways 
+to clean up the messiness in texts. :)  
+
 
 
 ## Load Data
@@ -274,9 +278,9 @@ def test_similarity(text1, text2):
 
 **Now, we test some texts to see the semantic similarity**  
 ```python
-test_similarity('that cat eats shit', 'that cat drinks')
+test_similarity('that cat eats catnip', 'that cat drinks')
 ```
-**Similarity Score**: 0.7456401  
+**Similarity Score**: 0.770905  
 
 ```python
 test_similarity('he made that food', 'that food was made by him')
