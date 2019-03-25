@@ -39,9 +39,9 @@ The harmony attenuates
 To this lifeless part  
 The universal art!  
   
-Sometimes...
-It's amazing.
-It's amazing to even be a black hole...  
+Sometimes...  
+It's amazing  
+It's amazing to even be a black hole.  
 Thoughts come in and never escape  
 You try to accelerate and go full throttle  
 But there's no return  
@@ -54,11 +54,12 @@ Beyond its event horizon
 You are gone...  
 I guess you are gone in parts  
   
-Sometimes....  
+Sometimes...  
 Sometimes I wish I were a supernova nearing its death  
 Where the explosion creates a surge of emotions  
 A sudden gamma burst  
-That inflicts philosophical wounds to your inner Bruce Baner  
+That inflicts philosophical wounds  
+To your inner Bruce Baner  
 Where a new hulk is about to emerge.  
 But this time, he's calmer!  
   
@@ -87,7 +88,7 @@ The parts of which doesn't make sense
 The whole creates essence with its presence!  
 The world is empowered!  
   
-Sometimes I wish I was as hypothetical as Deep Thought can be  
+Sometimes I wish I was as hypothetical as Deep Thought could be  
 Where hitchhikers around the galaxy come and ask  
 **"Hey! What's the meaning of YOUR LIFE, YOUR UNIVERSE AND YOUR EVERYTHING"**  
 And I compute there silently and reply back  
@@ -112,7 +113,7 @@ Or has fallen
 The echo of which you will never hear...  
 I ask a question to the universe:  
 **"If a tree falls in a forest and no one is around to hear it, does it make a sound?"**  
-The universe sits silently
+The universe sits silently  
 Staring at me  
 Right through my soul  
 Gives me a silent gaze  
