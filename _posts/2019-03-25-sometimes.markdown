@@ -1,13 +1,13 @@
 ---
 layout: post
 title:  "Sometimes"
-date:   2019-03-24 00:01:00 +0545
-last_edited_on:   2019-03-24 00:01:00 +0545
+date:   2019-03-25 00:01:00 +0545
+last_edited_on:   2019-03-25 00:01:00 +0545
 categories: poetry
 tags: poetry existence thoughts
 subtitle: "Sometimes my mind is a black hole where the voices never echo..."
 comments: true
-header-img: img/post-headers/2019-03-24-sometimes.jpg"
+header-img: img/post-headers/2019-03-25-sometimes.jpg"
 ---
 
 *{About The Image}: Picture taken by Me(paradox) in Petra, Jordan*
