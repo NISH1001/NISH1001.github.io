@@ -2,7 +2,7 @@
 layout: post
 title:  "Sometimes"
 date:   2019-03-25 00:01:00 +0545
-last_edited_on:   2019-03-25 00:01:00 +0545
+last_edited_on:   2019-04-03 00:01:00 +0545
 categories: poetry
 tags: poetry existence thoughts
 subtitle: "Sometimes my mind is a black hole where the voices never echo..."
@@ -17,7 +17,7 @@ Sometimes...
 Sometimes I feel my head is the sun  
 Where rest of the world revolves around  
 Too close, you get burn  
-Too far,  it's desolated  
+Too far,  you get shunned
 Somewhere, lies a Goldilocks region  
 The place of mindful creation  
 The place of self destruction  
