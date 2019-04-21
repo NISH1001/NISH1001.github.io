@@ -122,7 +122,7 @@ YOLO V3:
 YOLO binaries (and sources) can be downloaded from following sources:
 
 * [https://pjreddie.com/darknet/yolo/](https://pjreddie.com/darknet/yolo/){:class="paradox"}
-* Directly from github [here](https://github.com/pjreddie/darknet)
+* Directly from github [here](https://github.com/pjreddie/darknet){:class="paradox'}
 
 YOLO is based on darknet, built in C. [Darknet](https://pjreddie.com/darknet/)
 is an open source neural network framework written in C and CUDA.
@@ -131,7 +131,7 @@ is an open source neural network framework written in C and CUDA.
 
 #### I) Clone the Repository
 
-    git clone 
+    git clone https://github.com/pjreddie/darknet
 
 #### II) Compile The Source
 
@@ -139,8 +139,10 @@ We can directly compile the source using `make`. Just go the the directory where
 darknet is cloned and run the command:
 
 
-*Remember: make makes use of the ***Makefile*** which consists of instructions
-to compile the C source files.*<br>  After completion of the make process, you
+*Remember: make makes use of the **Makefile** which consists of instructions
+to compile the C source files.*  
+
+After completion of the make process, you
 will get a file named **darknet** which is a binary and executable file. You can
 use this binary executable to run the YOLO.
 
