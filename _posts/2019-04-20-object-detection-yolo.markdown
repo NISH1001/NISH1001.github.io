@@ -1,11 +1,11 @@
 ---
 layout: post
 title:  "Understanding Object Detection using YOLO"
-date:   2019-04-18 00:01:00 +0545
-last_edited_on:   2019-04-18 00:01:00 +0545
+date:   2019-04-20 00:01:00 +0545
+last_edited_on:   2019-04-20 00:01:00 +0545
 categories: programming
 tags: programming python deep-learning object-detection yolo computer-vision
-subtitle: "Object classfication, detection and segmentation has been an active research area for deep learning."
+subtitle: "Object classfication, detection and segmentation has been an active research area for deep learning. Different architectures such as YOLO make it possible to perform such action without going down much into the rabbit hole."
 comments: true
 header-img: "img/post-headers/2019-04-18-object-detection-yolo.png"
 ---
