@@ -405,3 +405,15 @@ body {
 .paradox {
     text-decoration: underline
 }
+img + br + em {
+    font-style: italic;
+    display: inherit;
+    text-align: center;
+    font-size: 75%;
+}
+.paradox-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 80%;
+}
