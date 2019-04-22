@@ -18,6 +18,8 @@ layout: default
                                 Last Edited on
                             {{ page.last_edited_on| date: "%B %-d, %Y" }}
                             {% endif %}
+                            <br/>
+                            {% include read_time.html text=content %} read
                         </span>
                     </div>
                 </div>
