@@ -246,26 +246,27 @@ network. The content is similar as:
     ...
     ...
 
-Here, **train-images/** consists of all the training images.<br>  Along with the
-images, this directory also consists of text file for bounding box corresponding
-to the image.<br>  So, you will have `custom/train-images/11.txt` whose content
-can be:
+Here, **train-images/** consists of all the training images.  
+Along with the images, this directory also consists of text file for bounding box corresponding to the image.  
+So, you will have `custom/train-images/11.txt` whose content can be:  
 
     0 0.32502480158730157 0.3950066137566138 0.12896825396825398 0.09523809523809523
 
 Here the first number represents the id of class of corresponding in
-**obj.names**.<br>  The remaining numbers represent the bounding box. If there
-were multiple boxes of multiple classes, it’d be like:
+**obj.names**.  
+The remaining numbers represent the bounding box. If there were multiple boxes of multiple classes, it’d be like:
 
+```bash
+0 0.32502480158730157 0.3950066137566138 0.12896825396825398 0.09523809523809523
+0 0.52502480158730157 0.3950066137566138 0.12896825396825398 0.09523809523809523
+1 0.32502480158730157 0.3950066137566138 0.12896825396825398 0.09523809523809523
+```
 
 #### test.txt
 
 This file consist of list of test images.
 
-> *Note on .cfg*
-
-> *Note, in ***.cfg***, you have to change the number of classes to the total
-> found in ***obj.names***.*
+> **Note:** In **.cfg**, you have to change the number of classes to the total found in **obj.names**.
 
 So, that is how you can run YOLO. Remember all the above command was tested in a
 Linux system. The process is similar for windows systems too.
