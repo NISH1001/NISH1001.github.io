@@ -5,7 +5,7 @@ date:   2019-04-29 00:01:00 +0545
 last_edited_on:   2019-04-29 00:01:00 +0545
 categories: writing
 tags: writing life
-subtitle: "In the distant darkness, you cannot feel me. I am an observer you cannot see with your eyes."
+subtitle: "Everyone has their part of being happy and sad at the same time. I guess, we are all inevitable..."
 comments: true
 header-img: "img/post-headers/2019-04-29-temptation.jpg"
 ---
