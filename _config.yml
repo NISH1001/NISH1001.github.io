@@ -1,5 +1,6 @@
 # Site settings
 title: Bits and Paradoxes 
+timezone: Asia/Kathmandu 
 header-img: img/home-bg.jpeg
 email: nishanpantha@gmail.com 
 copyright_name: Bits and Paradoxes 
@@ -25,11 +26,12 @@ markdown: kramdown
 highlighter: rouge
 #permalink: pretty
 #permalink: /:year/:month/:day/:title.html
-permalinks:
-    year: '/:year/'
-    month: '/:year/:month/'
-    day: '/:year/:month/:day/'
-    tag: '/tag/:name/'
+permalink: /:categories/:title.html
+# permalinks:
+#     tag: '/:tag/:name/'
+#     year: '/:year/'
+#     month: '/:year/:month/'
+#     day: '/:year/:month/:day/'
 paginate: 10
 exclude: ["less","node_modules","Gruntfile.js","package.json","README.md"]
 
