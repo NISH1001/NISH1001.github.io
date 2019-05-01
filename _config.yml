@@ -32,7 +32,7 @@ permalink: /:categories/:title.html
 #     year: '/:year/'
 #     month: '/:year/:month/'
 #     day: '/:year/:month/:day/'
-paginate: 10
+paginate: 15
 exclude: ["less","node_modules","Gruntfile.js","package.json","README.md"]
 
 #gems: [jekyll-paginate, jekyll-feed]
