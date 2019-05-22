@@ -12,7 +12,7 @@ header-img: "img/post-headers/2019-05-17-choices.jpg"
 { Header picture: Captured by Me at Sauraha, Chitwan dated around July, 2018 }
 
 The audio version (podcast) of this writing(esaay?) can be found here:
-https://www.youtube.com/watch?v=uEuf3JQAIAw
+[https://www.youtube.com/watch?v=uEuf3JQAIAw](https://www.youtube.com/watch?v=uEuf3JQAIAw){:class="paradox"}
 
 #### [After Watching The Movie Mr. Nobody]
 
