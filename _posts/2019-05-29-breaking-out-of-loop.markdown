@@ -18,7 +18,7 @@ to its fullest. If there is really something meaningful to the existence itself,
 to find something for self satisfaction. Maybe we are sleepwalking through 
 our routine, monotone streams of life. The hectic days when you are stressed out and feel like you could sleep for eternity.
 Maybe we are in a rut. I don't know, At least, I have formed few habits, out of which calisthenics is one! 
-I have started to feel my body and the mind. I can tell if there is no sync between them. Sometimes there are lazy times where I don't do 
+I have started to feel my body and the mind. I can tell if there is no sync between them. Sometimes there are lazy times when I don't do 
 exercises and just go out and eat whatever I want. But most of the time, I love the idea that your body should be in your total physical 
 control .
 I have regularized my sleep cycle to have 8 hours of sleep per day. I have really experimented on this. In the past, I was only able to hit 
@@ -53,7 +53,8 @@ In that case, you may form new, if bored! Grow!
 
 ### Perserverance Is The Key
 Persistence matters. Try. You may not know what’s going to happen until you have seen the result yourself. 
-I don’t have much to say about this! It all boils down to your enthusiasm to be persistent time!
+I don’t have much to say about this! It all boils down to your enthusiasm to be persistent enough! 
+Time tells all the tales.
 
 ### Try To Do “Same Routine” In A Different Way
 If you feel you are bored with same old routine in your life, try some new ways to do the same old tasks! 
