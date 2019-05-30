@@ -5,7 +5,7 @@ date:   2019-05-29 08:00:00 +0545
 last_edited_on:   2019-05-29 16:00:00 +0545
 categories: writing
 tags: writing life choices habits
-subtitle: "Maybe life is all about choices, goals, wishes, and changes."
+subtitle: "Some things I have jolted down from personal experiences."
 comments: true
 header-img: "img/post-headers/2019-05-29-breaking-out-of-loop.png"
 ---
