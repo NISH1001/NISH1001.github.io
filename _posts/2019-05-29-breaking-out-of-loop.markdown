@@ -2,7 +2,7 @@
 layout: post
 title:  "Breaking Out of The Loop"
 date:   2019-05-29 08:00:00 +0545
-last_edited_on:   2019-05-29 16:00:00 +0545
+last_edited_on:   2019-06-01 16:00:00 +0545
 categories: writing
 tags: writing life choices habits
 subtitle: "Some things I have jolted down from personal experiences."
@@ -31,7 +31,7 @@ I can walk anywhere in this world. At least, the paths I can walk, that I can fe
 
 
 
-So, here are few things I have tried listing **things** out to anyone who feel inspired enough to read the former paragraph.
+So, here are few **things** I have tried to list for anyone who feel inspired enough to read the former paragraph.
 Maybe they might make sense. Maybe they don't at all. I don't know. The choice is just yours. This is coming from the guy who is ever 
 anxious regarding huge existential crisis rendered. 
 The guy who phases out often into his mind cave, trying to make sense out from unfathomable life
@@ -39,16 +39,16 @@ stream. The same guy who used to think that he had full control over his life. N
 few things you might relate. Or might be completely out of sync with you. 
 
 ### Form A Habit
-Start with the greater “small” stuff and actions - things that might be “good” for you in the future. Do it on routine basis. In the long run, 
+Start with the greater “small” stuff and actions — things that might be “good” for you in the future. Do it on routine basis. In the long run, 
 you will feel proud.
 
-For me, I have form few habits that weren’t in my daily lifestyle a year ago. I started doing home workouts and calisthenics. 
+For me, I have formed few habits that weren’t in my daily lifestyle a year ago. I started doing home workouts and calisthenics. 
 I started eating healthy foods. 
 Although I am not used to reading “long” books (there might not be the concept of “long” for any books, I guess), I read a very long read 
-daily - mostly about philosophy, computer science, life, history, etc (For this, I have been using same app for nearly 6 years now). 
-And as I write this, I am pretty sure I am happy.
+daily — mostly about philosophy, computer science, life, history, etc. (For this, I have been using same app for nearly 6 years now). 
+And as I write this, I am pretty sure I am **happy**. (Perhaps, that's an illusion.)
 
-However, eventually, there will always be a time when these newly-formed habits become same old “routine”. 
+Eventually, there will always be a time when these newly-formed habits become same old “routine”. 
 In that case, you may form new, if bored! Grow!
 
 ### Perserverance Is The Key
@@ -106,7 +106,7 @@ Track the time you have felt more alive than better! Track your health status.
 
 Write a journal! Shouldn’t be on daily basis! 
 But write whenever you are feeling low or high! 
-It helps you in the long run, when you look at the things you had written - the time, memories and emotions at the time of writing! 
+It helps you in the long run, when you look at the things you had written — the time, memories and emotions at the time of writing! 
 You will know what has changed and what hasn’t.
 
 It's been around 1.5 years since I have taken on my personal habit of *one selfie per day* to see how I have changed through the course of time 
