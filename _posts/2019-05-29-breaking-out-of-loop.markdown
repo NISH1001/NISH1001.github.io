@@ -98,7 +98,7 @@ Drink water.
 Maybe, go to theater to watch movie! 
 Go out to attend various events like talks shows, conferences, poetry nights. That might help!  
 Stop scrolling through the aimless feed in the social media! Have some definite goal on why you are logged in to that platform.
-Above all, lll you need is a break! The one that will re-energize you!
+Above all, you need is a break! The one that will re-energize you!
 
 
 ### Track Your Life
@@ -115,7 +115,7 @@ You will know what has changed and what hasn’t.
 It's been around 1.5 years since I have taken on my personal habit of *one selfie per day* to see how I have changed through the course 
 of time for my future self to look back at.
 
-I have also introduced a small habit of tracking all the expenses daily. BTW, I have written written my own code to do some analysis on this. 
+I have also introduced a small habit of tracking all the expenses daily. BTW, I have written my own code to do some analysis on this. 
 *coughs*
 
 ### So?
