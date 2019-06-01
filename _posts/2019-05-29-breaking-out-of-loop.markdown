@@ -80,26 +80,29 @@ You can listen to new podcasts daily! Watch short videos that make you think
 Try mind puzzles! 
 Read interesting articles! Watch new series! 
 This way you will always be wanting to close the loop daily. 
-In fact, this is called [Closure Effect](https://en.wikipedia.org/wiki/Closure_(psychology)){:class="paradox"}
+In fact, this is called [Closure Effect](https://en.wikipedia.org/wiki/Closure_(psychology)){:class="paradox"}. 
 There’s this desire and urgency to complete a task, the incompleteness of which might give you nightmare. 
 You can factor in this effect to make your life interesting! 
-Write 2 sentences about anything! And I am sure, you will have this lust to complete the writing about the matter somehow!
+Write 2 sentences about anything! I am sure, you will have this lust to complete the writing about the matter somehow!
 
 ### Willingness To Take Break
 Sometimes, you are in the middle of your work and this notion hits you really hard. 
-The notion of **“Why am I doing this?”. “Man! This sucks now…”**
+The thought of **“Why am I doing this?”. “Man! This sucks now…”**
 
 Just take a break! 
 Go out and wander! 
 Travel during the break! 
 If you can’t travel, just chill in your room and do not think of the work! 
+Have caffee (or tea?). 
+Drink water. 
 Maybe, go to theater to watch movie! 
-Going out to attend various events like talks shows, conferences, poetry nights might help! 
-Stop scrolling through the aimless feed in the social media! All you need is a break! The one that will re-energize you!
+Go out to attend various events like talks shows, conferences, poetry nights. That might help!  
+Stop scrolling through the aimless feed in the social media! Have some definite goal on why you are logged in to that platform.
+Above all, lll you need is a break! The one that will re-energize you!
 
 
 ### Track Your Life
-This is a controversial topic which I don’t want to dive deeper :) ! 
+This is a controversial topic which I don’t want to dive deeper. :) 
 For me it works! Tracking your life helps you to understand your lifestyle better! Track your daily expenses! 
 Calculate savings! Track your eating habits! Track your sleeping patterns! 
 Track the time you have felt more alive than better! Track your health status.
@@ -109,8 +112,11 @@ But write whenever you are feeling low or high!
 It helps you in the long run, when you look at the things you had written — the time, memories and emotions at the time of writing! 
 You will know what has changed and what hasn’t.
 
-It's been around 1.5 years since I have taken on my personal habit of *one selfie per day* to see how I have changed through the course of time 
-for my future self to look back at.
+It's been around 1.5 years since I have taken on my personal habit of *one selfie per day* to see how I have changed through the course 
+of time for my future self to look back at.
+
+I have also introduced a small habit of tracking all the expenses daily. BTW, I have written written my own code to do some analysis on this. 
+*coughs*
 
 ### So?
 The choice is yours. Not a compulsion. I have jolted some things from my experience through out situations.
