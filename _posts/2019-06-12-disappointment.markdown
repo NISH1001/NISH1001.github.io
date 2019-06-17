@@ -10,6 +10,11 @@ comments: true
 header-img: "img/post-headers/2019-06-12-disappointment.png"
 ---
 
+The audio version can be found in my "thought-cast" here:  
+[Disappointment | Coffee with Nish | Episode 7](https://www.youtube.com/watch?v=BwRksA0LzH4){:class="pardox"}
+
+---
+
 
 Life. The only thing that's readily available to your fingertips. You are listening to your heart as it beats seamlessly with the streams of external surroundings. You breathe slowly and slowly. You try to calm your mind down, or at least you think so. Your mind expounds to this ever-increasing fantasies in the cave. 
 Your mind-cave.
