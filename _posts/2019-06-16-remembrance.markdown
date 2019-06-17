@@ -5,7 +5,7 @@ date:   2019-06-16 08:00:00 +0545
 last_edited_on:   2019-06-16 16:00:00 +0545
 categories: writing
 tags: writing life memoir change
-subtitle: "Life is beautiful and joyous during childhood. As children we think we can conquer the world, but somewhere between childhood and adulthood, our enthusiasm to dream big are squashed."
+subtitle: "Life is beautiful and joyous during childhood. As children, we think we can conquer the world, but somewhere between childhood and adulthood, our enthusiasm to dream big are squashed."
 comments: true
 header-img: "img/post-headers/2019-06-16-remembrance.jpg"
 ---
@@ -51,9 +51,9 @@ Excruciating pain from the surgery. The remarkableness of your vacuous thoughts.
 
 Fast forward to the final year of your engineering and your emptiness heightens. You lose hold of the world around — the people, the feelings, the connections around,  especially with the past. You are lost somewhere — in time, in place, in mood and in thoughts of your own "self". You are under, yet another metamorphosis.
 
-This is just a remembrance to all those memories of you, when you thought life would be *okayish* and still you have no clue on what you are going to do the next time you wake up after a restless night! This is an ode to all those **interests** you had which have faded into oblivion.
+This is just a remembrance to all those memories of you when you thought life would be *okayish* and still, you have no clue on what you are going to do the next time you wake up after a restless night! This is an ode to all those **interests** you had which have faded into oblivion.
 
-Life is beautiful and joyous during childhood. As children we think we can conquer the world, but somewhere between childhood and adulthood, our enthusiasm to dream big are squashed.
+Life is beautiful and joyous during childhood. As children, we think we can conquer the world, but somewhere between childhood and adulthood, our enthusiasm to dream big are squashed.
 
 
 Fast forward to **Today**. Remember I am here. Remember you are here. 
