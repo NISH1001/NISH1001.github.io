@@ -63,14 +63,20 @@ Dogs are howling at the far corner of the canvas. Maybe they are singing my name
 *People, Emotions, Feelings and Chaos*
 
 
-My mind is being distracted to the conversation of this 2 person sitting right beside me. I guess this is how I enjoy my life. I hope they are talking about me, for I believe that will not matter on what I should be.
+My mind is being distracted to the conversation of these two persons sitting right beside me. I guess this is how I enjoy my life. I hope they are talking about me, for I believe that will not matter on what I should be, what I am to be.
+
+As my favourite person [Alan Watts](https://medium.com/@OshanJarow/alan-watts-on-the-hubris-of-formal-spiritual-practice-753e99dc05ef){:class="paradox"} says:  
+
+> Who you really are, you almost have to go by yourself. Stop talking. Stop thinking words and be absolutely alone. Listen to the great [silences](http://localhost:4000/writing/echoes-and-silences.html){:class="paradox"}. Then if you’re lucky, you’ll recover from the illusion that you’re just small me and so and so.
 
 This is my time today. This is me just being myself without any external forces. There’s bliss in solitude. There’s no love like self-love. After all, “self” is what matters. The Self Is Contagious.
 
 :)
 
 
+
 ## Other Things from Somewhere
 - [The "Self" Is Contagious](https://www.youtube.com/watch?v=KzbxVnZmfZw){:class="paradox"}
 - [/r/HeavyMind](https://www.reddit.com/r/Heavymind/){:class="paradox"}
 - [My Favourites from DeviantArt](https://www.deviantart.com/nishparadox/favourites/){:class="paradox"}
+- [Seneca - On Shortness of Life](https://tim.blog/2009/04/24/on-the-shortness-of-life-an-introduction-to-seneca/){:class="paradox"}
