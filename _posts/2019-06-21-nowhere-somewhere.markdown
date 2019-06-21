@@ -5,7 +5,7 @@ date:   2019-06-21 08:00:00 +0545
 last_edited_on:   2019-06-21 16:00:00 +0545
 categories: writing
 tags: writing life solitude self
-subtitle: "Life is beautiful and joyous during childhood. As children, we think we can conquer the world, but somewhere between childhood and adulthood, our enthusiasm to dream big are squashed."
+subtitle: "There's bliss in solitude. There's no love like self-love. After all, 'self' is what matters. The Self Is Contagious."
 comments: true
 header-img: "img/post-headers/2019-06-21-nowhere-somewhere.jpg"
 ---
@@ -14,7 +14,7 @@ header-img: "img/post-headers/2019-06-21-nowhere-somewhere.jpg"
 *On June 20, 2019, when the clock hits 5:15pm in my mobile, when I am all by myself*
 
 
-Everywhere and nowhere. I guess that’s where I am right now. At the side of a small lake, crows ranting to the scorching heat, the ripples on water, and in time. The footsteps of sadness and happiness. The honking of rush hours. I guess you know where I am right now. Perhaps, you have no clue. That’s okay. Hold on to this flow of thoughts in my mind-cave.
+Everywhere and nowhere. I guess that’s where I am right now — lost in time, in emotions, in a body. At the side of a small lake, crows ranting to the scorching heat, the ripples on water, and in time. The footsteps of sadness and happiness. The honking of rush hours. I guess you know where I am right now. Perhaps, you have no clue. That’s okay. Hold on to this flow of thoughts in my mind-cave.
 
 The pathway is rendered colorful with the rhythmic energies of people talking, couples making love, dogs phasing in and out. As I sit here patiently, I know this is only one of few rare moments to be alone in this ever-growing busyness of life, of existence.
 
