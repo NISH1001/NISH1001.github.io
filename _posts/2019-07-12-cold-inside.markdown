@@ -5,7 +5,7 @@ date:   2019-07-12 08:00:00 +0545
 last_edited_on:   2019-07-13 16:00:00 +0545
 categories: poetry
 tags: poetry love life thoughts
-subtitle: ""
+subtitle: "It's raining the whole day. I asked her for coffee but couldn't meet. Due to rain the plan was cancelled. Our ending is coming soon. It's inevitable. Life's like that. :)"
 comments: true
 header-img: "img/post-headers/2019-07-12-cold-inside.jpg"
 ---
