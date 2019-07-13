@@ -20,6 +20,9 @@ header-img: "img/post-headers/2019-07-12-cold-inside.jpg"
 
 <hr/>
 
+This poem is also made as a song here in my channel: [https://www.youtube.com/watch?v=zXCi79JQxrQ](https://www.youtube.com/watch?v=zXCi79JQxrQ){:class="paradox"}.
+<hr/>
+
 It's cold in the morning  
 The sun is dying  
 The sky is crying  
