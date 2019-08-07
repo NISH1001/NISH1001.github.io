@@ -5,7 +5,7 @@ date:   2019-08-07 19:00:00 +0545
 last_edited_on:   2019-08-07 20:00:00 +0545
 categories: writing
 tags: writing life 
-subtitle: "Life seems to be stuck in a loop of some form. Your existence cannot get out of it."
+subtitle: "Being excited and scared at the same time of uncertainties that hold us, that fix us to positions we may never able to calculate of our 'self' — that makes my life ticking, your life moving slowly"
 comments: true
 header-img: "img/post-headers/2019-08-07-inevitableness-life.jpg"
 ---
