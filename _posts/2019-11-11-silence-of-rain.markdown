@@ -5,13 +5,13 @@ date:   2019-11-11 10:00:00 +0545
 last_edited_on:   2019-11-11 18:00:00 +0545
 categories: writing
 tags: writing life 
-subtitle: "Silence of the rain."
+subtitle: "Sometimes loud things are silent. Sometimes silent things are the loudest. And life oscillates in between."
 comments: true
 header-img: "img/post-headers/2019-11-11-silence-of-rain.jpg"
 ---
 
 ![Gradients](/img/post-headers/2019-11-11-silence-of-rain.jpg){:class="paradox-center"}  
-*Silence of The Rain* 
+*Our existence is like these little drops of rain.* 
 
 <hr/>
 
