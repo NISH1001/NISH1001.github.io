@@ -40,7 +40,7 @@ It's been a while I haven't written any **productive** posts. Most of the posts 
 2019 was a wild roller-coaster ride for me. I flew on a plane for the first time in my life. I went to another country (Jordan), 
 had first-hand experience on [cross-race effect](https://en.wikipedia.org/wiki/Cross-race_effect), quit from my own startup 
 (after directing AI Tech and Research for a year), 
-met a girl and fell in love with her, told my parents about my depression, gave GRE and TOEFL exams within a month (neither good nor bad). 
+met a girl and fell in love with her (now I'm trying to move on), told my parents about my depression, gave GRE and TOEFL exams within a month (neither good nor bad). 
 Now, I am applying for graduate schools somewhere in the world out there. Seriously! It's freaking taxing. :/
 
 
