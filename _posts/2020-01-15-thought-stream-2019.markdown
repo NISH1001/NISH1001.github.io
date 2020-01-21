@@ -80,7 +80,7 @@ Having been on a sabbatical myself, I could resonate with the author's sentiment
 
 ### [Why Does F=ma](http://cognitivemedium.com/f-ma){:class="paradox"}
 This is a thought-provoking essay that tries to question the parameters on this equation.
-What do those parameters imply? Why is equation the way it is?
+What do those parameters imply? Why is the equation the way it is?
 
 ### [Accidental Leadership](https://medium.com/on-management/accidental-leadership-1083f5d390cc){:class="paradox"}
 This article somehow resonates with a situation I had in my startup. 
@@ -159,7 +159,7 @@ Anyway, feel free to provide feedback. If not, do have a look at the **Other Con
 
 
 ## Other Contents I Loved Reading 
-- [Breaking Out of Loop](www.nishanpantha.com.np/writing/breaking-out-of-loop.html){:class="paradox"}
+- [Breaking Out of The Loop](https://www.nishanpantha.com.np/writing/breaking-out-of-loop.html){:class="paradox"}
 - [Asimov’s Empire, Asimov’s Wall](https://www.publicbooks.org/asimovs-empire-asimovs-wall/){:class="paradox"}
 - [The Eccentric and Ingenious Father of the Atomic Bomb, J. Robert Oppenheimer](https://medium.com/cantors-paradise/the-ingenious-eccentric-father-of-the-atomic-bomb-ba012f620454){:class="paradox"}
 - [Kafkaesque](https://www.nishanpantha.com.np/writing/kafkaesque.html){:class="paradox"}
