@@ -2,7 +2,7 @@
 layout: post
 title:  "Thoughts Streaming from 2019"
 date:   2020-01-15 00:00:00 +0545
-last_edited_on:   2020-01-20 00:00:00 +0545
+last_edited_on:   2020-01-22 00:00:00 +0545
 categories: writing
 tags: writing life reading essay
 subtitle: "2019 was a full on rollercoaster ride, most of which were going downhill and experiencing strong g-force."
@@ -119,7 +119,7 @@ Being someone who "writes" his thoughts, I have never tried asking this question
 A *poem*, like any other art, has its own expressiveness to project various thought processes into another dimension. 
 
 ### [The Monarchy of Fear by Martha C. Nussbaum](https://www.neh.gov/about/awards/jefferson-lecture/martha-nussbaum-biography){:class="paradox"}
-It's better to watch (listen) to Nussbaum's lecture on this from [here](https://www.youtube.com/watch?v=ML2npciPjaQ).  
+An abstract summary to Nussbaum's lecture can be found [here](https://www.youtube.com/watch?v=ML2npciPjaQ).  
 This is a thought-provoking lecture that goes deep into the roots of anger and its impulsive manifestation that leads to violent motives. 
 I've been thinking a lot about this "moral" and "ethics" lately. 
 But, this surely presents a profound understanding of philosophy towards fear, its place in democracy and society.
