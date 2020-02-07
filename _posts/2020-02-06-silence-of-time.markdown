@@ -6,7 +6,7 @@ last_edited_on:   2020-02-07 00:00:00 +0545
 categories: writing
 tags: writing life thoughts
 subtitle: "Happiness is best experienced when shared. So is one's life and memories!"
-comments: false
+comments: true
 header-img: "img/post-headers/2020-02-06-silence-of-time.jpg"
 ---
 
