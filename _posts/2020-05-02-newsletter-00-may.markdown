@@ -10,6 +10,18 @@ comments: true
 header-img: "img/post-headers/2020-05-01-newsletter-00.jpeg"
 ---
 
+Hi Folks,
+
+This is the start of a mysterious journey for me and you. I know I had been procrastinating about this for a very long time. 
+So, I have set up a few personal goals and meaning to meet the deadlines. 
+
+
+I hope you're doing well in this messed-up time we are living in during this global pandemic. For some these times might be to have a long hiatus and have healthy and refreshing life. Some might take it as an opportunity to learn and explore themselves. Some might be depressed that they are caged up. But, at least it will try to stagnate the unforeseen spread of COVID-19.
+
+I hope everyone is trying to be physically active as well. I know it's hard to push yourself to do yoga or exercises. 
+But hey! That's just like starting your personal newsletter like this. And here I am...
+
+
 ## Articles I Loved Reading and Contemplating about
 
 [Life is Made of Unfair Coin Flips](https://alexdanco.com/2020/04/09/life-is-made-of-unfair-coin-flips/){:class="paradox"}
@@ -163,6 +175,7 @@ header-img: "img/post-headers/2020-05-01-newsletter-00.jpeg"
 ## My Life Update
 
 - Not sure how I should put it. But life's kind of like it has always been -- anxiety keeps on knocking down the creatures in my mind-cave. Not sure if this quarantine has been affecting me. I've always been like this; living a quarantine life, thinking about life, love, world, existence, space, time and all the absurdity within.
+- It's been more than a month that I have started calisthenics and it's having a good impact. I have upped my game from 20 pushups to 35 in a month. Have changed diets. Most importantly, my sleep cycle is healthy now. I normally go to bet around 9pm and wake up around 5:30am. Then I go to the roof (of course, after going through washroom), watch the sky, and observe birds. Yup! "bird-watching" has been my new hobby. Remote working is kind of good (mabye that's how I want to work in the long run). Every 2 days I practice guitar and learn music theory (but a slow progress).
 - Life at work seems to be just what works are supposed to be. I am trying to create graph embeddings from document image. I came up with my own (naive) computer vision algorithm to detect if a document is a photocopy or scanned. Yeah. I know. I suck. But at least I am trying to focus on something at work. If two things, solitude and better focus aren't kept in harmony, it might be more destructive than anything else.
 - I have updated [panim](https://github.com/NISH1001/panim){:class="paradox"}. I have added a robust transformation pipeline. For now there are only 2 transformations - zoom and rotation. Lately, I have been trying to add 3D coordinate system, but have failed miserably.
 - This newsletter might be something I could focus in coming times.
