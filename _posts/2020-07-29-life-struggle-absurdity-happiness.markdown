@@ -24,7 +24,7 @@ If you are too busy or bored to read these long, broken thoughts of mine, here�
 *   For me, happiness (perhaps) is a state where I accept and appreciate reality without much expectations.
 *   There should be a balance between work life and your personal life. Don’t try to mix them up.
 *   Try to minimize [temporal discounting](https://nesslabs.com/temporal-discounting){:class="paradox"}. We make decisions, usually with unforeseen consequences, that our future self has to deal with. This is quite the opposite to the [compounding effect](https://www.youtube.com/watch?v=U_nzqnXWvSo){:class="paradox"}.
-*   Have habits that you can provide a sense of being alive and present.
+*   Have habits that you provide you a sense of being alive and present.
 *   Life’s absurdity hits us all. [Sometimes life seems short. Sometimes it feels long.](https://www.goodreads.com/book/show/97412.On_the_Shortness_of_Life){:class="paradox"} Whatever it is, life is “just enough” if you use it wisely.
 
 ---
@@ -309,25 +309,14 @@ I appreciate [Prakash](https://twitter.com/Prakashdbhatta) for always being ther
 ---
 
 ## References
-
-- [What is Happiness?](https://www.youtube.com/watch?v=5f0ilA4tjJ0)
-
-- [The Tail End - Tim Urban](https://waitbutwhy.com/2015/12/the-tail-end.html)
-
-- [On The Shortness of Life - Seneca](https://www.goodreads.com/book/show/97412.On_the_Shortness_of_Life)
-
-- [The days are long but the decades are short](https://blog.samaltman.com/the-days-are-long-but-the-decades-are-short)
-
-- [Philosophy of Walking](https://fs.blog/2014/05/a-philosophy-of-walking/)
-
-- [Temporal discounting: the battle between present and future self](https://nesslabs.com/temporal-discounting)
-
-- [Why You Should Become Internet Famous: Patrick McKenzie + David Perell](https://www.youtube.com/watch?v=YrTrWf6EjqA)
-
-- [Roam: A note-taking tool for networked thought](https://roamresearch.com/)
-
-- [From my journal: The Clock Strikes 12](https://www.evernote.com/shard/s326/sh/3e9ba731-ba37-40fc-a44c-6b7ac737c785/bc76f82541c7f47242e0682dd9815ed6)
-
-- [The Long Game](https://vimeo.com/84022735)
-
-- [The way I walk now](https://www.goodreads.com/quotes/9165551-they-way-i-walk-now-you-d-have-a-hard-time)
+- [What is Happiness?](https://www.youtube.com/watch?v=5f0ilA4tjJ0){:class="paradox"}
+- [The Tail End - Tim Urban](https://waitbutwhy.com/2015/12/the-tail-end.html){:class="paradox"}
+- [On The Shortness of Life - Seneca](https://www.goodreads.com/book/show/97412.On_the_Shortness_of_Life){:class="paradox"}
+- [The days are long but the decades are short](https://blog.samaltman.com/the-days-are-long-but-the-decades-are-short){:class="paradox"}
+- [Philosophy of Walking](https://fs.blog/2014/05/a-philosophy-of-walking/){:class="paradox"}
+- [Temporal discounting: the battle between present and future self](https://nesslabs.com/temporal-discounting){:class="paradox"}
+- [Why You Should Become Internet Famous: Patrick McKenzie + David Perell](https://www.youtube.com/watch?v=YrTrWf6EjqA){:class="paradox"}
+- [Roam: A note-taking tool for networked thought](https://roamresearch.com/){:class="paradox"}
+- [From my journal: The Clock Strikes 12](https://www.evernote.com/shard/s326/sh/3e9ba731-ba37-40fc-a44c-6b7ac737c785/bc76f82541c7f47242e0682dd9815ed6){:class="paradox"}
+- [The Long Game](https://vimeo.com/84022735){:class="paradox"}
+- [The way I walk now](https://www.goodreads.com/quotes/9165551-they-way-i-walk-now-you-d-have-a-hard-time){:class="paradox"}
