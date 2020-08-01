@@ -320,3 +320,6 @@ I appreciate [Prakash](https://twitter.com/Prakashdbhatta) for always being ther
 - [From my journal: The Clock Strikes 12](https://www.evernote.com/shard/s326/sh/3e9ba731-ba37-40fc-a44c-6b7ac737c785/bc76f82541c7f47242e0682dd9815ed6){:class="paradox"}
 - [The Long Game](https://vimeo.com/84022735){:class="paradox"}
 - [The way I walk now](https://www.goodreads.com/quotes/9165551-they-way-i-walk-now-you-d-have-a-hard-time){:class="paradox"}
+
+---
+---
