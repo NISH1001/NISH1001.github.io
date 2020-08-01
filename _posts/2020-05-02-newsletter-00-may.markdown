@@ -10,6 +10,13 @@ comments: true
 header-img: "img/post-headers/2020-05-01-newsletter-00.jpeg"
 ---
 
+# Note
+I have moved to substack to publish my newsletter since the workflow there is seamless:  
+[https://bitsandparadoxes.substack.com/](https://bitsandparadoxes.substack.com/)
+
+---
+---
+
 Hi Folks,
 
 This is the start of a mysterious journey for me and you. I know I had been procrastinating about this for a very long time. 
