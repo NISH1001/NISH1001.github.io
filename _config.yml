@@ -21,6 +21,7 @@ youtube_username: UCNSZ1lV7udogWO8EBxJGkqg
 # Google Analytics
 # To enable google analytics, uncomment below line with a valid Google Tracking ID
 google_tracking_id: UA-63014279-2
+google_tracking_id2: UA-63014279-4
 
 google_ad_client: ca-pub-7918070781803326
 
