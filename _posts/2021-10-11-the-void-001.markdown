@@ -1,0 +1,78 @@
+---
+layout: post
+title:  "The Void: 001"
+date:   2021-10-10 00:20:30 +0545
+last_edited_on:   2021-10-11 20:40:00 +0545
+categories: podcaast the-void
+tags: starup, product, failure, happiness
+subtitle: "All the references mentioned in The Void episode 001"
+header-img: "img/the-void-cover.png"
+comments: true
+---
+
+The podcast can be found at:
+[https://youtu.be/Gky1U_debdU](https://youtu.be/Gky1U_debdU){:class="paradox"}
+
+---
+
+Few things to note on the prefix:
+ - `A/` - article
+ - `V/` - video
+ - `W/` - website
+ - `G/` - GitHub/GitLab
+ - `T/` - Tweet
+ - `HN` - Hacker News
+ - `R/` - Reddit
+
+---
+
+> Note: These references might get updated if necessary!
+
+
+## Programming and Learning
+
+- [A/python-design-patterns](https://python-patterns.guide/){:class="paradox"}
+
+## "Exciting tools" 
+
+- [W/ClickUp](https://clickup.com/){:class="paradox"}
+- [W/Gitpod](https://gitpod.io/){:class="paradox"}
+- [G/Logseq](https://github.com/logseq/logseq){:class="paradox"}
+- [G/SponsorBlock](https://github.com/ajayyy/SponsorBlock){:class="paradox"}
+- [W/Roam Research](https://roamresearch.com/){:class="paradox"}
+- [W/Obsidian](https://obsidian.md/){:class="paradox"}
+
+## Communitites, Cult, Digital Interaction
+
+- [T/Tweet relevant to Roam "Cult"](https://twitter.com/rroudt/status/1446542563620622351){:class="paradox"}
+- [A/The rise of private communities](https://stevepavlina.com/blog/2018/01/rise-private-communities/){:class="paradox"}
+- [V/Hacker News Syndrome](https://www.youtube.com/watch?v=loXwNyMcbuo){:class="paradox"}
+
+## On Post-truth
+
+- [A/You can handle the post-truth: a pocket guide to the surreal internet](https://aaronzlewis.com/blog/2019/05/29/you-can-handle-the-post-truth/){:class="paradox"}
+- [V/Post-Truth: Why Facts Don't Matter Anymore](https://www.youtube.com/watch?v=dvk2PQNcg8w){:class="paradox"}
+
+
+## On Ideas and Validation
+
+- [A/The Mom Test - How to talk to customers](https://sandro.volpee.de/the-mom-test-summary-validate-ideas){:class="paradox"}
+- [HN/Ask HN: Where do you find potential customers to validate your idea / MVP?](https://news.ycombinator.com/item?id=26644616){:class="paradox"}
+- [HN/Ask HN: How do you work through large ideas?](https://news.ycombinator.com/item?id=25217436){:class="paradox"}
+- [T/Patrick Collision's tweet on indexing the internet](https://twitter.com/patrickc/status/953011978217205760){:class="paradox"}
+
+## On Gratitude, Failure and Happiness
+
+- [V//Patreon CEO shares his most epic failures](https://www.youtube.com/watch?v=Zf5rKTCMNnU){:class="paradox"}
+- [A/Tips for Keeping a Gratitude Journal](https://greatergood.berkeley.edu/article/item/tips_for_keeping_a_gratitude_journal){:class="paradox"}
+- [A/Optimize for happiness](https://tom.preston-werner.com/2010/10/18/optimize-for-happiness.html){:class="paradox"}
+
+## On Applied ML and MLOps
+
+- [G/applied-ml](https://github.com/eugeneyan/applied-ml){:class="paradox"}
+- [A/What I learned from looking at 200 machine learning tools](https://huyenchip.com/2020/06/22/mlops.html){:class="paradox"}
+- [A/A hypothesis is a libability](https://bitsandparadoxes.substack.com/p/bits-and-paradoxes-30){:class="paradox"}
+
+## Misc
+
+- [V/Making a math murderer](https://www.youtube.com/watch?v=mLEWj-61a4I){:class="paradox"}
