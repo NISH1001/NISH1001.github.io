@@ -1,10 +1,10 @@
 ---
 layout: post
-title:  "The Void: 001"
+title:  "The Void Podcast #001"
 date:   2021-10-10 00:20:30 +0545
 last_edited_on:   2021-10-11 20:40:00 +0545
-categories: podcast the-void
-tags: starup, product, failure, happiness
+categories: podcast
+tags: starup, product, failure, happiness, the-void
 subtitle: "All the references mentioned in The Void episode 001"
 header-img: "img/the-void-cover.png"
 comments: true

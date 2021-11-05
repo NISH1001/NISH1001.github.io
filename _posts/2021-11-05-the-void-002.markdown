@@ -1,0 +1,76 @@
+---
+layout: post
+title:  "The Void Podcast #002"
+date:   2021-11-05 00:20:30 +0545
+last_edited_on:   2021-11-05 20:40:00 +0545
+categories: podcast
+tags: open-source, social-media, echo-chambers, Firefox, product, the-void
+subtitle: "All the references mentioned in The Void episode 002"
+header-img: "img/the-void-cover.png"
+comments: true
+---
+
+The podcast can be found at : [The Void Podcast : Episode #002 : Firefox, Open Source, Social Media  and Echo Chambers](https://youtu.be/mrvaelfcCvU){:class="paradox"}
+
+---
+
+Few things to note on the prefix:
+ - `A/` - article
+ - `V/` - video
+ - `W/` - website
+ - `G/` - GitHub/GitLab
+ - `T/` - Tweet
+ - `HN` - Hacker News
+ - `R/` - Reddit
+
+---
+
+> Note: The podcast was recorded on October 17, 2021. All the references might get updated if necessary!
+
+---
+---
+
+# Part A : Firefox, Browser War and Open Souce
+
+i) [A/Firefox Lost Almost 50 million Users: Here’s Why It is Concerning](https://news.itsfoss.com/firefox-decline/){:class="paradox"}
+
+ii) [A/real decline has been over 12 years with a total loss of half a Billion users and 75% of the market share it once held. ](https://news.itsfoss.com/firefox-continuous-decline/){:class="paradox"}
+
+iii) [HN/The reason Firefox has lost market share in my opinion is because](https://news.ycombinator.com/item?id=24166971){:class="paradox"}
+- Chrome is pushed by Google.com, which has a near monopoly on search
+- Chrome was bundled and installed alongside other software
+- Chrome is built into Android and Chromebook
+- Chrome has a huge advertising budget
+
+iv) [A/Mozilla's Uncertain Future](https://frankhecker.com/2020/08/13/mozillas-uncertain-future/#whither-mozilla){:class="paradox"}
+
+v) [HN/Ask HN: Can Firefox be revived?](https://news.ycombinator.com/item?id=28954390){:class="paradox"}
+
+vi) [HN/Mozilla to put ads in Firefox address bar suggestions](https://news.ycombinator.com/item?id=28783381){:class="paradox"}
+
+---
+---
+
+# Part B: On Social Media and Echo Chambers
+
+i) [V/Mrwhosetheboss: I'm worried about humanity's future.](https://www.youtube.com/watch?v=FZvee3-PEzo){:class="paradox"}
+
+ii) [A/The Trauma Floor: The secret lives of Facebook moderators in America](https://www.theverge.com/2019/2/25/18229714/cognizant-facebook-content-moderator-interviews-trauma-working-conditions-arizona){:class="paradox"}
+
+iii) Facebook research on teen well-being
+- [A/What our research says about teen well-being and Instagram](https://about.fb.com/news/2021/09/research-teen-well-being-and-instagram/){:class="paradox"}
+- [HN/What our research says about teen well-being and Instagrama](HN Thread: https://news.ycombinator.com/item?id=28665503){:class="paradox"}
+- [A/Facebook Struggles to Quell Uproar over Instagram’s Effect on Teens](https://www.nytimes.com/2021/10/01/technology/facebook-instagram-teenagers.html){:class="paradox"}
+- [HN/Facebook Struggles to Quell Uproar over Instagram’s Effect on Teens](https://news.ycombinator.com/item?id=28725112){:class="paradox"}
+
+iv) [V/Misinformation: Last Week Tonight with John Oliver (HBO)](https://www.youtube.com/watch?v=l5jtFqWq5iU){:class="paradox"}
+
+v) [A/TikTok and the Sorting Hat](https://www.eugenewei.com/blog/2020/8/3/tiktok-and-the-sorting-hat){:class="paradox"}
+
+vi) [A/The rise of private community](https://www.stevepavlina.com/blog/2018/01/rise-private-communities/){:class="paradox"}
+
+---
+
+# Misc
+
+- [A meta-layer for notes](https://julian.digital/2020/09/04/a-meta-layer-for-notes/){:class="paradox"}
