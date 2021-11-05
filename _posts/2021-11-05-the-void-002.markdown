@@ -59,7 +59,7 @@ ii) [A/The Trauma Floor: The secret lives of Facebook moderators in America](htt
 
 iii) Facebook research on teen well-being
 - [A/What our research says about teen well-being and Instagram](https://about.fb.com/news/2021/09/research-teen-well-being-and-instagram/){:class="paradox"}
-- [HN/What our research says about teen well-being and Instagrama](HN Thread: https://news.ycombinator.com/item?id=28665503){:class="paradox"}
+- [HN/What our research says about teen well-being and Instagram](https://news.ycombinator.com/item?id=28665503){:class="paradox"}
 - [A/Facebook Struggles to Quell Uproar over Instagram’s Effect on Teens](https://www.nytimes.com/2021/10/01/technology/facebook-instagram-teenagers.html){:class="paradox"}
 - [HN/Facebook Struggles to Quell Uproar over Instagram’s Effect on Teens](https://news.ycombinator.com/item?id=28725112){:class="paradox"}
 
