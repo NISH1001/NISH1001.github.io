@@ -12,6 +12,9 @@ comments: true
 
 The podcast can be found at : [The Void Podcast : Episode #002 : Firefox, Open Source, Social Media  and Echo Chambers](https://youtu.be/mrvaelfcCvU){:class="paradox"}
 
+You can also view the knowledge graph (rendered using Logseq) at:
+[thevoid42/kb episode 002](https://thevoid42.gitlab.io/kb/#/page/podcast%2Fthe%20void%2F002%20-%20firefox%2C%20open%20source%2C%20social%20media%20and%20echo%20chambers)
+
 ---
 
 Few things to note on the prefix:
