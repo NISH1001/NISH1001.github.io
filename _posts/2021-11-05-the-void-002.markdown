@@ -2,7 +2,7 @@
 layout: post
 title:  "The Void Podcast #002"
 date:   2021-11-05 00:20:30 +0545
-last_edited_on:   2021-11-05 20:40:00 +0545
+last_edited_on:   2021-11-07 20:40:00 +0545
 categories: podcast
 tags: open-source, social-media, echo-chambers, Firefox, product, the-void
 subtitle: "All the references mentioned in The Void episode 002"
@@ -51,6 +51,16 @@ v) [HN/Ask HN: Can Firefox be revived?](https://news.ycombinator.com/item?id=289
 
 vi) [HN/Mozilla to put ads in Firefox address bar suggestions](https://news.ycombinator.com/item?id=28783381){:class="paradox"}
 
+vii) [YC funded company - sigmaos: first web browser made for work](https://sigmaos.com/)
+
+viii) Firefox alternatives
+- [waterfox](https://www.waterfox.net/){:class="paradox"}
+- [ungoogled chromium](https://github.com/Eloston/ungoogled-chromium){:class="paradox"}
+- [chromium](https://www.chromium.org/){:class="paradox"}
+- [chrome](https://www.google.com/chrome/){:class="paradox"}
+- [vivaldi](https://vivaldi.com/){:class="paradox"}
+- [Bromite](https://github.com/bromite/bromite){:class="paradox"}
+
 ---
 ---
 
@@ -77,3 +87,10 @@ vi) [A/The rise of private community](https://www.stevepavlina.com/blog/2018/01/
 # Misc
 
 - [A meta-layer for notes](https://julian.digital/2020/09/04/a-meta-layer-for-notes/){:class="paradox"}
+- [Bikram Dahal rapid API](https://rapidapi.com/search/bkrmdahal){:class="paradox"}
+- [Send to Kindle addon - Experiment](https://github.com/BkrmDahal/Send-to-Kindle-Chrome-Extension){:class="paradox"}
+- [Send to Kindle - Offical](https://www.amazon.com/gp/sendtokindle){:class="paradox"}
+- [DaVinci Resolve](https://www.blackmagicdesign.com/products/davinciresolve/){:class="paradox"}
+- [OBS project](https://obsproject.com/){:class="paradox"}
+- [Freshworks a JuniorVc](https://ajuniorvc.com/freshworks-india-saas-zoho-unicorn-ipo-story-history-girish/){:class="paradox"}
+- [Sentry](https://sentry.io/){:class="paradox"}
