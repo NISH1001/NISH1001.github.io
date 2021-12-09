@@ -1,9 +1,14 @@
 ---
 layout: page
-description: "All about programming, technology, philosophy, life, love and shit"
+description: "All about programming, algorithms, technology, philosophy and life."
 ---
 
 {% for post in paginator.posts %}
+
+{% if post.published==false %}
+    {% continue %}
+{% endif %}
+
 <div class="post-preview">
     <a href="{{ post.url | prepend: site.baseurl }}">
         <h2 class="post-title">            {{ post.title }}
