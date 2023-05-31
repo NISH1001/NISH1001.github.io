@@ -4,11 +4,12 @@ timezone: Asia/Kathmandu
 header-img: img/home-bg.jpeg
 email: nishanpantha@gmail.com 
 copyright_name: Bits and Paradoxes 
-description: "All about programming, technology, philosophy, life, love and shit"
+description: "Spectrum from technical mind to existential to meta-learning."
 baseurl: ""
 # url: "http://www.nishanpantha.com.np"
-url: "nish1001.github.io"
-# twitter_username: nishparadox
+# url: "nish1001.github.io"
+url: ""
+twitter_username: nishparadox
 github_username: NISH1001 
 #medium_username : nishparadox
 # facebook_username: nishparadox 
@@ -45,3 +46,4 @@ plugins:
     - jekyll-paginate
     - jekyll-feed
     - jekyll-sitemap
+    - jekyll-pdf-embed
