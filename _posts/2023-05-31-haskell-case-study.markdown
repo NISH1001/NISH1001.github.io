@@ -12,4 +12,4 @@ comments: false
 
 This was a term paper for one of the courses I took. I took on the challenge to explore functional/declarative programming paradigms. And my love for Haskell catalyzed that.
 
- <!-- {% pdf "/documents/haskell-case-study.pdf"  %} -->
+{% pdf "/documents/haskell-case-study.pdf"  %}
