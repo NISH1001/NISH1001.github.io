@@ -296,12 +296,14 @@ Zoom into your mind-cave. Lust, love, hatred, dislike, pessimism, optimism, skil
 
 Just look at the history of humans. We have been in existence just recently. Life will continue for another million years without you. Just look at the timescale. It's bizarre. And probably, [most of us might not do anything remarkable](https://www.youtube.com/watch?v=vmIUvp0e1bw).
 
+[13] - Not anymore. It was a brief meaningful encounter.
+
 ---
 ---
 
 ## Appreciations
 
-I appreciate [Prakash](https://twitter.com/Prakashdbhatta) for always being there whenever I needed help. He’s probably the only person to have read most of my drafts first, before everyone else. Haha. Of course, [Bijay](https://bglearning.substack.com/) for being there, among all the absurdities, and tolerating all of my sadness and rants. Finally, [Ayushma](https://www.youtube.com/watch?v=7JrOK2dXE_M) (recently) for being there among all those emails and Deep Meaningful Conversations.
+I appreciate [Prakash](https://twitter.com/Prakashdbhatta) for always being there whenever I needed help. He’s probably the only person to have read most of my drafts first, before everyone else. Haha. Of course, [Bijay](https://bglearning.substack.com/) for being there, among all the absurdities, and tolerating all of my sadness and rants. Finally, Miss A (recently) [13] for being there among all those emails and Deep Meaningful Conversations.
 
 (I think that’s about it to whom I shared this draft. Haha. Yeah. I know. Not many can find their time to read all these turbulent thoughts of mine. Shoutout to other few closest people in my life.).
 
