@@ -46,4 +46,4 @@ plugins:
     - jekyll-paginate
     - jekyll-feed
     - jekyll-sitemap
-    - jekyll-pdf-embed
+    # - jekyll-pdf-embed
