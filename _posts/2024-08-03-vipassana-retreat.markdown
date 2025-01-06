@@ -71,14 +71,14 @@ There are so many moments I felt I was in a flow-state; the sensation I felt all
 
 Looking at this schedule, I can definitely see how it has transformed my understanding of myself, the way I feel and sense my own body and sensations and how much calmer my mind has become comparatively. 
 
-During Vipassana, 6th or 7th day was very difficult for me, because I literally senses my Sinuses moving from one nostril to another, could feel the pulsation of my skull, and more importantly I realized and senses how tensed up my whole mouth and jaw and skull has been because of stress accumulated through my life and Vipassana helped me just get relief of that and ultimately my migraine has more or less vanished from my life. Of course, the goal is to not expect or have these in mind. For me, it helped me gain so much in lfe.
+During Vipassana, 6th or 7th day was very difficult for me, because I literally sensed my Sinuses moving from one nostril to another, could feel the pulsation of my skull, and more importantly I realized and sensed how tensed up my whole mouth and jaw and skull has been because of stress accumulated through my life and Vipassana helped me just get relief of that and ultimately my migraine has more or less vanished from my life. Of course, the goal is to not expect or have these in mind. For me, it helped me gain so much in lfe.
 
  The difficult part might have arisen from having *Noble Silence* where you are not allowed to talk and speak for 10 days and it probably loosened my jaw muscles. And since I had my wisdowm teeth removed many months before, there was less musclular tension to hold my jaw muscle together. This caused so much difficulty in sleeping where my jaw used to slide sideway when I am sleeping sideway. But hey, I made it out and realized that my migraine is partially gone.
 
 
 ---
 
-I try at least doing 30 to 40 minutes of sit per day these days. Although the sensations aren't pronounced like it used to be (temporal attenuation?), but I can still feel some bits her e and there, sometimes achieving the flow state where I partially disintegrate (*Bhanga*).
+I try at least doing 30 to 40 minutes of sit per day these days. Although the sensations aren't pronounced like it used to be (temporal attenuation?), but I can still feel some bits here and there, sometimes achieving the flow state where I partially disintegrate (*Bhanga*).
 
 > Anicca! Anicca! Anicca!
 
