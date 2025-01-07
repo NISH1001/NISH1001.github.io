@@ -82,7 +82,7 @@ I try at least doing 30 to 40 minutes of sit per day these days. Although the se
 
 > Anicca! Anicca! Anicca!
 
-# Gloassary
+# Glossary
 
 - **Anicca**: Impermanence
 - **mettā**: A buddhist concept of love and kindness
