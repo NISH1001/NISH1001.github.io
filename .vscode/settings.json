@@ -1,0 +1,13 @@
+{
+  "foam.files.ignore": [
+    "_site/**",
+    ".jekyll-cache/**",
+    "node_modules/**",
+    ".sass-cache/**"
+  ],
+  "foam.links.sync.enable": false,
+  "foam.edit.linkReferenceDefinitions": "off",
+  "foam.files.notesExtensions": ["md", "markdown"],
+  "foam.files.defaultNoteDirectory": "_notes",
+  "foam.graph.titleMaxLength": 50
+}
