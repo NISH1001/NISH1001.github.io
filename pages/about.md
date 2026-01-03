@@ -56,6 +56,6 @@ For other things about life, love, romance, tragedy and all the proses that evok
 
 ---
 
-Oh! I also maintain a weekly newsletter **Bits and Paradoxes**
+Oh! I used to maintain a weekly newsletter **Bits and Paradoxes** (now unmaintained)
 
 <iframe src="https://bitsandparadoxes.substack.com/embed" width="100%" height="320" style="border:1px solid var(--border); background:var(--bg); border-radius: 0.5rem;" frameborder="0" scrolling="no"></iframe>
