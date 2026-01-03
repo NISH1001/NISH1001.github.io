@@ -19,7 +19,7 @@ comments: false
 
 I have never felt such a strong transformative system I went through for 10, to 11 days. When I came out of the Vipassana retreat on the 11th day and back to interacting with the outside world, I found something very calm about myself and the level of awareness in my body started to get short-circuited. Sitting for 11 hours a day meditating, you are forced to face all your insides and outsides to the level you can’t imagine it’d lead to. I surely have felt that the intense 10 days of the retreat fundamentally transformed how I see myself, how I feel myself, how I observe my reaction, and how I see and observe the outside world. I do feel that I am a bit calmer than the pre-Vipassana Nish and that I am starting to be more in-align-not-affected to all these thoughts coming in and out; and that I am more aware of my environment and my body. I didn’t know I was physically capable of feeling so much sensation in my body; spots that felt untouched and blind on my body have started to surface giving me some sensations. Other times, I feel I have now somewhat gained the ability to fix my migraine (more on that later), feel more awareness on my arms and legs and just staring at the abyss feels like staring back into my body.
 
-# Prelude (Day 0)
+## Prelude (Day 0)
 
 There I was in Salt Lake City (SLC), Utah where my cousin’s (sister’s) husband would drop me at the Intermountain Vipassana Center, Idaho Falls on July 17, 2024, around 5:30 pm. I was excited to face the retreat but never had expectations. I didn’t expect much except I knew it was going to be tough facing my inner world. I knew my mind would wander a lot, that a lot of transient thoughts would come, rise, and go (later on, I’d come to know about feeling these at the physical body level, how my physical body would react to all the things I, “I” as in Nish would react to the world and the sensation and start to become more equanimous to these sensations). On day 0 (July 17), after saying goodbye to my brother-in-law and his mom, and also talking for a bit to The Octopus Lady and saying goodbye to her and asking her to take care of herself (I know how much tendency she has to get into spirals, especially on Friday night, and that’s why I had one email scheduled to her to be sent on Friday that week and it went well : ) ), and switching off my phone and putting on the locker, I was off the grid. The environment was eerie at that time, with the wind blowing outside the center, different kinds of interesting people talking, some lying aloof feeling something, some getting anxious and such. For some reason, I was a bit calm, and excited but didn’t have expectations. One of the students (say A) said I looked a bit calm and I surely felt that way.
 
@@ -27,14 +27,14 @@ Once we had dinner around 6ish pm, and had an introductory lecture session on th
 
 After the session, we headed back to our living quarters. I got a decent quarter, window-side room, sharing meditator (K). It’s funny how we only had literally 10 minutes or so to figure out our washroom schedule (who goes first in the morning, etc.), and then Noble Silence was enforced. The first group sitting that night felt very very very jittery in my mind.
 
-# Day 1
+## Day 1
 
 On day 1, it was very difficult to wake up at 4 am and do the meditation from 4:30 to 6:30 am. For some reason, the anxiety attack woke me up that morning early and I was on time in the hall where we got instruction for this meditation technique called “Anapana”. Anapana is focusing your entire attention on your breath and just focusing on your nostrils as air comes in and out of your nose. Later in the course (before day 4), you’d start experiencing some sensation in that region, between the upper lip and below the nostril or inside the nostril. Anapana sets everything about your awareness in motion, to make your mind sharper to focus on a specific region of your body (starting with the nostril region). Later, after Day 3, from Day 4, actual Vipassana meditation starts where you are required to focus your awareness fully on your body, scanning from the top of your head to the feet. The purpose of Anapana is to establish your awareness of your breath, making you more aware of your present.
 
 ...
 ...
 
-# Day 3+
+## Day 3+
 
 After day 3, the real Vipassana starts where you are guided to put your whole attention to scan your whole body for any sensation that can arise...
 
@@ -42,7 +42,7 @@ Since, for straight 3 days you are used to focusing your entire attention near y
 
 There are so many moments I felt I was in a flow-state; the sensation I felt all over my body made me feel like I am free-falling in air.
 
-# Schedule
+## Schedule
 
 
 | Time          | Activity                        |
@@ -67,7 +67,7 @@ There are so many moments I felt I was in a flow-state; the sensation I felt all
 
 ---
 
-# Hindsight (Nish from January 5th, 2025)
+## Hindsight (Nish from January 5th, 2025)
 
 Looking at this schedule, I can definitely see how it has transformed my understanding of myself, the way I feel and sense my own body and sensations and how much calmer my mind has become comparatively. 
 
@@ -82,7 +82,7 @@ I try at least doing 30 to 40 minutes of sit per day these days. Although the se
 
 > Anicca! Anicca! Anicca!
 
-# Glossary
+## Glossary
 
 - **Anicca**: Impermanence
 - **mettā**: A buddhist concept of love and kindness
@@ -90,13 +90,13 @@ I try at least doing 30 to 40 minutes of sit per day these days. Although the se
 - **Bhaṅga**: Disintegration, dissolutation -> An experiential realization of impermanence (anicca) through dissolution
 
 
-# Resources
+## Resources
 - [Shankharas](https://en.wikipedia.org/wiki/Sa%E1%B9%85kh%C4%81ra){:class="paradox"}
 - [Mindfulness in Plain English](https://www.vipassana.com/meditation/mindfulness_in_plain_english.html){:class="paradox"}
 - [Vipassana Meditation: Developing Meta-Feeling Skills](https://www.lesswrong.com/posts/NTkBCFJSA4PFBxSM9/vipassana-meditation-developing-meta-feeling-skills){:class="paradox"}
 
 ---
 
-# Sending mettā to you everyone
+## Sending mettā to you everyone
 
 #writing #meditation

@@ -87,7 +87,8 @@
                 {%- endif -%}
             {%- endif -%}
 
-             <!--- Post Layout-->
+             <!--- Post Layout (exclude homepage) -->
+             {%- unless page.permalink == "/" -%}
              {%- if page.content-type == "post" or page.layout == "post" -%}
                  <h1>{{page.title}}</h1>
                  {%- include PostMeta.html -%}
@@ -96,6 +97,7 @@
                  {%- include Backlinks.html -%}
                  {%- endif -%}
              {%- endif -%}
+             {%- endunless -%}
 
             <!--- Static Page Layout-->
             {%- if page.content-type == "static" -%}

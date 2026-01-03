@@ -71,7 +71,7 @@ One hill after another, a lot of hills. Random hills. And yet, here we are in th
 
 ---
 
-# Related
+## Related
 
 - [About Time, Life, and Values]({{ '/writing/time-life-values.html' | relative_url }}){:class="paradox"}
 - [Life: Struggle, Absurdity and Happiness]({{ '/writing/life-struggle-absurdity-happiness.html' | relative_url }}){:class="paradox"}
