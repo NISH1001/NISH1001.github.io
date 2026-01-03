@@ -33,14 +33,22 @@ In hindsight, I am a pile of atoms coming together to form broken thoughts. So y
 
 Let me be ego-centric just this time. If people who, in all seriousness, ask me about myself, here are few things I'd say:
 
-- I am currently pursuing my MS in CS at University of Alabama in Huntsville (UAH). I am working as a Graduate Research Assistant with [NASA-IMPACT](https://earthdata.nasa.gov/esds/impact) lab where I deal with quirky research!
+- I am a Computer Scientist at [NASA-IMPACT](https://earthdata.nasa.gov/esds/impact), leading the LLM team. I work on ML research & engineering for open science, particularly NLP/LLMs for scientific knowledge discovery.
 - I am trying to exist among Chaos, Caffeine and Code (and Words)
-- I am interested in applied Machine Learning, Programming, Software Engineering, Algorithms, Optimizations and Data Science
+- I am interested in applied Machine Learning, NLP, Large Language Models, and designing modular, extensible, and maintainable systems
 - I tend to phase out (and in) of this world. But for the sake of arguments, assume I am right here in this blog, within randomness of words, reflecting from my mind-cave.
 - There were more things I used to be interested in. Not now. Perhaps, I might again. You will never know. :)
 - Most of the time, I feel like an observer moving in and out, observing things (and entities) as events unfold. I feel like a highly caffeinated silhouette.
 - I am just trying to see where the river flows with the help of the indefiniteness of words residing in this blog
 - Last but profoundly, I am highly influenced by Feynman. That should give you some idea about an **abstraction** of me (Abstractions are leaky, alright!)
+
+### The professional bits
+
+9+ years at the intersection of ML research and engineering, bridging the gap between research and practical solutions. I've worn many hats—founder, builder, researcher, engineer, project leader—leveraging ML to tackle real-world challenges across startups and initiatives.
+
+I believe in continuous learning and "connecting the dots." I advocate for foundational CS principles as crucial for effectively leveraging new technologies. My interests in ML span NLP, computer vision, MLOps, and LLMs—with a particular focus on low-resource training environments.
+
+Beyond the technical, I explore philosophical domains: life, culture, art, progress, and the nature of existence. These explorations help reformulate my mental models and meta-learning strategies.
 
 ---
 
