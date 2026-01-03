@@ -1,0 +1,125 @@
+{
+"nodes": [
+{
+"id": "/blog/regex/",
+"title": "Lookaround in Regex",
+"type": "post",
+"url": "/blog/regex/"
+},
+{
+"id": "/blog/codes-and-cleanliness/",
+"title": "On Codes and Cleanliness",
+"type": "post",
+"url": "/blog/codes-and-cleanliness/"
+},
+{
+"id": "/blog/decorator-in-python/",
+"title": "Decorator in Python",
+"type": "post",
+"url": "/blog/decorator-in-python/"
+},
+{
+"id": "/blog/perceptron-part-1/",
+"title": "Let's learn perceptron the noob way",
+"type": "post",
+"url": "/blog/perceptron-part-1/"
+},
+{
+"id": "/blog/perceptron-part-2/",
+"title": "Let's learn perceptron the noob way - Part 2",
+"type": "post",
+"url": "/blog/perceptron-part-2/"
+},
+{
+"id": "/blog/accuracy-is-no-brainer/",
+"title": "Accuracy Is a No-Brainer: Precision and Recall",
+"type": "post",
+"url": "/blog/accuracy-is-no-brainer/"
+},
+{
+"id": "/blog/thought-analysis/",
+"title": "A Boring Analysis of My Thoughts",
+"type": "post",
+"url": "/blog/thought-analysis/"
+},
+{
+"id": "/blog/advent-of-code-2018-day-3/",
+"title": "AOC-2018-Day-3: No Matter How You Slice It.",
+"type": "post",
+"url": "/blog/advent-of-code-2018-day-3/"
+},
+{
+"id": "/blog/voronoi-diagram/",
+"title": "Voronoi Diagram",
+"type": "post",
+"url": "/blog/voronoi-diagram/"
+},
+{
+"id": "/blog/universal-sentence-encoder-semantic-search/",
+"title": "Semantic Similarity using Universal Sentence Encoder",
+"type": "post",
+"url": "/blog/universal-sentence-encoder-semantic-search/"
+},
+{
+"id": "/blog/object-detection-yolo/",
+"title": "Understanding Object Detection using YOLO",
+"type": "post",
+"url": "/blog/object-detection-yolo/"
+},
+{
+"id": "/blog/newsletter-00-may/",
+"title": "Newsletter: Bits and Paradoxes - 00",
+"type": "post",
+"url": "/blog/newsletter-00-may/"
+},
+{
+"id": "/blog/life-struggle-absurdity-happiness/",
+"title": "Life: Struggle, Absurdity and Happiness",
+"type": "post",
+"url": "/blog/life-struggle-absurdity-happiness/"
+},
+{
+"id": "/blog/time-life-values/",
+"title": "About Time, Life and Values",
+"type": "post",
+"url": "/blog/time-life-values/"
+},
+{
+"id": "/blog/pleasures-of-finding-things/",
+"title": "Brain Dump: The Pleasure of Finding Things Out",
+"type": "post",
+"url": "/blog/pleasures-of-finding-things/"
+},
+{
+"id": "/blog/the-void-001/",
+"title": "The Void Podcast #001",
+"type": "post",
+"url": "/blog/the-void-001/"
+},
+{
+"id": "/blog/the-void-002/",
+"title": "The Void Podcast #002",
+"type": "post",
+"url": "/blog/the-void-002/"
+},
+{
+"id": "/blog/haskell-case-study/",
+"title": "Haskell Case Study",
+"type": "post",
+"url": "/blog/haskell-case-study/"
+},
+{
+"id": "/blog/2023-life-in-transition-same-different/",
+"title": "2023: A life in transition, same yet different",
+"type": "post",
+"url": "/blog/2023-life-in-transition-same-different/"
+},
+{
+"id": "/blog/vipassana-retreat/",
+"title": "Vipassana Re-treat",
+"type": "post",
+"url": "/blog/vipassana-retreat/"
+}
+],
+"links": []
+}
