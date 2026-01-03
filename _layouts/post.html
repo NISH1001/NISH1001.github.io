@@ -62,10 +62,9 @@
                     <!--- Show content from index.md when homepage is enabled -->
                     {%- include Content.html -%}
                 {%- else -%}
-                    <!--- Show content from notes.md + search + feed when homepage is disabled -->
+                    <!--- Show content from notes.md + feed when homepage is disabled -->
                     <h1>{{page.title}}</h1>
                     {%- include Content.html -%}
-                    {%- include Search.html -%}
                     {%- include Feed.html -%}
                 {%- endif -%}
             {%- endif -%}
