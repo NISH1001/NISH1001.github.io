@@ -106,6 +106,12 @@ body {
   text-decoration: none;
 }
 
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
 .logo {
   width: 32px;
   height: 32px;
@@ -386,8 +392,21 @@ a:hover {
 
 .theme-toggle svg {
   display: block;
-  width: 14px;
-  height: 14px;
+  width: 20px;
+  height: 20px;
+}
+
+/* Sun/Moon icon visibility based on theme */
+.theme-toggle .icon-sun {
+  display: none;
+}
+
+[data-theme="dark"] .theme-toggle .icon-sun {
+  display: block;
+}
+
+[data-theme="dark"] .theme-toggle .icon-moon {
+  display: none;
 }
 
 /* Markdown Support */
