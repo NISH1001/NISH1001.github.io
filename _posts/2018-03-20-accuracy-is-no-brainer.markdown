@@ -187,7 +187,7 @@ of the input and output. Choose wisely. Don't hesitate to experiment with your s
 > **Side Note**: Please, don't forget to share this post if you think it makes **sense**
 
 
-# Further Reads
+## Further Reads
 
 - [The Relationship between Precision-Recall and ROC Curves](http://pages.cs.wisc.edu/~jdavis/davisgoadrichcamera2.pdf){:class="paradox"}
 - [The Class Imbalance Problem](http://www.chioka.in/class-imbalance-problem){:class="paradox"}

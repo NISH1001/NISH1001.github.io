@@ -19,7 +19,7 @@ header-img: "img/post-images/2021-06-12-time-life-values/time-non-linear.png"
 ---
 
 
-# **I)**
+## **I)**
 
 I've been feeling a bit lonely for the past few weeks, and my anxieties are back again. Since my last letter, certain things have surely changed. I have tried regaining control over my life. Now my family situation is not that **"unstable"[3]**. I haven't had my medics since then. No cigarettes. No weed. No alcoholic beverages. In fact, I have spent every day trying to not **"give in"** to the absurd rut we all live in. In fact, my mother has been especially cautious of my situation (hello, depression?). And I have been trying my best to not fall into the pits of absolute sadness. In fact, I like to remind myself that everyone is going through a lot of shits, especially catalyzed by [[COVID-19]] situations. I am not even going to pretend that I am not **"feeling good**. Of course, I am not. I have never felt good about my life itself. Every other task I do is just a[ coping mechanism](https://nish1001.github.io/mind-cave/writing/coping-mechanisms.html) to not give in to all the absurdities of life. But ...
 
@@ -42,7 +42,7 @@ There are few things, I believe I can vaguely pinpoint the rising anxiousness wi
 
 
 
-# **II)**
+## **II)**
 
 When I talk to people, I hesitate to open up right away. To those I don't open up much, I tend to redirect them to my personal journal-based blog or this newsletter, hoping that they would get some glimpse of the absurdities I am pissing in.
 
@@ -59,7 +59,7 @@ When I look back at the years passed by -- almost through a decade-long lens -- 
 
 
 
-# **III)**
+## **III)**
 
 During our early years, we tend to "believe" that time is linear. That we have **"plenty of time"** to do **"plenty of things"**.
 
@@ -91,7 +91,7 @@ This sensation of time that it's almost "logarithmic" grows over time. By the ti
 
 
 
-# **IV)**
+## **IV)**
 
 Human life is short.
 
@@ -118,7 +118,7 @@ This thought has been haunting me for many months now. And I can't shake off the
 
 
 
-# **V)**
+## **V)**
 
 Over the past few years, I had believed in the[ "play the long game"](https://bitsandparadoxes.substack.com/p/bits-and-paradoxes-14) narrative. But if I am to revise that notion, I can (for now) say: _"Fuck the long game"_. This is not coming from frustration, but from a very authentic side-effect when[ money](https://moretothat.com/money/)<span style="text-decoration:underline;"> </span>is taken into the equation. If your life is full of financial struggles, then why the fuck do you have to improvise for the long game? The answer is pretty straightforward. You invest your current "self" towards immediate rewards. These rewards could be, perhaps:
 
@@ -141,7 +141,7 @@ Now that's out of the way, there are still a lot of things I want to talk about 
 
 
 
-# **VI)**
+## **VI)**
 
 Back to the original context of why I am feeling more anxious for the past 2 weeks or so...
 
@@ -157,7 +157,7 @@ This isn't just about my personal life. It's also about my work life. I have tri
 
 
 
-# **VII)**
+## **VII)**
 
 One of the reasons why most of us feel very "shitty" is the way how [[Social Media]] bubble is affecting our mental health. This bubble is shaping our mindset to believe that every other person is doing great in their life. They are having a blast, with themselves as well as with their partners.
 
@@ -171,7 +171,7 @@ Just a few days back I also had thought of deleting this newsletter. Then I came
 
 
 
-# **VIII)**
+## **VIII)**
 
 Every interaction should create some value. This is actually my new motto to keep on learning. If I talk to you and you talk about all your existential crises, I get some values as a side-effect. In that process, I learn that there are people like me who are actually having a lot of crises in their life.
 
@@ -185,7 +185,7 @@ At this point, I am so skeptical about interacting with anyone that, I feel I ne
 
 
 
-# **IX)**
+## **IX)**
 
 This last section is about how I joggle with an inherently meaningless world and try to find "meanings" in my own existence.
 
@@ -197,7 +197,7 @@ Like I said in the beginning, all the archaic philosophy we are used to "consumi
 
 ---
 
-# Ending Thoughts
+## Ending Thoughts
 
 
 I think I have gone overboard talking all these shits. Have a "great" night ahead!
@@ -220,7 +220,7 @@ Hope you are as excited as I am with the final track! I hope I can meet my perso
 
 
 
-# **Footnotes**
+## **Footnotes**
 
 [0] - What the fuck even "good advice" means? Perhaps, I like to "believe" that good advice is fragmented opinions, which can re-direct me towards something better for me.
 

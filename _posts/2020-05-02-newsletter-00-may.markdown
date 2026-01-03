@@ -10,7 +10,7 @@ comments: true
 header-img: "img/post-headers/2020-05-01-newsletter-00.jpeg"
 ---
 
-# Note
+## Note
 I have moved to substack to publish my newsletter since the workflow there is seamless:  
 [https://bitsandparadoxes.substack.com/](https://bitsandparadoxes.substack.com/)
 

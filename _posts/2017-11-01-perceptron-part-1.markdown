@@ -17,7 +17,7 @@ We know, a neuron fires (or does not fire) based on its input stimuli. So, a per
 input ---> process ---> output (prediction)
 ```
 
-# How does it work?
+## How does it work?
 A perceptron is a decision maker. It outputs certain number which can be interpreted as **yes/no** or
 **0/1** or similar range of decision.  
 
@@ -99,7 +99,7 @@ a neuron outputs a real number.
 
 ------
 
-# Let's build a perceptron
+## Let's build a perceptron
 We will be using `python3` and `numpy`. Other libraries/modules can be installed accordingly from `pip3`.
 
 ## Import numpy

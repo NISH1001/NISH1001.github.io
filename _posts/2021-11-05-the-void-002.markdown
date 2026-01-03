@@ -33,7 +33,7 @@ Few things to note on the prefix:
 ---
 ---
 
-# Part A : Firefox, Browser War and Open Souce
+## Part A : Firefox, Browser War and Open Souce
 
 i) [A/Firefox Lost Almost 50 million Users: Here’s Why It is Concerning](https://news.itsfoss.com/firefox-decline/){:class="paradox"}
 
@@ -64,7 +64,7 @@ viii) Firefox alternatives
 ---
 ---
 
-# Part B: On Social Media and Echo Chambers
+## Part B: On Social Media and Echo Chambers
 
 i) [V/Mrwhosetheboss: I'm worried about humanity's future.](https://www.youtube.com/watch?v=FZvee3-PEzo){:class="paradox"}
 
@@ -84,7 +84,7 @@ vi) [A/The rise of private community](https://www.stevepavlina.com/blog/2018/01/
 
 ---
 
-# Misc
+## Misc
 
 - [A meta-layer for notes](https://julian.digital/2020/09/04/a-meta-layer-for-notes/){:class="paradox"}
 - [Bikram Dahal rapid API](https://rapidapi.com/search/bkrmdahal){:class="paradox"}

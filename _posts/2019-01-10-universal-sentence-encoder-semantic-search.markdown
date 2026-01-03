@@ -10,7 +10,7 @@ comments: true
 header-img: "img/post-headers/2019-01-10-universal-sentence-encoder-semantic-search.png"
 ---
 
-# TL;DR
+## TL;DR
 Here I demonstrate how powerful sentence embeddings from Universal Sentence Encoder are.  
 I have a bunch of textual data and query in an arbitary text to find the nearest match that is semantically similar. I am not diving 
 into the architecture of the model itself. But rather focus its usecase for end-user.  

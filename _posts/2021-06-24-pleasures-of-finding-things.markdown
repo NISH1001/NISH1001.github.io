@@ -11,7 +11,7 @@ header-img: "img/post-headers/2021-06-24-pleasure-of-finding-things.jpg"
 ---
 
 
-# I)
+## I)
 As someone who grew up looking up to Feynman as a source of inspiration [0] to keep on learning whatever I tend to "like", Feynman has shaped a lot of my "beliefs" around learning and "understanding" things to its core; the "knowing-vs-understanding" conundrum of lives stemmed very early from my post-teen and early 20s when I started going too deep into the rabbit holes of topics I tend to think about. This book is one of few books I tend to go back to often for inspiration, when I feel my life is in a "rut". I will leave a more detailed review later here when I am in the mood to talk about life, science, art, and philosophy...the mental models I think I revolve around!
 
 For now, all I can say is there's something profound in the absurd world we live in, the pleasures of actually finding some meanings [1] in the things I like to do despite that absurdity.
@@ -22,13 +22,13 @@ For now, all I can say is there's something profound in the absurd world we live
 
 ---
 
-# II)
+## II)
 
 Another aspect of "knowing-vs-understanding" conundrum is teaching. Once you start to teach and explain (at least try to), you'll be enforced to actually think from 3rd person POV to consume what you are conveying. That helps. Of course, you don't have to be **"The Best"** in whatever you do. Of course, you don't need to. What you need to do is to understand that the topic you're "consuming" is something you actually "understand". I am tempted to even say that a single life isn't possible to get my hands into a multitude of things like Feynman [2]. I don't have to think in that way. That's my realization after reading this book twice last year.
 
 ---
 
-# III)
+## III)
 
 Another aspect of "thinking thoroughly" is scientific methods through which we can come to conclusion, to claim that a certain chain of thoughts is "true" or "false". That in addition to the infamous "Feynman Technique" is also something I like to talk about a lot to people (if I am actually talking).
 
@@ -38,7 +38,7 @@ Overall, this book resonates deeply with my core. [0]
 
 ---
 
-# Footnotes
+## Footnotes
 
 [0] - Don't get me started on how much of a fanboy I am while talking about Feynman!
 
@@ -56,7 +56,7 @@ Project. That's one of my favorites from the book
 
 ---
 
-# References
+## References
 - [Feynman on scientific method](https://www.youtube.com/watch?v=EYPapE-3FRw){:class="paradox"}
 - [Richard Feynman: Can Machines Think?](https://www.youtube.com/watch?v=ipRvjS7q1DI){:class="paradox"}
 - [Lex Fridman 118: Grant Sanderson: Math, Manim, Neural Networks & Teaching with 3Blue1Brown](https://www.youtube.com/watch?v=U_6AYX42gkU){:class="paradox"}
