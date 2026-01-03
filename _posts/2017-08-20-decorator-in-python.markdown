@@ -143,4 +143,6 @@ You can basically take it to any level. But beyond 3 wrappers, the decorator doe
 Decorators are possible in python because a function itself is an object in python and you can pass it around, kick its butt
 and play around.
 
+#programming #python #decorator
+
 ------

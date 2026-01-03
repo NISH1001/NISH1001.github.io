@@ -455,3 +455,5 @@ For now, UST does fine and BERT is not a necessity.
 - [How NLP Cracked Transfer Learning](https://jalammar.github.io/illustrated-bert/){:class="paradox"}
 - [Code for BERT](https://github.com/google-research/bert){:class="paradox"}
 - [The Illustrated Transfer](https://jalammar.github.io/illustrated-transformer/){:class="paradox"}
+
+#programming #python #nlp #natural-language-processing #word-embeddings

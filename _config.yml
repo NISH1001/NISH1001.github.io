@@ -1,49 +1,108 @@
 # Site settings
-title: Bits and Paradoxes 
-timezone: Asia/Kathmandu 
-header-img: img/home-bg.jpeg
-email: nishanpantha@gmail.com 
-copyright_name: Bits and Paradoxes 
+title: Bits and Paradoxes
+heading: Nishan Pantha
 description: "Spectrum from technical mind to existential to meta-learning."
+url: "https://nish1001.github.io"
 baseurl: ""
-# url: "http://www.nishanpantha.com.np"
-# url: "nish1001.github.io"
-url: ""
+timezone: Asia/Kathmandu
+
+# Author info
+email: nishanpantha@gmail.com
 twitter_username: nishparadox
-github_username: NISH1001 
-#medium_username : nishparadox
-# facebook_username: nishparadox 
-linkedin_username : nishparadox
-#quora_username : nishan-pantha
-#deviantart_username: nishparadox
-#youtube_username: UCNSZ1lV7udogWO8EBxJGkqg
-#email_username: nishanpantha@gmail.com 
+github_username: NISH1001
+linkedin_username: nishparadox
 
-# Google Analytics
-# To enable google analytics, uncomment below line with a valid Google Tracking ID
+# Google Analytics (keeping for stats)
 google_tracking_id: UA-63014279-2
-google_tracking_id2: UA-63014279-4
 
-google_ad_client: ca-pub-7918070781803326
+# Jekyll Garden Preferences
+preferences:
+  homepage:
+    enabled: false
+  search:
+    enabled: true
+  backlinks:
+    enabled: true
+  pagepreview:
+    enabled: true
+  wiki_style_link:
+    enabled: true
+
+# Asset Configuration
+favicon: "/assets/img/favicon.svg"
+css_file: "/assets/css/style.css"
+
+# Menu Items
+menu:
+  - title: "Notes"
+    url: "/notes"
+  - title: "Blog"
+    url: "/blog"
+  - title: "Tags"
+    url: "/tags"
+  - title: "About"
+    url: "/about"
+
+# Footer
+footer:
+  copyright: "Bits and Paradoxes"
+  credits:
+    enabled: false
+
+# Collections
+collections:
+  notes:
+    output: true
+    permalink: /:collection/:name
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+      type: "notes"
+    values:
+      layout: "post"
+      content-type: "notes"
+      feed: "show"
+      toc: true
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+      content-type: "post"
+      feed: "show"
+      toc: true
+      permalink: /blog/:title/
 
 # Build settings
 markdown: kramdown
 highlighter: rouge
-#permalink: pretty
-#permalink: /:year/:month/:day/:title.html
-permalink: /:categories/:title.html
-# permalinks:
-#     tag: '/:tag/:name/'
-#     year: '/:year/'
-#     month: '/:year/:month/'
-#     day: '/:year/:month/:day/'
-paginate: 15
-exclude: ["less","node_modules","Gruntfile.js","package.json","README.md"]
 
-#gems: [jekyll-paginate, jekyll-feed]
-
+# Plugins
 plugins:
-    - jekyll-paginate
-    - jekyll-feed
-    - jekyll-sitemap
-    # - jekyll-pdf-embed
+  - jekyll-feed
+  - jekyll-sitemap
+
+# Private links (for broken wiki links)
+privatelinks:
+  title: "Private Note"
+  msg: "This note hasn't been published yet."
+
+# Math rendering
+katex: true
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+  - less
+  - Gruntfile.js
+  - package.json
+  - README.md
+  - CLAUDE.md

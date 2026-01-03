@@ -1,10 +1,15 @@
-source 'https://rubygems.org'
+source "https://rubygems.org"
 
 gem "jekyll", "~> 4.4.1"
 
 group :jekyll_plugins do
-  gem "jekyll-paginate"
-  gem "jekyll-feed"
+  gem "jekyll-feed", "~> 0.12"
   gem "jekyll-sitemap"
-  # gem "jekyll-pdf-embed"
+  gem "jekyll-tidy"
 end
+
+# Math support (KaTeX)
+gem "kramdown-math-katex"
+
+# Local server
+gem "webrick", "~> 1.7"

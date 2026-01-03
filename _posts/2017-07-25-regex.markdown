@@ -31,3 +31,5 @@ Find expression **A** that is not preceded by expression **B**:
 ```bash
 (?<!B)A
 ```
+
+#programming #regex

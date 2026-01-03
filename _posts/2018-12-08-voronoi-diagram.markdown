@@ -117,4 +117,6 @@ This gives us voronoi diagram like this:
 **Note**  
 > The list of 2d points used for generating this voronoi diagram can be found [here](https://github.com/NISH1001/advent-of-code-2018/blob/master/day-6/input)
 
+#programming #numpy #python #mathematics
+
 

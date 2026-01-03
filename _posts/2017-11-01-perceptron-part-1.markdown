@@ -157,3 +157,5 @@ So, **OR Gate** is working nicely. The perceptron is giving us the output very h
 ## Training
 Since, we have used already solved weights, we haven't trained the perceptron in the tutorial.
 We will do the perceptron learning/training process in the next part.
+
+#programming #machine-learning #perceptron

@@ -275,5 +275,7 @@ Linux system. The process is similar for windows systems too.
 ### Final Thought
 I know it’s a tedious process, and the initial phase might feel like running straight into a wall, but once you make it to the end, you'll feel great.
 
-> This was originally posted [here](https://medium.com/mpercept-academy/understanding-object-detection-using-yolo-bf2d0f75747a){:class="paradox"}  
+> This was originally posted [here](https://medium.com/mpercept-academy/understanding-object-detection-using-yolo-bf2d0f75747a){:class="paradox"}
 > This article has also been published in Dzone [here](https://dzone.com/articles/understanding-object-detection-using-yolo){:class="paradox"}
+
+#programming #python #deep-learning #object-detection #yolo #computer-vision

@@ -77,3 +77,4 @@ One hill after another, a lot of hills. Random hills. And yet, here we are in th
 - [Life: Struggle, Absurdity and Happiness]({{ '/writing/life-struggle-absurdity-happiness.html' | relative_url }}){:class="paradox"}
 - [Pleasure of finding things out]({{ '/writing/pleasures-of-finding-things.html' | relative_url }}){:class="paradox"}
 
+#writing #life-review

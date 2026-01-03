@@ -1,0 +1,44 @@
+<!-- Collect all tags -->
+{% assign all_tags = "" | split: "" %}
+{% for post in site.posts %}
+  {% if post.tags %}
+    {% assign tags_string = post.tags | join: "," %}
+    {% assign post_tags = tags_string | split: "," %}
+    {% for tag in post_tags %}
+      {% assign clean_tag = tag | strip | remove: '"' | remove: '[' | remove: ']' %}
+      {% if clean_tag != "" %}
+        {% unless all_tags contains clean_tag %}
+          {% assign all_tags = all_tags | push: clean_tag %}
+        {% endunless %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+{% endfor %}
+{% assign all_tags = all_tags | sort %}
+
+<!-- Tag cloud -->
+<div class="tag-cloud">
+  {% for tag in all_tags %}
+    <a href="#{{ tag | slugify }}" class="tag-pill">{{ tag }}</a>
+  {% endfor %}
+</div>
+
+<!-- Posts by tag -->
+<div class="tags-list">
+  {% for tag in all_tags %}
+    <div class="tag-section" id="{{ tag | slugify }}">
+      <h3>{{ tag }}</h3>
+      <ul>
+        {% for post in site.posts %}
+          {% assign post_tags_string = post.tags | join: "," %}
+          {% if post_tags_string contains tag %}
+            <li>
+              <a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a>
+              <span class="post-date">{{ post.date | date: "%b %Y" }}</span>
+            </li>
+          {% endif %}
+        {% endfor %}
+      </ul>
+    </div>
+  {% endfor %}
+</div>

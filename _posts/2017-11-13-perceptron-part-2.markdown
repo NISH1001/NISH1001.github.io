@@ -229,3 +229,5 @@ Perceptron is nothing more than a way to construct a linear boundary between the
 
 Try the perceptron for **XOR** gate and see if you get what *linearity* is.
 
+#programming #machine-learning #perceptron
+

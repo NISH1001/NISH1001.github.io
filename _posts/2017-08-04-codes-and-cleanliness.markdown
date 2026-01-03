@@ -68,5 +68,7 @@ PS: I’d like to add a quote:
 > Always code as if the guy who ends up maintaining your code will be a violent psychopath who knows where you live.
 
 ### Edit 1 - 20 August, 2017
-I gave a talk in **Python Nepal Meetup #12** on the topic *Writing Clean Code* on 19 August, 2017.  
+I gave a talk in **Python Nepal Meetup #12** on the topic *Writing Clean Code* on 19 August, 2017.
 [Here are the slides](http://www.nishanpantha.com.np/writing-clean-code/)
+
+#programming #clean-code

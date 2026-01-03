@@ -1,33 +1,62 @@
-<!-- Navigation -->
-<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
-    <div class="container-fluid">
-        <!-- Brand and toggle get grouped for better mobile display -->
-        <div class="navbar-header page-scroll">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="{{ site.baseurl }}/">{{ site.title }}</a>
-        </div>
+<nav class="nav">
+  <div class="nav-left">
+    <a href="{{ site.baseurl }}/">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+        <rect x="8" y="8" width="16" height="16" rx="4" />
+      </svg>
+    </a>
+  </div>
 
-        <!-- Collect the nav links, forms, and other content for toggling -->
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-            <ul class="nav navbar-nav navbar-right">
-                <li>
-                    <a href="{{ site.baseurl }}/">Home</a>
-                </li>
-                {% for page in site.pages %}{% if page.title %}
-				{% if page.url != '/404.html' %}
-                <li>
-                    <a href="{{ page.url | prepend: site.baseurl }}">{{ page.title }}</a>
-                </li>
-				{% endif %}
-                {% endif %}{% endfor %}
-            </ul>
-        </div>
-        <!-- /.navbar-collapse -->
+  {%- if site.preferences.search.enabled -%}
+  <div class="nav-search">
+    <div class="search-container">
+      <input class="search-input" type="text" placeholder="Search..." id="search-input" autocomplete="off">
+      <div id="search-results" class="search-results"></div>
     </div>
-    <!-- /.container -->
+  </div>
+  {%- endif -%}
+
+  <div class="nav-right">
+    <div class="dropdown">
+      <div class="hamburger">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 6H21M3 12H21M3 18H21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="dropdown-menu">
+        {%- if site.menu -%}
+          {%- for item in site.menu -%}
+            <a href="{{ site.baseurl }}{{ item.url }}">{{ item.title }}</a>
+          {%- endfor -%}
+        {%- else -%}
+          <a href="{{ site.baseurl }}/">About</a>
+          <a href="{{ site.baseurl }}/notes">Notes</a>
+          <a href="{{ site.baseurl }}/about">About</a>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
 </nav>
+
+{%- if site.preferences.search.enabled -%}
+<script type="text/javascript" src="{{ site.baseurl }}/assets/js/vendor/lunr.min.js"></script>
+<script src="{{ site.baseurl }}/assets/js/Search.js"></script>
+{%- endif -%}
+
+<script>
+  const hamburger = document.querySelector('.hamburger');
+  const dropdown = document.querySelector('.dropdown');
+
+  hamburger.addEventListener('click', function(e) {
+    e.stopPropagation();
+    this.classList.toggle('active');
+    dropdown.classList.toggle('active');
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.dropdown')) {
+      hamburger.classList.remove('active');
+      dropdown.classList.remove('active');
+    }
+  });
+</script>

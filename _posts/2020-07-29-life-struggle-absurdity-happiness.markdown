@@ -323,5 +323,7 @@ I appreciate [Prakash](https://twitter.com/Prakashdbhatta) for always being ther
 - [The Long Game](https://vimeo.com/84022735){:class="paradox"}
 - [The way I walk now](https://www.goodreads.com/quotes/9165551-they-way-i-walk-now-you-d-have-a-hard-time){:class="paradox"}
 
+#writing #life #life-review #goals #happiness #absurdity #struggle
+
 ---
 ---

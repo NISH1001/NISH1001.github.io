@@ -144,6 +144,8 @@ The analysis and my observation might be biased because I know what type of blog
 is by making other folks do the observation based on the graphs and some metrics.
 
 ## References
-[1] [Principal Component Analysis](https://en.wikipedia.org/wiki/Principal_component_analysis)  
+[1] [Principal Component Analysis](https://en.wikipedia.org/wiki/Principal_component_analysis)
 [2] [t-distributed stochastic neighbor embedding](https://en.wikipedia.org/wiki/T-distributed_stochastic_neighbor_embedding)
+
+#programming #machine-learning #nlp #word2vec #text
 

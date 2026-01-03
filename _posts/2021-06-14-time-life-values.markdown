@@ -228,4 +228,6 @@ Hope you are as excited as I am with the final track! I hope I can meet my perso
 
 [2] - Maybe modern society too creates the abstraction that an “ideal life” is to have a stable career with decent pay, marry and have children, and retire…
 
-[3] - I don’t know why I relate to Franz Kafka more than anything else. Perhaps it’s because of this weird relationship I have with my father. Haven’t really talked with him for more than a year. Our family situation is pretty bad. I am not even going to talk about how my sister eloped away stealing a very large sum of money! (Don’t worry. She’s back. But a brother’s rage is a brother’s rage, especially I can’t tolerate anyone stealing my money for which I work hard every day! I can only hope that she learns her lesson from me being silent with her for a few months now…)
+[3] - I don't know why I relate to Franz Kafka more than anything else. Perhaps it's because of this weird relationship I have with my father. Haven't really talked with him for more than a year. Our family situation is pretty bad. I am not even going to talk about how my sister eloped away stealing a very large sum of money! (Don't worry. She's back. But a brother's rage is a brother's rage, especially I can't tolerate anyone stealing my money for which I work hard every day! I can only hope that she learns her lesson from me being silent with her for a few months now…)
+
+#writing #life #time #meaning-of-life #absurdity #empathy #social-media

@@ -209,4 +209,6 @@ Hope, you would take time to contemplate things, explore ideas and keep on re-in
 
 Cheers...
 
-PS: This web version of newsletter is raw and might have few typo and grammatical mistakes. However, the email version is streamlined. 
+PS: This web version of newsletter is raw and might have few typo and grammatical mistakes. However, the email version is streamlined.
+
+#newsletter #life #podcast #learning #articles 

@@ -62,3 +62,5 @@ Project. That's one of my favorites from the book
 - [Lex Fridman 118: Grant Sanderson: Math, Manim, Neural Networks & Teaching with 3Blue1Brown](https://www.youtube.com/watch?v=U_6AYX42gkU){:class="paradox"}
 - [Richard Feynman: The Beauty of the Flower](https://www.youtube.com/watch?v=ZbFM3rn4ldo){:class="paradox"}
 - [Feynman Effect](https://wiki.c2.com/?FeynmanEffect){:class="paradox"}
+
+#writing #feynman #science #life #art #learning #knowing #understanding #feynman-technique

@@ -112,3 +112,5 @@ for cn, x, y, w, h in claims:
 ```
 
 Cheers...
+
+#programming #numpy #python #competetion

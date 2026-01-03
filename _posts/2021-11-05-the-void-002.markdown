@@ -94,3 +94,5 @@ vi) [A/The rise of private community](https://www.stevepavlina.com/blog/2018/01/
 - [OBS project](https://obsproject.com/){:class="paradox"}
 - [Freshworks a JuniorVc](https://ajuniorvc.com/freshworks-india-saas-zoho-unicorn-ipo-story-history-girish/){:class="paradox"}
 - [Sentry](https://sentry.io/){:class="paradox"}
+
+#open-source #social-media #echo-chambers #Firefox #product #the-void

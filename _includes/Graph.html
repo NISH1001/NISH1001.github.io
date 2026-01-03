@@ -1,0 +1,173 @@
+<div class="graph-wrapper">
+    <h3>Knowledge Graph</h3>
+    <div id="knowledge-graph" class="graph-container"></div>
+</div>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+(function() {
+    const container = document.getElementById('knowledge-graph');
+    if (!container) return;
+
+    const width = container.clientWidth || 800;
+    const height = 400;
+
+    // Create SVG
+    const svg = d3.select('#knowledge-graph')
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height)
+        .attr('viewBox', [0, 0, width, height]);
+
+    // Add zoom behavior
+    const g = svg.append('g');
+
+    svg.call(d3.zoom()
+        .extent([[0, 0], [width, height]])
+        .scaleExtent([0.5, 4])
+        .on('zoom', (event) => {
+            g.attr('transform', event.transform);
+        }));
+
+    // Fetch graph data
+    fetch('/assets/js/graph-data.json')
+        .then(response => response.json())
+        .then(data => {
+            if (!data.nodes || data.nodes.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: var(--text); padding: 2rem;">No connections found yet. Start linking your notes!</p>';
+                return;
+            }
+
+            // Create force simulation
+            const simulation = d3.forceSimulation(data.nodes)
+                .force('link', d3.forceLink(data.links)
+                    .id(d => d.id)
+                    .distance(100))
+                .force('charge', d3.forceManyBody().strength(-200))
+                .force('center', d3.forceCenter(width / 2, height / 2))
+                .force('collision', d3.forceCollide().radius(30));
+
+            // Draw links
+            const link = g.append('g')
+                .attr('class', 'links')
+                .selectAll('line')
+                .data(data.links)
+                .join('line')
+                .attr('class', 'graph-link');
+
+            // Draw nodes
+            const node = g.append('g')
+                .attr('class', 'nodes')
+                .selectAll('g')
+                .data(data.nodes)
+                .join('g')
+                .attr('class', 'graph-node')
+                .call(d3.drag()
+                    .on('start', dragstarted)
+                    .on('drag', dragged)
+                    .on('end', dragended));
+
+            // Add circles to nodes
+            node.append('circle')
+                .attr('r', d => d.type === 'note' ? 8 : 6)
+                .attr('fill', d => d.type === 'note' ? 'var(--brand)' : 'var(--title)');
+
+            // Add labels
+            node.append('text')
+                .text(d => d.title.length > 20 ? d.title.substring(0, 20) + '...' : d.title)
+                .attr('x', 12)
+                .attr('y', 4)
+                .style('font-size', '11px')
+                .style('fill', 'var(--text)');
+
+            // Add click to navigate
+            node.on('click', (event, d) => {
+                window.location.href = d.url;
+            });
+
+            // Add hover effects
+            node.on('mouseenter', function(event, d) {
+                d3.select(this).select('circle')
+                    .transition()
+                    .duration(200)
+                    .attr('r', d.type === 'note' ? 12 : 10);
+            });
+
+            node.on('mouseleave', function(event, d) {
+                d3.select(this).select('circle')
+                    .transition()
+                    .duration(200)
+                    .attr('r', d.type === 'note' ? 8 : 6);
+            });
+
+            // Update positions on tick
+            simulation.on('tick', () => {
+                link
+                    .attr('x1', d => d.source.x)
+                    .attr('y1', d => d.source.y)
+                    .attr('x2', d => d.target.x)
+                    .attr('y2', d => d.target.y);
+
+                node.attr('transform', d => `translate(${d.x},${d.y})`);
+            });
+
+            // Drag functions
+            function dragstarted(event, d) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+            }
+
+            function dragged(event, d) {
+                d.fx = event.x;
+                d.fy = event.y;
+            }
+
+            function dragended(event, d) {
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+            }
+        })
+        .catch(error => {
+            console.error('Error loading graph data:', error);
+            container.innerHTML = '<p style="text-align: center; color: var(--text); padding: 2rem;">Graph data not available.</p>';
+        });
+})();
+</script>
+
+<style>
+.graph-wrapper {
+    margin: var(--space-xl) 0;
+}
+
+.graph-wrapper h3 {
+    margin-bottom: var(--space-md);
+}
+
+#knowledge-graph {
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    background: var(--bg2);
+    overflow: hidden;
+}
+
+#knowledge-graph svg {
+    display: block;
+}
+
+.graph-link {
+    stroke: var(--border);
+    stroke-opacity: 0.6;
+    stroke-width: 1px;
+}
+
+.graph-node {
+    cursor: pointer;
+}
+
+.graph-node text {
+    pointer-events: none;
+    user-select: none;
+}
+</style>

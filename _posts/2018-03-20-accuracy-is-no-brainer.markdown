@@ -195,6 +195,4 @@ of the input and output. Choose wisely. Don't hesitate to experiment with your s
 - [Confusion Matrix](https://en.wikipedia.org/wiki/Confusion_matrix){:class="paradox"}
 - [Metrics To Evaluate ML Models](https://machinelearningmastery.com/metrics-evaluate-machine-learning-algorithms-python/){:class="paradox"}
 
-
-
-
+#programming #machine-learning #metric #evaluation
