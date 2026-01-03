@@ -38,6 +38,8 @@ menu:
     url: "/notes"
   - title: "Blog"
     url: "/blog"
+  - title: "Research"
+    url: "/research"
   - title: "Tags"
     url: "/tags"
   - title: "About"
