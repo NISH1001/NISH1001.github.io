@@ -86,8 +86,9 @@
                 {%- endif -%}
             {%- endif -%}
 
-             <!--- Post Layout (exclude homepage) -->
+             <!--- Post Layout (exclude homepage, static, notes, tags) -->
              {%- unless page.permalink == "/" -%}
+             {%- unless page.content-type == "static" or page.content-type == "notes" or page.content-type == "tags" -%}
              {%- if page.content-type == "post" or page.layout == "post" -%}
                  <h1>{{page.title}}</h1>
                  {%- include PostMeta.html -%}
@@ -96,6 +97,7 @@
                  {%- include Backlinks.html -%}
                  {%- endif -%}
              {%- endif -%}
+             {%- endunless -%}
              {%- endunless -%}
 
             <!--- Static Page Layout-->
