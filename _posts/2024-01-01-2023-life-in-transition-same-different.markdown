@@ -71,12 +71,15 @@ One hill after another, a lot of hills. Random hills. And yet, here we are in th
 
 2023 felt like just another hill. Maybe some hills I tried to traverse and some I failed miserably. But still I tried and that's what matters maybe.  
 
+
 ---
 
 ## Related
 
-- [About Time, Life, and Values]({{ '/writing/time-life-values.html' | relative_url }}){:class="paradox"}
-- [Life: Struggle, Absurdity and Happiness]({{ '/writing/life-struggle-absurdity-happiness.html' | relative_url }}){:class="paradox"}
-- [Pleasure of finding things out]({{ '/writing/pleasures-of-finding-things.html' | relative_url }}){:class="paradox"}
+- [[About Time, Life and Values]]
+- [[Life: Struggle, Absurdity and Happiness]]
+- [[Brain Dump: The Pleasure of Finding Things Out]]
+
+
 
 #writing #life-review
