@@ -1,9 +1,10 @@
 ---
 title: "Anathem - Neal Stephenson"
-tags: [book, completed, sci-fi, philosophy]
+tags: [book, sci-fi, philosophy]
 author: "Neal Stephenson"
 started_on: "November 19th, 2025"
 completed_on: "December 27th, 2025"
+toc: false
 ---
 
 - Thoughts
