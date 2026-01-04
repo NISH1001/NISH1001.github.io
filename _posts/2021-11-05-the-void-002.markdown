@@ -8,6 +8,8 @@ tags: open-source, social-media, echo-chambers, Firefox, product, the-void
 subtitle: "All the references mentioned in The Void episode 002"
 header-img: "img/the-void-cover.png"
 comments: true
+redirect_from:
+  - /writing/the-void-002.html
 ---
 
 The podcast can be found at : [The Void Podcast : Episode #002 : Firefox, Open Source, Social Media  and Echo Chambers](https://youtu.be/mrvaelfcCvU){:class="paradox"}

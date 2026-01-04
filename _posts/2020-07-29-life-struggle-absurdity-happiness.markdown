@@ -8,6 +8,8 @@ tags: writing life life-review goals happiness absurdity struggle
 subtitle: "I turned 26. So, this is an exhaustive review of my life: finance, relationships, happines and absurdities."
 comments: true
 header-img: "img/post-headers/2020-07-29-peak-life-struggle-absurdity-happiness.png"
+redirect_from:
+  - /writing/life-struggle-absurdity-happiness.html
 ---
 
 ### **[[Life Review]] [[July 29th, 2020]]**

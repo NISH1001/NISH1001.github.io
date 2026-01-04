@@ -8,6 +8,8 @@ tags: programming, haskell, functional-programming
 subtitle: "A quick intro to haskell paradigms"
 header-img: "img/post-headers/2023-05-31-haskell.jpg"
 comments: false
+redirect_from:
+  - /writing/haskell-case-study.html
 ---
 
 This was a term paper for one of the courses I took. I took on the challenge to explore functional/declarative programming paradigms. And my love for Haskell catalyzed that.

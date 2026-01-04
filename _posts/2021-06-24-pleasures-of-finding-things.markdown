@@ -8,6 +8,8 @@ tags: writing feynman science life art learning knowing understanding feynman-te
 subtitle: "This is just my brain dump at the moment. I might get back to this write-up later, at some point in my life. Anyway, it's always a 'pleasure' to listen to Feynman's lectures!"
 comments: true
 header-img: "img/post-headers/2021-06-24-pleasure-of-finding-things.jpg"
+redirect_from:
+  - /writing/pleasures-of-finding-things.html
 ---
 
 

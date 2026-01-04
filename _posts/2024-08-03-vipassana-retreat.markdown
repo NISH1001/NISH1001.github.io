@@ -1,13 +1,15 @@
 ---
 layout: post
 title:  "Vipassana Re-treat"
-date:   2024-08-03 
+date:   2024-08-03
 last_edited_on:   2025-01-05
 categories: writing
 tags: writing, meditation
 subtitle: "A look at the 10-days Vipassana retreat I had done for the first time. Anicca..."
 header-img: "img/post-headers/2024-08-03-vipassana-retreat.jpg"
 comments: false
+redirect_from:
+  - /writing/vipassana-retreat.html
 ---
 
 > Note: This has been incomplete and I don't think I can complete and describe as the experience feels long time ago now - Nish from [[January 1st, 2025]]

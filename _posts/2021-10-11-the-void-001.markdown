@@ -8,6 +8,8 @@ tags: starup, product, failure, happiness, the-void
 subtitle: "All the references mentioned in The Void episode 001"
 header-img: "img/the-void-cover.png"
 comments: true
+redirect_from:
+  - /writing/the-void-001.html
 ---
 
 The podcast can be found at:

@@ -5,9 +5,11 @@ date:   2021-06-12 00:01:00 +0545
 last_edited_on:   2021-06-14 19:20:00 +0545
 categories: writing
 tags: writing life time meaning-of-life absurdity empathy social-media
-subtitle: "We are so used to with the 'linear' perception of time that we think we have plenty of time. However, the sensation of time that it's almost 'logarithmic' grows over time. By the time you are 27ish years old, you might realize that a lot of early years were just a filler arc in your life. That your current “self” has a lot of things to squeeze in a short period of time, especially when you have crossed the quarter-life milestone."
+subtitle: "We are so used to with the 'linear' perception of time that we think we have plenty of time. However, the sensation of time that it's almost 'logarithmic' grows over time. By the time you are 27ish years old, you might realize that a lot of early years were just a filler arc in your life. That your current 'self' has a lot of things to squeeze in a short period of time, especially when you have crossed the quarter-life milestone."
 comments: true
 header-img: "img/post-images/2021-06-12-time-life-values/time-non-linear.png"
+redirect_from:
+  - /writing/time-life-values.html
 ---
 
 > This was posted originally to my newsletter *Bits-and-paradoxes* at: https://bitsandparadoxes.substack.com/p/bits-and-paradoxes-33.

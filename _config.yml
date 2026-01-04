@@ -85,6 +85,7 @@ highlighter: rouge
 plugins:
   - jekyll-feed
   - jekyll-sitemap
+  - jekyll-redirect-from
 
 # Private links (for broken wiki links)
 privatelinks:

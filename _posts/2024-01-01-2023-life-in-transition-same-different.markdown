@@ -1,13 +1,15 @@
 ---
 layout: post
 title:  "2023: A life in transition, same yet different"
-date:   2024-01-01 
-last_edited_on:   2024-01-18 
+date:   2024-01-01
+last_edited_on:   2024-01-18
 categories: writing
 tags: writing, life-review, meaning-of-life
 subtitle: "An partial look at 2023 in hindsight"
 header-img: "img/post-headers/2024-01-01-2023-life-in-transition-same-different.jpg"
 comments: false
+redirect_from:
+  - /writing/2023-life-in-transition-same-different.html
 ---
 
 > Note: This is an incomplete review of my 2023 through my mind's lens. I'd call it "partial" because it was hard for my jittery mind, and I eventually succumed to my procrastination and unsteady mind at that time. So, it's a partial look at my life in 2023.
