@@ -65,7 +65,7 @@
                     <!--- Show content from notes.md + feed when homepage is disabled -->
                     <h1>{{page.title}}</h1>
                     {%- include Content.html -%}
-                    {%- include Feed.html -%}
+                    {%- include Feed.html type="homepage" -%}
                 {%- endif -%}
             {%- endif -%}
 
@@ -73,8 +73,8 @@
             {%- if page.permalink == "/notes" -%}
                 <h1>{{page.title}}</h1>
                 {%- include Content.html -%}
-                {%- include Search.html -%}
-                {%- include Feed.html -%}
+                {%- include Feed.html type="notes" -%}
+                {%- include Feed.html type="recent-posts" -%}
             {%- endif -%}
 
             <!--- Notes Layout-->
@@ -116,18 +116,8 @@
 
             <!--- Blog Feed Layout-->
             {%- if page.permalink == "/writing" -%}
-                <div class="related-wrapper">
-                {% assign post_items = site.posts | sort: "date" | reverse %}
-                {% for post_items in post_items %}
-                    {%- if post_items.feed == "show" -%}
-                            <div class="notelist-feed">
-                                <a href="{{ site.baseurl }}{{post_items.url}}">
-                                    <p>{{ post_items.title }}</p>
-                                </a>
-                            </div>
-                    {%- endif -%}
-                {%- endfor -%}
-                </div>
+                {%- include Feed.html type="posts" -%}
+                {%- include Feed.html type="recent-notes" -%}
             {%- endif -%}
 
             {%- include footer.html -%}

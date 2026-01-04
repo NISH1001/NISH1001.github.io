@@ -1,13 +1,132 @@
-<!-- feed with filter-->
-<div class="related-wrapper">
-{% assign note_items = site.notes | sort: "date" | reverse %}
-{% for note_items in note_items %}
-    {%- if note_items.feed == "show" -%}
-            <div class="notelist-feed">
-                <a href="{{ site.baseurl }}{{note_items.url}}">
-                    <p>{{ note_items.title }}</p>
-                </a>
-            </div>
-    {%- endif -%}
-{%- endfor -%}
+<!-- Unified Feed Component -->
+<!-- Usage: include Feed.html type="homepage|notes|posts|recent-notes|recent-posts" -->
+
+{% if include.type == "homepage" %}
+<!-- Two-column layout: Recent Notes + Recent Writing -->
+<div class="recent-feed">
+    {% assign recent_notes = site.notes | sort: "date" | reverse %}
+    {% if recent_notes.size > 0 %}
+    <div class="feed-section">
+        <h3>Recent Notes</h3>
+        <ul class="feed-list">
+        {% for note in recent_notes limit:5 %}
+            <li><a href="{{ site.baseurl }}{{ note.url }}">{{ note.title }}</a></li>
+        {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% assign recent_posts = site.posts | sort: "date" | reverse %}
+    {% if recent_posts.size > 0 %}
+    <div class="feed-section">
+        <h3>Recent Writing</h3>
+        <ul class="feed-list">
+        {% for post in recent_posts limit:5 %}
+            <li><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></li>
+        {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
 </div>
+
+{% elsif include.type == "notes" %}
+<!-- All notes -->
+<div class="feed-single">
+    {% assign all_notes = site.notes | sort: "date" | reverse %}
+    <ul class="feed-list">
+    {% for note in all_notes %}
+        <li><a href="{{ site.baseurl }}{{ note.url }}">{{ note.title }}</a></li>
+    {% endfor %}
+    </ul>
+</div>
+
+{% elsif include.type == "posts" %}
+<!-- All posts -->
+<div class="feed-single">
+    {% assign all_posts = site.posts | sort: "date" | reverse %}
+    <ul class="feed-list">
+    {% for post in all_posts %}
+        <li><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></li>
+    {% endfor %}
+    </ul>
+</div>
+
+{% elsif include.type == "recent-notes" %}
+<!-- Recent notes with heading -->
+{% assign recent_notes = site.notes | sort: "date" | reverse %}
+{% if recent_notes.size > 0 %}
+<div class="feed-single feed-related">
+    <h3>Recent Notes</h3>
+    <ul class="feed-list">
+    {% for note in recent_notes limit:5 %}
+        <li><a href="{{ site.baseurl }}{{ note.url }}">{{ note.title }}</a></li>
+    {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{% elsif include.type == "recent-posts" %}
+<!-- Recent posts with heading -->
+{% assign recent_posts = site.posts | sort: "date" | reverse %}
+{% if recent_posts.size > 0 %}
+<div class="feed-single feed-related">
+    <h3>Recent Writing</h3>
+    <ul class="feed-list">
+    {% for post in recent_posts limit:5 %}
+        <li><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></li>
+    {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{% endif %}
+
+<style>
+.recent-feed {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--space-lg);
+    margin: var(--space-xl) 0;
+}
+
+.feed-single {
+    margin: var(--space-lg) 0;
+}
+
+.feed-related {
+    margin-top: var(--space-xl);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--border);
+}
+
+.feed-section h3,
+.feed-related h3 {
+    margin-bottom: var(--space-sm);
+    font-size: 1rem;
+    color: var(--text);
+}
+
+.feed-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.feed-list li {
+    padding: var(--space-xs) 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.feed-list li:last-child {
+    border-bottom: none;
+}
+
+.feed-list a {
+    color: var(--title);
+    text-decoration: none;
+}
+
+.feed-list a:hover {
+    color: var(--brand);
+}
+</style>
