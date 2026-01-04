@@ -4,7 +4,7 @@ title:  "A Boring Analysis of My Thoughts"
 date:   2018-11-13 00:01:00 +0545
 last_edited_on:   2018-11-14 00:01:20 +0545
 categories: programming
-tags: programming machine-learning nlp word2vec text
+tags: programming machine-learning nlp word2vec
 subtitle: "I have analyzed all of my blog posts from medium"
 comments: true
 header-img: img/post-headers/2018-11-13-thought-analysis.png"
