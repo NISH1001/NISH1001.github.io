@@ -45,7 +45,7 @@
                     .distance(100))
                 .force('charge', d3.forceManyBody().strength(-200))
                 .force('center', d3.forceCenter(width / 2, height / 2))
-                .force('collision', d3.forceCollide().radius(30));
+                .force('collision', d3.forceCollide().radius(40));
 
             // Draw links
             const link = g.append('g')
@@ -69,7 +69,7 @@
 
             // Add circles to nodes
             node.append('circle')
-                .attr('r', d => d.type === 'note' ? 8 : 6)
+                .attr('r', d => d.type === 'note' ? 12 : 10)
                 .attr('fill', d => d.type === 'note' ? 'var(--brand)' : 'var(--title)');
 
             // Add labels
@@ -90,14 +90,14 @@
                 d3.select(this).select('circle')
                     .transition()
                     .duration(200)
-                    .attr('r', d.type === 'note' ? 12 : 10);
+                    .attr('r', d.type === 'note' ? 16 : 14);
             });
 
             node.on('mouseleave', function(event, d) {
                 d3.select(this).select('circle')
                     .transition()
                     .duration(200)
-                    .attr('r', d.type === 'note' ? 8 : 6);
+                    .attr('r', d.type === 'note' ? 12 : 10);
             });
 
             // Update positions on tick
@@ -157,9 +157,9 @@
 }
 
 .graph-link {
-    stroke: var(--border);
-    stroke-opacity: 0.6;
-    stroke-width: 1px;
+    stroke: var(--text);
+    stroke-opacity: 0.8;
+    stroke-width: 2.5px;
 }
 
 .graph-node {
