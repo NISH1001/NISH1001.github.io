@@ -252,7 +252,7 @@ I hope it doesn't. But if you get another side of the reality --a very humane va
 
 
 I guess things feel amazing when I discover something new.
-> A guitar piece that connects directly to my soul. Ancient philosophy which I’ve been contemplating for a very long time.
+> A guitar piece that connects directly to my soul. Ancient philosophy which I've been contemplating for a very long time. The eternal question of [[Objective Truth]] vs social constructs (see [[Anathem - Neal Stephenson]]).
 
 Just think about it again.
 
