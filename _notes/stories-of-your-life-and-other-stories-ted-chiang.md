@@ -2,8 +2,8 @@
 title: "Stories of Your Life and Other Stories - Ted Chiang"
 tags: [book, sci-fi]
 author: "Ted Chiang"
-started_on: "May 1st, 2025"
-completed_on: "May 20th, 2025"
+started_on: "March 20th, 2025"
+completed_on: "May 1st, 2025"
 toc: false
 ---
 
