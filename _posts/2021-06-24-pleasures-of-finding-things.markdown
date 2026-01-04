@@ -4,7 +4,7 @@ title:  "Brain Dump: The Pleasure of Finding Things Out"
 date:   2021-06-24 00:20:30 +0545
 last_edited_on:   2021-06-24 20:40:00 +0545
 categories: writing
-tags: writing feynman science life art learning knowing understanding feynman-technique
+tags: writing feynman science life art learning knowing understanding feynman-technique book
 subtitle: "This is just my brain dump at the moment. I might get back to this write-up later, at some point in my life. Anyway, it's always a 'pleasure' to listen to Feynman's lectures!"
 comments: true
 header-img: "img/post-headers/2021-06-24-pleasure-of-finding-things.jpg"

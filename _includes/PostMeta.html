@@ -3,6 +3,14 @@
     <span class="post-date">{{ page.date | date: "%B %d, %Y" }}</span>
   {% endif %}
 
+  {% if page.started_on or page.completed_on %}
+    <span class="post-reading-dates">
+      {% if page.started_on %}Started: {{ page.started_on }}{% endif %}
+      {% if page.started_on and page.completed_on %} · {% endif %}
+      {% if page.completed_on %}Completed: {{ page.completed_on }}{% endif %}
+    </span>
+  {% endif %}
+
   {% if page.tags %}
     <span class="post-tags">
       {% assign tags_string = page.tags | join: ", " %}

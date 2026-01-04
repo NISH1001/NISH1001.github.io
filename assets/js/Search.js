@@ -85,6 +85,7 @@
             var index = lunr(function(){
                 this.ref('id');
                 this.field('title', {boost: 500});
+                this.field('tags', {boost: 100});
                 this.field('content', {boost: 1});
                 this.field('url');
                 this.metadataWhitelist = ['position']
@@ -93,6 +94,7 @@
                     this.add({
                         id: i,
                         title: docs[i].title,
+                        tags: docs[i].tags || '',
                         content: docs[i].content,
                         url: docs[i].url
                     });
