@@ -4,7 +4,7 @@ title:  "Semantic Similarity using Universal Sentence Encoder"
 date:   2019-01-10 00:01:00 +0545
 last_edited_on:   2019-03-11 00:03:20 +0545
 categories: programming
-tags: programming python nlp natural-language-processing word-embeddings
+tags: programming python nlp word-embeddings
 subtitle: "Universal Sentence Encoder is the model for encoding sentences into embedding vectors."
 comments: true
 header-img: "img/post-headers/2019-01-10-universal-sentence-encoder-semantic-search.png"
@@ -456,4 +456,4 @@ For now, UST does fine and BERT is not a necessity.
 - [Code for BERT](https://github.com/google-research/bert){:class="paradox"}
 - [The Illustrated Transfer](https://jalammar.github.io/illustrated-transformer/){:class="paradox"}
 
-#programming #python #nlp #natural-language-processing #word-embeddings
+#programming #python #nlp  #word-embeddings
