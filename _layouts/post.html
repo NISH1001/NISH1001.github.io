@@ -86,8 +86,8 @@
                 {%- endif -%}
             {%- endif -%}
 
-             <!--- Post Layout (exclude homepage, static, notes, tags) -->
-             {%- unless page.permalink == "/" -%}
+             <!--- Post Layout (exclude homepage, static, notes, tags, and feed pages) -->
+             {%- unless page.permalink == "/" or page.permalink == "/notes" or page.permalink == "/blog" -%}
              {%- unless page.content-type == "static" or page.content-type == "notes" or page.content-type == "tags" -%}
              {%- if page.content-type == "post" or page.layout == "post" -%}
                  <h1>{{page.title}}</h1>
