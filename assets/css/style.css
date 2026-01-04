@@ -615,6 +615,22 @@ td {
   text-align: center;
 }
 
+.search-all-results {
+  display: block;
+  padding: var(--space-sm) var(--space-md);
+  text-align: center;
+  color: var(--brand);
+  font-size: var(--scale-sm);
+  text-decoration: none;
+  border-top: 1px solid var(--border);
+  margin-top: var(--space-xs);
+}
+
+.search-all-results:hover {
+  background: var(--bg2);
+  text-decoration: underline;
+}
+
 /* Feed styles */
 .notelist-feed {
   border-bottom: 1px solid var(--border);

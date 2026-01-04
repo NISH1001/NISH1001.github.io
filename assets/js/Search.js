@@ -177,6 +177,13 @@
                 searchResults.appendChild(resultsList);
 
                 addResults(resultsList, results, 0, 10, 100, currentSearchIndex);
+
+                // Add "All results" link at bottom
+                var allResultsLink = document.createElement('a');
+                allResultsLink.href = '/search?q=' + encodeURIComponent(input);
+                allResultsLink.innerText = 'All ' + results.length + ' results →';
+                allResultsLink.classList.add('search-all-results');
+                searchResults.appendChild(allResultsLink);
             }
 
             function addResults(resultsList, results, start, batchSize, batchMillis, searchIndex) {
@@ -415,14 +422,9 @@
                 return;
             case 13: // enter
                 e.preventDefault();
-                var active = document.querySelector('.search-result.active');
-                if (active) {
-                active.click();
-                } else {
-                var first = document.querySelector('.search-result');
-                if (first) {
-                    first.click();
-                }
+                var input = searchInput.value;
+                if (input) {
+                    window.location.href = '/search?q=' + encodeURIComponent(input);
                 }
                 return;
             }
