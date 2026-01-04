@@ -75,7 +75,7 @@ defaults:
       content-type: "post"
       feed: "show"
       toc: true
-      permalink: /blog/:title/
+      permalink: /writing/:title/
 
 # Build settings
 markdown: kramdown
