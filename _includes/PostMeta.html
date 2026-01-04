@@ -1,5 +1,7 @@
 <div class="post-meta">
-  {% if page.date %}
+  {% if page.published_date %}
+    <span class="post-date">{{ page.published_date | date: "%B %d, %Y" }}</span>
+  {% elsif page.date and page.content-type == "post" %}
     <span class="post-date">{{ page.date | date: "%B %d, %Y" }}</span>
   {% endif %}
 
