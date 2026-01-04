@@ -88,7 +88,7 @@
             {%- endif -%}
 
              <!--- Post Layout (exclude homepage, static, notes, tags, and feed pages) -->
-             {%- unless page.permalink == "/" or page.permalink == "/notes" or page.permalink == "/blog" -%}
+             {%- unless page.permalink == "/" or page.permalink == "/notes" or page.permalink == "/writing" -%}
              {%- unless page.content-type == "static" or page.content-type == "notes" or page.content-type == "tags" -%}
              {%- if page.content-type == "post" or page.layout == "post" -%}
                  <h1>{{page.title}}</h1>
@@ -115,7 +115,7 @@
             {%- endif -%}
 
             <!--- Blog Feed Layout-->
-            {%- if page.permalink == "/blog" -%}
+            {%- if page.permalink == "/writing" -%}
                 <div class="related-wrapper">
                 {% assign post_items = site.posts | sort: "date" | reverse %}
                 {% for post_items in post_items %}

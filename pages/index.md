@@ -6,8 +6,6 @@ title: Bits and Paradoxes
 
 A spectrum from technical mind to existential to meta-learning.
 
-This is a digital garden where ideas grow, connect, and evolve. Browse through interconnected notes, explore blog posts, or search for specific topics.
-
-Browse through [Notes](/notes), explore the [Blog](/blog), check out [Research](/research) (publications, talks and more), or search by [Tags](/tags).
+This is a digital garden where ideas grow, connect, and evolve. Browse through my [Notes](/notes), [Writing](/writing), [Research](/research) and explore their interconnectedness. 
 
 {% include Graph.html %}

@@ -1,8 +1,8 @@
 ---
-title: "Blog"
+title: "Writing"
 layout: post
-permalink: /blog
+permalink: /writing
 content-type: "static"
 ---
 
-Browse all published blog posts. These are chronological, time-sensitive posts alongside the evergreen digital garden notes. 
+Browse all published writing. These are chronological, time-sensitive posts alongside the evergreen digital garden notes. 
