@@ -1,10 +1,11 @@
-<!-- Collect all tags -->
+<!-- Collect all tags from posts and notes -->
 {% assign all_tags = "" | split: "" %}
-{% for post in site.posts %}
-  {% if post.tags %}
-    {% assign tags_string = post.tags | join: "," %}
-    {% assign post_tags = tags_string | split: "," %}
-    {% for tag in post_tags %}
+{% assign all_items = site.posts | concat: site.notes %}
+{% for item in all_items %}
+  {% if item.tags %}
+    {% assign tags_string = item.tags | join: "," %}
+    {% assign item_tags = tags_string | split: "," %}
+    {% for tag in item_tags %}
       {% assign clean_tag = tag | strip | remove: '"' | remove: '[' | remove: ']' %}
       {% if clean_tag != "" %}
         {% unless all_tags contains clean_tag %}
@@ -23,18 +24,18 @@
   {% endfor %}
 </div>
 
-<!-- Posts by tag -->
+<!-- Posts and notes by tag -->
 <div class="tags-list">
   {% for tag in all_tags %}
     <div class="tag-section" id="{{ tag | slugify }}">
       <h3>{{ tag }}</h3>
       <ul>
-        {% for post in site.posts %}
-          {% assign post_tags_string = post.tags | join: "," %}
-          {% if post_tags_string contains tag %}
+        {% for item in all_items %}
+          {% assign item_tags_string = item.tags | join: "," %}
+          {% if item_tags_string contains tag %}
             <li>
-              <a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a>
-              <span class="post-date">{{ post.date | date: "%b %Y" }}</span>
+              <a href="{{ site.baseurl }}{{ item.url }}">{{ item.title }}</a>
+              {% if item.date %}<span class="post-date">{{ item.date | date: "%b %Y" }}</span>{% endif %}
             </li>
           {% endif %}
         {% endfor %}
