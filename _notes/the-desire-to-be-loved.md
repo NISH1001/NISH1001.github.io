@@ -16,4 +16,4 @@ toc: true
 
 ## My Thoughts
 - This hits hard
-- Sometimes I feel like I don't have a sense of not *belonging* anywhere. The sense of not being loved enough. But that's okay.
+- Sometimes I feel like I don't have a sense of *belonging* anywhere. But that's okay.
