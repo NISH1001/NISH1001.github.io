@@ -47,7 +47,7 @@ Every year has felt so much same yet different; every year has felt so much diff
 
 
 ![Linear Time Perception](/img/post-images/2021-06-12-time-life-values/time-linear.png){:class="img-responsive"}
-> Image: “Linear time perception” ([Time, Life, and Values]({{ '/writing/time-life-values.html' | relative_url }}))
+> Image: "Linear time perception" ([[About Time, Life and Values]])
 
 
 **Life:** Just random [**Hill Climbing**](#) here and there hoping everything works out eventually? Or just a set of mundane transitions from one sad state to another? Either way, suffering is here to stay. We think we've done enough in life, but then the hindsight-based attack vector to life itself feels like we haven't done much, that we haven't progressed much in different vividly dreamy aspects of life.  
@@ -78,8 +78,6 @@ One hill after another, a lot of hills. Random hills. And yet, here we are in th
 
 - [[About Time, Life and Values]]
 - [[Life: Struggle, Absurdity and Happiness]]
-- [[Brain Dump: The Pleasure of Finding Things Out]]
-
-
+- [[The Pleasure of Finding Things Out]]
 
 #writing #life-review
