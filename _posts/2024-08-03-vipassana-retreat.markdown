@@ -4,7 +4,7 @@ title:  "Vipassana Re-treat"
 date:   2024-08-03
 last_edited_on:   2025-01-05
 categories: writing
-tags: writing, meditation
+tags: writing, meditation, buddhism
 subtitle: "A look at the 10-days Vipassana retreat I had done for the first time. Anicca..."
 header-img: "img/post-headers/2024-08-03-vipassana-retreat.jpg"
 comments: false
