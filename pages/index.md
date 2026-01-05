@@ -4,8 +4,10 @@ permalink: /
 title: Bits and Paradoxes
 ---
 
-A spectrum from technical mind to existential to meta-learning.
+Staring into the abyss...in "aweness"....
 
-This is a digital garden where ideas grow, connect, and evolve. Browse through my [Notes](/notes), [Writing](/writing), [Research](/research) and explore their interconnectedness. 
+Pondering about life, existence, universe and everything in between: art, philosophy, mindfulness, technology, absurdities of it all.
+
+This is my digital garden where ideas grow, connect, and evolve. Browse through my [Notes](/notes), [Writing](/writing), [Research](/research) and explore their interconnectedness.
 
 {% include Graph.html %}
