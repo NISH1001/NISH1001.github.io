@@ -13,7 +13,7 @@ completed_on: May, 2020
 
 
 ## Notes
- - Coffee provides very significant quantities of [[Magnesium]], as well as other nutrients including [[Vitamin B1]]
+ - #coffee provides very significant quantities of [[Magnesium]], as well as other nutrients including [[Vitamin B1]]
 
  - [[Nutrition]] science is neglected more
 
@@ -62,13 +62,13 @@ completed_on: May, 2020
 ---
 
 ## My Thoughts
-- This is a bit obscured read (more like a self-research from the Author with "pretty" [[Chemical]] jargon. Personally, I loved a thing or two here.
+- This is a bit obscured read (more like a self-research from the Author with "pretty" Chemical jargon. Personally, I loved a thing or two here.
 
-- It's interesting to find the history of nutrients in the essay. However, as always, the positive and negative effects of [[Caffeine]] intake are still fuzzy. Personally, I agree to > Bad reputation of [[Coffee]] because of severe [[Palpitation]] it causes when taken in high doses (this coming from personal experiences past 3-4 years).
-- In hindsight, it's how much [[Tolerant]] you are for caffeine. 
+- It's interesting to find the history of nutrients in the essay. However, as always, the positive and negative effects of Caffeine intake are still fuzzy. Personally, I agree to > Bad reputation of #coffee because of severe Palpitation it causes when taken in high doses (this coming from personal experiences past 3-4 years).
+- In hindsight, it's how much Tolerant you are for caffeine. 
 	- For me it's high and sometimes I get too anxious with high doses. Normal doses for me seem to be a high dose for a few people I have interacted with.
 
 	- Too much of anything is not that good.
-- All I can say is, it all depends on situation how you use it. The case with Coffee drinkers having low incidence of [[Suicide]] just isn't digestible, at least for me. Maybe, there's a serious [[Synchronicity]] in the two.
+- All I can say is, it all depends on situation how you use it. The case with Coffee drinkers having low incidence of #suicide just isn't digestible, at least for me. Maybe, there's a serious [[Synchronicity]] in the two.
 
-- Anyway, I have a [[Love]] and [[Hate]] relationship with [[Caffeine]]. :)
+- Anyway, I have a #love and Hate relationship with caffeine. :)
