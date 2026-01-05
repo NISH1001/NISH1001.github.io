@@ -3,11 +3,11 @@ layout: post
 title: "Attachments to desires"
 date: 2025-12-25
 categories: writing
-tags: [writing, attachments, life, buddhism, journal]
+tags: [writing, attachments, life, buddhism, journal, meaning-of-life]
 toc: false
 ---
   
-Desiree are the most dangerous weapons in the world. They drive your life to the point they make it break your life. They are addictive in nature while your suffering keeps on being maximized.
+Desiree are the most dangerous weapons in the world. They drive your life to the point they make or break your life. They are addictive in nature while your suffering keeps on being maximized.
 
 Lately I have been thinking about desires in a way I haven't thought for a while. It's not that I haven't thought about them previously. As someone who keeps on philosophizing on ways of life, I have thought about life, its meaninglessness my entirety of existence, desires come into play early on. And I believe most of my life (and probably most of ours?) has been driven forward by desires that have had shaped and reshaped my mental Model about the world. But lately as an adult, I have been pondering about it more and more; somewhere on how I should lead my life and what I actually need to do in life. "need* I say because not want. There are so many wants while also needs are also many. 
 
