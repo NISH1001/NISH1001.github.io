@@ -2,11 +2,13 @@
 """
 Logseq to Jekyll Migration Script
 
-Converts Logseq markdown notes to Jekyll-compatible markdown for the _notes collection.
+Converts Logseq markdown notes to Jekyll-compatible markdown for the _notes or _posts collection.
 
 Usage:
     uv run scripts/logseq2jekyll.py "Article-Why Books Don't Work.md"
     uv run scripts/logseq2jekyll.py "Book%2FAnathem - Neal Stephenson.md" --dry-run
+    uv run scripts/logseq2jekyll.py "Article-Title.md" --post --date 2024-01-15
+    uv run scripts/logseq2jekyll.py "Article-Title.md" --post --category writing
 """
 
 import argparse
@@ -14,6 +16,7 @@ import json
 import os
 import re
 import shutil
+from datetime import date
 from pathlib import Path
 from typing import Optional
 
@@ -24,6 +27,7 @@ LOGSEQ_ASSETS = LOGSEQ_ROOT / "assets"
 
 JEKYLL_ROOT = Path(__file__).parent.parent
 JEKYLL_NOTES = JEKYLL_ROOT / "_notes"
+JEKYLL_POSTS = JEKYLL_ROOT / "_posts"
 JEKYLL_ASSETS = JEKYLL_ROOT / "assets" / "notes"
 
 BLOCK_INDEX_CACHE = LOGSEQ_ROOT / ".block_index.json"
@@ -138,10 +142,21 @@ def extract_properties(content: str) -> dict:
     return properties
 
 
-def generate_front_matter(title: str, properties: dict) -> str:
+def generate_front_matter(title: str, properties: dict, as_post: bool = False,
+                          post_date: Optional[str] = None, category: Optional[str] = None) -> str:
     """Generate Jekyll YAML front matter."""
     lines = ['---']
+
+    if as_post:
+        lines.append('layout: post')
+
     lines.append(f'title: "{title}"')
+
+    if as_post and post_date:
+        lines.append(f'date: {post_date}')
+
+    if as_post and category:
+        lines.append(f'categories: {category}')
 
     if 'tags' in properties and properties['tags']:
         tags_str = ', '.join(properties['tags'])
@@ -318,7 +333,9 @@ def copy_assets(content: str, dry_run: bool = False) -> str:
     return re.sub(r'!\[([^\]]*)\]\(([^)]+)\)', replace_asset, content)
 
 
-def migrate_note(filename: str, dry_run: bool = False, rebuild_index: bool = False) -> Optional[str]:
+def migrate_note(filename: str, dry_run: bool = False, rebuild_index: bool = False,
+                 as_post: bool = False, post_date: Optional[str] = None,
+                 category: Optional[str] = None) -> Optional[str]:
     """Migrate a single Logseq note to Jekyll."""
 
     # Find the file - support multiple search methods
@@ -380,13 +397,36 @@ def migrate_note(filename: str, dry_run: bool = False, rebuild_index: bool = Fal
     content = clean_logseq_syntax(content)
     content = copy_assets(content, dry_run=dry_run)
 
+    # Determine date for posts
+    effective_date = post_date
+    if as_post and not effective_date:
+        # Try to derive date from completed_on property, or use today
+        if properties.get('completed_on'):
+            # Parse Logseq date format like "Jan 15th, 2024"
+            completed = properties['completed_on']
+            try:
+                import dateutil.parser
+                parsed = dateutil.parser.parse(completed.replace('th,', ',').replace('st,', ',').replace('nd,', ',').replace('rd,', ','))
+                effective_date = parsed.strftime('%Y-%m-%d')
+            except:
+                effective_date = date.today().isoformat()
+        else:
+            effective_date = date.today().isoformat()
+        print(f"  Date: {effective_date}")
+
     # Generate output
-    front_matter = generate_front_matter(title, properties)
+    front_matter = generate_front_matter(title, properties, as_post=as_post,
+                                         post_date=effective_date, category=category)
     output = f"{front_matter}\n\n{content}"
 
     # Write output
     slug = slugify(title)
-    output_path = JEKYLL_NOTES / f"{slug}.md"
+    if as_post:
+        output_path = JEKYLL_POSTS / f"{effective_date}-{slug}.markdown"
+        output_dir = JEKYLL_POSTS
+    else:
+        output_path = JEKYLL_NOTES / f"{slug}.md"
+        output_dir = JEKYLL_NOTES
 
     if dry_run:
         print(f"\n--- DRY RUN OUTPUT ---")
@@ -395,7 +435,7 @@ def migrate_note(filename: str, dry_run: bool = False, rebuild_index: bool = Fal
         if len(output) > 1000:
             print(f"\n... ({len(output)} chars total)")
     else:
-        JEKYLL_NOTES.mkdir(parents=True, exist_ok=True)
+        output_dir.mkdir(parents=True, exist_ok=True)
         output_path.write_text(output, encoding='utf-8')
         print(f"  Written to: {output_path}")
 
@@ -404,7 +444,7 @@ def migrate_note(filename: str, dry_run: bool = False, rebuild_index: bool = Fal
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Migrate Logseq notes to Jekyll _notes collection'
+        description='Migrate Logseq notes to Jekyll _notes or _posts collection'
     )
     parser.add_argument(
         'filename',
@@ -420,17 +460,39 @@ def main():
         action='store_true',
         help='Force rebuild of block reference index'
     )
+    parser.add_argument(
+        '--post', '-p',
+        action='store_true',
+        help='Output as a blog post to _posts/ instead of _notes/'
+    )
+    parser.add_argument(
+        '--date', '-d',
+        type=str,
+        help='Post date in YYYY-MM-DD format (defaults to completed_on or today)'
+    )
+    parser.add_argument(
+        '--category', '-c',
+        type=str,
+        default='writing',
+        help='Post category (default: writing)'
+    )
 
     args = parser.parse_args()
 
     result = migrate_note(
         args.filename,
         dry_run=args.dry_run,
-        rebuild_index=args.rebuild_index
+        rebuild_index=args.rebuild_index,
+        as_post=args.post,
+        post_date=args.date,
+        category=args.category if args.post else None
     )
 
     if result and not args.dry_run:
-        print(f"\nDone! Note available at: /notes/{Path(result).stem}")
+        if args.post:
+            print(f"\nDone! Post available at: /{args.category}/{Path(result).stem.split('-', 3)[-1]}.html")
+        else:
+            print(f"\nDone! Note available at: /notes/{Path(result).stem}")
 
 
 if __name__ == '__main__':
