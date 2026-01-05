@@ -164,6 +164,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // Tag aliases for resolving alternative tag names
+    const tagAliases = {
+        {%- for alias in site.data.tag_aliases -%}
+        "{{ alias[0] | downcase }}": "{{ alias[1] | downcase }}",
+        {%- endfor -%}
+    };
+
+    // Function to resolve tag aliases
+    function resolveTagAlias(tag) {
+        const normalized = tag.toLowerCase();
+        return tagAliases[normalized] || normalized;
+    }
+
     // Function to process hashtags in text nodes only
     function processHashtags(node) {
         if (node.nodeType === Node.TEXT_NODE) {
@@ -207,7 +220,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // Create the tag link
                 const link = document.createElement('a');
-                link.href = '{{ site.baseurl }}/tags#' + tagName.toLowerCase();
+                link.href = '{{ site.baseurl }}/tags#' + resolveTagAlias(tagName);
                 link.textContent = hashtag;
                 link.className = 'hashtag';
                 fragments.push(link);

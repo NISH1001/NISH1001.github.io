@@ -1,0 +1,6 @@
+# Tag Aliases Configuration
+# Format: alias: canonical_tag
+# Example: caffeine: coffee (so #caffeine links to /tags#coffee)
+
+caffeine: coffee
+cafe: coffee

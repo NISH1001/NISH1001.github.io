@@ -71,4 +71,4 @@ completed_on: May, 2020
 	- Too much of anything is not that good.
 - All I can say is, it all depends on situation how you use it. The case with Coffee drinkers having low incidence of #suicide just isn't digestible, at least for me. Maybe, there's a serious [[Synchronicity]] in the two.
 
-- Anyway, I have a #love and Hate relationship with caffeine. :)
+- Anyway, I have a #love and Hate relationship with #caffeine. :)
