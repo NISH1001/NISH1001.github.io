@@ -3,7 +3,7 @@ layout: post
 title: "Attachments to desires"
 date: 2025-12-25
 categories: writing
-tags: [writing, the-self-is-contagious, attachments, life, buddhism, journal]
+tags: [writing, attachments, life, buddhism, journal]
 toc: false
 ---
   
