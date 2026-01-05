@@ -40,6 +40,7 @@ Learned about Coffee so much from this [TED Talk video](https://www.youtube.com/
         - Exothermic Chemical reaction?
             - Based on heat intensity, generates amino acid
             - Gives acidic taste?
+        - ![Maillard Reaction](/img/notes/image_1705372768784_0.png)
 
 
 ---

@@ -46,3 +46,12 @@ bundle exec jekyll build
 
 ### Frontend Framework
 Uses Bootstrap-based Clean Blog theme with Grunt for asset processing (package.json configuration present but primarily using Jekyll's built-in processing).
+
+## Logseq Integration
+
+The blog has notes migrated from Logseq. The Logseq vault is located at:
+- **Logseq Root**: `~/Dropbox/kb/logseq-nishparadox`
+- **Pages**: `~/Dropbox/kb/logseq-nishparadox/pages`
+- **Assets**: `~/Dropbox/kb/logseq-nishparadox/assets`
+
+Use `scripts/logseq2jekyll.py` to migrate notes from Logseq to Jekyll's `_notes/` collection. Note images should be copied to `img/notes/`.
