@@ -4,7 +4,7 @@
 {% if include.type == "homepage" %}
 <!-- Two-column layout: Recent Notes + Recent Writing -->
 <div class="recent-feed">
-    {% assign recent_notes = site.notes | sort: "date" | reverse %}
+    {% assign recent_notes = site.notes | sort_by_note_date %}
     {% if recent_notes.size > 0 %}
     <div class="feed-section">
         <h3>Recent Notes</h3>
@@ -32,7 +32,7 @@
 {% elsif include.type == "notes" %}
 <!-- All notes -->
 <div class="feed-single">
-    {% assign all_notes = site.notes | sort: "date" | reverse %}
+    {% assign all_notes = site.notes | sort_by_note_date %}
     <ul class="feed-list">
     {% for note in all_notes %}
         <li><a href="{{ site.baseurl }}{{ note.url }}">{{ note.title }}</a></li>
@@ -53,7 +53,7 @@
 
 {% elsif include.type == "recent-notes" %}
 <!-- Recent notes with heading -->
-{% assign recent_notes = site.notes | sort: "date" | reverse %}
+{% assign recent_notes = site.notes | sort_by_note_date %}
 {% if recent_notes.size > 0 %}
 <div class="feed-single feed-related">
     <h3>Recent Notes</h3>
