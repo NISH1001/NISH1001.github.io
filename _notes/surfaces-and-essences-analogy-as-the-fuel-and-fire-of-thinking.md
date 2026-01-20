@@ -1,5 +1,6 @@
 ---
 title: "Surfaces and Essences: Analogy as the Fuel and Fire of Thinking"
+permalink: /notes/analogy-thinking
 categories: notes
 tags: [book, psychology, language, mental-model]
 author: "Douglas Hofstadter"
