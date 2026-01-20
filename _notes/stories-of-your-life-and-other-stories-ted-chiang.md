@@ -1,5 +1,6 @@
 ---
 title: "Stories of Your Life and Other Stories - Ted Chiang"
+permalink: /notes/stories-of-your-life
 tags: [book, sci-fi]
 author: "Ted Chiang"
 started_on: "March 20th, 2025"
