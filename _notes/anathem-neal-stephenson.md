@@ -1,5 +1,6 @@
 ---
 title: "Anathem - Neal Stephenson"
+permalink: /notes/anathem
 tags: [book, sci-fi, philosophy]
 author: "Neal Stephenson"
 started_on: "November 19th, 2025"

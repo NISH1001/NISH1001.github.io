@@ -1,5 +1,6 @@
 ---
 title: "How to enjoy coffee"
+permalink: /notes/coffee-enjoy
 tags: [article, coffee]
 source: "https://psyche.co/guides/good-coffee-is-like-a-fine-wine-start-with-high-quality-beans"
 started_on: "October 21st, 2020"

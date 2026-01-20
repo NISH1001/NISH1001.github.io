@@ -1,5 +1,6 @@
 ---
 title: "Everything You've Ever Wanted to Know About Coffee | Chandler Graf | TEDxACU"
+permalink: /notes/coffee-everything
 tags: [video, ted-talk, coffee]
 source: "https://www.youtube.com/watch?v=N8meCjVsJWI"
 started_on: "January 15th, 2024"

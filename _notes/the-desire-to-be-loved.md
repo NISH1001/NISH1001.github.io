@@ -1,5 +1,6 @@
 ---
 title: "The Desire to Be Loved"
+permalink: /notes/desire-to-be-loved
 tags: [video, philosophy, love, attachments]
 source: "https://www.youtube.com/watch?v=00s2jpgU6ic"
 started_on: "June 14th, 2024"

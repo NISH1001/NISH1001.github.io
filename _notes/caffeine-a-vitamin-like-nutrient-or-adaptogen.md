@@ -1,5 +1,6 @@
 ---
 title: "Caffeine - A vitamin-like nutrient, or adaptogen"
+permalink: /notes/caffeine-adaptogen
 tags: [article, coffee, nutrition, article]
 author: "Ray Peat"
 source: http://raypeat.com/articles/articles/caffeine.shtml
