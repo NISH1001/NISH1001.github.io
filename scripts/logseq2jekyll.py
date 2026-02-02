@@ -21,7 +21,7 @@ from pathlib import Path
 from typing import Optional
 
 # Configuration
-LOGSEQ_ROOT = Path("/Users/nishparadox/Dropbox/kb/logseq-nishparadox")
+LOGSEQ_ROOT = Path.home() / "Dropbox" / "kb" / "logseq-nishparadox"
 LOGSEQ_PAGES = LOGSEQ_ROOT / "pages"
 LOGSEQ_ASSETS = LOGSEQ_ROOT / "assets"
 
@@ -234,7 +234,19 @@ def resolve_block_references(content: str, block_index: dict) -> str:
     def replace_ref(match):
         uuid = match.group(1)
         if uuid in block_index:
-            return f"> {block_index[uuid]}"
+            text = block_index[uuid]
+            # Check if the reference is standalone on its line (just a bullet with the ref)
+            line_start = content.rfind('\n', 0, match.start()) + 1
+            line_end = content.find('\n', match.end())
+            if line_end == -1:
+                line_end = len(content)
+            line = content[line_start:line_end].strip().lstrip('-').strip()
+            if line == match.group(0):
+                # Standalone reference — render as blockquote
+                return f"> {text}"
+            else:
+                # Inline reference — insert text directly
+                return text
         return f"[ref: {uuid[:8]}...]"
 
     def replace_embed(match):
@@ -268,6 +280,9 @@ def clean_logseq_syntax(content: str) -> str:
 
     # Convert ^^highlight^^ to **highlight**
     content = re.sub(r'\^\^([^\^]+)\^\^', r'**\1**', content)
+
+    # Fix spaced bold markers: ** text ** -> **text**
+    content = re.sub(r'\*\*\s+(.+?)\s+\*\*', r'**\1**', content)
 
     # Remove DONE/TODO markers
     content = re.sub(r'^(\s*-\s*)(?:DONE|TODO|LATER|NOW)\s+', r'\1', content, flags=re.MULTILINE)
