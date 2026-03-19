@@ -51,7 +51,7 @@ Till the third day, I was also struggling with good meditation posture to sit fo
 
 ## IV)
 
-In this course, I spent most of my hours just meditating in the halls. This was something i was determined to do in this course because in my first course I tried a lot of physical-pain excuse for me to stay in my dorm room and lie on the floor which led most of the time sleeping on the floor during breaks and during when we were supposed to "meditate in our room or in the hall". This time, this powerful determination helped me do long hour sit without straining me physically. It's wonderful that even if I sat for 2 hours, my legs would hurt: no pain in the knee or ankles or hips. I give credit to all my yoga classes I had been doing for more than a year and the calisthenics yes.
+In this course, I spent most of my hours just meditating in the halls. This was something i was determined to do in this course because in my first course I tried a lot of physical-pain excuse for me to stay in my dorm room and lie on the floor which led most of the time sleeping on the floor during breaks and during when we were supposed to "meditate in our room or in the hall". This time, this powerful determination helped me do long hour sit without straining me physically. It's wonderful that even if I sat for 2 hours, my legs wouldn't hurt: no pain in the knee or ankles or hips. I give credit to all my yoga classes I had been doing for more than a year and the calisthenics yes.
 
 Also because there were not much grounds to walk outside since Illinois is just a flatland, and that it was very cold, windy, I couldn't make myself to walk much except after meal times. This was good for me to continue the sits in my dorm as well. This well I meditated so much.
 
