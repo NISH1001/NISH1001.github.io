@@ -1,0 +1,82 @@
+---
+layout: post
+title: "Vipassana Retreat II"
+date: 2026-03-19
+categories: writing
+tags: writing, meditation, buddhism
+started_on: "March 16th, 2026"
+completed_on: "March 19th, 2026"
+header-img: "img/post-headers/2026-03-19-vipassana-retreat-ii.jpg"
+---
+
+![Vipassana Retreat II](/img/post-headers/2026-03-19-vipassana-retreat-ii.jpg)
+
+I don't know where to start this writing/journal/introspection. I guess I can start by saying that just today I came out of my second 10-day Vipassana  Meditation retreat. Today was the 11th day, and I left the meditation center (Dhamma Pakasa) 9am ish. Got back to Springfield, IL to pack my remaining stuff from my cousin's place (Suri) and left towards the Peorria Airport (1 hour 15 minutes drive from Springfield) because that was the cheaper flight I got prior to my retreat. Okay I think I can just condense those things as:
+
+PIA --> Flight Delay --> Missed the flight at CLT --> Now stuck at CLT for another 9 hours. And finally I have the entire night to talk about my experience.
+
+## I)
+
+The retreat this time was from March 4th, 2026 to March 15th, 2026 at Dhamma Pakasa (Illinois). This is also one of the oldest centers that was established in the states for Vipassana by Goinkaji. I did my first [[Vipassana Re-treat]] sometime back in 2024 July.
+
+I was fortunate that G was able to give me ride from Springfield to Dhamma Pakasa. Prior to that: I had driven from Huntsville to Nashville on Feb 26 I think and left Nashville early on 27th. This was to have Nashville as a checkpoint as it'd take 8hours of drive for me to reach Springfield. It was a good checkpoint and I left very early morning heading towards Springfield. It was also something like an achievement for me to drive straight for more than 6+ hours alone. Previously, long drives were accompanied by other passengers and friends. This might what people say "American dream"? Sigh.
+
+I reach Springfield early afternoon around 4pm. It was exhausting for me, mentally challenging because of figuring out where and when to stop for gas, taking detours and alternate highways. But I managed it with lots of caffeine and only times I drink coffee in recent years (just so that I won't drowse frequently).
+
+At Springfield I stayed till March 3rd, working remotely for two days because I had expected to take leave from March 4th. Late morning on March 4th, G, a fellow meditator picked me up. He was coming from St. Louis. Then we talked so much about stuff, mostly meditation being the anchor point and about suffering in general and yes technology as both being technology-oriented people. Altogether, I am very grateful for him to give me space in his car and all the Deep Meaningful Conversations we had driving-to-and-back-from the center.
+
+At Springfield I felt sick and lots of running noise, constantly throwing out the mucus, coughs, sever headaches, and fever-like state. It was because of that drive, stress and changing weather...and could be a combination of these things. Seasonal flu. It was hard. I tried going the natural remedy route but at the end I knew I had to heal before the retreat starts. So, I started taking medicine and I think I got better for Day 0.
+
+## II)
+
+March 4th was Day 0, March 14th was Day 10 and March 15th is the 11th day where we depart. Just to set the timeline of things that happened.
+
+This time the atmosphere in the center was a bit different. I didn't have expectation again this time, because I feel every experience will channel unique mental (and physical) energy. Briefly sitting on the light dinner table and conversating with fellow meditators was interesting, in that, 2 were doing the course for the first time while two of us were the second time. But I tried not to dwell in the conversation, because it would mean adding new set of conversations to my mind which could disrupt my whole sessions. Of all the thoughts I'd want to surface, I'd not want new set of conversations to surface which could disrupt my sits. (Well, that's not how it should be though but in hindsight, I think it makes sense).
+
+The center had very mature energy as we came to realize that a lot of other meditators were also recurring Vipassana meditators, and the fact that now in hindsight the center is one of the earliest centers in the states makes sense, since the management was smooth, understanding of students' as well as essence of the course and "monk life". The center was beautiful in its own space, in that it had a small pond where swans were enjoying the nature; cold and chilly definitely and later very windy. But the **male boundary** didn't include the pond. Would have been a great addition to usual breaks, especially when I was doing a lot of walking meditation and trying to feel my breath and sensations.
+
+A lot of things happened to me physically and mentally in this session.... A lot of things.
+
+## III)
+
+I was able to quickly get into breathing flow early and quickly. Anapana -- a precursor to Vipassana where we just focus on giving our entire attention to breathe and small space under the nose -- wasn't as difficult as my first time. The first day was hard as usual because it throws you into this meditative space where you try to focus on your breaths but your mind keeps on hopping rapidly among a large set of random thoughts. These thoughts could be me thinking about immigration situation, about politics in nepal and the world, about my girlfriend, my family, Nessa, childhood events, past traumas, PTSDS, sex, and everything that I experienced in my being. For two days I couldn't straight up focus my attention on Anapana because of these prominent as well as background thoughts.
+
+Anapana was also very difficult because of my sinus / migraine. I realized that as I close my eyes and start to feel the breath at my nostril, my eyes would literally inside the eye lid move to focus on the nose. This is not very good way to meditate and it kept on surfacing for some of the sessions later as well. I think one another reason for this is: since I am too much habituated to sit in front of the screen, constantly having my eyes focus on different elements on the screen, naturally my mind started associating "attention" with "eye movements and focus". I think this makes sense and I see in the internet that a lot of other meditators experience the same thing with the eyes.
+
+For two days, my attention span for focus on the Anapana was limited to just about at max 15 seconds. Which is fine and part of the process in hindsight. But I think towards the end of the 2nd day, I was able to quickly able to realize the accumulated stress and natural tension that constantly arises in my skulls, jaw, and all the facial muscles. This took me 6 days in my first retreat to realize and I think this was a good progress for me to do it on day 2nd. And naturally, I was inclined to focus my attention not just on breath but also the tensed parts to ease it up. It helped so much in getting rid of migraine and more of sinus once I could control when there's tension. I think this helped me quickly get into 30 something seconds of attention for my breath work.
+
+On the third day, it was clearer for me that a lot of my inability to focus arises from my natural skull tensions and in hindsight I feel like it's my jaw and teeth structures over my life that shaped the way certain points are tight, some muscles are the way they are in the mouth. It's interesting that: my default mode for face is always tensed up, with so much tension. And it greatly contributes me to feel sleepy constantly whenever I try to focus on some specific spots in the space, eyes opened or closed. And getting rid of those tensions helped me. Towards the end of the third day, I now was able to just feel my whole face thing. I know I was going against the rules where the sensations on other part of the body other than nostril was not to be done until Day 4, the day of Vipassana. But I couldn't help and tolerate my sinus.
+
+Till the third day, I was also struggling with good meditation posture to sit for what's coming up next from Day 4 to do more long hours of sitting. Although I had been doing 30-minutes meditation sit every morning in my daily life, long sitting was slowly causing so much physical pain: from the shoulder blade to right ribs to chest. A lot of experiments with cushion height, adjusting my cross-legged postures, spinal postures, I finally hit a spot to ease my good posture for rest of the days. I came to realize that: although hips being higher than knees help, it didn't help my right region (mainly right rib reason) because I am not habituated to that higher cushion position. The other spectrum is: sitting on just the normal thin cushion where hips and knees are  in same horizontal plane. This causes pain in ankles and knees for me as I have experienced it in my daily life. I realized sitting no that high and not that low, the middleground helps. With this position: it felt like I actually got superpower to continuously sit for 1.5 hours maybe. It really helped.
+
+## IV)
+
+In this course, I spent most of my hours just meditating in the halls. This was something i was determined to do in this course because in my first course I tried a lot of physical-pain excuse for me to stay in my dorm room and lie on the floor which led most of the time sleeping on the floor during breaks and during when we were supposed to "meditate in our room or in the hall". This time, this powerful determination helped me do long hour sit without straining me physically. It's wonderful that even if I sat for 2 hours, my legs would hurt: no pain in the knee or ankles or hips. I give credit to all my yoga classes I had been doing for more than a year and the calisthenics yes.
+
+Also because there were not much grounds to walk outside since Illinois is just a flatland, and that it was very cold, windy, I couldn't make myself to walk much except after meal times. This was good for me to continue the sits in my dorm as well. This well I meditated so much.
+
+Another aspect of being old student is that you are apparently not encouraged to eat any meal after mid-day meal. So, the first few days I tried going heavy on the lunch (11am - 12 pm) which was not the best idea as it would block the meditation flow state from 1pm-2:30pm (on our own room or hall) and the group sits later. This was actually good to discourage to eat because the atmosphere in this course was a bit mature meditation energy, and you don't want to be the one who disrupts the energy of the whole group sit. So, at 5-5:30pm tea break I would just drink milk and that's it. New students would grab fruits and stuff as well. But from Day 1, I just drank milk and other old students also drank only tea. Some even stopped taking tea breaks.
+
+## V)
+
+From the 4th day, which is when you start practicing  Vipassana. You get promoted from Anapama. You shift our focus/attention from breath to sensations in our body. To sum this technique in very crude way and abstract it all: it's a body-scanning algorithm from head to toes and toes to head in sequence. You focus on every small part of your body and try to feel all the sensation in that part: could be gross solidified sensations like some sweat, vapor, heat, cold, skin touching the cloth, itching...to actual bodily sensations that drive Vipassana where you just phase out and feel like you don't have any material sense of body: your body is just a wave of vibrating stuff. My sits makes me feel this as electric current, waves and pulses. And this helps me understand Vipassana from my own perspectives.
+
+## VI)
+
+One of the hardest parts of the sits was letting go myself fully and be present right now, at the very exact moment, feel the sensations and what not. It's temping to "crave" for "feel good" sensations, because that's our usual old habit pattern of our mind, where we strive for feeling good every second. After the 4th day, listening along with Goenkaji talk about Sila (morality), Samadhi (concentration of mind) and Panna (experiental wisdom), this course made me realize the differentiation between the three. While, it's good to live by moral values in life, Sila,  (eg: *"I help and love everyone"*), that alone can not let you feel the impermanence of life. You have to concentrate your mind, keep a rigid focus on actions you do that directly transfers out from your Sila. And at the end, when you start to feel each and every action you do, both external and internal, then you start to realize that you're nothing but all these sensations that arises and passes away. The cravings and the aversions come and go. The impermanent nature of reality within yourself and within the external world. Anicca.
+
+The sits I did during this course, after the 5th day, were full of so many **"Free flows**. I could quickly concentrate in the meditation and very early feel so many sensations all over the body. I reached free flows in most of the sessions in most of my body parts. It felt as if I didn't exist. As if, I am nothing but a pulse of these sensations, coming alive and passing away. A wave form of some kind, where there's no materialistic "me". Where there's no "me". There was a point in the 8th day I felt that the whole day I was free flowing most of my body and it came to the point that I literally felt I was getting dissolved. That moment, the realization that I am nothing but all these sensations, a temporary holding of everything, and that all my cravings and aversions were just "existing", as if I was the only observer in the cosmos that was looking at this "arising and passing away". This is what they call *"Bhanga"*, a complete disassociation of your mind and the body. After this, I feel a lot of my deeply-rooted ego-wounds got disassociated. As I write this right now, I can still be so present in the moment right now, as my fingers touch the keyboard, my feet touching my slipper and the migraine coming in and out rapidly, it's very present..and that a little bit of my ego has dissolved after the course. I feel wholly-tuned to the sensations coming in and out.
+
+## VII)
+
+The **Metta** day was also difficult, as I teared up so much when Geonkaji started talking about how understanding the impermanence help you realize the your own suffering as well as the suffering of others, which guides you to the path of *Dhamma* where you start to become more compassionated towards the outer world. The Metta day discourse was kind of overwhelming, in that it helped my Sankharas of "feeling so much empathetic" arose rapidly, went away rapidly, and came and go rapidly.
+
+*Metta Bhawana* has also played an important part of my recent life, especially after the first course. When I sit and finish meditating, I have been usually ending it with some minutes of Metta, where I remember people I feel compassionate about in life, whom I deeply respect and care about. And I continued this throughout this 10-day course as well. I usually ended most of my sits, after the gong rings, by rubbing my palm to create warmth and applying that warmth over my face to remember that I am still alive, here, present and in doing so I remembered people I deeply care about and wish all the happiness, and goodwill in their lives. Metta to them.
+
+Metta to you
+
+## VIII)
+
+After the course, I have become more self aware of everything, and probably every time I do these retreats, I end up like that. Especially, I am so much aware about the tightness in my head, the knots on my skulls and the root causes of migraine/sinus. But it's not distracting now. I have just let it feel like a passing sensations. I think, in general, Vipassana form of meditation actually helps you realize that all the misery you think you have in life, that you are miserable, are all everything internally arising within yourself. Once you start to feel that you are nothing but an impermanent self, or the lack there of, and that miseries happen because you react to things internally and externally, it seems a correct direction to let go of some of those attachments, cravings and the other way around (aversions). Obviously, having this sense of detachment doesn't necessarily mean you are apathetic. In fact, it lets you feel more compassionately in love with everything, that everyone is going through the same sets of realities. The same nature of reality of arising and passing away. Anicca
+
+Metta to you. ❤️ 🌻
