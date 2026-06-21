@@ -1056,3 +1056,138 @@ li a[href^="http://"]:after, li a[href^="https://"]:after {
   background: var(--brand);
   color: var(--bg);
 }
+
+/* Ephemera — app cards (on /ephemera) */
+.ephemera-cards {
+  margin-top: var(--space-lg);
+}
+
+.ephemera-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-md) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.ephemera-card:last-child {
+  border-bottom: none;
+}
+
+.ephemera-card__thumb {
+  flex: 0 0 11rem;
+  text-align: center;
+  display: block;
+}
+
+.ephemera-card__thumb img {
+  width: 100%;
+  height: auto;
+  max-height: 13rem;
+  object-fit: contain;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  display: inline-block;
+  vertical-align: top;
+}
+
+.ephemera-card__body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ephemera-card__title {
+  margin: 0 0 var(--space-xs);
+  font-size: var(--scale-lg);
+}
+
+.ephemera-card__title a {
+  color: var(--title);
+  text-decoration: none;
+}
+
+.ephemera-card__title a:hover {
+  color: var(--brand);
+}
+
+.ephemera-card__tagline {
+  margin: 0 0 var(--space-sm);
+  color: var(--text);
+  font-size: var(--scale-sm);
+  line-height: var(--line-height);
+}
+
+.ephemera-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.ephemera-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--text);
+  font-size: var(--scale-sm);
+  text-decoration: none;
+}
+
+.ephemera-link:hover {
+  color: var(--brand);
+}
+
+.ephemera-link svg {
+  display: block;
+  flex-shrink: 0;
+}
+
+@media (max-width: 520px) {
+  .ephemera-card {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+  .ephemera-card__thumb {
+    flex-basis: auto;
+    width: 100%;
+  }
+}
+
+/* Ephemera — compact tease on the homepage */
+.ephemera-tease {
+  margin: var(--space-xl) 0;
+}
+
+.ephemera-tease__head {
+  font-size: var(--scale-lg);
+  color: var(--title);
+  margin-bottom: var(--space-sm);
+  padding-bottom: var(--space-xs);
+  border-bottom: 1px solid var(--border);
+}
+
+.ephemera-tease__list {
+  list-style: none;
+  padding-left: 0;
+  margin: 0 0 var(--space-sm);
+}
+
+.ephemera-tease__list li {
+  padding: var(--space-xs) 0;
+  color: var(--text);
+  font-size: var(--scale-sm);
+}
+
+.ephemera-tease__list a {
+  color: var(--title);
+  text-decoration: none;
+}
+
+.ephemera-tease__list a:hover {
+  color: var(--brand);
+}
+
+.ephemera-tease__more a {
+  color: var(--brand);
+  font-size: var(--scale-sm);
+  text-decoration: none;
+}

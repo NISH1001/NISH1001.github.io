@@ -1,0 +1,10 @@
+{%- comment -%} Compact homepage version of the Ephemera section (reads the same _data/ephemera.yml). {%- endcomment -%}
+<div class="ephemera-tease">
+  <h2 class="ephemera-tease__head">Ephemera</h2>
+  <ul class="ephemera-tease__list">
+    {%- for app in site.data.ephemera -%}
+    <li><a href="{{ app.links[0].url }}">{{ app.name }}</a> — {{ app.tagline }}</li>
+    {%- endfor -%}
+  </ul>
+  <p class="ephemera-tease__more"><a href="{{ site.baseurl }}/ephemera">more in Ephemera →</a></p>
+</div>

@@ -1,0 +1,19 @@
+# Small apps / experiments, surfaced on /ephemera and teased on the homepage.
+# Add a new app = append a block here. The first link (kind: live) is the
+# primary target for the card's title + thumbnail.
+# Supported link kinds: live, firefox, source (each maps to an icon in
+# _includes/ephemera-cards.html). Add a new kind there if you need one.
+- name: anicca
+  tagline: a live meditation on the finite, waking hours you still have
+  thumb: https://nishparadox.com/anicca/assets/screenshot.png
+  links:
+    - { kind: live,    url: https://nishparadox.com/anicca }
+    - { kind: firefox, url: https://addons.mozilla.org/en-US/firefox/addon/anicca-new-tab/ }
+    - { kind: source,  url: https://github.com/NISH1001/anicca }
+
+- name: mastishka
+  tagline: a barebones Vipassana sit timer — set it, the gong rings, it counts the overtime
+  thumb: https://nishparadox.com/mastishka/screenshots/sit.png
+  links:
+    - { kind: live,   url: https://nishparadox.com/mastishka/ }
+    - { kind: source, url: https://github.com/NISH1001/mastishka }

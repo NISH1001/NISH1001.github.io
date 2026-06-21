@@ -40,6 +40,8 @@ menu:
     url: "/writing"
   - title: "Research"
     url: "/research"
+  - title: "Ephemera"
+    url: "/ephemera"
   - title: "Tags"
     url: "/tags"
   - title: "About"
