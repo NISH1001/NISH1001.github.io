@@ -1402,7 +1402,272 @@ gave the exact, checkable answer. This is precisely why §7.4 runs span localisa
 unconditionally and treats the drop as an annotation on the quote rather than the other way
 round. A system that reported only ablation weights here would have reported noise.
 
-### 8.2 Design decisions and their measured justification
+### 8.2 Interactive replay of the same session
+
+The panel below replays the interaction above. It opens on the real screenshot of each state, and
+the toggle switches that same state to a working replica you can click through — check sources,
+select a claim, accept the cost, read the result. Every number, quote and verdict is what the live
+run returned; no model is called.
+
+<div class="sim" id="sim">
+  <div class="sim-bar">
+    <div class="sim-tabs">
+      <button type="button" class="sim-tab on" data-mode="shot">Screenshot</button>
+      <button type="button" class="sim-tab" data-mode="live">Interactive replay</button>
+    </div>
+    <span class="sim-badge" id="sim-badge">real UI, captured</span>
+  </div>
+
+  <div class="sim-rail" id="sim-rail"></div>
+
+  <div class="sim-shot" id="sim-shot">
+    <img id="sim-img" src="/img/post-images/2026-07-30-response-provenance/fig1-gate.png" alt="AKD Labs provenance UI">
+  </div>
+
+  <div class="sim-live" id="sim-live" hidden>
+    <div class="sim-chat">
+      <div class="sim-you">can you list the available guardrails?</div>
+      <div class="sim-meta">MIO Worldview Agent · openai:gpt-5.2</div>
+      <div class="sim-resp" id="sim-resp"></div>
+      <div class="sim-foot">
+        <button type="button" id="sim-check" class="sim-link">Check sources</button>
+        <span id="sim-summary" class="sim-summary"></span>
+      </div>
+      <div id="sim-panel"></div>
+    </div>
+  </div>
+
+  <p class="sim-cap" id="sim-cap"></p>
+</div>
+
+<style>
+.sim{border:1px solid var(--border,#dcdcd4);border-radius:.5rem;margin:1.8rem 0;
+  background:var(--bg,#fff);color:var(--text,#4a4a46);font-size:.85rem;overflow:hidden}
+.sim-bar{display:flex;justify-content:space-between;align-items:center;gap:.5rem;flex-wrap:wrap;
+  padding:.45rem .7rem;background:var(--bg2,#f6f5ef);border-bottom:1px solid var(--border,#e6e4d9)}
+.sim-tabs{display:flex;gap:.25rem}
+.sim-tab{font:inherit;font-size:.76rem;padding:.2rem .6rem;border-radius:.3rem;cursor:pointer;
+  border:1px solid transparent;background:transparent;color:var(--text,#4a4a46);opacity:.6}
+.sim-tab.on{opacity:1;font-weight:600;background:var(--bg,#fff);
+  border-color:var(--border,#dcdcd4);color:var(--title,#222)}
+.sim-badge{font-size:.68rem;opacity:.7}
+.sim-rail{display:flex;gap:.3rem;flex-wrap:wrap;padding:.45rem .7rem;
+  border-bottom:1px solid var(--border,#e6e4d9)}
+.sim-stp{font-size:.7rem;padding:.1rem .5rem;border-radius:.7rem;
+  border:1px solid var(--border,#e6e4d9);opacity:.4;white-space:nowrap}
+.sim-stp.on{opacity:1;border-color:var(--brand,#3aa99f);color:var(--brand,#3aa99f);font-weight:600}
+.sim-shot{padding:.6rem;background:var(--bg2,#f6f5ef)}
+.sim-shot img{display:block;max-width:100%;border:1px solid var(--border,#e6e4d9);border-radius:.3rem}
+.sim-live{padding:.7rem .8rem}
+.sim-you{display:inline-block;background:var(--bg2,#f6f5ef);border:1px solid var(--border,#e6e4d9);
+  padding:.3rem .6rem;border-radius:.8rem;font-size:.8rem;margin-bottom:.3rem}
+.sim-meta{font-size:.68rem;opacity:.6;margin-bottom:.5rem}
+.sim-resp{line-height:1.6;font-size:.81rem}
+.sim-resp h4{font-size:.85rem;margin:.7rem 0 .3rem;color:var(--title,#222)}
+.sim-resp p,.sim-resp li{margin:.3rem 0}
+.sim-resp ol,.sim-resp ul{margin:.3rem 0;padding-left:1.3rem}
+.sim-resp .url{font-family:ui-monospace,Menlo,monospace;font-size:.7rem;word-break:break-all;
+  opacity:.75}
+.sg{border-radius:.15rem;transition:background .15s}
+.sg.traceable{text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px;
+  text-decoration-color:#2563eb;cursor:pointer}
+.sg.traceable:hover{background:rgba(37,99,235,.10)}
+.sg.quoted{text-decoration:underline;text-decoration-color:rgba(5,150,105,.55);
+  text-underline-offset:3px}
+.sg.sel{background:rgba(37,99,235,.14)}
+.sim-foot{margin-top:.7rem;padding-top:.45rem;border-top:1px solid var(--border,#e6e4d9);
+  display:flex;gap:.5rem;flex-wrap:wrap;align-items:baseline;font-size:.74rem}
+.sim-link{font:inherit;font-size:.74rem;background:none;border:none;padding:0;cursor:pointer;
+  color:var(--brand,#3aa99f);text-decoration:underline;text-decoration-style:dotted}
+.sim-summary{opacity:.8}
+.sim-box{margin-top:.6rem;border:1px solid var(--border,#e6e4d9);border-radius:.4rem;
+  padding:.55rem .65rem;background:var(--bg2,#f6f5ef);font-size:.76rem}
+.sim-box h5{margin:0 0 .35rem;font-size:.78rem;color:var(--title,#222)}
+.sim-quote{border-left:2px solid var(--border,#dcdcd4);padding-left:.5rem;margin:.3rem 0;
+  font-style:italic;opacity:.85}
+.sim-kv{display:flex;justify-content:space-between;gap:1rem;padding:.06rem 0}
+.sim-kv b{font-family:ui-monospace,Menlo,monospace;color:var(--title,#222)}
+.sim-warn{margin-top:.4rem;padding:.35rem .45rem;border-radius:.25rem;font-size:.72rem;
+  border:1px solid rgba(217,119,6,.45);color:#b45309}
+.sim-btn{font:inherit;font-size:.75rem;padding:.22rem .6rem;border-radius:.3rem;cursor:pointer;
+  border:1px solid var(--border,#dcdcd4);background:var(--bg,#fff);color:var(--text,#4a4a46)}
+.sim-btn.primary{background:var(--brand,#3aa99f);border-color:var(--brand,#3aa99f);color:#fff}
+.sim-btn:disabled{opacity:.5;cursor:default}
+.sim-row{display:flex;gap:.4rem;align-items:center;margin-top:.5rem;flex-wrap:wrap}
+.sim-lvl{border:1px solid var(--border,#e6e4d9);border-radius:.3rem;margin-top:.4rem;
+  overflow:hidden}
+.sim-lvlh{display:flex;justify-content:space-between;gap:.5rem;padding:.3rem .45rem;cursor:pointer;
+  background:var(--bg,#fff);font-size:.76rem}
+.sim-lvlh b{font-family:ui-monospace,Menlo,monospace}
+.sim-lvlb{padding:.35rem .45rem;border-top:1px solid var(--border,#e6e4d9);font-size:.73rem}
+.sim-src{font-family:ui-monospace,Menlo,monospace;font-size:.7rem;word-break:break-word}
+.sim-ok{border-color:rgba(5,150,105,.5)!important;background:rgba(5,150,105,.06)}
+.sim-cap{font-size:.78rem;line-height:1.5;opacity:.8;padding:.5rem .8rem .7rem;margin:0;
+  border-top:1px solid var(--border,#e6e4d9)}
+</style>
+
+<script>
+(function(){
+  var root=document.getElementById('sim'); if(!root) return;
+  var $=function(id){return document.getElementById(id);};
+  var D='$';  // kept out of static HTML so KaTeX never sees a stray delimiter
+
+  var SEG=[
+    {k:'url',  t:'…&amp;t=2012-01-01&amp;t1=2022-01-01&amp;v=−88.7,30.1,−84.8,35.2&amp;p=geographic&amp;cm=swipe', s:'quoted'},
+    {k:'h',    t:'What you’ll be looking at (in plain terms)'},
+    {k:'li',   t:'Layer: <b>MODIS Annual Land Cover Type (IGBP classification)</b>.', s:'traceable', id:'t1'},
+    {k:'li',   t:'It’s <b>not a “forest loss” measurement</b>. It’s a map that assigns each pixel a <b>land-cover category</b> each year.'},
+    {k:'li',   t:'To do “forest vs non-forest,” you’ll use the <b>legend</b> and treat the “forest” categories as forest, and everything else as non-forest.', s:'traceable', id:'t2'},
+    {k:'h',    t:'How to use it (quick steps)'},
+    {k:'ol',   t:['Open the link.',
+                  'Use the <b>vertical swipe bar</b> to compare 2012 (one side) vs 2022 (the other).',
+                  'Open the layer’s <b>legend</b> in Worldview to see which colors correspond to forest classes.']},
+    {k:'p',    t:'<i>Non-authoritative note:</i> classification maps can change due to real land change <b>or</b> mapping uncertainty (especially near edges/mixed landscapes), so treat this as an exploratory visual comparison rather than a definitive change calculation.', s:'traceable', id:'t3'},
+    {k:'p',    t:'If you want, tell me whether you want <b>(A)</b> statewide Alabama (current link) or <b>(B)</b> a specific county/city area, and I can tighten the map zoom to that spot.'}
+  ];
+
+  var STEPS=[
+    {name:'① response', img:'fig1-gate.png',
+     cap:'The response before anything is checked. No markers, no cost, no model calls.'},
+    {name:'② gated (free)', img:'fig1-gate.png',
+     cap:'After Check sources. Dotted underlines mark the three sentences that earned an affordance; the summary accounts for all thirteen. Still no model calls.'},
+    {name:'③ cost gate', img:'fig4-cost-gate.png',
+     cap:'Selecting a claim prices the run from the real corpus before spending — 8 sources, 31 calls, 77,407 tokens, and a disclosure that 2 sources exceed the scoring window.'},
+    {name:'④ result', img:'fig3-instructions.png',
+     cap:'The result. The hedge resolves to lines 64–66 of the agent’s own system prompt, quoted and mechanically verified. Tools and instructions both show −4.00; the quote is what actually answers the question.'}
+  ];
+
+  var mode='shot', step=0, gated=false, sel=null, ran=false;
+
+  function renderResp(){
+    var h='';
+    SEG.forEach(function(s){
+      var cls=s.s?('sg '+s.s+(sel===s.id?' sel':'')):'';
+      var attr=(gated&&s.s)?(' class="'+cls+'"'+(s.id?' data-seg="'+s.id+'"':'')):'';
+      if(s.k==='h'){ h+='<h4>'+s.t+'</h4>'; }
+      else if(s.k==='ol'){ h+='<ol>'+s.t.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ol>'; }
+      else if(s.k==='li'){ h+='<ul><li><span'+attr+'>'+s.t+'</span></li></ul>'; }
+      else if(s.k==='url'){ h+='<p class="url"><span'+attr+'>'+s.t+'</span></p>'; }
+      else { h+='<p><span'+attr+'>'+s.t+'</span></p>'; }
+    });
+    $('sim-resp').innerHTML=h;
+    Array.prototype.forEach.call($('sim-resp').querySelectorAll('[data-seg]'),function(el){
+      el.addEventListener('click',function(){ selectClaim(el.getAttribute('data-seg')); });
+    });
+  }
+
+  function renderRail(){
+    $('sim-rail').innerHTML=STEPS.map(function(s,k){
+      return '<span class="sim-stp'+(k===step?' on':'')+'">'+s.name+'</span>';
+    }).join('');
+    $('sim-cap').innerHTML='<b>'+STEPS[step].name+'.</b> '+STEPS[step].cap;
+    $('sim-img').src='/img/post-images/2026-07-30-response-provenance/'+STEPS[step].img;
+  }
+
+  function setStep(n){ step=n; renderRail(); }
+
+  function check(){
+    gated=true; setStep(1);
+    $('sim-summary').textContent='8 sources · 13 sentences: 3 you can trace, 1 quoted directly, '+
+      '1 questions or offers, 8 nothing specific to check';
+    $('sim-check').textContent='Hide sources';
+    renderResp();
+  }
+
+  function selectClaim(id){
+    if(!gated) return;
+    sel=id; ran=false; setStep(2); renderResp();
+    var isDisc = id==='t3';
+    $('sim-panel').innerHTML=
+      '<div class="sim-box"><h5>Trace this claim</h5>'+
+      '<div class="sim-quote" id="sim-claimtx"></div>'+
+      '<div class="sim-kv"><span>Sources</span><b>8</b></div>'+
+      '<div class="sim-kv"><span>Model calls</span><b>31</b></div>'+
+      '<div class="sim-kv"><span>Est. input tokens</span><b>77,407</b></div>'+
+      '<div class="sim-kv"><span>Est. cost</span><b>~'+D+'0.164</b></div>'+
+      '<div class="sim-warn">2 sources are larger than the 700-token scoring window, so only the '+
+      'first part is checked. A claim grounded later in those files will read as ungrounded.</div>'+
+      '<div class="sim-row"><button type="button" class="sim-btn primary" id="sim-run">Run</button>'+
+      '<button type="button" class="sim-btn" id="sim-cancel">Cancel</button></div></div>';
+    var tx = isDisc
+      ? 'Non-authoritative note: classification maps can change due to real land change or mapping uncertainty…'
+      : (id==='t1' ? 'Layer: MODIS Annual Land Cover Type (IGBP classification).'
+                   : 'To do “forest vs non-forest,” you’ll use the legend and treat the “forest” categories as forest…');
+    $('sim-claimtx').textContent=tx;
+    $('sim-run').addEventListener('click',function(){ run(isDisc); });
+    $('sim-cancel').addEventListener('click',function(){ sel=null; $('sim-panel').innerHTML=''; setStep(1); renderResp(); });
+  }
+
+  function run(isDisc){
+    var t0=0, iv;
+    $('sim-panel').innerHTML='<div class="sim-box"><h5>Running…</h5>'+
+      '<div class="sim-kv"><span id="sim-el">0s · 31 calls in flight</span><b></b></div></div>';
+    iv=setInterval(function(){ t0++; var e=$('sim-el'); if(e) e.textContent=t0+'s · 31 calls in flight';
+      if(t0>=3){ clearInterval(iv); result(isDisc); } },400);
+  }
+
+  function result(isDisc){
+    ran=true; setStep(3);
+    var instrBody = isDisc
+      ? '<div class="sim-src">agent instructions (system prompt)</div>'+
+        '<div class="sim-quote">“## Non-authoritative communication — Use neutral language; avoid '+
+        'authoritative framing. — Always include a non-authoritative disclaimer in the user-facing '+
+        'narrative.” <span style="font-style:normal;opacity:.7">(line 64–66)</span></div>'+
+        '<div>directs this response · confidence 0.72 · <span style="color:#b45309">current text; '+
+        'an edit since this turn can’t be detected</span></div>'
+      : '<div class="sim-src">agent instructions (system prompt)</div>'+
+        '<div>no instruction here directs this · confidence 0.41</div>';
+    $('sim-panel').innerHTML=
+      '<div class="sim-box"><h5>Support 5.00 with everything · 1.00 with nothing · effect 4.00</h5>'+
+      lvl('Tools &amp; artifacts (1)','−4.00',
+          '<div class="sim-src">search_worldview_layers(forest non-forest mask annual land cover…)</div>'+
+          '<div>no span here states the claim</div>'+
+          '<div>neither states nor contradicts it · confidence 0.83</div>')+
+      lvl('Agent instructions (1)','−4.00', instrBody, isDisc)+
+      lvl('Earlier conversation (6)','+0.00','<div>not checked at source level</div>')+
+      '<div class="sim-row"><button type="button" class="sim-btn" id="sim-again">Close</button>'+
+      '<span style="font-size:.72rem;opacity:.7">31 model calls · '+D+'0.1607 · openai:gpt-5.2</span></div>'+
+      '</div>';
+    Array.prototype.forEach.call($('sim-panel').querySelectorAll('.sim-lvlh'),function(h){
+      h.addEventListener('click',function(){
+        var b=h.nextElementSibling; if(b) b.hidden=!b.hidden;
+      });
+    });
+    $('sim-again').addEventListener('click',function(){ sel=null; $('sim-panel').innerHTML=''; setStep(1); renderResp(); });
+  }
+
+  function lvl(title,drop,body,ok){
+    return '<div class="sim-lvl'+(ok?' sim-ok':'')+'">'+
+           '<div class="sim-lvlh"><span>▾ '+title+'</span><b>'+drop+'</b></div>'+
+           '<div class="sim-lvlb">'+body+'</div></div>';
+  }
+
+  Array.prototype.forEach.call(root.querySelectorAll('.sim-tab'),function(b){
+    b.addEventListener('click',function(){
+      mode=b.getAttribute('data-mode');
+      Array.prototype.forEach.call(root.querySelectorAll('.sim-tab'),function(x){
+        x.classList.toggle('on', x===b); });
+      $('sim-shot').hidden = mode!=='shot';
+      $('sim-live').hidden = mode!=='live';
+      $('sim-badge').textContent = mode==='shot' ? 'real UI, captured' : 'replica · recorded values, no model calls';
+    });
+  });
+  $('sim-check').addEventListener('click',function(){
+    if(gated){ gated=false; sel=null; $('sim-summary').textContent=''; $('sim-panel').innerHTML='';
+               $('sim-check').textContent='Check sources'; setStep(0); renderResp(); }
+    else check();
+  });
+
+  renderResp(); renderRail();
+})();
+</script>
+
+Clicking through it makes one property obvious that the prose can only assert: the affordance is
+absent from most of the response. Ten of the thirteen sentences are not clickable at all, because
+they were resolved or excluded for free. That absence is the design — a badge on every sentence
+would be indistinguishable from no badges at all.
+
+### 8.3 Design decisions and their measured justification
 
 <figure>
   <img src="/img/post-images/2026-07-30-response-provenance/chart-b-scalar-stability.png" alt="Comparison of scalar variance: similarity 0.165/0.743/0.870 versus digit scorer 5.00/5.00/5.00">
