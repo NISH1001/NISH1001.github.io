@@ -29,6 +29,11 @@ published: true
   border-left:3px solid var(--brand,#999);padding:.2rem 0 .2rem 1rem;margin:1.5rem 0;
   font-size:.95rem;
 }
+.jump{display:block;margin-top:.8rem;padding:.55rem .7rem;border-radius:.35rem;
+  border:1px solid var(--border,#e6e4d9);background:var(--bg2,#f6f5ef);font-size:.88rem;
+  line-height:1.55}
+/* the widgets are link targets from the abstract; keep them clear of any sticky header */
+#sim,#rp{scroll-margin-top:1.5rem}
 figure{margin:2rem 0}
 figure img{max-width:100%}
 figure figcaption{font-size:.85rem;line-height:1.5;color:var(--text,#666);opacity:.8;margin-top:.5rem}
@@ -53,6 +58,13 @@ exact leave-one-out. I report the measurements that killed three earlier designs
 resulting algorithm in full, and state plainly what it does and does not license you to
 conclude. The method is deployed in one platform (AKD Labs) but the formulation is
 implementation-independent.
+
+<span class="jump">Two interactive pieces sit in the body, both replaying real recorded runs:
+**[Demo B: the end-to-end product flow &rarr;](#sim)** lets you drive the method on an actual agent turn — check
+sources, pick a claim, accept the cost, read the result — and
+**[Demo A: the algorithm's internals &rarr;](#rp)** steps the estimator through its ablation masks with the
+arithmetic exposed. Neither calls a model; both are safe to click before reading any of the
+formalism.</span>
 </div>
 
 ## 1. Introduction
@@ -1006,9 +1018,9 @@ hierarchical decomposition is what keeps this affordable — a flat leave-one-ou
 in a long conversation would need arbitrary narrowing, and *which* sources survived would then be
 an arbitrary choice rather than a measured one.
 
-### 7.10 Interactive walkthrough of the full pipeline
+### 7.10 Interactive demo A — the algorithm's internals
 
-The widget below steps through the entire method on one real turn — segmentation and gating over
+This is the first of two demos. It exposes the **algorithm's internals** on one real turn — segmentation and gating over
 all thirteen sentences, corpus construction across the three levels, then the two ablation rounds
 and span verification for one selected claim. Every score it reports is a value the live run
 actually returned; nothing is computed in your browser, so treat it as a **replay of a recorded
@@ -1497,7 +1509,7 @@ turn ran — which is a different experiment and arguably a dishonest one, since
 disagreement rather than observing it. `contradicted` therefore remains **verified in unit tests
 and unobserved in the wild**, and §10 should be read with that gap in mind.
 
-### 8.4 Interactive replay of the same session
+### 8.4 Interactive demo B — the end-to-end product flow
 
 The panel below replays the interaction above. It opens on the real screenshot of each state, and
 the toggle switches that same state to a working replica you can click through — check sources,
@@ -1507,8 +1519,8 @@ run returned; no model is called.
 All three recorded outcomes are selectable from the **claim** dropdown — the hedge (§8.1,
 instructions), the layer identification (§8.2, redundant across levels) and the NDVI acronym
 (§8.3, internal knowledge, from a separate turn). **Play** advances the four states at about a
-second each; Step and To end are there if you would rather drive it. Where §7.10 shows the
-algorithm's internals — masks, scalars, drops — this shows what a user actually sees.
+second each; Step and To end are there if you would rather drive it. Where Demo A (§7.10) shows the
+algorithm's internals — masks, scalars, drops — this is what a user actually sees and clicks.
 
 <div class="sim" id="sim">
   <div class="sim-bar">
