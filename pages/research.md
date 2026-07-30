@@ -97,9 +97,9 @@ D. That, **N. Pantha**, et al., "Report on the IEEE GRSS Workshop on Remote Sens
 
 ---
 
-### Query by Humming [IJASS 2018]
+### Query by Humming [IJASS 2019]
 
-**N. Pantha**, et al., "Effects of Auto Tuning and Pitch Normalization on Query by Humming," *International Journal of Advanced Social Sciences (IJASS)*, vol. 1, no. 2, Dec. 2018. **[1 citation]**
+P. Koirala, M. Chapagain, **N. Pantha**, N. B. Adhikari, "Effects of Auto Tuning and Pitch Normalization on Query by Humming," *International Journal of Advanced Social Sciences (IJASS)*, vol. 1, no. 2, pp. 11–16, 2019. **[1 citation]** [[PDF](https://ictaes.org/wp-content/uploads/2019/IJASS_01_02/2.11-16-Effects-of-Auto-Tuning-and-Pitch-Normalization-on-Query-by-Humming.pdf)]
 
 ---
 
