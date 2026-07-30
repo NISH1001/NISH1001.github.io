@@ -31,43 +31,81 @@ Publications, talks, and academic work in AI, ML, and NLP.
 
 ## Publications
 
-[Google Scholar Profile](https://scholar.google.com/citations?user=a5JbCv0AAAAJ&hl=en) | Citations: 39 | h-index: 3 | i10-index: 2
+*[Google Scholar](https://scholar.google.com/citations?user=a5JbCv0AAAAJ&hl=en): 62 citations | h-index: 3 | i10-index: 3 — as of July 2026*
+
+---
+
+### INDUS-SDE [KDD 2026]
+
+**N. Pantha**, S. Awale, V. Kuruvanthodi, S. KC, M. Ramasubramanian, C. Davis, B. Praveen, E. Foshee, B. Bhattacharjee, K. Bugbee, R. Ramachandran, "INDUS-SDE: A Language Model for Scientific Content Curation and Discovery," in *Proc. 32nd ACM SIGKDD Conference on Knowledge Discovery and Data Mining (KDD '26)*, AI for Sciences Track, Jeju Island, Republic of Korea, Aug. 2026. [[DOI](https://doi.org/10.1145/3770855.3818847)]
+
+---
+
+### Scientific Code Search at Scale [2026]
+
+**N. Pantha**, P. R. Kumbam, S. Awale, P. Krishnappa, M. Ramasubramanian, N. Jha, E. Foshee, A. Kumar, R. A. Slank, A. Danehkar, R. Ramachandran, "Scientific Code Search at Scale: A Multi-Domain Dataset and Benchmark," *arXiv preprint arXiv:2607.05443*, 2026. [[arXiv](https://arxiv.org/abs/2607.05443)]
+
+A multi-domain dataset of **5,264** scientific repositories across five NASA SMD divisions, with two information-retrieval benchmarks — **219** expert-curated queries over **117,950** code snippets — for evaluating scientific code search.
 
 ---
 
 ### INDUS [EMNLP 2024]
 
-B. Bhattacharjee, A. Trivedi, M. Muraoka, M. Ramasubramanian, **N. Pantha**, et al., "Indus: Effective and efficient language models for scientific applications," in *Proc. Conference on Empirical Methods in Natural Language Processing (EMNLP)*, 2024. [15 citations] [[Paper](https://aclanthology.org/2024.emnlp-main.746/)]
+B. Bhattacharjee, A. Trivedi, M. Muraoka, M. Ramasubramanian, T. Udagawa, I. Gurung, **N. Pantha**, et al., "INDUS: Effective and Efficient Language Models for Scientific Applications," *EMNLP 2024*, Industry Track, pp. 98–112, Miami, FL, 2024. **[25 citations]** [[Paper](https://aclanthology.org/2024.emnlp-main.746/)]
+
+Domain-adapted language models for Earth science, biology, physics, heliophysics, planetary sciences and astrophysics.
 
 ---
 
 ### Guardrailing LLMs for Science [2024]
 
-**N. Pantha**, M. Ramasubramanian, I. Gurung, M. Maskey, and R. Ramachandran, "Challenges in guardrailing large language models for science," *arXiv preprint arXiv:2411.08181*, 2024. [14 citations] [[arXiv](https://arxiv.org/abs/2411.08181)]
+**N. Pantha**, M. Ramasubramanian, I. Gurung, M. Maskey, R. Ramachandran, "Challenges in Guardrailing Large Language Models for Science," *arXiv preprint arXiv:2411.08181*, 2024. **[21 citations]** [[arXiv](https://arxiv.org/abs/2411.08181)]
+
+A taxonomic framework for LLM guardrails in scientific applications.
+
+---
+
+### Feature Selection [IEEE SoutheastCon 2024]
+
+**N. Pantha**, M. Ramasubramanian, I. Gurung, M. Maskey, L. M. Sanders, et al., "Feature Selection in High-Dimensional Space with Applications to Gene Expression Data," *IEEE SoutheastCon 2024*, Atlanta, GA, pp. 6–15, 2024. **[3 citations]** [[DOI](https://doi.org/10.1109/SoutheastCon52093.2024.10500057)]
 
 ---
 
 ### Blaze [IEEE CLOUD 2023]
 
-S. Marru, B. Freitag, D. Wannipurage, R. Bommala, **N. Pantha**, et al., "Blaze: A High-Performance, Scalable, and Efficient Data Transfer Framework with Configurable and Extensible Features," in *Proc. IEEE 16th International Conference on Cloud Computing (CLOUD)*, pp. 58-68, 2023. [8 citations]
+S. Marru, B. Freitag, D. Wannipurage, **N. Pantha**, et al., "Blaze: A High-Performance, Scalable, and Efficient Data Transfer Framework," *IEEE 16th International Conference on Cloud Computing (CLOUD)*, pp. 58–68, 2023. **[11 citations]**
+
+Evaluated transatlantic data transfer between ESA and NASA.
 
 ---
 
-### Feature Selection [SoutheastCon 2024]
+### Reasoning Risks Benchmark [NeurIPS 2026, under review]
 
-**N. Pantha**, M. Ramasubramanian, I. Gurung, M. Maskey, L. M. Sanders, et al., "Feature Selection in High-Dimensional Space with Applications to Gene Expression Data," in *SoutheastCon 2024*, pp. 6-15, 2024. [1 citation]
-
----
-
-### Query by Humming [ICAEIC 2019]
-
-P. Koirala, M. Chapagain, **N. Pantha**, and N. B. Adhikari, "Effects of Auto Tuning and Pitch Normalization on Query by Humming," in *Advanced Engineering and ICT-Convergence 2019 (ICAEIC-2019)*, p. 128, 2019. [1 citation]
+T. Tchrakian, A. Pascale, **N. Pantha**, J. Barry, N. Jha, R. A. Slank, A. Danehkar, E. Foshee, G. De Mel, M. Ramasubramanian, J. Carnerero-Cano, R. Ramachandran, J. Bernabe-Moreno, "A Benchmark for Reasoning Risks in Scientific Content Generation," submitted to *NeurIPS 2026*, Evaluations and Datasets Track.
 
 ---
 
-### ABCDE [KJSE 2017]
+### Agentic Workflows for Gap-Aware Literature Reviews [2025]
 
-**N. Pantha**, M. Kshitiz, and P. Ashis, "Artificial Intelligence, Big Data and Cloud Driven E-Governance (ABCDE)," *KEC Journal of Science and Engineering (KJSE)*, vol. 3, no. 2, p. 14, 2017.
+"Agentic Workflows for Gap-Aware Literature Reviews," 2025. **[1 citation]**
+
+---
+
+### IEEE GRSS Workshop Report [2022]
+
+D. That, **N. Pantha**, et al., "Report on the IEEE GRSS Workshop on Remote Sensing Data Management Technologies in Geoscience 2022 [Technical Committees]," *IEEE Geoscience and Remote Sensing Magazine*, vol. 10, no. 4, pp. 273–277, Dec. 2022. [[DOI](https://doi.org/10.1109/MGRS.2022.3223624)]
+
+---
+
+### Query by Humming [IJASS 2018]
+
+**N. Pantha**, et al., "Effects of Auto Tuning and Pitch Normalization on Query by Humming," *International Journal of Advanced Social Sciences (IJASS)*, vol. 1, no. 2, Dec. 2018. **[1 citation]**
+
+---
+
+### ABCDE [2017]
+
+**N. Pantha**, K. Mandal, A. Parajuli, "Artificial Intelligence, Big Data and Cloud Driven E-Governance (ABCDE)," 2017. [[DOI](https://doi.org/10.13140/RG.2.2.30531.30245)]
 
 ---
 
