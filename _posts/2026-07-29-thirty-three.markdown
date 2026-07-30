@@ -19,7 +19,7 @@ On turning thirty-three biologically (well, you know how it is with official doc
 5. Track your expenses. Has helped me optimize my financial decisions in life.
 6. Eat healthy. Getting in that **"rainbow spectrum"** helps you get so many things into your physical system -> directly connects to your mental being.
 7. Exercise. Move. Yoga. Running. Walks, short or long. Stretches. Crunches. Pushups. Pullups. Planks. Whatever you can do: just do it!
-8. Crisis in, crisis out. Existential crises are here to stay.
+8. Crisis in, crisis out. Existential crises are here to stay. (See: [[2023: A life in transition, same yet different]])
 9. Observe and introspect your thoughts and actions. Helps you understand your biases and the unintended actions you exhibit on the external world.
 10. Don't hesitate to apologize whenever you feel you *fucked it up*.
 11. Speak your heart out. Every time you get an opportunity.
@@ -33,7 +33,7 @@ On turning thirty-three biologically (well, you know how it is with official doc
 19. Be proud of your past self. All the hardships and difficulties, and suffering. It only made you stronger... 🌻 :)
 20. It's okay to feel vulnerable. Vulnerability is what makes you grounded to your "self".
 21. Trade the transactional for the Deep and the Meaningful.
-22. It's okay to feel that life is inconsequential. It's okay to feel like nothing matters really. But look at yourself, your past, the things you are connected to in life...
+22. It's okay to feel that life is inconsequential. It's okay to feel like nothing matters really. But look at yourself, your past, the things you are connected to in life... (See: [[Life: Struggle, Absurdity and Happiness]])
 23. Nobody is coming to save you. Everyone is deep in their own shit. Your own actualizations are the only rescue that's ever shown up.
 24. Don't hesitate to update your priors and beliefs. Keep learning. Keep growing.
 25. Zoom out. Watch the birds. Look at the sky, the clouds, the stars, the eclipse. Your inner self. The external factors. Everything. The insignificance makes you feel alive perhaps.
@@ -41,10 +41,10 @@ On turning thirty-three biologically (well, you know how it is with official doc
 27. Work doesn't define your "self." You will burn out treating a job like your identity. And when you do, say it out loud: to your manager, to your friends, in writing...
 28. Reformulate your issues, if things are not working out.
 29. Fall in love. With someone. With yourself. With the world. With everything. **Awe**-ism.
-30. Understand impermanence. *Anicca*. Gives you perspective about your own issues, suffering, happiness -- and that of the world... everything. (See: [[Vipassana Retreat II]], [[Attachments to desires]])
+30. Understand impermanence. *Anicca*. Gives you perspective about your own issues, suffering, happiness -- and that of the world... everything. (See: [[Vipassana Re-treat]], [[Vipassana Retreat II]], [[Attachments to desires]])
 31. Make things. Build things. Art. Poetry. Music. Prose. Creative freedom helps you express yourself.
 32. It's okay to seek help. Ask whenever you can...
-33. Birthdays. New years... are just checkpoints, not the absolute milestones. You have your own pace. But just keep going!
+33. Birthdays. New years... are just checkpoints, not the absolute milestones. You have your own pace. But just keep going! (See: [[About Time, Life and Values]])
 
 ---
 
