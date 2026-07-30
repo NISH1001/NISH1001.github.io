@@ -51,7 +51,7 @@ A multi-domain dataset of **5,264** scientific repositories across five NASA SMD
 
 ### INDUS [EMNLP 2024]
 
-B. Bhattacharjee, A. Trivedi, M. Muraoka, M. Ramasubramanian, T. Udagawa, I. Gurung, **N. Pantha**, et al., "INDUS: Effective and Efficient Language Models for Scientific Applications," *EMNLP 2024*, Industry Track, pp. 98–112, Miami, FL, 2024. **[25 citations]** [[Paper](https://aclanthology.org/2024.emnlp-main.746/)]
+B. Bhattacharjee, A. Trivedi, M. Muraoka, M. Ramasubramanian, T. Udagawa, I. Gurung, **N. Pantha**, et al., "INDUS: Effective and Efficient Language Models for Scientific Applications," *EMNLP 2024*, Industry Track, pp. 98–112, Miami, FL, 2024. **[25 citations]** [[Paper](https://aclanthology.org/2024.emnlp-industry.9)] [[DOI](https://doi.org/10.18653/v1/2024.emnlp-industry.9)]
 
 Domain-adapted language models for Earth science, biology, physics, heliophysics, planetary sciences and astrophysics.
 
