@@ -471,9 +471,9 @@ choice.
 
 Total cost:
 
-$$\text{calls} \;\le\; \underbrace{|\mathcal{L}| + 2}_{\text{round 1}} \;+\; \underbrace{d' + 2}_{\text{round 2}} \;+\; \underbrace{2d'}_{\text{span checks}}$$
+$$\text{calls} \;\le\; \underbrace{|\mathcal{L}| + 2}_{\text{round 1}} \;+\; \underbrace{d^{\prime} + 2}_{\text{round 2}} \;+\; \underbrace{2d^{\prime}}_{\text{span checks}}$$
 
-where $d'$ counts sources in contributing layers. Also note $\Delta_L$ is reported for **every**
+where $d^{\prime}$ counts sources in contributing layers. Also note $\Delta_L$ is reported for **every**
 contributing layer, not a single winner: instructions commonly shape a sentence's *form* while a
 tool return supplies its *fact*, and collapsing to one winner discards half the finding.
 
@@ -1003,13 +1003,13 @@ Every constant, with the reasoning. None is calibrated against annotated ground 
 
 ### 7.9 Complexity and what a run actually costs
 
-With $|\mathcal{L}|$ layers present, $d'$ candidate sources in contributing layers, and $d''$
+With $|\mathcal{L}|$ layers present, $d^{\prime}$ candidate sources in contributing layers, and $d^{\prime\prime}$
 span targets:
 
-$$\text{calls} \;=\; \underbrace{(|\mathcal{L}| + 2)}_{\text{round 1}} \;+\; \underbrace{(d' + 2)}_{\text{round 2}} \;+\; \underbrace{2d''}_{\text{spans, retry-inclusive}}$$
+$$\text{calls} \;=\; \underbrace{(|\mathcal{L}| + 2)}_{\text{round 1}} \;+\; \underbrace{(d^{\prime} + 2)}_{\text{round 2}} \;+\; \underbrace{2d^{\prime\prime}}_{\text{spans, retry-inclusive}}$$
 
-At defaults ($|\mathcal{L}| = 3$, $d' = d'' = 12$) the worst case is $5 + 14 + 24 = 43$ calls,
-inside the 48 ceiling. The span term must be counted at $2d''$, not $d''$: assuming one call per
+At defaults ($|\mathcal{L}| = 3$, $d^{\prime} = d^{\prime\prime} = 12$) the worst case is $5 + 14 + 24 = 43$ calls,
+inside the 48 ceiling. The span term must be counted at $2d^{\prime\prime}$, not $d^{\prime\prime}$: assuming one call per
 source understates a full run by about a third and lets the ceiling be passed by a run it had
 already approved.
 
@@ -1029,7 +1029,7 @@ arithmetic legible, which a static listing cannot do.
 
 <div class="rp" id="rp">
   <div class="rp-bar">
-    <span class="rp-title">Response provenance — full pipeline</span>
+    <span class="rp-title">Demo A — the algorithm's internals</span>
     <span class="rp-badge">replay of a recorded run · no live model calls</span>
   </div>
 
@@ -1974,6 +1974,17 @@ A `contradicted` verdict is grounds to go read the file, not a finding. Quote ve
 single hard guarantee anywhere in the system: a fabricated verdict still cannot produce a span
 that occurs in the source, and the ranking tier has no equivalent check, which is the reason its
 output is presented as an ordering.
+
+That same verdict is also the method's largest evidential gap, and it should be stated as such
+rather than left implicit. `contradicted` is the outcome §2.4 argues justifies computing the
+corroborative axis at all — the misread that a purely contributive method would point at without
+explaining, and a purely corroborative method would miss. It is verified in unit tests and it has
+**never been observed on a real turn.** §8.3 records the attempt: the natural route is a genuine
+agent misread, which cannot be summoned on demand, and the planted alternative was refused by the
+agent as factually incorrect. So of the four outcomes the decision rule can return, three are
+demonstrated live in §8 and the fourth — the one that matters most for catching errors — rests on
+tests alone. Any claim in this post about the value of the span check should be read with that
+asymmetry in view.
 
 Three limitations concern what is being measured rather than how well. Attribution describes the
 **model performing the ablation**, so defaulting to the trace's own model is what keeps the result
