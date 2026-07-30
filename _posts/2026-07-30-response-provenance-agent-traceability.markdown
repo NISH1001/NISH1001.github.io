@@ -26,14 +26,14 @@ published: true
 }
 .cite:hover::after{opacity:1;visibility:visible}
 .paper-abstract{
-  border-left:3px solid #999;padding:.2rem 0 .2rem 1rem;margin:1.5rem 0;
+  border-left:3px solid var(--brand,#999);padding:.2rem 0 .2rem 1rem;margin:1.5rem 0;
   font-size:.95rem;
 }
 figure{margin:2rem 0}
 figure img{max-width:100%}
-figure figcaption{font-size:.85rem;line-height:1.5;color:#666;margin-top:.5rem}
+figure figcaption{font-size:.85rem;line-height:1.5;color:var(--text,#666);opacity:.8;margin-top:.5rem}
 table{font-size:.9rem}
-.small-note{font-size:.85rem;color:#666}
+.small-note{font-size:.85rem;color:var(--text,#666);opacity:.8}
 </style>
 
 <div class="paper-abstract" markdown="1">
@@ -1005,6 +1005,279 @@ Compare ContextCite's fixed $m \approx 32$ *plus* the requirement of teacher-for
 hierarchical decomposition is what keeps this affordable — a flat leave-one-out over every source
 in a long conversation would need arbitrary narrowing, and *which* sources survived would then be
 an arbitrary choice rather than a measured one.
+
+### 7.10 Interactive walkthrough of the full pipeline
+
+The widget below steps through the entire method on one real turn — segmentation and gating over
+all thirteen sentences, corpus construction across the three levels, then the two ablation rounds
+and span verification for one selected claim. Every score it reports is a value the live run
+actually returned; nothing is computed in your browser, so treat it as a **replay of a recorded
+run** rather than a simulation of the model. Its purpose is to make the mask sequence and the
+arithmetic legible, which a static listing cannot do.
+
+<div class="rp" id="rp">
+  <div class="rp-bar">
+    <span class="rp-title">Response provenance — full pipeline</span>
+    <span class="rp-badge">replay of a recorded run · no live model calls</span>
+  </div>
+
+  <div class="rp-stages" id="rp-stages"></div>
+
+  <div class="rp-cols">
+    <div class="rp-col rp-colwide">
+      <div class="rp-sub">① response <span class="rp-dim">— 13 sentences, gated for free</span></div>
+      <div id="rp-segs" class="rp-segs"></div>
+    </div>
+    <div class="rp-col">
+      <div class="rp-sub">② corpus C <span class="rp-dim">— mask v</span></div>
+      <div id="rp-srcs"></div>
+      <div class="rp-mask">v = <code id="rp-mask">········</code></div>
+    </div>
+  </div>
+
+  <div class="rp-metrics">
+    <div class="rp-m"><span>s(v)</span><b id="rp-score">·</b></div>
+    <div class="rp-m"><span>s(1)</span><b id="rp-s1">·</b></div>
+    <div class="rp-m"><span>s(0)</span><b id="rp-s0">·</b></div>
+    <div class="rp-m rp-hi"><span>Γ</span><b id="rp-g">·</b></div>
+    <div class="rp-m"><span>Δ tools</span><b id="rp-dt">·</b></div>
+    <div class="rp-m"><span>Δ instr</span><b id="rp-di">·</b></div>
+    <div class="rp-m"><span>Δ hist</span><b id="rp-dh">·</b></div>
+    <div class="rp-m"><span>calls</span><b id="rp-calls">0</b></div>
+  </div>
+
+  <div class="rp-verdict" id="rp-verdict">verdict pending</div>
+
+  <div class="rp-ctl">
+    <button type="button" id="rp-step">Step ▸</button>
+    <button type="button" id="rp-end">Run to end ⏭</button>
+    <button type="button" id="rp-rst">Reset ↺</button>
+    <span class="rp-prog" id="rp-prog"></span>
+  </div>
+
+  <ol class="rp-log" id="rp-log"></ol>
+</div>
+
+<style>
+/* Inherits the page theme: every colour is a site variable with a light-mode fallback, so the
+   header toggle (which sets data-theme on <html>) drives this widget too. No
+   prefers-color-scheme here — that would follow the OS and fight the page. */
+.rp{border:1px solid var(--border,#dcdcd4);border-radius:.5rem;margin:1.8rem 0;
+  background:var(--bg,#fff);color:var(--text,#4a4a46);font-size:.85rem;overflow:hidden}
+.rp-bar{display:flex;justify-content:space-between;align-items:center;gap:.5rem;flex-wrap:wrap;
+  padding:.5rem .75rem;background:var(--bg2,#f6f5ef);border-bottom:1px solid var(--border,#e6e4d9)}
+.rp-title{font-weight:600;color:var(--title,#222)}
+.rp-badge{font-size:.7rem;color:var(--brand,#3aa99f);border:1px solid var(--border,#e6e4d9);
+  padding:.08rem .45rem;border-radius:.7rem}
+.rp-stages{display:flex;gap:.3rem;flex-wrap:wrap;padding:.5rem .75rem;
+  border-bottom:1px solid var(--border,#e6e4d9)}
+.rp-stg{font-size:.7rem;padding:.12rem .5rem;border-radius:.7rem;border:1px solid var(--border,#e6e4d9);
+  opacity:.4;white-space:nowrap}
+.rp-stg.on{opacity:1;border-color:var(--brand,#3aa99f);color:var(--brand,#3aa99f);font-weight:600}
+.rp-stg.done{opacity:.85}
+.rp-cols{display:flex;flex-wrap:wrap}
+.rp-col{padding:.6rem .75rem;flex:1 1 240px;min-width:0}
+.rp-colwide{flex:1 1 340px;border-right:1px solid var(--border,#e6e4d9)}
+.rp-sub{font-size:.66rem;text-transform:uppercase;letter-spacing:.07em;opacity:.65;margin-bottom:.4rem}
+.rp-dim{text-transform:none;letter-spacing:0;opacity:.75}
+.rp-segs{display:flex;flex-direction:column;gap:.15rem}
+.rp-seg{display:flex;gap:.4rem;align-items:baseline;font-size:.73rem;line-height:1.4;
+  padding:.15rem .25rem;border-radius:.2rem;opacity:.45;transition:opacity .2s,background .2s}
+.rp-seg.lit{opacity:1}
+.rp-seg.sel{background:var(--bg2,#f6f5ef);box-shadow:inset 2px 0 0 var(--brand,#3aa99f)}
+.rp-seg .n{flex:0 0 1.1rem;opacity:.5;font-variant-numeric:tabular-nums}
+.rp-seg .tx{flex:1 1 auto;min-width:0}
+.rp-chip{flex:0 0 auto;font-size:.62rem;padding:.02rem .3rem;border-radius:.2rem;
+  border:1px solid var(--border,#e6e4d9);white-space:nowrap;opacity:0;transition:opacity .2s}
+.rp-seg.lit .rp-chip{opacity:1}
+.rp-chip.traceable{color:#2563eb;border-color:#93b4f7}
+.rp-chip.quoted{color:#059669;border-color:#8fd6bf}
+.rp-chip.voice{color:#d97706;border-color:#e8c58a}
+.rp-chip.none{opacity:.55}
+.rp-src{display:flex;align-items:center;gap:.4rem;font-size:.71rem;line-height:1.35;
+  padding:.16rem .25rem;border-radius:.2rem;font-family:ui-monospace,Menlo,monospace;
+  transition:opacity .18s,background .18s}
+.rp-src.off{opacity:.3;text-decoration:line-through}
+.rp-src.probe{background:var(--bg2,#f6f5ef);box-shadow:inset 2px 0 0 #d97706}
+.rp-dot{width:.45rem;height:.45rem;border-radius:50%;flex:0 0 auto;background:#3b82f6}
+.rp-src.instr .rp-dot{background:#10b981}
+.rp-src.hist .rp-dot{background:#f59e0b}
+.rp-lvl{font-size:.63rem;letter-spacing:.05em;opacity:.6;margin:.4rem 0 .1rem}
+.rp-mask{margin-top:.5rem;font-size:.72rem;opacity:.8}
+.rp-mask code{letter-spacing:.16em}
+.rp-metrics{display:flex;flex-wrap:wrap;gap:.1rem .9rem;padding:.5rem .75rem;
+  border-top:1px solid var(--border,#e6e4d9);border-bottom:1px solid var(--border,#e6e4d9)}
+.rp-m{display:flex;gap:.35rem;align-items:baseline;font-size:.74rem}
+.rp-m span{opacity:.65}
+.rp-m b{font-family:ui-monospace,Menlo,monospace;color:var(--title,#222)}
+.rp-m.rp-hi b{color:var(--brand,#3aa99f)}
+.rp-verdict{padding:.4rem .75rem;font-size:.76rem;opacity:.7;
+  border-bottom:1px solid var(--border,#e6e4d9)}
+.rp-verdict.ok{opacity:1;color:var(--brand,#3aa99f);font-weight:600}
+.rp-ctl{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;padding:.55rem .75rem}
+.rp-ctl button{font:inherit;font-size:.77rem;padding:.22rem .6rem;border-radius:.3rem;
+  border:1px solid var(--border,#dcdcd4);background:var(--bg2,#f6f5ef);
+  color:var(--text,#4a4a46);cursor:pointer}
+.rp-ctl button:hover:not(:disabled){border-color:var(--brand,#3aa99f);color:var(--brand,#3aa99f)}
+.rp-ctl button:disabled{opacity:.4;cursor:default}
+.rp-prog{margin-left:auto;font-size:.71rem;opacity:.6;font-family:ui-monospace,Menlo,monospace}
+.rp-log{margin:0;padding:.5rem .75rem .6rem 2rem;font-size:.75rem;line-height:1.55;
+  border-top:1px solid var(--border,#e6e4d9);max-height:14rem;overflow-y:auto}
+.rp-log li{margin:.18rem 0}
+.rp-log li b{color:var(--title,#222)}
+</style>
+
+<script>
+(function(){
+  var root = document.getElementById('rp'); if(!root) return;
+  var $ = function(id){ return document.getElementById(id); };
+
+  var SEGS = [
+    {t:'…&t=2012-01-01&t1=2022-01-01&v=−88.7,30.1… (permalink)', s:'quoted',    c:'quoted'},
+    {t:'What you’ll be looking at (in plain terms)',          s:'none',      c:'nothing specific'},
+    {t:'Layer: MODIS Annual Land Cover Type (IGBP classification).', s:'traceable', c:'traceable'},
+    {t:'It’s not a “forest loss” measurement.',      s:'none',      c:'nothing specific'},
+    {t:'It’s a map that assigns each pixel a land-cover category each year.', s:'none', c:'nothing specific'},
+    {t:'To do “forest vs non-forest,” you’ll use the legend and treat the “forest” categories as forest…', s:'traceable', c:'traceable'},
+    {t:'How to use it (quick steps)',                              s:'none',      c:'nothing specific'},
+    {t:'Open the link.',                                           s:'none',      c:'nothing specific'},
+    {t:'Use the vertical swipe bar to compare 2012 vs 2022.',       s:'none',      c:'nothing specific'},
+    {t:'Open the layer’s legend in Worldview to see which colors correspond to forest classes.', s:'none', c:'nothing specific'},
+    {t:'Non-authoritative note: classification maps can change due to real land change or mapping uncertainty…', s:'traceable', c:'traceable', sel:true},
+    {t:'…so treat this as an exploratory visual comparison rather than a definitive change calculation.', s:'none', c:'nothing specific'},
+    {t:'If you want, tell me whether you want (A) statewide Alabama or (B) a specific county…', s:'voice', c:'questions or offers'}
+  ];
+
+  var SRC = [
+    {id:'s0', lvl:'tool',  label:'search_worldview_layers(forest non-forest…)'},
+    {id:'s1', lvl:'instr', label:'agent instructions (system prompt)'},
+    {id:'s2', lvl:'hist',  label:'you asked · 6 turns ago'},
+    {id:'s3', lvl:'hist',  label:'agent replied · 5 turns ago'},
+    {id:'s4', lvl:'hist',  label:'you asked · 4 turns ago'},
+    {id:'s5', lvl:'hist',  label:'agent replied · 3 turns ago'},
+    {id:'s6', lvl:'hist',  label:'you asked · 2 turns ago'},
+    {id:'s7', lvl:'hist',  label:'agent replied · 1 turn ago'}
+  ];
+  var LVLN = {tool:'TOOLS & ARTIFACTS (1)', instr:'AGENT INSTRUCTIONS (1)', hist:'EARLIER CONVERSATION (6)'};
+  var ALL1 = SRC.map(function(){return 1;}), ALL0 = SRC.map(function(){return 0;});
+  var maskOff = function(f){ return SRC.map(function(s){ return f(s)?0:1; }); };
+
+  var STAGES = ['① segment','② gate','③ corpus','④ level round','⑤ source round','⑥ span'];
+
+  var STEPS = [
+    {st:0, lit:0, corpus:false,
+     log:'<b>Segment.</b> The renderer walks the rendered tree and emits one segment per sentence — 13 here. The renderer is the single segmentation authority; re-splitting server-side would drift, and every drift is a citation anchored to the wrong sentence.'},
+    {st:1, lit:13, corpus:false,
+     log:'<b>Gate (Algorithm 3), free.</b> Each segment is classified: headings and procedure steps carry nothing checkable; the permalink is a verbatim <b>quote</b> of a tool return; the closing sentence is an <b>offer</b>; three sentences assert something specific and unresolved.'},
+    {st:1, lit:13,
+     log:'<b>Gate result.</b> <code>3 traceable · 1 quoted · 1 offer · 8 nothing specific</code>. Only the 3 traceable segments earn an affordance — no model call has been made yet, and 10 of 13 sentences are resolved or excluded for free.'},
+    {st:2, corpus:true, mask:ALL1,
+     log:'<b>Build corpus (Algorithm 1).</b> 8 sources across three levels. Note the tool source <i>is</i> the artifact access — a workspace read is a tool call, not a fourth level. The 6 history units exclude the current query, which is held fixed.'},
+    {st:3, mask:ALL1, sel:true,
+     log:'<b>Select a claim.</b> The reader clicks the non-authoritative note. Class <code>disclaimer</code> → traceable regardless of anchors, because its provenance is a directive rather than a fact.'},
+    {st:3, mask:ALL1, score:5.00, s1:5.00,
+     log:'<b>Round 1, mask 1.</b> Everything present → s(1) = <b>5.00</b>: the judge says the corpus <i>partially</i> supports the sentence.'},
+    {st:3, mask:ALL0, score:1.00, s0:1.00, g:4.00,
+     log:'<b>Round 1, mask 0.</b> Everything ablated → s(0) = <b>1.00</b>, so Γ = <b>4.00</b> ≫ τ<sub>Γ</sub> = 0.75. <b>Not internal knowledge</b> — the context genuinely matters.'},
+    {st:3, mask:maskOff(function(s){return s.lvl==='tool';}), probe:'tool', score:9.00, dt:-4.00,
+     log:'<b>Ablate TOOLS.</b> s = <b>9.00</b> → Δ = 5.00 − 9.00 = <b>−4.00</b>. Removal <i>raised</i> apparent support: role <code>distractor</code>. The tool return was diluting the evidence for this particular sentence.'},
+    {st:3, mask:maskOff(function(s){return s.lvl==='instr';}), probe:'instr', score:9.00, di:-4.00,
+     log:'<b>Ablate INSTRUCTIONS.</b> s = <b>9.00</b> → Δ = <b>−4.00</b>, also <code>distractor</code>. Two levels now tie — precisely the situation ablation cannot resolve by itself.'},
+    {st:3, mask:maskOff(function(s){return s.lvl==='hist';}), probe:'hist', score:5.00, dh:0.00,
+     log:'<b>Ablate HISTORY.</b> s unchanged at <b>5.00</b> → Δ = <b>+0.00</b>, <code>irrelevant</code>. Five calls have just eliminated 6 of the 8 sources from the expensive round.'},
+    {st:4, mask:ALL1,
+     log:'<b>Contributing levels.</b> |Δ| ≥ τ for tools and instructions → round 2 tests only those 2 sources. <code>redundant = false</code>, <code>internal_knowledge = false</code>.'},
+    {st:4, mask:maskOff(function(s){return s.lvl!=='hist';}), score:9.00,
+     log:'<b>Round 2 anchor.</b> All candidates off at once. History stays <i>present</i> in every round-2 mask — context the model still sees, but not a candidate under test.'},
+    {st:4, mask:maskOff(function(s){return s.id==='s0';}), probe:'tool', score:5.00,
+     log:'<b>Round 2 LOO, s0.</b> Δ = <b>+0.00</b>. Per-source ablation adds nothing; the tie survives to source level.'},
+    {st:4, mask:maskOff(function(s){return s.id==='s1';}), probe:'instr', score:5.00,
+     log:'<b>Round 2 LOO, s1.</b> Δ = <b>+0.00</b>. Ablation has now told us <i>which levels</i> and nothing more. A system reporting only weights would stop here and report noise.'},
+    {st:5, mask:ALL1, done:true,
+     log:'<b>Span localisation (Algorithm 5) — unconditional.</b> One call per source over all 8, retry-inclusive. On s1 the model returns a span, <code>VerifyQuote</code> normalises it and finds it in the source at <b>lines 64–66</b>: <i>“## Non-authoritative communication — Use neutral language; avoid authoritative framing. — Always include a non-authoritative disclaimer in the user-facing narrative.”</i> Verdict <code>directs this response</code>, confidence 0.72. <b>The quote is the answer; the drops were the annotation.</b>'},
+    {st:5, mask:ALL1, calls:31,
+     log:'<b>Accounting (§7.9).</b> This replay shows one representative call per stage; the real run made <b>31</b> — 5 in the level round, 10 in the source round, 16 span checks over 8 sources counted retry-inclusive. That is (3+2) + (8+2) + 2×8, exactly the formula.'}
+  ];
+
+  var i=0, calls=0, litN=0, corpusOn=false, selOn=false;
+
+  function drawStages(active){
+    $('rp-stages').innerHTML = STAGES.map(function(s,k){
+      var c = k===active ? 'rp-stg on' : (k<active ? 'rp-stg done' : 'rp-stg');
+      return '<span class="'+c+'">'+s+'</span>';
+    }).join('');
+  }
+  function drawSegs(){
+    $('rp-segs').innerHTML = SEGS.map(function(s,k){
+      var lit = k < litN, cls = 'rp-seg' + (lit?' lit':'') + (selOn && s.sel ? ' sel':'');
+      var chip = s.s==='none' ? 'none' : s.s;
+      return '<div class="'+cls+'"><span class="n">'+(k+1)+'</span>'+
+             '<span class="tx">'+s.t+'</span>'+
+             '<span class="rp-chip '+chip+'">'+s.c+'</span></div>';
+    }).join('');
+  }
+  function drawSrcs(mask, probe){
+    if(!corpusOn){ $('rp-srcs').innerHTML='<div class="rp-seg" style="opacity:.4">not built yet</div>';
+                   $('rp-mask').textContent='········'; return; }
+    var html='', last=null;
+    SRC.forEach(function(s,k){
+      if(s.lvl!==last){ html += '<div class="rp-lvl">'+LVLN[s.lvl]+'</div>'; last=s.lvl; }
+      var cls='rp-src '+s.lvl+(mask[k]?'':' off')+(probe===s.lvl?' probe':'');
+      html += '<div class="'+cls+'"><span class="rp-dot"></span><span>'+s.id+' '+s.label+'</span></div>';
+    });
+    $('rp-srcs').innerHTML=html;
+    $('rp-mask').textContent=mask.join('');
+  }
+  function fmt(v){ return (v>=0?'+':'')+v.toFixed(2); }
+
+  function reset(){
+    i=0; calls=0; litN=0; corpusOn=false; selOn=false;
+    drawStages(-1); drawSegs(); drawSrcs(ALL1,null);
+    ['rp-score','rp-s1','rp-s0','rp-g','rp-dt','rp-di','rp-dh'].forEach(function(id){ $(id).textContent='·'; });
+    $('rp-calls').textContent='0';
+    $('rp-verdict').textContent='verdict pending'; $('rp-verdict').className='rp-verdict';
+    $('rp-log').innerHTML='';
+    $('rp-prog').textContent='0 / '+STEPS.length;
+    $('rp-step').disabled=false; $('rp-end').disabled=false;
+  }
+  function step(){
+    if(i>=STEPS.length) return;
+    var s=STEPS[i];
+    if(s.lit!==undefined) litN=s.lit;
+    if(s.corpus!==undefined) corpusOn=s.corpus;
+    if(s.sel) selOn=true;
+    drawStages(s.st); drawSegs(); drawSrcs(s.mask||ALL1, s.probe);
+    if(s.score!==undefined){ calls++; $('rp-score').textContent=s.score.toFixed(2); }
+    else $('rp-score').textContent='—';
+    if(s.calls){ calls=s.calls; }
+    $('rp-calls').textContent = s.calls ? String(s.calls)+' (real)' : String(calls);
+    if(s.s1!==undefined) $('rp-s1').textContent=s.s1.toFixed(2);
+    if(s.s0!==undefined) $('rp-s0').textContent=s.s0.toFixed(2);
+    if(s.g!==undefined)  $('rp-g').textContent=s.g.toFixed(2);
+    if(s.dt!==undefined) $('rp-dt').textContent=fmt(s.dt);
+    if(s.di!==undefined) $('rp-di').textContent=fmt(s.di);
+    if(s.dh!==undefined) $('rp-dh').textContent=fmt(s.dh);
+    if(s.done){ var v=$('rp-verdict'); v.className='rp-verdict ok';
+      v.innerHTML='attributed → agent instructions, lines 64–66, quote verified'; }
+    var li=document.createElement('li'); li.innerHTML=s.log;
+    $('rp-log').appendChild(li); $('rp-log').scrollTop=$('rp-log').scrollHeight;
+    i++; $('rp-prog').textContent=i+' / '+STEPS.length;
+    if(i>=STEPS.length){ $('rp-step').disabled=true; $('rp-end').disabled=true; }
+  }
+  $('rp-step').addEventListener('click', step);
+  $('rp-end').addEventListener('click', function(){ while(i<STEPS.length) step(); });
+  $('rp-rst').addEventListener('click', reset);
+  reset();
+})();
+</script>
+
+Three things are worth watching. The free tier resolves or excludes ten of the thirteen sentences
+before any model call exists, which is what makes the metered tiers affordable at all. The level
+round then eliminates six of eight sources for five calls, because history is most of the corpus
+and none of it matters here. And the ending is instructive: after ten calls the ablation numbers
+are a tie between two levels at $-4.00$ and two per-source drops of $+0.00$ — ablation has
+localised the claim to *a pair of levels* and refuses to go further. The answer comes from span
+verification, which is exactly why Algorithm 4 never makes it conditional.
 
 ## 8. Implementation
 
