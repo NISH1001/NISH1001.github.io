@@ -1402,12 +1402,67 @@ gave the exact, checkable answer. This is precisely why §7.4 runs span localisa
 unconditionally and treats the drop as an annotation on the quote rather than the other way
 round. A system that reported only ablation weights here would have reported noise.
 
-### 8.2 Interactive replay of the same session
+### 8.2 A second claim: the tools level, and redundancy
+
+The same session, same corpus, a different sentence — the layer identification:
+
+> *Layer: **MODIS Annual Land Cover Type (IGBP classification)**.*
+
+The cost gate is identical (8 sources, 31 calls, ~$0.164, same corpus), but the outcome is a
+different branch of §6.5 entirely: $s(\mathbf{1}) = 9.00$, $s(\mathbf{0}) = 1.00$, so
+$\Gamma = 8.00$ — the strongest context effect observed anywhere in this work — while **every
+level drop is exactly $+0.00$**. That is the redundancy region: removing the whole context changed
+the answer decisively, but removing any single level changed nothing, because more than one level
+carries the claim independently. Round 2 is therefore skipped as uninformative rather than
+because there was nothing to find, and the interface says so:
+
+```
+Carried by several sources
+Removing everything changed the answer, but removing any one layer did not — each
+carries this independently, so no single layer is solely responsible. The layer
+scores below are real zeros for that reason; per-source scores were skipped
+because they would read zero too, so the quotes are the answer here.
+```
+
+<figure>
+  <img src="/img/post-images/2026-07-30-response-provenance/fig5-tools-redundant.png" alt="The redundancy verdict, with the tool return quoted at lines 26-30">
+  <figcaption><strong>Figure 6.</strong> The redundancy branch, and the tools level positively grounding a claim. Γ = 8.00 with every level drop at +0.00. The tool return is quoted at lines 26–30 — the raw <code>search_worldview_layers</code> payload containing <code>"layer_id": "MODIS_Combined_L3_IGBP_Land_Cover_Type_Annual"</code> — with verdict <em>states the claim</em> at confidence 0.86.</figcaption>
+</figure>
+
+Three things in this result are worth drawing out.
+
+**The tools level grounds it, with a byte-exact quote.** The span check returns lines 26–30 of the
+`search_worldview_layers` return: `"layer_id": "MODIS_Combined_L3_IGBP_Land_Cover_Type_Annual",
+"platform": "", "bm25_score": 1.0, "instrument": "modis", "description": "The Terra and Aqua
+combined Moderate Resolution Imaging Spectroradiometer (MODIS) Land Cover Type (MCD12Q1) Version
+6.1 data product provides global land cover types at yearly intervals.` Verdict: *states the
+claim*, confidence 0.86. Note that this is JSON, and the quote verified — which is exactly the
+escape-decoding path of §6.6 doing its job. Before that normalisation existed, every quote from a
+tool return of this shape was discarded as fabricated.
+
+**The history level also carries it.** `agent replied · 3 turns ago` quotes *"showing the **MODIS
+annual land cover classification (IGBP)**"* at line 2, also *states the claim* at 0.86. The agent
+had already named this layer earlier in the conversation, so the claim is genuinely over-determined
+— present in the tool return *and* in the prior turn. This is what redundancy means concretely,
+and it is why a single-winner attribution would have been arbitrary here.
+
+**The instructions level correctly abstains.** *"no instruction here bears on this"*, confidence
+0.77. Compare §8.1, where the same source was the whole answer. The directive framing of §6.6 is
+not biased toward finding a rule; on a factual claim it declines.
+
+Taken together with §8.1, the two claims exercise three of the outcomes the method can return —
+attributed to instructions, redundant across levels, and grounded in a tool return — over the same
+corpus, with the level drops informative in one case and uniformly zero in the other. In both, the
+verified quote is what carries the answer.
+
+### 8.3 Interactive replay of the same session
 
 The panel below replays the interaction above. It opens on the real screenshot of each state, and
 the toggle switches that same state to a working replica you can click through — check sources,
 select a claim, accept the cost, read the result. Every number, quote and verdict is what the live
-run returned; no model is called.
+run returned; no model is called. Two of the three traceable sentences have recorded results: the
+hedge (§8.1, attributing to instructions) and the layer identification (§8.2, the redundancy
+branch), so clicking each shows a genuinely different outcome over the same corpus.
 
 <div class="sim" id="sim">
   <div class="sim-bar">
@@ -1577,7 +1632,7 @@ run returned; no model is called.
   function selectClaim(id){
     if(!gated) return;
     sel=id; ran=false; setStep(2); renderResp();
-    var isDisc = id==='t3';
+    var which = id;
     $('sim-panel').innerHTML=
       '<div class="sim-box"><h5>Trace this claim</h5>'+
       '<div class="sim-quote" id="sim-claimtx"></div>'+
@@ -1589,44 +1644,69 @@ run returned; no model is called.
       'first part is checked. A claim grounded later in those files will read as ungrounded.</div>'+
       '<div class="sim-row"><button type="button" class="sim-btn primary" id="sim-run">Run</button>'+
       '<button type="button" class="sim-btn" id="sim-cancel">Cancel</button></div></div>';
-    var tx = isDisc
+    var tx = id==='t3'
       ? 'Non-authoritative note: classification maps can change due to real land change or mapping uncertainty…'
       : (id==='t1' ? 'Layer: MODIS Annual Land Cover Type (IGBP classification).'
                    : 'To do “forest vs non-forest,” you’ll use the legend and treat the “forest” categories as forest…');
     $('sim-claimtx').textContent=tx;
-    $('sim-run').addEventListener('click',function(){ run(isDisc); });
+    $('sim-run').addEventListener('click',function(){ run(which); });
     $('sim-cancel').addEventListener('click',function(){ sel=null; $('sim-panel').innerHTML=''; setStep(1); renderResp(); });
   }
 
-  function run(isDisc){
+  function run(which){
     var t0=0, iv;
     $('sim-panel').innerHTML='<div class="sim-box"><h5>Running…</h5>'+
       '<div class="sim-kv"><span id="sim-el">0s · 31 calls in flight</span><b></b></div></div>';
     iv=setInterval(function(){ t0++; var e=$('sim-el'); if(e) e.textContent=t0+'s · 31 calls in flight';
-      if(t0>=3){ clearInterval(iv); result(isDisc); } },400);
+      if(t0>=3){ clearInterval(iv); result(which); } },400);
   }
 
-  function result(isDisc){
-    ran=true; setStep(3);
-    var instrBody = isDisc
-      ? '<div class="sim-src">agent instructions (system prompt)</div>'+
+  // Both outcomes are real runs against the same corpus. t3 (the hedge) attributes to the
+  // instructions level; t1 (the layer identification) lands in the redundancy region with every
+  // level drop at zero and two levels independently quoting the claim.
+  var RES = {
+    t3: {head:'Support 5.00 with everything · 1.00 with nothing · effect 4.00', note:null,
+      tools:{d:'−4.00', body:'<div class="sim-src">search_worldview_layers(forest non-forest mask annual land cover…)</div>'+
+        '<div>no span here states the claim</div><div>neither states nor contradicts it · confidence 0.83</div>'},
+      instr:{d:'−4.00', ok:true, body:'<div class="sim-src">agent instructions (system prompt)</div>'+
         '<div class="sim-quote">“## Non-authoritative communication — Use neutral language; avoid '+
         'authoritative framing. — Always include a non-authoritative disclaimer in the user-facing '+
         'narrative.” <span style="font-style:normal;opacity:.7">(line 64–66)</span></div>'+
         '<div>directs this response · confidence 0.72 · <span style="color:#b45309">current text; '+
-        'an edit since this turn can’t be detected</span></div>'
-      : '<div class="sim-src">agent instructions (system prompt)</div>'+
-        '<div>no instruction here directs this · confidence 0.41</div>';
+        'an edit since this turn can’t be detected</span></div>'},
+      hist:{d:'+0.00', body:'<div>not checked at source level</div>'}, cost:'0.1607'},
+    t1: {head:'Support 9.00 with everything · 1.00 with nothing · effect 8.00',
+      note:'<b>Carried by several sources.</b> Removing everything changed the answer, but removing any '+
+        'one layer did not — each carries this independently, so no single layer is solely responsible. '+
+        'The layer scores below are real zeros for that reason; per-source scores were skipped because '+
+        'they would read zero too, so the quotes are the answer here.',
+      tools:{d:'+0.00', ok:true, body:'<div class="sim-src">search_worldview_layers(forest non-forest mask annual land cover…)</div>'+
+        '<div class="sim-quote">"layer_id": "MODIS_Combined_L3_IGBP_Land_Cover_Type_Annual", "instrument": '+
+        '"modis", "description": "The Terra and Aqua combined Moderate Resolution Imaging Spectroradiometer '+
+        '(MODIS) Land Cover Type (MCD12Q1) Version 6.1 data product provides global land cover types at '+
+        'yearly intervals. <span style="font-style:normal;opacity:.7">(line 26–30)</span></div>'+
+        '<div>states the claim · confidence 0.86</div>'},
+      instr:{d:'+0.00', body:'<div class="sim-src">agent instructions (system prompt)</div>'+
+        '<div>no instruction here bears on this · confidence 0.77</div>'},
+      hist:{d:'+0.00', ok:true, body:'<div class="sim-src">agent replied · 3 turn(s) ago</div>'+
+        '<div class="sim-quote">showing the <b>MODIS annual land cover classification (IGBP)</b> '+
+        '<span style="font-style:normal;opacity:.7">(line 2)</span></div>'+
+        '<div>states the claim · confidence 0.86</div>'+
+        '<div style="opacity:.7;margin-top:.2rem">5 further history sources: no span states the claim</div>'},
+      cost:'0.1583'}
+  };
+
+  function result(claim){
+    ran=true; setStep(3);
+    var r = RES[claim] || RES.t3;
     $('sim-panel').innerHTML=
-      '<div class="sim-box"><h5>Support 5.00 with everything · 1.00 with nothing · effect 4.00</h5>'+
-      lvl('Tools &amp; artifacts (1)','−4.00',
-          '<div class="sim-src">search_worldview_layers(forest non-forest mask annual land cover…)</div>'+
-          '<div>no span here states the claim</div>'+
-          '<div>neither states nor contradicts it · confidence 0.83</div>')+
-      lvl('Agent instructions (1)','−4.00', instrBody, isDisc)+
-      lvl('Earlier conversation (6)','+0.00','<div>not checked at source level</div>')+
+      '<div class="sim-box"><h5>'+r.head+'</h5>'+
+      (r.note ? '<div class="sim-warn" style="border-color:var(--border,#e6e4d9);color:inherit;opacity:.85">'+r.note+'</div>' : '')+
+      lvl('Tools &amp; artifacts (1)', r.tools.d, r.tools.body, r.tools.ok)+
+      lvl('Agent instructions (1)', r.instr.d, r.instr.body, r.instr.ok)+
+      lvl('Earlier conversation (6)', r.hist.d, r.hist.body, r.hist.ok)+
       '<div class="sim-row"><button type="button" class="sim-btn" id="sim-again">Close</button>'+
-      '<span style="font-size:.72rem;opacity:.7">31 model calls · '+D+'0.1607 · openai:gpt-5.2</span></div>'+
+      '<span style="font-size:.72rem;opacity:.7">31 model calls · '+D+r.cost+' · openai:gpt-5.2</span></div>'+
       '</div>';
     Array.prototype.forEach.call($('sim-panel').querySelectorAll('.sim-lvlh'),function(h){
       h.addEventListener('click',function(){
@@ -1667,21 +1747,21 @@ absent from most of the response. Ten of the thirteen sentences are not clickabl
 they were resolved or excluded for free. That absence is the design — a badge on every sentence
 would be indistinguishable from no badges at all.
 
-### 8.3 Design decisions and their measured justification
+### 8.4 Design decisions and their measured justification
 
 <figure>
   <img src="/img/post-images/2026-07-30-response-provenance/chart-b-scalar-stability.png" alt="Comparison of scalar variance: similarity 0.165/0.743/0.870 versus digit scorer 5.00/5.00/5.00">
-  <figcaption><strong>Figure 6.</strong> Why the scalar was replaced (§5.2, §6.2). Generated-text similarity varied across <em>identical</em> masks with a spread of 0.705 — a Lasso fit on it put a negative weight on the single most relevant source. The forced-choice digit repeated exactly, spread 0.000.</figcaption>
+  <figcaption><strong>Figure 7.</strong> Why the scalar was replaced (§5.2, §6.2). Generated-text similarity varied across <em>identical</em> masks with a spread of 0.705 — a Lasso fit on it put a negative weight on the single most relevant source. The forced-choice digit repeated exactly, spread 0.000.</figcaption>
 </figure>
 
 <figure>
   <img src="/img/post-images/2026-07-30-response-provenance/chart-c-call-complexity.png" alt="Call complexity comparison across number of sources">
-  <figcaption><strong>Figure 7.</strong> Cost per traced claim. Note honestly that below about 12 sources the hierarchical scheme costs <em>more</em> calls than a flat leave-one-out, because it pays for a level round and for retry-inclusive span checks. What it buys is a bounded ceiling as the corpus grows, plus the level-level answer that flat LOO cannot produce. ContextCite's 34 is flat but presumes access this setting does not have (§4). The marked point is the live run.</figcaption>
+  <figcaption><strong>Figure 8.</strong> Cost per traced claim. Note honestly that below about 12 sources the hierarchical scheme costs <em>more</em> calls than a flat leave-one-out, because it pays for a level round and for retry-inclusive span checks. What it buys is a bounded ceiling as the corpus grows, plus the level-level answer that flat LOO cannot produce. ContextCite's 34 is flat but presumes access this setting does not have (§4). The marked point is the live run.</figcaption>
 </figure>
 
 <figure>
   <img src="/img/post-images/2026-07-30-response-provenance/chart-e-decision-regions.png" alt="Decision regions in terms of total context effect and maximum layer drop">
-  <figcaption><strong>Figure 8.</strong> The decision rule of §6.5 as regions. The vertical boundary separates internal knowledge from context-driven claims; the horizontal one separates a claim some level is responsible for from one carried redundantly by several. The live claim sits in the attributed region.</figcaption>
+  <figcaption><strong>Figure 9.</strong> The decision rule of §6.5 as regions. The vertical boundary separates internal knowledge from context-driven claims; the horizontal one separates a claim some level is responsible for from one carried redundantly by several. The live claim sits in the attributed region.</figcaption>
 </figure>
 
 ## 9. Applications
