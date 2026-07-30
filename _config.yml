@@ -97,6 +97,13 @@ privatelinks:
 # Math rendering
 katex: true
 
+# Leave $$...$$ as literal text so KaTeX's auto-render (loaded in _layouts/post.html) can
+# find the delimiters. kramdown's default math engine rewrites them into
+# <script type="math/tex"> tags, which nothing on this site consumes — the result is that
+# every equation renders as blank space.
+kramdown:
+  math_engine: null
+
 # Exclude from processing
 exclude:
   - Gemfile

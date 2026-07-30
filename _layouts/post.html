@@ -124,5 +124,21 @@
             {%- include footer.html -%}
         </div>
     </div>
+
+    {%- if site.katex -%}
+    <!-- Katex.css in <head> styles the output; these actually render it. auto-render scans
+         the DOM text for delimiters, which is why kramdown's math_engine is disabled in
+         _config.yml: otherwise kramdown rewrites $$...$$ into <script type="math/tex"> tags
+         that auto-render never sees, and every equation silently renders as nothing. -->
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"
+            crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+            crossorigin="anonymous"
+            onload="renderMathInElement(document.body, {delimiters: [
+                {left: '$$', right: '$$', display: true},
+                {left: '\\[', right: '\\]', display: true},
+                {left: '$', right: '$', display: false}
+            ], throwOnError: false});"></script>
+    {%- endif -%}
 </body>
 </html>
