@@ -1511,10 +1511,11 @@ and unobserved in the wild**, and §10 should be read with that gap in mind.
 
 ### 8.4 Interactive demo B — the end-to-end product flow
 
-The panel below replays the interaction above. It opens on the real screenshot of each state, and
-the toggle switches that same state to a working replica you can click through — check sources,
-select a claim, accept the cost, read the result. Every number, quote and verdict is what the live
-run returned; no model is called.
+The panel below is a working replica of the interaction above — a chat widget you can actually
+drive. It opens ready to use, and a numbered prompt tells you what to click at each stage, with the
+target highlighted: check sources, pick a claim, accept the cost, read the result. Every number,
+quote and verdict is what the live run returned; no model is called. The second tab shows the
+screenshot of the real UI in the same state, if you want to confirm the replica is faithful.
 
 All three recorded outcomes are selectable from the **claim** dropdown — the hedge (§8.1,
 instructions), the layer identification (§8.2, redundant across levels) and the NDVI acronym
@@ -1525,10 +1526,10 @@ algorithm's internals — masks, scalars, drops — this is what a user actually
 <div class="sim" id="sim">
   <div class="sim-bar">
     <div class="sim-tabs">
-      <button type="button" class="sim-tab on" data-mode="shot">Screenshot</button>
-      <button type="button" class="sim-tab" data-mode="live">Interactive replay</button>
+      <button type="button" class="sim-tab on" data-mode="live">▶ Interactive</button>
+      <button type="button" class="sim-tab" data-mode="shot">Screenshot of the real UI</button>
     </div>
-    <span class="sim-badge" id="sim-badge">real UI, captured</span>
+    <span class="sim-badge" id="sim-badge">replica · recorded values, no model calls</span>
   </div>
 
   <div class="sim-rail" id="sim-rail"></div>
@@ -1547,11 +1548,12 @@ algorithm's internals — masks, scalars, drops — this is what a user actually
     </span>
   </div>
 
-  <div class="sim-shot" id="sim-shot">
+  <div class="sim-shot" id="sim-shot" hidden>
     <img id="sim-img" src="/img/post-images/2026-07-30-response-provenance/fig1-gate.png" alt="AKD Labs provenance UI">
   </div>
 
-  <div class="sim-live" id="sim-live" hidden>
+  <div class="sim-live" id="sim-live">
+    <div class="sim-guide" id="sim-guide"></div>
     <div class="sim-chat">
       <div class="sim-you">can you list the available guardrails?</div>
       <div class="sim-meta">MIO Worldview Agent · openai:gpt-5.2</div>
@@ -1634,6 +1636,19 @@ algorithm's internals — masks, scalars, drops — this is what a user actually
 .sim-claimsel{margin-left:auto;font-size:.72rem;opacity:.8}
 .sim-claimsel select{font:inherit;font-size:.72rem;padding:.1rem .25rem;border-radius:.25rem;
   border:1px solid var(--border,#dcdcd4);background:var(--bg,#fff);color:var(--text,#4a4a46)}
+.sim-guide{display:flex;gap:.45rem;align-items:baseline;margin:-.1rem 0 .7rem;
+  padding:.45rem .6rem;border-radius:.35rem;font-size:.79rem;line-height:1.5;
+  border:1px solid var(--brand,#3aa99f);background:rgba(58,169,159,.09)}
+.sim-guide .gn{flex:0 0 auto;font-weight:700;color:var(--brand,#3aa99f)}
+.sim-guide.done{border-color:var(--border,#e6e4d9);background:var(--bg2,#f6f5ef)}
+.pulse{position:relative;animation:simpulse 1.5s ease-in-out infinite;
+  box-shadow:0 0 0 0 rgba(58,169,159,.65);border-radius:.25rem}
+@keyframes simpulse{
+  0%{box-shadow:0 0 0 0 rgba(58,169,159,.55)}
+  70%{box-shadow:0 0 0 7px rgba(58,169,159,0)}
+  100%{box-shadow:0 0 0 0 rgba(58,169,159,0)}
+}
+@media (prefers-reduced-motion:reduce){ .pulse{animation:none;outline:2px solid var(--brand,#3aa99f)} }
 .sim-cap{font-size:.78rem;line-height:1.5;opacity:.8;padding:.5rem .8rem .7rem;margin:0;
   border-top:1px solid var(--border,#e6e4d9)}
 </style>
@@ -1641,6 +1656,22 @@ algorithm's internals — masks, scalars, drops — this is what a user actually
 <script>
 (function(){
   var root=document.getElementById('sim'); if(!root) return;
+
+  var GUIDE = [
+    ['1', 'Click <b>Check sources</b> below. This runs the free gate — segmentation and classification, <b>no model calls</b>.', 'sim-check'],
+    ['2', 'Three sentences are now dotted-underlined: those earned an affordance. <b>Click one</b> to select a claim (or use the <b>claim</b> selector above).', null],
+    ['3', 'Read the estimate — 8 sources, 31 calls, and a truncation disclosure — then click <b>Run</b>.', 'sim-run'],
+    ['4', 'Done. Expand a level to see its verified quote and line numbers. Switch the <b>claim</b> selector to compare a redundant claim and an internal-knowledge one.', null]
+  ];
+  function guide(i){
+    var g=GUIDE[i]; if(!g) return;
+    var el=$('sim-guide');
+    el.className = 'sim-guide' + (i===GUIDE.length-1 ? ' done' : '');
+    el.innerHTML = '<span class="gn">'+g[0]+'/4</span><span>'+g[1]+'</span>';
+    root.querySelectorAll('.pulse').forEach(function(n){ n.classList.remove('pulse'); });
+    if(g[2]){ var tgt=$(g[2]); if(tgt) tgt.classList.add('pulse'); }
+    else { root.querySelectorAll('[data-seg]').forEach(function(n){ n.classList.add('pulse'); }); }
+  }
   var $=function(id){return document.getElementById(id);};
   var D='$';  // kept out of static HTML so KaTeX never sees a stray delimiter
 
@@ -1699,16 +1730,17 @@ algorithm's internals — masks, scalars, drops — this is what a user actually
   function setStep(n){ step=n; renderRail(); }
 
   function check(){
-    gated=true; setStep(1);
+    gated=true; tlAt=1; setStep(1);
     $('sim-summary').textContent='8 sources · 13 sentences: 3 you can trace, 1 quoted directly, '+
       '1 questions or offers, 8 nothing specific to check';
     $('sim-check').textContent='Hide sources';
     renderResp();
+    guide(1);
   }
 
   function selectClaim(id){
     if(!gated) return;
-    sel=id; ran=false; setStep(2); renderResp();
+    sel=id; ran=false; tlAt=2; setStep(2); renderResp();
     var which = id;
     $('sim-panel').innerHTML=
       '<div class="sim-box"><h5>Trace this claim</h5>'+
@@ -1727,6 +1759,7 @@ algorithm's internals — masks, scalars, drops — this is what a user actually
                    : 'NDVI stands for the Normalized Difference Vegetation Index.   (§8.3, separate turn)');
     $('sim-claimtx').textContent=tx;
     $('sim-run').addEventListener('click',function(){ run(which); });
+    guide(2);
     $('sim-cancel').addEventListener('click',function(){ sel=null; $('sim-panel').innerHTML=''; setStep(1); renderResp(); });
   }
 
@@ -1782,7 +1815,7 @@ algorithm's internals — masks, scalars, drops — this is what a user actually
   };
 
   function result(claim){
-    ran=true; setStep(3);
+    ran=true; tlAt=3; setStep(3);
     var r = RES[claim] || RES.t3;
     $('sim-panel').innerHTML=
       '<div class="sim-box"><h5>'+r.head+'</h5>'+
@@ -1799,7 +1832,8 @@ algorithm's internals — masks, scalars, drops — this is what a user actually
         var b=h.nextElementSibling; if(b) b.hidden=!b.hidden;
       });
     });
-    $('sim-again').addEventListener('click',function(){ sel=null; $('sim-panel').innerHTML=''; setStep(1); renderResp(); });
+    $('sim-again').addEventListener('click',function(){ sel=null; $('sim-panel').innerHTML=''; tlAt=1; setStep(1); renderResp(); guide(1); });
+    guide(3);
   }
 
   function lvl(title,drop,body,ok){
@@ -1828,7 +1862,7 @@ algorithm's internals — masks, scalars, drops — this is what a user actually
   // ---- automatically at roughly one second per step.
   var TL = [
     function(){ gated=false; sel=null; $('sim-summary').textContent=''; $('sim-panel').innerHTML='';
-                $('sim-check').textContent='Check sources'; setStep(0); renderResp(); },
+                $('sim-check').textContent='Check sources'; setStep(0); renderResp(); guide(0); },
     function(){ check(); },
     function(){ selectClaim($('sim-pick').value); },
     function(){ var w=$('sim-pick').value; result(w); }
@@ -1850,7 +1884,7 @@ algorithm's internals — masks, scalars, drops — this is what a user actually
   $('sim-reset').addEventListener('click', function(){ stop(); goTo(0); });
   $('sim-pick').addEventListener('change', function(){ stop(); goTo(0); });
 
-  renderResp(); renderRail();
+  renderResp(); renderRail(); guide(0);
 })();
 </script>
 
