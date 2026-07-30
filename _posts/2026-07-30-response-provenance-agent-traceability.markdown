@@ -1455,14 +1455,60 @@ attributed to instructions, redundant across levels, and grounded in a tool retu
 corpus, with the level drops informative in one case and uniformly zero in the other. In both, the
 verified quote is what carries the answer.
 
-### 8.3 Interactive replay of the same session
+### 8.3 A third claim: internal knowledge, and a failed attempt at a contradiction
+
+The two claims above both had a cause inside the turn. The remaining branch of §6.5 is the one
+where nothing does. To exercise it deliberately I asked the same agent, in the same conversation:
+
+> *Without calling any tools, answer in exactly one sentence from your own knowledge: what does the
+> acronym NDVI stand for?*
+
+The choice of acronym matters. `NDVI` occurs four times in this conversation, but its **expansion**
+occurs nowhere in the conversation and nowhere in the system prompt — so the claim's content is
+genuinely parametric even though its subject is not. The agent answered *"NDVI stands for the
+**Normalized Difference Vegetation Index**."* with zero tool calls.
+
+The result is unambiguous: $s(\mathbf{1}) = s(\mathbf{0})$, giving $\Gamma = 0.00$ exactly, with
+both surviving levels at $+0.00$.
+
+<figure>
+  <img src="/img/post-images/2026-07-30-response-provenance/fig6-internal-knowledge.png" alt="The internal-knowledge verdict with a context effect of exactly zero">
+  <figcaption><strong>Figure 7.</strong> The internal-knowledge branch. With Γ = 0.00 the claim survives the removal of the entire context, which rules out the redundancy confound that per-source drops alone cannot: this is not "several sources carry it", it is "no source does". The wording matters as much as the verdict — <em>not necessarily wrong, just outside what this turn can verify</em>.</figcaption>
+</figure>
+
+This turn also produced an incidental confirmation of the cost model under a different corpus
+shape. With no tool calls there are only **two** levels present, and eleven sources across them, so
+$(2+2) + (11+2) + 2 \times 11 = 39$ — exactly the figure the cost gate reported. The $|\mathcal{L}|$
+term is not decorative.
+
+**The attempt at a contradiction failed, and the failure is informative.** `contradicted` is the
+verdict §6.6 argues earns the span check its keep, and it is the one outcome I could not produce.
+The natural route is a genuine agent misread, which by definition cannot be summoned on demand, so
+I tried to plant one — asking for a caption asserting that the annual land-cover layer is *updated
+monthly*, which directly contradicts the `"yearly intervals"` string sitting in the tool return
+quoted in §8.2. The agent declined:
+
+> *I can't write that caption because it's factually incorrect.*
+
+So the demonstration is unavailable for a reason worth recording: on this agent, the response-side
+route to a contradiction is closed by the agent's own guardrails. Producing one would require
+planting the mismatch on the *artifact* side instead — changing a value in the workspace after the
+turn ran — which is a different experiment and arguably a dishonest one, since it manufactures a
+disagreement rather than observing it. `contradicted` therefore remains **verified in unit tests
+and unobserved in the wild**, and §10 should be read with that gap in mind.
+
+### 8.4 Interactive replay of the same session
 
 The panel below replays the interaction above. It opens on the real screenshot of each state, and
 the toggle switches that same state to a working replica you can click through — check sources,
 select a claim, accept the cost, read the result. Every number, quote and verdict is what the live
-run returned; no model is called. Two of the three traceable sentences have recorded results: the
-hedge (§8.1, attributing to instructions) and the layer identification (§8.2, the redundancy
-branch), so clicking each shows a genuinely different outcome over the same corpus.
+run returned; no model is called.
+
+All three recorded outcomes are selectable from the **claim** dropdown — the hedge (§8.1,
+instructions), the layer identification (§8.2, redundant across levels) and the NDVI acronym
+(§8.3, internal knowledge, from a separate turn). **Play** advances the four states at about a
+second each; Step and To end are there if you would rather drive it. Where §7.10 shows the
+algorithm's internals — masks, scalars, drops — this shows what a user actually sees.
 
 <div class="sim" id="sim">
   <div class="sim-bar">
@@ -1474,6 +1520,20 @@ branch), so clicking each shows a genuinely different outcome over the same corp
   </div>
 
   <div class="sim-rail" id="sim-rail"></div>
+
+  <div class="sim-ctl">
+    <button type="button" class="sim-btn" id="sim-play">▶ Play</button>
+    <button type="button" class="sim-btn" id="sim-next">Step ▸</button>
+    <button type="button" class="sim-btn" id="sim-fin">To end ⏭</button>
+    <button type="button" class="sim-btn" id="sim-reset">Reset ↺</button>
+    <span class="sim-claimsel">claim:
+      <select id="sim-pick">
+        <option value="t3">the hedge (§8.1 — instructions)</option>
+        <option value="t1">the layer id (§8.2 — redundant)</option>
+        <option value="t2">NDVI (§8.3 — internal knowledge)</option>
+      </select>
+    </span>
+  </div>
 
   <div class="sim-shot" id="sim-shot">
     <img id="sim-img" src="/img/post-images/2026-07-30-response-provenance/fig1-gate.png" alt="AKD Labs provenance UI">
@@ -1557,6 +1617,11 @@ branch), so clicking each shows a genuinely different outcome over the same corp
 .sim-lvlb{padding:.35rem .45rem;border-top:1px solid var(--border,#e6e4d9);font-size:.73rem}
 .sim-src{font-family:ui-monospace,Menlo,monospace;font-size:.7rem;word-break:break-word}
 .sim-ok{border-color:rgba(5,150,105,.5)!important;background:rgba(5,150,105,.06)}
+.sim-ctl{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;padding:.5rem .7rem;
+  border-bottom:1px solid var(--border,#e6e4d9)}
+.sim-claimsel{margin-left:auto;font-size:.72rem;opacity:.8}
+.sim-claimsel select{font:inherit;font-size:.72rem;padding:.1rem .25rem;border-radius:.25rem;
+  border:1px solid var(--border,#dcdcd4);background:var(--bg,#fff);color:var(--text,#4a4a46)}
 .sim-cap{font-size:.78rem;line-height:1.5;opacity:.8;padding:.5rem .8rem .7rem;margin:0;
   border-top:1px solid var(--border,#e6e4d9)}
 </style>
@@ -1572,7 +1637,7 @@ branch), so clicking each shows a genuinely different outcome over the same corp
     {k:'h',    t:'What you’ll be looking at (in plain terms)'},
     {k:'li',   t:'Layer: <b>MODIS Annual Land Cover Type (IGBP classification)</b>.', s:'traceable', id:'t1'},
     {k:'li',   t:'It’s <b>not a “forest loss” measurement</b>. It’s a map that assigns each pixel a <b>land-cover category</b> each year.'},
-    {k:'li',   t:'To do “forest vs non-forest,” you’ll use the <b>legend</b> and treat the “forest” categories as forest, and everything else as non-forest.', s:'traceable', id:'t2'},
+    {k:'li',   t:'To do “forest vs non-forest,” you’ll use the <b>legend</b> and treat the “forest” categories as forest, and everything else as non-forest.', s:'traceable', id:'t2'},  /* recorded result: the internal-knowledge branch (§8.3), reached on a separate turn */
     {k:'h',    t:'How to use it (quick steps)'},
     {k:'ol',   t:['Open the link.',
                   'Use the <b>vertical swipe bar</b> to compare 2012 (one side) vs 2022 (the other).',
@@ -1647,7 +1712,7 @@ branch), so clicking each shows a genuinely different outcome over the same corp
     var tx = id==='t3'
       ? 'Non-authoritative note: classification maps can change due to real land change or mapping uncertainty…'
       : (id==='t1' ? 'Layer: MODIS Annual Land Cover Type (IGBP classification).'
-                   : 'To do “forest vs non-forest,” you’ll use the legend and treat the “forest” categories as forest…');
+                   : 'NDVI stands for the Normalized Difference Vegetation Index.   (§8.3, separate turn)');
     $('sim-claimtx').textContent=tx;
     $('sim-run').addEventListener('click',function(){ run(which); });
     $('sim-cancel').addEventListener('click',function(){ sel=null; $('sim-panel').innerHTML=''; setStep(1); renderResp(); });
@@ -1693,7 +1758,15 @@ branch), so clicking each shows a genuinely different outcome over the same corp
         '<span style="font-style:normal;opacity:.7">(line 2)</span></div>'+
         '<div>states the claim · confidence 0.86</div>'+
         '<div style="opacity:.7;margin-top:.2rem">5 further history sources: no span states the claim</div>'},
-      cost:'0.1583'}
+      cost:'0.1583'},
+    t2: {head:'Support 0.00 with everything · 0.00 with nothing · effect 0.00',
+      ik:'<b>Not from this turn’s context.</b> The claim scores about the same with the whole context '+
+         'removed (effect 0.00), so it came from the model rather than these sources. Not necessarily '+
+         'wrong — just outside what this turn can verify.',
+      tools:{d:'+0.00', body:'<div>no span here states the claim</div>'},
+      instr:{d:'+0.00', body:'<div class="sim-src">agent instructions (system prompt)</div>'+
+        '<div>no instruction here bears on this</div>'},
+      hist:{d:'+0.00', body:'<div>not checked at source level</div>'}, cost:'0.1002'}
   };
 
   function result(claim){
@@ -1701,6 +1774,7 @@ branch), so clicking each shows a genuinely different outcome over the same corp
     var r = RES[claim] || RES.t3;
     $('sim-panel').innerHTML=
       '<div class="sim-box"><h5>'+r.head+'</h5>'+
+      (r.ik ? '<div class="sim-warn" style="border-color:rgba(37,99,235,.45);color:inherit;background:rgba(37,99,235,.07)">'+r.ik+'</div>' : '')+
       (r.note ? '<div class="sim-warn" style="border-color:var(--border,#e6e4d9);color:inherit;opacity:.85">'+r.note+'</div>' : '')+
       lvl('Tools &amp; artifacts (1)', r.tools.d, r.tools.body, r.tools.ok)+
       lvl('Agent instructions (1)', r.instr.d, r.instr.body, r.instr.ok)+
@@ -1738,6 +1812,32 @@ branch), so clicking each shows a genuinely different outcome over the same corp
     else check();
   });
 
+  // ---- timeline driver: the same four states the screenshots show, advanced manually or
+  // ---- automatically at roughly one second per step.
+  var TL = [
+    function(){ gated=false; sel=null; $('sim-summary').textContent=''; $('sim-panel').innerHTML='';
+                $('sim-check').textContent='Check sources'; setStep(0); renderResp(); },
+    function(){ check(); },
+    function(){ selectClaim($('sim-pick').value); },
+    function(){ var w=$('sim-pick').value; result(w); }
+  ];
+  var tlAt=0, timer=null;
+
+  function goTo(n){ tlAt=Math.max(0,Math.min(TL.length-1,n)); TL[tlAt](); }
+  function next(){ if(tlAt<TL.length-1){ goTo(tlAt+1); } if(tlAt>=TL.length-1) stop(); }
+  function stop(){ if(timer){ clearInterval(timer); timer=null; } $('sim-play').textContent='▶ Play'; }
+  function play(){
+    if(timer){ stop(); return; }
+    if(tlAt>=TL.length-1) goTo(0);
+    $('sim-play').textContent='❚❚ Pause';
+    timer=setInterval(next,1000);
+  }
+  $('sim-play').addEventListener('click', play);
+  $('sim-next').addEventListener('click', function(){ stop(); next(); });
+  $('sim-fin').addEventListener('click', function(){ stop(); goTo(TL.length-1); });
+  $('sim-reset').addEventListener('click', function(){ stop(); goTo(0); });
+  $('sim-pick').addEventListener('change', function(){ stop(); goTo(0); });
+
   renderResp(); renderRail();
 })();
 </script>
@@ -1747,21 +1847,21 @@ absent from most of the response. Ten of the thirteen sentences are not clickabl
 they were resolved or excluded for free. That absence is the design — a badge on every sentence
 would be indistinguishable from no badges at all.
 
-### 8.4 Design decisions and their measured justification
+### 8.5 Design decisions and their measured justification
 
 <figure>
   <img src="/img/post-images/2026-07-30-response-provenance/chart-b-scalar-stability.png" alt="Comparison of scalar variance: similarity 0.165/0.743/0.870 versus digit scorer 5.00/5.00/5.00">
-  <figcaption><strong>Figure 7.</strong> Why the scalar was replaced (§5.2, §6.2). Generated-text similarity varied across <em>identical</em> masks with a spread of 0.705 — a Lasso fit on it put a negative weight on the single most relevant source. The forced-choice digit repeated exactly, spread 0.000.</figcaption>
+  <figcaption><strong>Figure 8.</strong> Why the scalar was replaced (§5.2, §6.2). Generated-text similarity varied across <em>identical</em> masks with a spread of 0.705 — a Lasso fit on it put a negative weight on the single most relevant source. The forced-choice digit repeated exactly, spread 0.000.</figcaption>
 </figure>
 
 <figure>
   <img src="/img/post-images/2026-07-30-response-provenance/chart-c-call-complexity.png" alt="Call complexity comparison across number of sources">
-  <figcaption><strong>Figure 8.</strong> Cost per traced claim. Note honestly that below about 12 sources the hierarchical scheme costs <em>more</em> calls than a flat leave-one-out, because it pays for a level round and for retry-inclusive span checks. What it buys is a bounded ceiling as the corpus grows, plus the level-level answer that flat LOO cannot produce. ContextCite's 34 is flat but presumes access this setting does not have (§4). The marked point is the live run.</figcaption>
+  <figcaption><strong>Figure 9.</strong> Cost per traced claim. Note honestly that below about 12 sources the hierarchical scheme costs <em>more</em> calls than a flat leave-one-out, because it pays for a level round and for retry-inclusive span checks. What it buys is a bounded ceiling as the corpus grows, plus the level-level answer that flat LOO cannot produce. ContextCite's 34 is flat but presumes access this setting does not have (§4). The marked point is the live run.</figcaption>
 </figure>
 
 <figure>
   <img src="/img/post-images/2026-07-30-response-provenance/chart-e-decision-regions.png" alt="Decision regions in terms of total context effect and maximum layer drop">
-  <figcaption><strong>Figure 9.</strong> The decision rule of §6.5 as regions. The vertical boundary separates internal knowledge from context-driven claims; the horizontal one separates a claim some level is responsible for from one carried redundantly by several. The live claim sits in the attributed region.</figcaption>
+  <figcaption><strong>Figure 10.</strong> The decision rule of §6.5 as regions. The vertical boundary separates internal knowledge from context-driven claims; the horizontal one separates a claim some level is responsible for from one carried redundantly by several. The live claim sits in the attributed region.</figcaption>
 </figure>
 
 ## 9. Applications
