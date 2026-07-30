@@ -10,6 +10,25 @@ Publications, talks, and academic work in AI, ML, and NLP.
 
 ---
 
+## Technical reports
+
+{% assign reports = site.posts | where_exp: "p", "p.categories contains 'research'" | sort: "date" | reverse %}
+{% if reports.size > 0 %}
+{% for r in reports %}
+### {{ r.title }} [{{ r.date | date: "%Y" }}]
+
+{% if r.subtitle %}{{ r.subtitle }}{% endif %}
+
+[[Read]({{ site.baseurl }}{{ r.url }})]
+
+---
+{% endfor %}
+{% else %}
+*None yet.*
+
+---
+{% endif %}
+
 ## Publications
 
 [Google Scholar Profile](https://scholar.google.com/citations?user=a5JbCv0AAAAJ&hl=en) | Citations: 39 | h-index: 3 | i10-index: 2

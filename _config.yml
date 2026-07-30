@@ -78,6 +78,17 @@ defaults:
       feed: "show"
       toc: true
       permalink: /writing/:title/
+  # Research write-ups live in _posts/research/ so they stay *posts* — the feed, tags page
+  # and graph generator all iterate site.posts, and a separate collection would silently
+  # drop out of all three. Jekyll assigns the "research" category from the subdirectory.
+  - scope:
+      path: "_posts/research"
+      type: posts
+    values:
+      layout: post
+      feed: "show"
+      toc: true
+      permalink: /research/:title/
 
 # Build settings
 markdown: kramdown
