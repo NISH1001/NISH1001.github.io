@@ -39,6 +39,20 @@ figure img{max-width:100%}
 figure figcaption{font-size:.85rem;line-height:1.5;color:var(--text,#666);opacity:.8;margin-top:.5rem}
 table{font-size:.9rem}
 .small-note{font-size:.85rem;color:var(--text,#666);opacity:.8}
+
+/* Clickable section permalinks. Kramdown already emits an id on every heading; these expose
+   it. Hidden until hover so the headings stay clean, but always focusable by keyboard. */
+.content h2, .content h3 { scroll-margin-top: 1.5rem; }
+a.hanchor{
+  margin-left:.45rem; text-decoration:none; font-weight:400; font-size:.72em;
+  color:var(--brand,#3aa99f); opacity:0; transition:opacity .12s;
+}
+.content h2:hover a.hanchor, .content h3:hover a.hanchor, a.hanchor:focus{opacity:.75}
+a.hanchor:hover{opacity:1}
+/* Cross-references such as §6.2, turned into links to the section they name. */
+a.sref{text-decoration:none; border-bottom:1px dotted currentColor; color:inherit}
+a.sref:hover{color:var(--brand,#3aa99f)}
+:target{background:rgba(58,169,159,.10)}
 </style>
 
 > **Backstory**: When me and my colleague [igaurab](https://github.com/igaurab) started adding
@@ -2256,6 +2270,71 @@ Plain text:
 > Report. <https://nishparadox.com/research/response-provenance/>
 
 ---
+
+<script>
+// Section permalinks, and cross-references turned into links.
+//
+// Kramdown numbers heading ids from the heading text, so "### 6.2 The substituted scalar"
+// becomes id="62-the-substituted-scalar". That lets a reference written as §6.2 in prose be
+// resolved to its heading without maintaining a table by hand: read the leading number off
+// each heading, then rewrite matching §-references as links to it.
+(function(){
+  var content = document.querySelector('.content');
+  if (!content) return;
+
+  // 1. index headings by their section number, and give each a permalink
+  var byNumber = {};
+  Array.prototype.forEach.call(content.querySelectorAll('h2[id], h3[id]'), function (h) {
+    var m = h.textContent.trim().match(/^(\d+(?:\.\d+)?)[.\s]/);
+    if (m) byNumber[m[1]] = h.id;                    // read the number BEFORE appending
+    var a = document.createElement('a');
+    a.className = 'hanchor';
+    a.href = '#' + h.id;
+    a.textContent = '#';
+    a.title = 'Permalink to this section';
+    a.setAttribute('aria-label', 'Permalink to this section');
+    h.appendChild(a);
+  });
+
+  // 2. rewrite §N or §N.M in prose. Skips headings, code, existing links, and the two
+  //    interactive widgets, whose contents are managed by their own scripts.
+  var SKIP_TAG = /^(PRE|CODE|A|SCRIPT|STYLE|H1|H2|H3|H4|TEXTAREA|BUTTON|SELECT)$/;
+  var REF = /§(\d+(?:\.\d+)?)/g;
+
+  (function walk(node){
+    var kids = node.childNodes;
+    for (var i = 0; i < kids.length; i++) {
+      var n = kids[i];
+      if (n.nodeType === 1) {
+        if (SKIP_TAG.test(n.tagName)) continue;
+        if (n.id === 'rp' || n.id === 'sim') continue;
+        if (n.classList && n.classList.contains('katex')) continue;
+        walk(n);
+      } else if (n.nodeType === 3 && n.nodeValue.indexOf('§') !== -1) {
+        var txt = n.nodeValue, frag = document.createDocumentFragment(), last = 0, m, made = false;
+        REF.lastIndex = 0;
+        while ((m = REF.exec(txt))) {
+          var id = byNumber[m[1]];
+          if (!id) continue;                          // reference to a section that isn't a heading
+          frag.appendChild(document.createTextNode(txt.slice(last, m.index)));
+          var link = document.createElement('a');
+          link.className = 'sref';
+          link.href = '#' + id;
+          link.textContent = m[0];
+          frag.appendChild(link);
+          last = m.index + m[0].length;
+          made = true;
+        }
+        if (made) {
+          frag.appendChild(document.createTextNode(txt.slice(last)));
+          n.parentNode.replaceChild(frag, n);
+          i += frag.childNodes.length ? 0 : 0;         // fragment already inserted in place
+        }
+      }
+    }
+  })(content);
+})();
+</script>
 
 <div class="small-note" markdown="1">
 **Disclaimer.** The idea described here was implemented and tested thoroughly in AKD Labs — the
