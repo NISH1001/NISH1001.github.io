@@ -32,7 +32,7 @@ Publications, talks, and academic work in AI, ML, and NLP.
 {% assign reports = site.posts | where_exp: "p", "p.categories contains 'research'" | sort: "date" | reverse %}
 {% if reports.size > 0 %}
 {% for r in reports %}
-##### {{ r.title }} [{{ r.date | date: "%Y" }}]
+#### {{ r.title }} [{{ r.date | date: "%Y" }}]
 
 {% if r.subtitle %}{{ r.subtitle }}{% endif %}
 
