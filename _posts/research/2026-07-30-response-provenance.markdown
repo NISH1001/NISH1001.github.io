@@ -63,85 +63,115 @@ table{font-size:.9rem}
 > Hence, this technical report.
 
 <div class="paper-abstract" markdown="1">
-**Abstract.** An LLM agent answers a scientific question by reading files, calling tools, and
-writing prose. The interface can show *that* `read_file("lst.md")` ran; it cannot show that
-*this* sentence came from *that* file, or from a line in the system prompt, or from something
-the user said four turns ago. That gap is the difference between an answer a scientist can
-defend and one they can only believe. I formalise the problem as **response provenance** —
-mapping each segment of a generated response to the parts of the context responsible for it —
-and separate it from two adjacent problems it is routinely confused with: auditing
-agent-declared citations, and corroborative fact-checking. I then show that every current
-state-of-the-art method for the contributive question is unavailable on a hosted chat API by
-construction, because each requires teacher-forced log-probabilities or white-box access. I
-describe a hybrid estimator that keeps ContextCite's interventional protocol, substitutes an
-LLM-as-judge forced-choice scalar for the unobtainable probability, and replaces Lasso with
-exact leave-one-out. I report the measurements that killed three earlier designs, give the
-resulting algorithm in full, and state plainly what it does and does not license you to
-conclude. The method is deployed in one platform (AKD Labs) but the formulation is
-implementation-independent.
+**Abstract.** Tool-using language agents produce prose whose individual claims may originate in
+retrieved documents, in the agent's own configuration, in earlier conversational turns, or in the
+model's parametric knowledge. Existing agent interfaces record which tools executed, but not which
+part of the context is responsible for which part of the output. That distinction determines
+whether a generated answer can be audited, corrected, or cited. This report formalises that
+problem as **response provenance**: the task of mapping each segment of a generated response to
+the elements of the context that produced it. We distinguish it from two adjacent problems with
+which it is frequently conflated, namely the auditing of agent-declared citations and
+corroborative fact-checking, and show that the three differ in what they can detect. We then
+observe that the methods which address the contributive formulation most faithfully are
+unavailable in the deployment setting most agents occupy: each requires teacher-forced
+log-probabilities or white-box model access, neither of which a hosted inference API exposes. In
+that setting the quantity these methods estimate is not merely expensive but unobservable. We
+therefore propose a black-box estimator that retains an interventional protocol over context
+ablations while substituting a forced-choice judged scalar for the unobtainable probability, and
+replaces sparse regression with exact leave-one-out over coarse sources under a hierarchical
+search. We report the measurements that eliminated three earlier designs, specify the resulting
+algorithm in full, describe an implementation, and state explicitly what its output does and does
+not license a reader to conclude.
 
 <span class="jump">Two interactive pieces sit in the body, both replaying real recorded runs:
-**[Demo B: the end-to-end product flow &rarr;](#sim)** lets you drive the method on an actual agent turn — check
-sources, pick a claim, accept the cost, read the result — and
-**[Demo A: the algorithm's internals &rarr;](#rp)** steps the estimator through its ablation masks with the
-arithmetic exposed. Neither calls a model; both are safe to click before reading any of the
-formalism.</span>
+**[Demo B: the end-to-end product flow &rarr;](#sim)** lets you drive the method on an actual agent
+turn, checking sources, selecting a claim, accepting the cost and reading the result.
+**[Demo A: the algorithm's internals &rarr;](#rp)** steps the estimator through its ablation masks
+with the arithmetic exposed. Neither calls a model; both are safe to click before reading any of
+the formalism.</span>
 </div>
 
 ## 1. Introduction
 
-### 1.1 The gap
+Language agents are increasingly used for work whose output is expected to be defensible rather
+than merely plausible: literature synthesis, data discovery, analysis over curated document
+collections. In these settings the agent's answer is not the end of the task but the beginning of
+one, since somebody must decide whether to act on it. That decision requires knowing where the
+answer came from.
 
-Give an agent a workspace and a question, and it will produce something fluent. Modern agent
-UIs render the tool calls underneath: a card saying `read_file("datasets/lst.md")`, another
-saying `worldview_permalink_tool(...)`. This is *execution* transparency. It tells you what the
-agent did.
+This report is concerned with a specific and, we argue, under-served part of that requirement. Not
+whether an agent's answer is correct, which is a question about the world, but where each part of
+it originated, which is a question about the agent's context and is answerable from records that
+agent systems already keep. We call this **response provenance**, formalise it in §2, and spend the
+remainder of the report on the observation that the deployment setting most agents occupy makes the
+standard formulation of the problem unobservable, and on what can be measured in its place.
 
-It does not tell you what the agent's *words* rest on. Consider a response containing:
+### 1.1 Background
 
-> The MOD11A1 product provides daily land surface temperature at 1 km resolution, which is
-> too coarse for neighbourhood-scale urban heat work. I can't certify an official figure for
-> Alabama. In practice I would start with a bounding box of west −88.6, south 30.1.
+A language agent answering a technical question does not draw on a single source. Over the course
+of one turn it may retrieve documents, call tools whose returns enter its context, operate under a
+configuration that constrains what it is permitted to assert, and condition on several turns of
+prior conversation. Its output is a single stretch of prose in which contributions from all of
+these are interleaved, and in which the model's own parametric knowledge is interleaved with them
+indistinguishably.
 
-Four claims, four different provenances. "1 km resolution" may be copied verbatim from a file
-the agent read. "too coarse for urban work" is likely the model's own judgement, present in no
-artifact. "I can't certify an official figure" may be *mandated* by a line in the system prompt
-telling the agent never to assert authoritative statistics. The bounding box may be invented.
-The tool cards distinguish none of these, and the prose gives the reader no way to tell them
-apart — every sentence arrives in the same confident register.
+Current agent interfaces expose the *execution* trace: which tools ran, with which arguments, and
+what they returned. This is a record of the agent's actions. It is not a record of what the
+agent's assertions rest on, and the two are not recoverable from one another. A tool may execute
+and its return may go unused; a claim may be shaped decisively by a configuration rule that
+appears in no tool call at all. Between the execution log and the generated text there is a gap
+that the interface does not cross.
 
-For ordinary chat this is tolerable. For science it is not, for a reason that has little to do
-with hallucination: **an answer whose provenance is unknown cannot be audited, and therefore
-cannot be cited, corrected, or built on.** If a number is wrong, a scientist needs to know
-whether the artifact was wrong, the artifact was misread, or the artifact was ignored — because
-those are three different repairs.
+### 1.2 Motivation
 
-### 1.2 Why "just make the agent cite its sources" is not the answer
+The consequence of that gap is not primarily a matter of hallucination. It is that an assertion
+whose origin is unknown cannot be audited, and an assertion that cannot be audited cannot be
+corrected, cited, or built upon.
 
-The obvious fix is to have the agent emit inline citations. This is what OpenAI's
+Consider what a domain expert must do when an agent returns a value they believe to be wrong.
+Three distinct conditions are consistent with that observation, and each requires a different
+intervention: the governing document was absent from the agent's working set, so it must be
+supplied; the document was present but structured such that the agent misread it, so its structure
+must be revised; or the document was present and legible and the model answered from parametric
+knowledge regardless, so a constraint must be added. These are not variations on one repair. They
+are three separate repairs, and choosing between them requires knowing which of the three
+occurred. Without provenance the expert cannot distinguish them and must proceed by guesswork.
+
+The same gap has a second consequence, at the layer of the artefact rather than the error. A claim
+accompanied by a verified pointer to its origin can be reproduced by a third party and entered
+into a methods section. A claim without one cannot, irrespective of whether it happens to be
+correct. Provenance does not establish that an answer is right; it establishes what would have to
+be examined in order to find out.
+
+### 1.3 The gap in existing approaches
+
+The natural response to the foregoing is to require the agent to cite its own sources inline. This
+is what OpenAI's
 citation-formatting convention supports <span class="cite" data-ref="OpenAI. Citation formatting guide, API documentation. developers.openai.com/api/docs/guides/citation-formatting"><a href="#ref-openai-cite">[1]</a></span>,
 and what deep-research products do.
 
 A 2026 audit of exactly this shows why it is insufficient. Onweller et al.
 <span class="cite" data-ref="Onweller, H., Lumer, E., Huber, A., Ramchandani, P., Subbiah, V. K., &amp; Feld, C. (2026). Cited but Not Verified: Parsing and Evaluating Source Attribution in LLM Deep Research Agents. arXiv:2605.06635."><a href="#ref-cited-not-verified">[2]</a></span>
 parsed and fact-checked the citations that frontier deep-research agents produce. Link validity
-exceeded 94% and topical relevance exceeded 80% — the citations *look* right. Factual support
+exceeded 94% and topical relevance exceeded 80%, so the citations present as sound. Factual support
 was 39–77%. Worse, fact-check accuracy **degraded by roughly 42% as tool calls scaled from 2 to
 150**: doing more research produced less reliable citation.
 
-Two lessons. First, a citation the model *declares* is a claim about provenance, not evidence of
-it — it is generated by the same process, with the same failure modes, as the prose around it.
-Second, declared citations only cover text the model chose to mark. The sentence with no marker
-— the judgement, the caveat, the invented coordinate — remains unexplained, and those are
-precisely the sentences worth interrogating.
+Two conclusions follow. First, a citation the model *declares* is itself a generated claim about
+provenance, produced by the same process and subject to the same failure modes as the prose
+surrounding it; it is a hypothesis about origin rather than evidence of one. Second, declared
+citations cover only the text the model elected to mark. An unmarked sentence, whether a judgement,
+a caveat, or an unsupported quantity, remains unexplained; and those are frequently the sentences
+most in need of examination.
 
-Declared citation also cannot reach two of the three things that actually drive an agent's
-output: its **own instructions** and the **conversation so far**. No citation convention has the
-agent footnote a sentence with "because my system prompt told me to hedge here."
+Declared citation is also structurally incapable of reaching two of the three sources that drive an
+agent's output. It can point to a retrieved document. It cannot point to the agent's own
+configuration, nor to an earlier turn of the conversation, and no citation convention has an agent
+annotate a sentence with the rule that required it.
 
-### 1.3 Contribution
+### 1.4 Contribution
 
-This post sets out:
+This report makes the following contributions:
 
 1. A formalisation of response provenance, and its separation from declared-citation auditing
    and from corroborative fact-checking (§2, §3).
@@ -150,10 +180,22 @@ This post sets out:
 3. A hybrid estimator: ContextCite's interventional protocol, an LLM-as-judge scalar, exact
    leave-one-out, and hierarchical layer-first search (§6), given as complete pseudocode with
    every parameter (§7).
-4. Honest accounting of what the output licenses — including the finding that the central
-   quantity is **unfalsifiable** in this setting, plus a live worked example (§8) and honest limits (§10).
+4. An accounting of what the output licenses, including the finding that the central
+   quantity is **unfalsifiable** in this setting, plus a live worked example (§8) and a statement of limits (§10).
 
 ## 2. Problem formulation
+
+This section fixes the objects the rest of the report reasons about. We define a turn and the
+partition of its context, state what a segment is and what an attribution over segments returns,
+and introduce ablation as the single intervention available to a black-box method. We then
+separate three questions that are routinely treated as one: whether a declared citation holds,
+whether a source supports a claim, and which source caused it. The separation matters because a
+method answering one of them is blind to the failure modes of the others, and much of the design in
+§6 follows from taking it seriously.
+
+Throughout, we assume only what a persisted agent turn ordinarily records: the query, the tool
+calls with their arguments and returns, the agent's configuration, and the prior messages. No
+assumption is made about the model beyond the ability to sample from it.
 
 ### 2.1 The turn
 
@@ -167,43 +209,43 @@ response. The context is an ordered collection of **sources**
 $$C = (c_1, c_2, \dots, c_d)$$
 
 Critically, $C$ is not just retrieved documents. In an agent setting it partitions into exactly
-**three levels of provenance**:
+**three layers of provenance**:
 
 $$C \;=\; C_{\text{tool}} \;\sqcup\; C_{\text{instr}} \;\sqcup\; C_{\text{hist}}$$
 
 <figure>
-  <img src="/img/post-images/2026-07-30-response-provenance/chart-a-context-levels.png" alt="The three levels of response provenance: tools, instructions, history">
-  <figcaption><strong>Figure 1.</strong> The three levels, and the two things that are deliberately not levels. Source ids are globally sequential across all three, so a single ablation-mask index always identifies exactly one source regardless of which level it came from.</figcaption>
+  <img src="/img/post-images/2026-07-30-response-provenance/chart-a-context-layers.png" alt="The three layers of response provenance: tools, instructions, history">
+  <figcaption><strong>Figure 1.</strong> The three layers, and the two things that are deliberately not layers. Source ids are globally sequential across all three, so a single ablation-mask index always identifies exactly one source regardless of which layer it came from.</figcaption>
 </figure>
 
-**Level 1 — tools and artifacts** ($C_{\text{tool}}$). This turn's tool calls, each paired with
+**Layer 1 — tools and artifacts** ($C_{\text{tool}}$). This turn's tool calls, each paired with
 its arguments and its return. One structural point here is easy to get wrong: **a workspace
-artifact is not a fourth level.** An agent does not receive its artifacts through a separate
+artifact is not a fourth layer.** An agent does not receive its artifacts through a separate
 channel; it *reads* them on demand through a console toolset — `read_file`, `ls`, `grep`, `glob`.
 An artifact load is therefore literally a tool call whose arguments carry the path and whose
-return carries the file content. Modelling artifacts as their own level would double-count them
+return carries the file content. Modelling artifacts as their own layer would double-count them
 and leave every attribution ambiguous between the two. They live here, and `ClassifyTool` (§7.1)
 merely labels them `artifact_read` so the interface can name them to a user. The same holds for
-MCP tools, web fetches and web searches: different *kinds* within one level, because they are all
+MCP tools, web fetches and web searches: different *kinds* within one layer, because they are all
 "something the agent went and got during this turn".
 
-**Level 2 — the agent's own instructions** ($C_{\text{instr}}$). The system prompt: role, scope
-limits, refusal rules, output conventions. This is the level no citation convention reaches, and
+**Layer 2 — the agent's own instructions** ($C_{\text{instr}}$). The system prompt: role, scope
+limits, refusal rules, output conventions. This is the layer no citation convention reaches, and
 it is frequently the true cause of a sentence — a hedge, a refusal, an "I can't certify that" is
 more often mandated by a prompt rule than derived from any artifact. It is treated as **one
 indivisible source**: ablation assumes sources are independent, but a system prompt is a single
 instruction set, so deleting one section leaves a prompt the model has never seen the like of and
 the resulting score change reports incoherence rather than attribution.
 
-**Level 3 — the conversation so far** ($C_{\text{hist}}$). Prior user messages and agent replies.
+**Layer 3 — the conversation so far** ($C_{\text{hist}}$). Prior user messages and agent replies.
 A constraint the user set three turns ago — *"only ever use Baldwin County"* — can drive a claim
 in the current turn with no artifact and no instruction involved.
 
-Two things are deliberately **not** levels:
+Two things are deliberately **not** layers:
 
 - **The current user message $q$.** It is the query, held fixed. Ablating it asks "what if the
   user had asked nothing", which is a different question; ContextCite ablates the context, not
-  the query. Treating it as a source hands the history level a spurious effect on every claim.
+  the query. Treating it as a source hands the history layer a spurious effect on every claim.
 - **Attached files whose content the trace does not retain.** The record keeps their *names* but
   not their bytes, so their text cannot be recovered post-hoc. Rather than omit them silently —
   which would make a claim grounded in one read as unsupported for no visible reason — they are
@@ -252,7 +294,7 @@ mush, so:
 The distinction is not academic. Suppose the agent misreads a file and states 1 km where the
 file says 5 km. A corroborative method finds **nothing** — no source supports "1 km", so the
 claim looks unsupported and unexplained. A contributive method points straight at the misread
-passage. The failure mode that matters most for science is exactly the one corroboration is
+passage. The failure mode of greatest consequence is the one corroboration is
 blind to.
 
 Conversely, contributive attribution alone yields a fact about model mechanics ("source 5 caused
@@ -264,7 +306,18 @@ interrogate that source directly.
 
 ## 3. Related work
 
-### 3.1 The contributive line
+Work bearing on response provenance divides along the distinction drawn in §2.4. One line asks
+which part of the context *caused* a generation and answers it by intervening on the context; a
+second asks whether a claim is *supported* by a given source and answers it by comparison; a third,
+more recent, audits the citations that agents emit of their own accord. The three have different
+requirements and different blind spots. The method proposed here borrows its protocol from the
+first, while being unable to use any of that line's instruments directly.
+
+We review each line in turn, with attention throughout to a property that is rarely stated
+explicitly in this literature but is decisive in practice: what access to the model each method
+presumes.
+
+### 3.1 Contributive attribution
 
 **ContextCite** <span class="cite" data-ref="Cohen-Wang, B., Shah, H., Georgiev, K., &amp; Madry, A. (2024). ContextCite: Attributing Model Generation to Context. arXiv:2409.00729. NeurIPS 2024."><a href="#ref-contextcite">[3]</a></span>
 is the reference formulation. Sources are context sentences. It samples $m \approx 32$ random
@@ -293,7 +346,7 @@ Jensen–Shannon divergence without fine-tuning, gradient computation, or surrog
 Being a mechanistic study of internal behaviour, it presumes access to the model's distributions
 — the opposite of the constraint we operate under.
 
-**TokenShapley** <span class="cite" data-ref="Xiao, Y., Zhu, Y., Samyoun, S., Zhang, W., Wang, J. T., &amp; Du, J. (2025). TokenShapley: Token Level Context Attribution with Shapley Value. arXiv:2507.05261. ACL Findings 2025."><a href="#ref-tokenshapley">[7]</a></span>
+**TokenShapley** <span class="cite" data-ref="Xiao, Y., Zhu, Y., Samyoun, S., Zhang, W., Wang, J. T., &amp; Du, J. (2025). TokenShapley: Token Layer Context Attribution with Shapley Value. arXiv:2507.05261. ACL Findings 2025."><a href="#ref-tokenshapley">[7]</a></span>
 pushes granularity to individual tokens by combining Shapley-value data attribution
 <span class="cite" data-ref="Shapley, L. S. (1953). A Value for n-Person Games. Contributions to the Theory of Games, II, 307–317."><a href="#ref-shapley">[8]</a></span>
 with KNN retrieval, reporting 11–23% accuracy gains for keyword-level attribution — numbers,
@@ -303,7 +356,7 @@ white-box and expensive.
 The frontier is moving *toward* mechanistic, white-box methods. Under an
 API-only, no-new-infrastructure constraint, there is no state-of-the-art method to adopt.
 
-### 3.2 The corroborative line
+### 3.2 Corroborative attribution and its evaluation
 
 Automatic attribution *evaluation* — given a claim and a cited source, is the claim supported? —
 is harder than it looks. **AttributionBench**
@@ -326,7 +379,7 @@ sentence into a checkable claim ("1 km resolution") and a judgement ("too coarse
 work") and let them receive separate verdicts. It is a real improvement over sentence
 granularity and it costs a model call per segment; we treat it as deferred, not dismissed.
 
-### 3.4 Where our problem sits
+### 3.4 Position of the present work
 
 Against §2.4, the 2026 audit <span class="cite" data-ref="Onweller, H., Lumer, E., Huber, A., Ramchandani, P., Subbiah, V. K., &amp; Feld, C. (2026). Cited but Not Verified: Parsing and Evaluating Source Attribution in LLM Deep Research Agents. arXiv:2605.06635."><a href="#ref-cited-not-verified">[2]</a></span>
 answers the declared-citation question: parse what the agent emitted, then check it. It cannot
@@ -335,7 +388,7 @@ history. ContextCite and ARC-JSD answer the contributive question but need acces
 corroborative line answers a different question and is blind to misreads.
 
 The gap is **segment-to-source tracing across all context layers, from generation access
-alone** — which is what the rest of this post builds.
+alone** — which is what the rest of this report builds.
 
 ## 4. Why the state of the art is unavailable
 
@@ -350,14 +403,14 @@ Every method in §3.1 needs one of:
 | ARC-JSD | Next-token distributions, mechanistic access | ✗ |
 | TokenShapley | White-box, datastore, many evaluations | ✗ |
 
-The blocking requirement is subtle and worth stating exactly. ContextCite needs the probability
+The blocking requirement is easily missed, and bears stating exactly. ContextCite needs the probability
 that the model *would have* produced a specific string it did not just produce. That is a
 teacher-forced quantity. Chat completions endpoints return log-probabilities only for tokens
 they **generate**. There is no `echo`. And the natural workaround — put the target in a trailing
 assistant message and read the logprobs of its continuation — fails because the API restarts
 rather than continues a trailing assistant turn.
 
-I verified this directly: prompting with a trailing assistant message `"The three primary colors
+We verified this directly: prompting with a trailing assistant message `"The three primary colors
 are red,"` produced a restarted sentence, not a continuation.
 
 So the scalar at the heart of the best-validated method is not merely expensive here. It is
@@ -410,8 +463,29 @@ sense ContextCite can.
 
 ## 6. Method
 
-The design that survives has four tiers, ordered by cost, and reports rankings rather than
-weights.
+Two constraints established above determine the shape of what follows. From §4, the scalar that
+contributive attribution is defined over cannot be observed through a hosted inference API, so any
+method operating there must substitute something else for it. From §5, three candidate substitutes
+fail for measured reasons: supplying the response prefix leaks the evidence into the prompt,
+similarity between regenerations is too noisy to regress on, and the first-token log-probability of
+a claim carries no signal. What remains is a judged scalar, which is not a probability and does not
+behave like one.
+
+We therefore describe a method that retains the interventional structure of ablation-based
+attribution while accepting a weaker measurement inside it, and which is organised so that the
+weakness is contained rather than propagated. It proceeds in four tiers of increasing cost. The
+first resolves or discards most of a response without calling a model at all (§6.1). The second
+introduces the judged scalar and states what it does and does not measure (§6.2). The third performs
+the attribution itself, by exact leave-one-out over coarse sources under a hierarchical search
+(§6.3, §6.4), together with the test that separates parametric knowledge from redundancy across
+sources (§6.5). The fourth localises a claim to a span of text and verifies that span mechanically
+(§6.6), which is the only step in the method whose output can be checked without trusting a model.
+
+One consequence belongs before the details, because it inverts the emphasis a reader might
+expect. Because the scalar is coarse and corroborative, the ablation results are reported as an
+ordering over sources rather than as weights, and the verified span, not the ablation, carries the
+answer that a reader can act on. §6.7 then describes an optional probe that addresses the
+contributive question directly, at higher cost and with a strictly weaker conclusion.
 
 ### 6.1 Tier 0 — free gating
 
@@ -433,7 +507,7 @@ source $c$. It counts as a quote iff
 
 $$|b| \;\ge\; \ell_{q} \quad\wedge\quad \frac{|b|}{|r_k|} \;\ge\; \rho$$
 
-with $\ell_q = 40$ characters and $\rho = 0.6$. Both conditions are load-bearing. Length alone
+with $\ell_q = 40$ characters and $\rho = 0.6$. Both conditions are required. Length alone
 fails badly in scientific domains: `MODIS_Combined_L3_IGBP_Land_Cover_Type_Annual` is 45
 characters, so any sentence merely *mentioning* a layer ID cleared an absolute threshold and was
 filed as "quoted", resolving it for free — while its actual claim ("…at the 2015 timestamp")
@@ -472,7 +546,7 @@ cheaper and assumption-free. For source $i$:
 
 $$\Delta_i \;=\; s(\mathbf{1}) \;-\; s(\mathbf{1} \ominus i)$$
 
-at $d+2$ calls, against 26–34 for a random-mask regression. Lasso earns its keep when you cannot
+at $d+2$ calls, against 26–34 for a random-mask regression. Lasso is the right choice when one cannot
 afford $d$ measurements; here you can.
 
 ### 6.4 Hierarchical search: layers before sources
@@ -553,9 +627,9 @@ $$\mathrm{ver}(\hat{q}, c) \;=\; \mathbb{1}\big[\, |\hat{q}| \ge \ell_{\min} \;\
 
 where $\sqsubseteq$ is substring containment. If verification fails the verdict is **downgraded to
 silent** and the quote discarded. A fabricated quote inside a provenance UI is worse than no
-quote: it manufactures precisely the false confidence the feature exists to prevent.
+quote: it manufactures the false confidence the method exists to prevent.
 
-Two details earned by measurement. The escape decoding is load-bearing, not cosmetic: tool
+Two details earned by measurement. The escape decoding is functional rather than cosmetic: tool
 returns frequently arrive as JSON whose payload is itself a JSON string, so stored text contains
 `\"layergroup\": \"Aerosol Albedo\"` while any readable quote says `"layergroup": "Aerosol
 Albedo"`. Without decoding, verification could never succeed against most MCP tools or any web
@@ -570,7 +644,7 @@ whether any instruction *directs* this response resolves a refusal to the exact 
 
 ### 6.7 The contributive probe (opt-in, directional)
 
-Everything above is corroborative. For the genuinely contributive question — *would the agent
+Everything above is corroborative. For the contributive question — *would the agent
 still make this claim without that source?* — there is one intervention the API permits:
 remove the source, **regenerate the answer from the query alone**, and test whether the claim
 reappears.
@@ -681,7 +755,7 @@ ALGORITHM 1  BuildLayeredCorpus(model_messages, response_payload,
 48  return units
 ```
 
-Three details that are load-bearing:
+Three details determine correctness:
 
 - **Ids are globally sequential across layers** (`s0, s1, …`). A mask index must map to exactly
   one unit regardless of which layer it came from.
@@ -736,7 +810,7 @@ ALGORITHM 2  Anchors(text) -> [token]
 
 Every guard here was forced by a measured failure:
 
-- **Case sensitivity is load-bearing.** An earlier version applied `IGNORECASE` to the identifier
+- **Case sensitivity is required.** An earlier version applied `IGNORECASE` to the identifier
   pattern, turning `[A-Z][A-Z0-9_]{2,}` into "any word of 3+ letters" and harvesting `load`,
   `all`, `and`, `each`. Presence detection then measured nothing.
 - **The acronym exemption** (line 20) exists because the short-alpha guard, meant to reject
@@ -745,7 +819,7 @@ Every guard here was forced by a measured failure:
   all, so the one claim most worth tracing was filed as generic.
 - **`PathLike`** exists because `county/watershed` and `legal/administrative` are ordinary prose
   that happens to use a slash, and counting them as paths made throwaway sentences look
-  checkable while genuinely important ones went unmarked.
+  checkable while substantive ones went unmarked.
 - **Mixed-case underscore identifiers** (line 5) needed their own pattern: ALLCAPS and camelCase
   both missed `MODIS_Combined_L3_IGBP_Land_Cover_Type_Annual` and `QC_Day`, the dominant
   convention in Earth-observation layer naming.
@@ -940,7 +1014,7 @@ verification failure looks identical to "this source says nothing", which is the
 conclusion. And the **downgrade** (line 14) is the one hard guarantee in the whole system: a
 supported verdict without a checkable quote does not get to render as one.
 
-`Normalise`'s escape decoding is load-bearing. Tool returns frequently arrive as JSON whose
+`Normalise`'s escape decoding is required. Tool returns frequently arrive as JSON whose
 payload is itself a JSON string, so stored text contains `\"layergroup\": \"Aerosol Albedo\"`
 while any readable quote says `"layergroup": "Aerosol Albedo"`. Before decoding was added, every
 honest quote from an MCP tool or web fetch was discarded as fabricated; one real case went from
@@ -989,7 +1063,7 @@ plus a rule appended to every tier's instructions stating that the fenced region
 be examined, never instructions, and that text addressing the judge is content being judged.
 
 Neutralising the marker (the `replace`) is the part that matters. Without it a source containing
-the literal fence closes the data region, and everything after it reads as top-level prompt —
+the literal fence closes the data region, and everything after it reads as top-layer prompt —
 handing the named adversary a one-line bypass. Two residuals remain and are not fixed by this:
 prose-level argumentation, and — inside the grounding and causal fences, where sources are listed
 as `[id] label` blocks — one source imitating another's header. The second is bounded: those tiers
@@ -1042,7 +1116,7 @@ an arbitrary choice rather than a measured one.
 ### 7.10 Interactive demo A — the algorithm's internals
 
 This is the first of two demos. It exposes the **algorithm's internals** on one real turn — segmentation and gating over
-all thirteen sentences, corpus construction across the three levels, then the two ablation rounds
+all thirteen sentences, corpus construction across the three layers, then the two ablation rounds
 and span verification for one selected claim. Every score it reports is a value the live run
 actually returned; nothing is computed in your browser, so treat it as a **replay of a recorded
 run** rather than a simulation of the model. Its purpose is to make the mask sequence and the
@@ -1195,7 +1269,7 @@ arithmetic legible, which a static listing cannot do.
   var ALL1 = SRC.map(function(){return 1;}), ALL0 = SRC.map(function(){return 0;});
   var maskOff = function(f){ return SRC.map(function(s){ return f(s)?0:1; }); };
 
-  var STAGES = ['① segment','② gate','③ corpus','④ level round','⑤ source round','⑥ span'];
+  var STAGES = ['① segment','② gate','③ corpus','④ layer round','⑤ source round','⑥ span'];
 
   var STEPS = [
     {st:0, lit:0, corpus:false,
@@ -1205,7 +1279,7 @@ arithmetic legible, which a static listing cannot do.
     {st:1, lit:13,
      log:'<b>Gate result.</b> <code>3 traceable · 1 quoted · 1 offer · 8 nothing specific</code>. Only the 3 traceable segments earn an affordance — no model call has been made yet, and 10 of 13 sentences are resolved or excluded for free.'},
     {st:2, corpus:true, mask:ALL1,
-     log:'<b>Build corpus (Algorithm 1).</b> 8 sources across three levels. Note the tool source <i>is</i> the artifact access — a workspace read is a tool call, not a fourth level. The 6 history units exclude the current query, which is held fixed.'},
+     log:'<b>Build corpus (Algorithm 1).</b> 8 sources across three layers. Note the tool source <i>is</i> the artifact access — a workspace read is a tool call, not a fourth layer. The 6 history units exclude the current query, which is held fixed.'},
     {st:3, mask:ALL1, sel:true,
      log:'<b>Select a claim.</b> The reader clicks the non-authoritative note. Class <code>disclaimer</code> → traceable regardless of anchors, because its provenance is a directive rather than a fact.'},
     {st:3, mask:ALL1, score:5.00, s1:5.00,
@@ -1215,21 +1289,21 @@ arithmetic legible, which a static listing cannot do.
     {st:3, mask:maskOff(function(s){return s.lvl==='tool';}), probe:'tool', score:9.00, dt:-4.00,
      log:'<b>Ablate TOOLS.</b> s = <b>9.00</b> → Δ = 5.00 − 9.00 = <b>−4.00</b>. Removal <i>raised</i> apparent support: role <code>distractor</code>. The tool return was diluting the evidence for this particular sentence.'},
     {st:3, mask:maskOff(function(s){return s.lvl==='instr';}), probe:'instr', score:9.00, di:-4.00,
-     log:'<b>Ablate INSTRUCTIONS.</b> s = <b>9.00</b> → Δ = <b>−4.00</b>, also <code>distractor</code>. Two levels now tie — precisely the situation ablation cannot resolve by itself.'},
+     log:'<b>Ablate INSTRUCTIONS.</b> s = <b>9.00</b> → Δ = <b>−4.00</b>, also <code>distractor</code>. Two layers now tie — precisely the situation ablation cannot resolve by itself.'},
     {st:3, mask:maskOff(function(s){return s.lvl==='hist';}), probe:'hist', score:5.00, dh:0.00,
      log:'<b>Ablate HISTORY.</b> s unchanged at <b>5.00</b> → Δ = <b>+0.00</b>, <code>irrelevant</code>. Five calls have just eliminated 6 of the 8 sources from the expensive round.'},
     {st:4, mask:ALL1,
-     log:'<b>Contributing levels.</b> |Δ| ≥ τ for tools and instructions → round 2 tests only those 2 sources. <code>redundant = false</code>, <code>internal_knowledge = false</code>.'},
+     log:'<b>Contributing layers.</b> |Δ| ≥ τ for tools and instructions → round 2 tests only those 2 sources. <code>redundant = false</code>, <code>internal_knowledge = false</code>.'},
     {st:4, mask:maskOff(function(s){return s.lvl!=='hist';}), score:9.00,
      log:'<b>Round 2 anchor.</b> All candidates off at once. History stays <i>present</i> in every round-2 mask — context the model still sees, but not a candidate under test.'},
     {st:4, mask:maskOff(function(s){return s.id==='s0';}), probe:'tool', score:5.00,
      log:'<b>Round 2 LOO, s0.</b> Δ = <b>+0.00</b>. Per-source ablation adds nothing; the tie survives to source level.'},
     {st:4, mask:maskOff(function(s){return s.id==='s1';}), probe:'instr', score:5.00,
-     log:'<b>Round 2 LOO, s1.</b> Δ = <b>+0.00</b>. Ablation has now told us <i>which levels</i> and nothing more. A system reporting only weights would stop here and report noise.'},
+     log:'<b>Round 2 LOO, s1.</b> Δ = <b>+0.00</b>. Ablation has now told us <i>which layers</i> and nothing more. A system reporting only weights would stop here and report noise.'},
     {st:5, mask:ALL1, done:true,
      log:'<b>Span localisation (Algorithm 5) — unconditional.</b> One call per source over all 8, retry-inclusive. On s1 the model returns a span, <code>VerifyQuote</code> normalises it and finds it in the source at <b>lines 64–66</b>: <i>“## Non-authoritative communication — Use neutral language; avoid authoritative framing. — Always include a non-authoritative disclaimer in the user-facing narrative.”</i> Verdict <code>directs this response</code>, confidence 0.72. <b>The quote is the answer; the drops were the annotation.</b>'},
     {st:5, mask:ALL1, calls:31,
-     log:'<b>Accounting (§7.9).</b> This replay shows one representative call per stage; the real run made <b>31</b> — 5 in the level round, 10 in the source round, 16 span checks over 8 sources counted retry-inclusive. That is (3+2) + (8+2) + 2×8, exactly the formula.'}
+     log:'<b>Accounting (§7.9).</b> This replay shows one representative call per stage; the real run made <b>31</b> — 5 in the layer round, 10 in the source round, 16 span checks over 8 sources counted retry-inclusive. That is (3+2) + (8+2) + 2×8, exactly the formula.'}
   ];
 
   var i=0, calls=0, litN=0, corpusOn=false, selOn=false;
@@ -1305,18 +1379,18 @@ arithmetic legible, which a static listing cannot do.
 </script>
 
 Three things are worth watching. The free tier resolves or excludes ten of the thirteen sentences
-before any model call exists, which is what makes the metered tiers affordable at all. The level
+before any model call exists, which is what makes the metered tiers affordable at all. The layer
 round then eliminates six of eight sources for five calls, because history is most of the corpus
 and none of it matters here. And the ending is instructive: after ten calls the ablation numbers
-are a tie between two levels at $-4.00$ and two per-source drops of $+0.00$ — ablation has
-localised the claim to *a pair of levels* and refuses to go further. The answer comes from span
+are a tie between two layers at $-4.00$ and two per-source drops of $+0.00$ — ablation has
+localised the claim to *a pair of layers* and refuses to go further. The answer comes from span
 verification, which is exactly why Algorithm 4 never makes it conditional.
 
 ## 8. Implementation
 
-The formulation above is implementation-independent; the deployment I built it in is AKD Labs, a
-platform for agent co-design in scientific workflows. Three properties of that implementation are
-worth reporting because they generalise.
+The formulation above is implementation-independent. The deployment described here is AKD Labs, a
+platform for agent co-design in scientific workflows. Three properties of that implementation
+generalise beyond it and are reported for that reason.
 
 **It is strictly read-only and post-hoc.** Every source is recovered from rows already stored:
 the native message list with tool calls paired to returns, the agent configuration, and the
@@ -1336,7 +1410,7 @@ snapshot.
 
 ### 8.1 A worked example, end to end
 
-The method described in this post was developed with the **Accelerated Knowledge Discovery (AKD)
+The method described in this report was developed with the **Accelerated Knowledge Discovery (AKD)
 team at NASA ODSI**, inside the AKD agent design environment
 <span class="cite" data-ref="AKD Labs — agent co-design environment, NASA ODSI Accelerated Knowledge Discovery team. labs.akd.odsi.io"><a href="#ref-akdlabs">[12]</a></span><span class="cite" data-ref="AKD Labs source repository. github.com/NASA-IMPACT/akd-labs"><a href="#ref-akdrepo">[13]</a></span>,
 and the worked example below runs against that team's **MIO Worldview Agent** — a NASA
@@ -1345,7 +1419,7 @@ public-facing instance of the same agent is available as a Hugging Face Space
 <span class="cite" data-ref="MIO Agent — public instance, ai-agents-for-science organisation on Hugging Face. huggingface.co/spaces/ai-agents-for-science/mio-agent"><a href="#ref-miospace">[14]</a></span>,
 so the agent itself can be inspected independently of this write-up.
 
-Everything below is a single live run captured while writing this post. The user had asked the
+Everything below is a single live run captured while writing this report. The user had asked the
 agent to list available guardrails; the agent answered with a Worldview permalink and an
 explanation of the MODIS annual land-cover layer.
 
@@ -1379,7 +1453,7 @@ Est. cost         ~$0.164
   read as ungrounded.
 ```
 
-The call count is a live check on §7.9: three levels present and 8 sources give
+The call count is a live check on §7.9: three layers present and 8 sources give
 $(3+2) + (8+2) + 2\times 8 = 31$, exactly what the gate reports. The truncation warning is the
 disclosure required by §6.8 — two of the eight sources exceed the 700-token window, and the
 interface says so rather than letting a miss look like an absence.
@@ -1396,7 +1470,7 @@ interface says so rather than letting a miss look like an absence.
 > comparison rather than a definitive change calculation.*
 
 and the run returned $s(\mathbf{1}) = 5.00$, $s(\mathbf{0}) = 1.00$, hence $\Gamma = 4.00$ — well
-clear of $\tau_\Gamma$, so this is *not* internal knowledge. The instructions level resolved to a
+clear of $\tau_\Gamma$, so this is *not* internal knowledge. The instructions layer resolved to a
 verified quote:
 
 ```
@@ -1412,7 +1486,7 @@ Agent instructions (1)
 
 <figure>
   <img src="/img/post-images/2026-07-30-response-provenance/fig3-instructions.png" alt="Layer to source to span tree showing the disclaimer resolved to lines 64-66 of the system prompt">
-  <figcaption><strong>Figure 4.</strong> One traced claim as a level → source → span tree, and the case declared citations cannot reach: a hedge resolved to the governing rule in the agent's own system prompt, quoted with line numbers. Asking whether the prompt <em>states</em> the claim finds nothing — the directive prompt variant of §6.6 asks whether an instruction <em>directs</em> it, and finds the rule. The unversioned warning is rendered inline, not hidden.</figcaption>
+  <figcaption><strong>Figure 4.</strong> One traced claim as a layer → source → span tree, and the case declared citations cannot reach: a hedge resolved to the governing rule in the agent's own system prompt, quoted with line numbers. Asking whether the prompt <em>states</em> the claim finds nothing — the directive prompt variant of §6.6 asks whether an instruction <em>directs</em> it, and finds the rule. The unversioned warning is rendered inline, not hidden.</figcaption>
 </figure>
 
 This is the demonstration that motivates the whole design. The sentence is a hedge; no artifact
@@ -1420,22 +1494,22 @@ states it; a corroborative sweep over the workspace would return nothing; and no
 scheme would ever footnote it — yet its cause is sitting in the agent's own configuration at lines
 64–66, and the method retrieves it with a mechanically verified quote.
 
-**Step 4 — and an honest complication.** The level drops were *negative*: both tools and
+**Step 4: a complication.** The layer drops were *negative*: both tools and
 instructions scored $\Delta_L = -4.00$. Removing either **raised** apparent support, from 5.00 to
-9.00. This is the distractor pattern of §6.5, and it replicated here on both levels.
+9.00. This is the distractor pattern of §6.5, and it replicated here on both layers.
 
 <figure>
   <img src="/img/post-images/2026-07-30-response-provenance/chart-d-layer-profile.png" alt="Bar chart of measured layer drops: tools -4.00, instructions -4.00, history +0.00">
-  <figcaption><strong>Figure 5.</strong> Measured level profile for the claim above. Negative drops mean removal <em>increased</em> apparent support — with the full corpus present the judge answered 5 (partial), and with either level removed it answered 9. The judge is hedging because most of the corpus is irrelevant to a sentence whose cause is a prompt rule, not a fact.</figcaption>
+  <figcaption><strong>Figure 5.</strong> Measured layer profile for the claim above. Negative drops mean removal <em>increased</em> apparent support — with the full corpus present the judge answered 5 (partial), and with either layer removed it answered 9. The judge is hedging because most of the corpus is irrelevant to a sentence whose cause is a prompt rule, not a fact.</figcaption>
 </figure>
 
 Read carefully, this is not a failure — it is the argument for the design. The ablation numbers
-alone would be *confusing*: two levels tied at $-4.00$, nothing "grounding" anything. The **quote**
+alone would be *confusing*: two layers tied at $-4.00$, nothing "grounding" anything. The **quote**
 gave the exact, checkable answer. This is precisely why §7.4 runs span localisation
 unconditionally and treats the drop as an annotation on the quote rather than the other way
 round. A system that reported only ablation weights here would have reported noise.
 
-### 8.2 A second claim: the tools level, and redundancy
+### 8.2 A second claim: the tools layer, and redundancy
 
 The same session, same corpus, a different sentence — the layer identification:
 
@@ -1444,8 +1518,8 @@ The same session, same corpus, a different sentence — the layer identification
 The cost gate is identical (8 sources, 31 calls, ~$0.164, same corpus), but the outcome is a
 different branch of §6.5 entirely: $s(\mathbf{1}) = 9.00$, $s(\mathbf{0}) = 1.00$, so
 $\Gamma = 8.00$ — the strongest context effect observed anywhere in this work — while **every
-level drop is exactly $+0.00$**. That is the redundancy region: removing the whole context changed
-the answer decisively, but removing any single level changed nothing, because more than one level
+layer drop is exactly $+0.00$**. That is the redundancy region: removing the whole context changed
+the answer decisively, but removing any single layer changed nothing, because more than one layer
 carries the claim independently. Round 2 is therefore skipped as uninformative rather than
 because there was nothing to find, and the interface says so:
 
@@ -1459,39 +1533,39 @@ because they would read zero too, so the quotes are the answer here.
 
 <figure>
   <img src="/img/post-images/2026-07-30-response-provenance/fig5-tools-redundant.png" alt="The redundancy verdict, with the tool return quoted at lines 26-30">
-  <figcaption><strong>Figure 6.</strong> The redundancy branch, and the tools level positively grounding a claim. Γ = 8.00 with every level drop at +0.00. The tool return is quoted at lines 26–30 — the raw <code>search_worldview_layers</code> payload containing <code>"layer_id": "MODIS_Combined_L3_IGBP_Land_Cover_Type_Annual"</code> — with verdict <em>states the claim</em> at confidence 0.86.</figcaption>
+  <figcaption><strong>Figure 6.</strong> The redundancy branch, and the tools layer positively grounding a claim. Γ = 8.00 with every layer drop at +0.00. The tool return is quoted at lines 26–30 — the raw <code>search_worldview_layers</code> payload containing <code>"layer_id": "MODIS_Combined_L3_IGBP_Land_Cover_Type_Annual"</code> — with verdict <em>states the claim</em> at confidence 0.86.</figcaption>
 </figure>
 
 Three things in this result are worth drawing out.
 
-**The tools level grounds it, with a byte-exact quote.** The span check returns lines 26–30 of the
+**The tools layer grounds it, with a byte-exact quote.** The span check returns lines 26–30 of the
 `search_worldview_layers` return: `"layer_id": "MODIS_Combined_L3_IGBP_Land_Cover_Type_Annual",
 "platform": "", "bm25_score": 1.0, "instrument": "modis", "description": "The Terra and Aqua
 combined Moderate Resolution Imaging Spectroradiometer (MODIS) Land Cover Type (MCD12Q1) Version
 6.1 data product provides global land cover types at yearly intervals.` Verdict: *states the
-claim*, confidence 0.86. Note that this is JSON, and the quote verified — which is exactly the
+claim*, confidence 0.86. Note that this is JSON, and the quote verified — which is the
 escape-decoding path of §6.6 doing its job. Before that normalisation existed, every quote from a
 tool return of this shape was discarded as fabricated.
 
-**The history level also carries it.** `agent replied · 3 turns ago` quotes *"showing the **MODIS
+**The history layer also carries it.** `agent replied · 3 turns ago` quotes *"showing the **MODIS
 annual land cover classification (IGBP)**"* at line 2, also *states the claim* at 0.86. The agent
-had already named this layer earlier in the conversation, so the claim is genuinely over-determined
+had already named this layer earlier in the conversation, so the claim is over-determined
 — present in the tool return *and* in the prior turn. This is what redundancy means concretely,
 and it is why a single-winner attribution would have been arbitrary here.
 
-**The instructions level correctly abstains.** *"no instruction here bears on this"*, confidence
+**The instructions layer correctly abstains.** *"no instruction here bears on this"*, confidence
 0.77. Compare §8.1, where the same source was the whole answer. The directive framing of §6.6 is
 not biased toward finding a rule; on a factual claim it declines.
 
 Taken together with §8.1, the two claims exercise three of the outcomes the method can return —
-attributed to instructions, redundant across levels, and grounded in a tool return — over the same
-corpus, with the level drops informative in one case and uniformly zero in the other. In both, the
+attributed to instructions, redundant across layers, and grounded in a tool return — over the same
+corpus, with the layer drops informative in one case and uniformly zero in the other. In both, the
 verified quote is what carries the answer.
 
 ### 8.3 A third claim: internal knowledge, and a failed attempt at a contradiction
 
 The two claims above both had a cause inside the turn. The remaining branch of §6.5 is the one
-where nothing does. To exercise it deliberately I asked the same agent, in the same conversation:
+where nothing does. To exercise it deliberately we asked the same agent, in the same conversation:
 
 > *Without calling any tools, answer in exactly one sentence from your own knowledge: what does the
 > acronym NDVI stand for?*
@@ -1502,7 +1576,7 @@ genuinely parametric even though its subject is not. The agent answered *"NDVI s
 **Normalized Difference Vegetation Index**."* with zero tool calls.
 
 The result is unambiguous: $s(\mathbf{1}) = s(\mathbf{0})$, giving $\Gamma = 0.00$ exactly, with
-both surviving levels at $+0.00$.
+both surviving layers at $+0.00$.
 
 <figure>
   <img src="/img/post-images/2026-07-30-response-provenance/fig6-internal-knowledge.png" alt="The internal-knowledge verdict with a context effect of exactly zero">
@@ -1510,14 +1584,14 @@ both surviving levels at $+0.00$.
 </figure>
 
 This turn also produced an incidental confirmation of the cost model under a different corpus
-shape. With no tool calls there are only **two** levels present, and eleven sources across them, so
+shape. With no tool calls there are only **two** layers present, and eleven sources across them, so
 $(2+2) + (11+2) + 2 \times 11 = 39$ — exactly the figure the cost gate reported. The $|\mathcal{L}|$
 term is not decorative.
 
 **The attempt at a contradiction failed, and the failure is informative.** `contradicted` is the
-verdict §6.6 argues earns the span check its keep, and it is the one outcome I could not produce.
+verdict §6.6 argues earns the span check its keep, and it is the one outcome we could not produce.
 The natural route is a genuine agent misread, which by definition cannot be summoned on demand, so
-I tried to plant one — asking for a caption asserting that the annual land-cover layer is *updated
+we tried to plant one — asking for a caption asserting that the annual land-cover layer is *updated
 monthly*, which directly contradicts the `"yearly intervals"` string sitting in the tool return
 quoted in §8.2. The agent declined:
 
@@ -1526,7 +1600,7 @@ quoted in §8.2. The agent declined:
 So the demonstration is unavailable for a reason worth recording: on this agent, the response-side
 route to a contradiction is closed by the agent's own guardrails. Producing one would require
 planting the mismatch on the *artifact* side instead — changing a value in the workspace after the
-turn ran — which is a different experiment and arguably a dishonest one, since it manufactures a
+turn ran — which is a different experiment, and one that manufactures a
 disagreement rather than observing it. `contradicted` therefore remains **verified in unit tests
 and unobserved in the wild**, and §10 should be read with that gap in mind.
 
@@ -1539,7 +1613,7 @@ quote and verdict is what the live run returned; no model is called. The second 
 screenshot of the real UI in the same state, if you want to confirm the replica is faithful.
 
 All three recorded outcomes are selectable from the **claim** dropdown — the hedge (§8.1,
-instructions), the layer identification (§8.2, redundant across levels) and the NDVI acronym
+instructions), the layer identification (§8.2, redundant across layers) and the NDVI acronym
 (§8.3, internal knowledge, from a separate turn). **Play** advances the four states at about a
 second each; Step and To end are there if you would rather drive it. Where Demo A (§7.10) shows the
 algorithm's internals — masks, scalars, drops — this is what a user actually sees and clicks.
@@ -1682,7 +1756,7 @@ algorithm's internals — masks, scalars, drops — this is what a user actually
     ['1', 'Click <b>Check sources</b> below. This runs the free gate — segmentation and classification, <b>no model calls</b>.', 'sim-check'],
     ['2', 'Three sentences are now dotted-underlined: those earned an affordance. <b>Click one</b> to select a claim (or use the <b>claim</b> selector above).', null],
     ['3', 'Read the estimate — 8 sources, 31 calls, and a truncation disclosure — then click <b>Run</b>.', 'sim-run'],
-    ['4', 'Done. Expand a level to see its verified quote and line numbers. Switch the <b>claim</b> selector to compare a redundant claim and an internal-knowledge one.', null]
+    ['4', 'Done. Expand a layer to see its verified quote and line numbers. Switch the <b>claim</b> selector to compare a redundant claim and an internal-knowledge one.', null]
   ];
   function guide(i){
     var g=GUIDE[i]; if(!g) return;
@@ -1793,8 +1867,8 @@ algorithm's internals — masks, scalars, drops — this is what a user actually
   }
 
   // Both outcomes are real runs against the same corpus. t3 (the hedge) attributes to the
-  // instructions level; t1 (the layer identification) lands in the redundancy region with every
-  // level drop at zero and two levels independently quoting the claim.
+  // instructions layer; t1 (the layer identification) lands in the redundancy region with every
+  // layer drop at zero and two layers independently quoting the claim.
   var RES = {
     t3: {head:'Support 5.00 with everything · 1.00 with nothing · effect 4.00', note:null,
       tools:{d:'−4.00', body:'<div class="sim-src">search_worldview_layers(forest non-forest mask annual land cover…)</div>'+
@@ -1923,12 +1997,12 @@ would be indistinguishable from no badges at all.
 
 <figure>
   <img src="/img/post-images/2026-07-30-response-provenance/chart-c-call-complexity.png" alt="Call complexity comparison across number of sources">
-  <figcaption><strong>Figure 9.</strong> Cost per traced claim. Note honestly that below about 12 sources the hierarchical scheme costs <em>more</em> calls than a flat leave-one-out, because it pays for a level round and for retry-inclusive span checks. What it buys is a bounded ceiling as the corpus grows, plus the level-level answer that flat LOO cannot produce. ContextCite's 34 is flat but presumes access this setting does not have (§4). The marked point is the live run.</figcaption>
+  <figcaption><strong>Figure 9.</strong> Cost per traced claim. Note that below about 12 sources the hierarchical scheme costs <em>more</em> calls than a flat leave-one-out, because it pays for a layer round and for retry-inclusive span checks. What it buys is a bounded ceiling as the corpus grows, plus the layer-layer answer that flat LOO cannot produce. ContextCite's 34 is flat but presumes access this setting does not have (§4). The marked point is the live run.</figcaption>
 </figure>
 
 <figure>
   <img src="/img/post-images/2026-07-30-response-provenance/chart-e-decision-regions.png" alt="Decision regions in terms of total context effect and maximum layer drop">
-  <figcaption><strong>Figure 10.</strong> The decision rule of §6.5 as regions. The vertical boundary separates internal knowledge from context-driven claims; the horizontal one separates a claim some level is responsible for from one carried redundantly by several. The live claim sits in the attributed region.</figcaption>
+  <figcaption><strong>Figure 10.</strong> The decision rule of §6.5 as regions. The vertical boundary separates internal knowledge from context-driven claims; the horizontal one separates a claim some layer is responsible for from one carried redundantly by several. The live claim sits in the attributed region.</figcaption>
 </figure>
 
 ## 9. Applications
@@ -1958,9 +2032,9 @@ rather than choosing between contributive and corroborative methods.
 A second application follows from the fact that attribution accumulates. Where an agent's
 specification is itself an accreting tree of artifacts — the case in co-design workflows, where
 SMEs add scope documents, examples and constraints over many sessions — attribution across turns
-separates specification that is load-bearing from specification that is merely present. This is
+separates specification that is in use from specification that is merely present. This is
 ContextCite's context-pruning application redirected from retrieval corpora to specification
-design, and it is the mechanism by which a growing prompt-and-artifact tree can be kept honest
+design, and it is the mechanism by which a growing prompt-and-artifact tree can be pruned
 rather than simply growing.
 
 The third application is the narrowest and the most consequential for scientific use. A claim
@@ -1978,7 +2052,7 @@ the quantity this method is a proxy for has no ground truth in this setting. Con
 attribution is defined against the probability the model assigns to a supplied target, hosted chat
 endpoints do not return that probability, and validating an approximate scalar against
 leave-one-out of the same approximate scalar establishes self-consistency rather than faithfulness.
-Every accuracy claim in this post should be read with that constraint in front of it. Were a
+Every accuracy claim in this report should be read with that constraint in front of it. Were a
 scoring-capable endpoint to become available, ContextCite proper becomes computable and this design
 should be re-evaluated against it rather than defended.
 
@@ -2004,7 +2078,7 @@ explaining, and a purely corroborative method would miss. It is verified in unit
 agent misread, which cannot be summoned on demand, and the planted alternative was refused by the
 agent as factually incorrect. So of the four outcomes the decision rule can return, three are
 demonstrated live in §8 and the fourth — the one that matters most for catching errors — rests on
-tests alone. Any claim in this post about the value of the span check should be read with that
+tests alone. Any claim in this report about the value of the span check should be read with that
 asymmetry in view.
 
 Three limitations concern what is being measured rather than how well. Attribution describes the
@@ -2040,7 +2114,7 @@ tool returns** into distinct sources would make "the agent chose the wrong date"
 from "the file says X", a distinction the current unit conflates because arguments and returns are
 folded into one scorable block (§7.1).
 
-A complementary direction is worth stating precisely because this post has argued against declared
+A complementary direction bears stating, precisely because this report has argued against declared
 citations as a *substitute*. Injecting source identifiers into tool returns and requesting inline
 markers would yield exact character offsets nearly for free, at the cost of changing what the
 agent generates. Declared citations verified post-hoc by the machinery of §6.6 are strictly
@@ -2060,16 +2134,16 @@ people it was designed for.
 
 Finally, the work this method most needs is not architectural. Every threshold in §7.8 —
 $\tau$, $\tau_\Gamma$, $\theta$, the verbatim pair $(\ell_q, \rho)$ — was set by inspection on a
-small number of real turns. None is calibrated against annotated ground truth, and the honest
-characterisation of the current state is that the algorithm is specified and the constants are
-folklore. Establishing an annotated set of agent turns with per-sentence provenance labels, and
+small number of real turns. None is calibrated against annotated ground truth. The current state is
+therefore one in which the algorithm is specified and its constants are not. Establishing an
+annotated set of agent turns with per-sentence provenance labels, and
 fitting these thresholds against it, would convert a set of defensible guesses into a measured
 operating point — and would incidentally provide the first real test of whether the corroborative
 proxy tracks the contributive quantity it stands in for.
 
 ## 12. Reproducibility and credit
 
-**What is reproducible from this post.** §7 is the whole method: every algorithm, every threshold,
+**What is reproducible from this report.** §7 is the whole method: every algorithm, every threshold,
 every prompt structure. It depends on nothing but a chat-completions endpoint that can return
 structured output, and it is deliberately implementation-independent — the formulation assumes
 only that you can recover a turn's tool calls, its system prompt, and its prior messages from
@@ -2087,7 +2161,7 @@ workspace, so the exact numbers — $\Gamma = 4.00$, the quote at lines 64–66 
 re-derivable by a third party without that workspace and that system prompt. The screenshots are
 illustrations of a working system rather than an evaluation, and the measurements in §5, §6 and §8
 are observations from a handful of turns: enough to eliminate three designs and to demonstrate
-that the instructions level resolves, nowhere near enough to constitute a benchmark. Nothing here
+that the instructions layer resolves, nowhere near enough to constitute a benchmark. Nothing here
 is calibrated (§11).
 
 **Credit.** This work was done with the NASA ODSI **Accelerated Knowledge Discovery team**, whose
@@ -2109,7 +2183,7 @@ stable-but-coarse judged scalar for the unobtainable probability, replace the re
 exact leave-one-out over whole sources, search layers before sources, and pin every claim to a
 mechanically verified quote. That yields something a scientist can act on — *this sentence traces
 to this span of this artifact, this rule in the agent's instructions, or nothing in your
-workspace at all* — provided the interface is honest that it is a reading and not a proof.
+workspace at all* — provided the interface states that this is a reading and not a proof.
 
 The alternative is what we have now: fluent paragraphs, execution logs underneath, and no way to
 connect them.
@@ -2138,7 +2212,7 @@ arXiv identifiers are given for every entry so each can be verified directly.
    Context Attribution in Retrieval-Augmented Generation.* ICLR 2026.
    [arXiv:2505.16415](https://arxiv.org/abs/2505.16415)
 7. <a id="ref-tokenshapley"></a>Xiao, Y., Zhu, Y., Samyoun, S., Zhang, W., Wang, J. T., & Du, J.
-   (2025). *TokenShapley: Token Level Context Attribution with Shapley Value.* ACL Findings 2025.
+   (2025). *TokenShapley: Token Layer Context Attribution with Shapley Value.* ACL Findings 2025.
    [arXiv:2507.05261](https://arxiv.org/abs/2507.05261)
 8. <a id="ref-shapley"></a>Shapley, L. S. (1953). *A Value for n-Person Games.* Contributions to
    the Theory of Games, II, 307–317.
@@ -2159,6 +2233,27 @@ arXiv identifiers are given for every entry so each can be verified directly.
 14. <a id="ref-miospace"></a>AI Agents for Science. *MIO Agent* (public instance of the MIO
     Worldview Agent). Hugging Face Spaces.
     [huggingface.co/spaces/ai-agents-for-science/mio-agent](https://huggingface.co/spaces/ai-agents-for-science/mio-agent)
+
+## Citation
+
+```bibtex
+@techreport{pantha2026provenance,
+  author      = {Pantha, Nishan},
+  title       = {Response Provenance: Tracing Agent Claims Back to Their Causes},
+  institution = {Bits and Paradoxes},
+  type        = {Technical Report},
+  year        = {2026},
+  month       = jul,
+  url         = {https://nishparadox.com/research/response-provenance/},
+  note        = {Black-box post-hoc attribution of agent response segments to
+                 tool returns, agent instructions, and conversation history}
+}
+```
+
+Plain text:
+
+> Pantha, N. (2026). *Response Provenance: Tracing Agent Claims Back to Their Causes.* Technical
+> Report. <https://nishparadox.com/research/response-provenance/>
 
 ---
 
