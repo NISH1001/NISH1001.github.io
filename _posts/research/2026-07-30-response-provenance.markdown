@@ -1170,6 +1170,7 @@ arithmetic legible, which a static listing cannot do.
   <div class="rp-verdict" id="rp-verdict">verdict pending</div>
 
   <div class="rp-ctl">
+    <button type="button" id="rp-play">▶ Play</button>
     <button type="button" id="rp-step">Step ▸</button>
     <button type="button" id="rp-end">Run to end ⏭</button>
     <button type="button" id="rp-rst">Reset ↺</button>
@@ -1385,9 +1386,24 @@ arithmetic legible, which a static listing cannot do.
     i++; $('rp-prog').textContent=i+' / '+STEPS.length;
     if(i>=STEPS.length){ $('rp-step').disabled=true; $('rp-end').disabled=true; }
   }
-  $('rp-step').addEventListener('click', step);
-  $('rp-end').addEventListener('click', function(){ while(i<STEPS.length) step(); });
-  $('rp-rst').addEventListener('click', reset);
+  // Autoplay. Slower than Demo B's one second per state, because each step here carries a
+  // line of reasoning to read rather than a UI transition to watch.
+  var timer = null;
+  function stopPlay(){ if(timer){ clearInterval(timer); timer=null; } $('rp-play').textContent='▶ Play'; }
+  function play(){
+    if(timer){ stopPlay(); return; }
+    if(i >= STEPS.length) reset();
+    $('rp-play').textContent='❚❚ Pause';
+    step();
+    timer = setInterval(function(){
+      if(i >= STEPS.length){ stopPlay(); return; }
+      step();
+    }, 1800);
+  }
+  $('rp-play').addEventListener('click', play);
+  $('rp-step').addEventListener('click', function(){ stopPlay(); step(); });
+  $('rp-end').addEventListener('click', function(){ stopPlay(); while(i<STEPS.length) step(); });
+  $('rp-rst').addEventListener('click', function(){ stopPlay(); reset(); });
   reset();
 })();
 </script>
