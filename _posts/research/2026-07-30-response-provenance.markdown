@@ -41,6 +41,27 @@ table{font-size:.9rem}
 .small-note{font-size:.85rem;color:var(--text,#666);opacity:.8}
 </style>
 
+> **Backstory**: When me and my colleague [igaurab](https://github.com/igaurab) started adding
+> artifact/spec-driven design of agent development in [AKD Labs](https://labs.akd.odsi.io) — the
+> Agent Co-Design Studio [[source](https://github.com/NASA-IMPACT/akd-labs)] — where agent specs
+> (roles, scope, output, guardrails, etc.) are guided entirely based on artifacts (a bunch of text
+> files as artifacts), we thought of adding agent response traceability as a feature.
+>
+> The idea was initially: since multiple SMEs/users would collaborate and "co-design" an agent's
+> specs, an agent response could maybe theoretically be traced back to which artifact from which
+> user contributed to the agent response. By "response", I mean: the agent produces a response, and
+> a specific segment of that response would maybe be traced back and pinpointed directly to
+> `(artifact, user)`. This would help a user interacting with the final agent get thorough
+> transparency of the chats.
+>
+> But it remained in our backlog. The idea kept lingering throughout, for so many months, in the
+> back of my head, as background white noise. But since right now coding agents like Claude Code
+> have become so good at implementation, I started studying the current literature and such — and
+> finally found that this problem is unique in itself: that I would want to use a black-box,
+> post-hoc approach to try to solve this, as a proxy.
+>
+> Hence, this technical report.
+
 <div class="paper-abstract" markdown="1">
 **Abstract.** An LLM agent answers a scientific question by reading files, calling tools, and
 writing prose. The interface can show *that* `read_file("lst.md")` ran; it cannot show that
@@ -2026,6 +2047,16 @@ agent generates. Declared citations verified post-hoc by the machinery of §6.6 
 stronger than either component alone: the marker supplies the offset, and verification supplies the
 guarantee the 2026 audit found missing <span class="cite" data-ref="Onweller, H., Lumer, E., Huber, A., Ramchandani, P., Subbiah, V. K., &amp; Feld, C. (2026). Cited but Not Verified: Parsing and Evaluating Source Attribution in LLM Deep Research Agents. arXiv:2605.06635."><a href="#ref-cited-not-verified">[2]</a></span>.
 The objection to declared citations is to trusting them unverified, not to producing them.
+
+The extension closest to the original motivation is **per-author attribution**. The problem this
+work started from was not "which artifact" but `(artifact, user)` — which *colleague's* contribution
+a sentence rests on, in a workspace several domain experts co-design. Everything here delivers the
+first half. The second needs the artifact tree to carry authorship at a granularity finer than the
+file: a source unit would have to resolve to the person who wrote the span that was quoted, not
+merely to the person who last touched the file. Since the span is already localised and verified
+(§6.6), the missing piece is provenance metadata on the artifacts themselves rather than anything in
+the estimator — which makes it a tractable next step, and the one that would make this useful to the
+people it was designed for.
 
 Finally, the work this method most needs is not architectural. Every threshold in §7.8 —
 $\tau$, $\tau_\Gamma$, $\theta$, the verbatim pair $(\ell_q, \rho)$ — was set by inspection on a
