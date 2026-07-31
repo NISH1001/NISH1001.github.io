@@ -83,7 +83,9 @@ model's parametric knowledge. Existing agent interfaces record which tools execu
 part of the context is responsible for which part of the output. That distinction determines
 whether a generated answer can be audited, corrected, or cited. This report formalises that
 problem as **response provenance**: the task of mapping each segment of a generated response to
-the elements of the context that produced it. We distinguish it from two adjacent problems with
+the elements of the context that produced it, over a context partitioned into three layers that
+existing attribution work does not jointly address — this turn's tool calls and the artifacts they
+carry, the agent's own configuration, and the prior conversation. We distinguish it from two adjacent problems with
 which it is frequently conflated, namely the auditing of agent-declared citations and
 corroborative fact-checking, and show that the three differ in what they can detect. We then
 observe that the methods which address the contributive formulation most faithfully are
@@ -191,9 +193,10 @@ This report makes the following contributions:
    and from corroborative fact-checking (§2, §3).
 2. An argument that the contributive question is *structurally* unavailable on hosted APIs, with
    the measurements that establish it (§4, §5).
-3. A hybrid estimator: ContextCite's interventional protocol, an LLM-as-judge scalar, exact
-   leave-one-out, and hierarchical layer-first search (§6), given as complete pseudocode with
-   every parameter (§7).
+3. An estimator for that setting: a forced-choice judged scalar in place of the unobservable
+   probability, exact leave-one-out over coarse sources rather than sparse regression, a
+   layer-first hierarchical search, and span localisation with mechanical verification (§6),
+   given as complete pseudocode with every parameter (§7).
 4. An accounting of what the output licenses, including the finding that the central
    quantity is **unfalsifiable** in this setting, plus a live worked example (§8) and a statement of limits (§10).
 
@@ -473,7 +476,7 @@ scalar is self-consistency, not validation.
 
 This is worth saying plainly because it is a real epistemic limit, not a temporary engineering
 gap: on a hosted API you can build something useful, but you cannot show it is faithful in the
-sense ContextCite can.
+sense a probability-based method can.
 
 ## 6. Method
 
@@ -546,14 +549,16 @@ degenerate in practice, landing on exactly 1.000 / 5.000 / 9.000, so the expecta
 argmax equals a plain parse of the digit; reading token log-probabilities buys nothing and would
 tie the method to specific providers.
 
-**What it is.** This is the ad-hoc substitution, and it changes the semantics: the judge scores
-**support**, not generation probability. Applying it under ablation yields *corroboration measured
-interventionally* — an unusual hybrid that is neither ContextCite nor entailment. It is also
-coarse. Use it to **rank** sources; never present it as a fine-grained weight.
+**What it is.** This substitution changes the semantics of the measurement: the judge scores
+**support**, not generation probability. Applying it under ablation therefore yields *corroboration
+measured interventionally*, which is neither a probability estimate nor a static entailment
+judgement, and which has no established name. It is also coarse. Use it to **rank** sources; never
+present it as a fine-grained weight.
 
 ### 6.3 Estimator: exact leave-one-out, not Lasso
 
-ContextCite uses Lasso because its scalar is noisy and $d$ is large (context *sentences*). Neither
+Sparse-regression approaches use Lasso because the scalar is noisy and $d$ is large, sources being
+individual context sentences. Neither
 holds here: the scalar is stable (§6.2), and sources are **whole evidence units** — typically
 $d \approx 3\text{–}10$ rather than ~100. Under those conditions exact leave-one-out is both
 cheaper and assumption-free. For source $i$:
@@ -588,12 +593,15 @@ tool return supplies its *fact*, and collapsing to one winner discards half the 
 
 ### 6.5 Internal knowledge and the redundancy confound
 
-The question "how do we handle the model's own knowledge" has a clean answer that falls out of
-the formalism. ContextCite states it: if the model used pre-training knowledge rather than
-context, attribution indicates this by attributing to nothing.
+Parametric knowledge requires no separate mechanism, and this has been observed before
+<span class="cite" data-ref="Cohen-Wang, B., Shah, H., Georgiev, K., &amp; Madry, A. (2024). ContextCite: Attributing Model Generation to Context. arXiv:2409.00729. NeurIPS 2024."><a href="#ref-contextcite">[3]</a></span>:
+a claim the model produced from training rather than from context is indicated by attribution to
+nothing.
 
-But near-zero weights are ambiguous. They also arise when a fact is **redundant** across several
-sources, so removing any one changes nothing. The $\mathbf{0}$ anchor separates the cases. Define
+What that observation leaves unresolved is that near-zero attribution is **ambiguous**. It arises
+equally when a fact is **redundant** across several sources, so that removing any one of them
+changes nothing. Distinguishing the two cases is necessary for the verdict to mean anything, and it
+is not obtained from per-source scores at all. The $\mathbf{0}$ anchor separates the cases. Define
 the total context effect
 
 $$\Gamma \;=\; s(\mathbf{1}) \;-\; s(\mathbf{0})$$
@@ -1122,7 +1130,8 @@ inside the 48 ceiling. The span term must be counted at $2d^{\prime\prime}$, not
 source understates a full run by about a third and lets the ceiling be passed by a run it had
 already approved.
 
-Compare ContextCite's fixed $m \approx 32$ *plus* the requirement of teacher-forced scoring. The
+A random-mask regression fixes its budget at roughly 32 calls regardless of $d$, and additionally
+requires teacher-forced scoring. The
 hierarchical decomposition is what keeps this affordable — a flat leave-one-out over every source
 in a long conversation would need arbitrary narrowing, and *which* sources survived would then be
 an arbitrary choice rather than a measured one.
@@ -2062,9 +2071,10 @@ rather than choosing between contributive and corroborative methods.
 A second application follows from the fact that attribution accumulates. Where an agent's
 specification is itself an accreting tree of artifacts — the case in co-design workflows, where
 SMEs add scope documents, examples and constraints over many sessions — attribution across turns
-separates specification that is in use from specification that is merely present. This is
-ContextCite's context-pruning application redirected from retrieval corpora to specification
-design, and it is the mechanism by which a growing prompt-and-artifact tree can be pruned
+separates specification that is in use from specification that is merely present. Context pruning is an established use of attribution
+<span class="cite" data-ref="Cohen-Wang, B., Shah, H., Georgiev, K., &amp; Madry, A. (2024). ContextCite: Attributing Model Generation to Context. arXiv:2409.00729. NeurIPS 2024."><a href="#ref-contextcite">[3]</a></span>;
+applied to specification rather than to retrieval corpora, it becomes the mechanism by which a
+growing prompt-and-artifact tree can be pruned
 rather than simply growing.
 
 The third application is the narrowest and the most consequential for scientific use. A claim
@@ -2083,8 +2093,8 @@ attribution is defined against the probability the model assigns to a supplied t
 endpoints do not return that probability, and validating an approximate scalar against
 leave-one-out of the same approximate scalar establishes self-consistency rather than faithfulness.
 Every accuracy claim in this report should be read with that constraint in front of it. Were a
-scoring-capable endpoint to become available, ContextCite proper becomes computable and this design
-should be re-evaluated against it rather than defended.
+scoring-capable endpoint to become available, the probability-based formulation becomes computable
+and this method should be evaluated against it rather than defended.
 
 The substituted scalar carries two further limitations that bound interpretation. It is
 **corroborative measured under intervention**, not causal: it reports which source a claim is
@@ -2136,8 +2146,8 @@ apparent precision for stated uncertainty is deliberate.
 
 The most valuable extension is not an improvement to the estimator but the removal of the
 constraint that forced it. A scoring-capable endpoint — teacher-forced log-probabilities for a
-supplied target — would make ContextCite directly computable and reduce everything here to a
-fallback for providers that do not offer one. Absent that, the estimator's known weaknesses have
+supplied target — would make the probability-based formulation directly computable, and the
+comparison between the two would then be an empirical question rather than an unavailable one. Absent that, the estimator's known weaknesses have
 identified remedies of differing cost: **atomic claim decomposition** addresses the granularity
 limitation at the price of one additional call per segment, and **separating tool arguments from
 tool returns** into distinct sources would make "the agent chose the wrong date" distinguishable
@@ -2208,7 +2218,8 @@ it is the one that determines whether an agent's output can enter a scientific r
 contributive formulation is the right one, and on hosted APIs it is not directly computable —
 its ground truth is an unobservable quantity.
 
-What is achievable is a hybrid: keep the interventional protocol from ContextCite, substitute a
+What is achievable is a method assembled from one borrowed component and several new ones: adopt
+context ablation as the intervention, substitute a
 stable-but-coarse judged scalar for the unobtainable probability, replace the regression with
 exact leave-one-out over whole sources, search layers before sources, and pin every claim to a
 mechanically verified quote. That yields something a scientist can act on — *this sentence traces
