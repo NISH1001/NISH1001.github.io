@@ -1427,7 +1427,10 @@ verification, which is exactly why Algorithm 4 never makes it conditional.
 
 ## 8. Implementation
 
-The formulation above is implementation-independent. The deployment described here is AKD Labs, a
+The formulation above is implementation-independent. A standalone **reference implementation** of
+the algorithms in §7 is available
+<span class="cite" data-ref="Pantha, N. (2026). response-provenance — reference implementation. github.com/NISH1001/response-provenance"><a href="#ref-refimpl">[15]</a></span>.
+The deployment described here is AKD Labs, a
 platform for agent co-design in scientific workflows. Three properties of that implementation
 generalise beyond it and are reported for that reason.
 
@@ -2187,14 +2190,15 @@ proxy tracks the contributive quantity it stands in for.
 every prompt structure. It depends on nothing but a chat-completions endpoint that can return
 structured output, and it is deliberately implementation-independent — the formulation assumes
 only that you can recover a turn's tool calls, its system prompt, and its prior messages from
-whatever you already store.
+whatever you already store. A reference implementation is public
+<span class="cite" data-ref="Pantha, N. (2026). response-provenance — reference implementation. github.com/NISH1001/response-provenance"><a href="#ref-refimpl">[15]</a></span>,
+so every algorithm in §7 can be read as code rather than taken from the pseudocode on trust.
 
 **What is partially reproducible.** The *agent* used in §8 is public: a instance of the MIO
 Worldview Agent runs as a Hugging Face Space under the `ai-agents-for-science` organisation
 <span class="cite" data-ref="MIO Agent — public instance, ai-agents-for-science organisation on Hugging Face. huggingface.co/spaces/ai-agents-for-science/mio-agent"><a href="#ref-miospace">[14]</a></span>,
 and the platform source is open <span class="cite" data-ref="AKD Labs source repository. github.com/NASA-IMPACT/akd-labs"><a href="#ref-akdrepo">[13]</a></span>.
-A reader can therefore interrogate the same agent over the same domain, and can read the
-implementation of every algorithm in §7 rather than taking the pseudocode on trust.
+A reader can therefore interrogate the same agent over the same domain.
 
 **What is not.** The specific figures come from an authenticated deployment against a particular
 workspace, so the exact numbers — $\Gamma = 4.00$, the quote at lines 64–66 — are not
@@ -2274,6 +2278,9 @@ arXiv identifiers are given for every entry so each can be verified directly.
 14. <a id="ref-miospace"></a>AI Agents for Science. *MIO Agent* (public instance of the MIO
     Worldview Agent). Hugging Face Spaces.
     [huggingface.co/spaces/ai-agents-for-science/mio-agent](https://huggingface.co/spaces/ai-agents-for-science/mio-agent)
+15. <a id="ref-refimpl"></a>Pantha, N. (2026). *response-provenance — reference implementation of
+    the algorithms in §7.*
+    [github.com/NISH1001/response-provenance](https://github.com/NISH1001/response-provenance)
 
 ## Citation
 
