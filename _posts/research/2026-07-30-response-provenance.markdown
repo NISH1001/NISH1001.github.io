@@ -2307,7 +2307,12 @@ Plain text:
 // becomes id="62-the-substituted-scalar". That lets a reference written as §6.2 in prose be
 // resolved to its heading without maintaining a table by hand: read the leading number off
 // each heading, then rewrite matching §-references as links to it.
+//
+// Must wait for DOM ready: this script sits inside the post body, and content that follows
+// it in the source (the closing disclaimer) is not in the DOM yet while it parses — running
+// immediately would leave any §-reference down there unlinked.
 (function(){
+  function linkify(){
   var content = document.querySelector('.content');
   if (!content) return;
 
@@ -2362,6 +2367,13 @@ Plain text:
       }
     }
   })(content);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', linkify);
+  } else {
+    linkify();
+  }
 })();
 </script>
 
