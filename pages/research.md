@@ -50,13 +50,15 @@ Publications, talks, posters, and academic work in AI, ML, and NLP.
 
 ## Publications
 
-*[Google Scholar](https://scholar.google.com/citations?user=a5JbCv0AAAAJ&hl=en): 62 citations | h-index: 3 | i10-index: 3 — as of July 2026*
+*[Google Scholar](https://scholar.google.com/citations?user=a5JbCv0AAAAJ&hl=en): 67 citations | h-index: 3 | i10-index: 3 — as of August 2026*
 
 ---
 
 ### INDUS-SDE [KDD 2026]
 
-**N. Pantha**, S. Awale, V. Kuruvanthodi, S. KC, M. Ramasubramanian, C. Davis, B. Praveen, E. Foshee, B. Bhattacharjee, K. Bugbee, R. Ramachandran, "INDUS-SDE: A Language Model for Scientific Content Curation and Discovery," in *Proc. 32nd ACM SIGKDD Conference on Knowledge Discovery and Data Mining (KDD '26)*, AI for Sciences Track, Jeju Island, Republic of Korea, Aug. 2026. [[DOI](https://doi.org/10.1145/3770855.3818847)]
+**N. Pantha**, S. Awale, V. Kuruvanthodi, S. KC, M. Ramasubramanian, C. Davis, B. Praveen, E. Foshee, B. Bhattacharjee, K. Bugbee, R. Ramachandran, "INDUS-SDE: A Language Model for Scientific Content Curation and Discovery," in *Proc. 32nd ACM SIGKDD Conference on Knowledge Discovery and Data Mining (KDD '26), V.2*, AI for Sciences Track, pp. 11762–11773, Jeju Island, Republic of Korea, Aug. 2026. [[DOI](https://doi.org/10.1145/3770855.3818847)]
+
+A small encoder language model for scientific content curation and discovery, designed for sparse contexts where scientific terminology is rare but carries most of the signal. Deployed in NASA's Science Discovery Engine pipeline.
 
 ---
 
