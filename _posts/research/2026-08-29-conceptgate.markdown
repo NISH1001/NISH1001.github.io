@@ -983,7 +983,19 @@ side of the harmful cluster along the discriminative axis (benign at $-2$ and $+
 No single threshold on any linear score can carve out "the middle," so the `fisher` gate is stuck
 near chance (38.8% error, AUC 0.60); the mixture, seeing $\mathbf{s}$ near a benign profile on each
 side and a harmful profile between, recovers it (7.1% error, AUC 0.98; the Bayes floor is 5.8%). That
-is the case for mixtures. The case *against* them, at least in the regime we care about, is that on
+is the case for mixtures, and <a class="sref" href="#figure-3">Figure 3</a> shows its geometry.
+
+<figure id="figure-3" style="margin:2rem 0">
+<div id="cg-killshot" class="cg-widget" style="margin:0"></div>
+<figcaption><strong>Figure 3 (interactive).</strong> The mixture kill-shot, on synthetic data. Two
+benign clusters (teal) sit on either side of the harmful cluster (red) along the score axis. Toggle
+the gate: a single linear threshold cannot isolate the middle from the two sides, whereas a
+two-component mixture fires only where the harmful density dominates. The error and AUC figures are the
+measured toy results; on real ten-shot data the mixture collapses to a single component, as the next
+paragraph reports.</figcaption>
+</figure>
+
+The case *against* them, at least in the regime we care about, is that on
 real gpt2 activations with 12+12 prompts, **BIC selects $J=1$ for both classes** — an extra
 full-covariance profile over five layers costs ~21 parameters, whose rent (~52 nats) twelve samples
 cannot pay — and the mixture gate collapses exactly onto the single-Gaussian gate (rank agreement
@@ -1475,8 +1487,55 @@ function cgTrace(){
   loadModel();
 }
 
+// ===================== widget 5: mixture kill-shot (synthetic illustration) =====================
+function cgKillshot(){
+  var host=cgEl("cg-killshot"); if(!host) return;
+  host.innerHTML=''
+    +'<p class="cg-eyebrow">figure · interactive · synthetic illustration</p>'
+    +'<h4>Why a mixture — and why it stays dormant</h4>'
+    +'<div class="cg-sub">A constructed hard case: two benign clusters sit on either side of the harmful one '
+    +'along the score axis. Toggle the gate to see why a single linear threshold cannot separate them while a '
+    +'two-component mixture can. Error / AUC are the measured toy results.</div>'
+    +'<div class="cg-ctrls"><div class="cg-ctrl" style="min-width:16rem"><label>gate</label>'
+    +'<select id="cgk-gate"><option value="linear">single Gaussian (linear threshold)</option>'
+    +'<option value="mixture">Gaussian mixture (two benign modes)</option></select></div></div>'
+    +'<svg id="cgk-svg" viewBox="0 0 460 175" style="width:100%;max-width:460px"></svg>'
+    +'<div class="cg-readout" id="cgk-out"></div>';
+  var sig=0.55;
+  function Nd(x,mu){return Math.exp(-0.5*Math.pow((x-mu)/sig,2));}   // unnormalized (peak 1)
+  function benign(x){return 0.5*(Nd(x,-2)+Nd(x,2));}
+  function harm(x){return Nd(x,0);}
+  function draw(){
+    var gate=cgEl("cgk-gate").value;
+    var W=460,H=175,L=12,R=12,T=16,Bm=28, x0=-4,x1=4, pw=W-L-R, baseY=H-Bm;
+    function X(x){return L+(x-x0)/(x1-x0)*pw;}
+    function Y(d){return baseY - d*(baseY-T)*0.92;}
+    var svg='';
+    if(gate==='mixture'){var a=X(-1),b=X(1);
+      svg+='<rect x="'+a+'" y="'+T+'" width="'+(b-a)+'" height="'+(baseY-T)+'" fill="'+CG_RED+'" opacity="0.09"/>';
+      svg+='<text x="'+X(0)+'" y="'+(T+11)+'" text-anchor="middle" font-size="9" fill="'+CG_RED+'">gate fires</text>';
+    } else {var tx=X(0.0);
+      svg+='<rect x="'+tx+'" y="'+T+'" width="'+(W-R-tx)+'" height="'+(baseY-T)+'" fill="'+CG_RED+'" opacity="0.09"/>';
+      svg+='<line x1="'+tx+'" y1="'+T+'" x2="'+tx+'" y2="'+baseY+'" stroke="'+CG_RED+'" stroke-dasharray="3 2" opacity="0.6"/>';
+      svg+='<text x="'+X(2.1)+'" y="'+(T+11)+'" text-anchor="middle" font-size="9" fill="'+CG_RED+'">fires (any single cut fails)</text>';
+    }
+    function path(fn){var p='';for(var i=0;i<=140;i++){var x=x0+(x1-x0)*i/140;p+=(i?'L':'M')+X(x).toFixed(1)+','+Y(fn(x)).toFixed(1)+' ';}return p;}
+    svg+='<path d="'+path(benign)+'" fill="none" stroke="'+CG_BLUE+'" stroke-width="2"/>';
+    svg+='<path d="'+path(harm)+'" fill="none" stroke="'+CG_RED+'" stroke-width="2"/>';
+    svg+='<line x1="'+L+'" y1="'+baseY+'" x2="'+(W-R)+'" y2="'+baseY+'" stroke="'+CG_GRID+'"/>';
+    svg+='<text x="'+X(-2)+'" y="'+(baseY+15)+'" text-anchor="middle" font-size="10" fill="'+CG_BLUE+'">benign</text>';
+    svg+='<text x="'+X(0)+'" y="'+(baseY+15)+'" text-anchor="middle" font-size="10" fill="'+CG_RED+'">harmful</text>';
+    svg+='<text x="'+X(2)+'" y="'+(baseY+15)+'" text-anchor="middle" font-size="10" fill="'+CG_BLUE+'">benign</text>';
+    cgEl("cgk-svg").innerHTML=svg;
+    cgEl("cgk-out").innerHTML = gate==='mixture'
+      ? 'The mixture models benign as two modes, so its likelihood ratio fires only in the middle, where the harmful density dominates. <b style="color:'+CG_RED+'">7.1% error · AUC 0.98</b> — near the Bayes floor (5.8%).'
+      : 'A single linear threshold catches one benign cluster whichever way it points, and cannot isolate the middle. <b style="color:'+CG_RED+'">38.8% error · AUC 0.60</b> — near chance.';
+  }
+  cgEl("cgk-gate").addEventListener('change',draw); draw();
+}
+
 (function(){
-  function boot(){ [cgTrace,cgDepthFusion,cgDetect,cgSteer,cgCost].forEach(function(f){try{f();}catch(e){}}); }
+  function boot(){ [cgTrace,cgDepthFusion,cgDetect,cgSteer,cgCost,cgKillshot].forEach(function(f){try{f();}catch(e){}}); }
   if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",boot);}else{boot();}
 })();
 </script>
