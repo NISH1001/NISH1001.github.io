@@ -157,8 +157,8 @@ substantially while still relying on gradient-based training and still changing 
 **Linear probing** freezes the backbone entirely and trains a lightweight linear readout on its
 activations, which yields an inexpensive detector but offers no means of altering behaviour.
 ConceptGate lies at the least-invasive end of this range: it performs no gradient-based training,
-estimating each concept in closed form from roughly ten examples, and it operates on activations
-rather than weights. Unlike a linear probe, it uses the learned direction not only to detect the
+estimating each concept in closed form in a low-sample, few-shot regime — on the order of ten examples
+per concept — and it operates on activations rather than weights. Unlike a linear probe, it uses the learned direction not only to detect the
 concept but to write it back into the residual stream and steer generation, which places it closest to
 the activation-steering and representation-engineering methods discussed in
 <a class="sref" href="#21-probes-and-representation-engineering">§2.1</a>–<a class="sref" href="#22-activation-steering-and-circuit-breakers">§2.2</a>;
