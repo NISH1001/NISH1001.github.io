@@ -1208,30 +1208,46 @@ function cgDepthFusion(){
         +'<input type="range" id="cgdf-s'+i+'" min="0" max="3" step="0.05" value="'+d[i]+'"></div>';}).join('')
     +'</div><svg id="cgdf-svg" viewBox="0 0 460 150" style="width:100%;max-width:460px"></svg>'
     +'<div class="cg-readout" id="cgdf-out"></div>';
-  function draw(){
-    var v=[0,1,2].map(function(i){return parseFloat(cgEl("cgdf-s"+i).value);});
-    v.forEach(function(x,i){cgEl("cgdf-v"+i).textContent=x.toFixed(2);});
-    var fused=Math.sqrt(v.reduce(function(a,x){return a+x*x;},0));
-    var best=Math.max.apply(null,v);
-    var errB=cgCdf(-best/2)*100, errF=cgCdf(-fused/2)*100;
-    var bars=v.concat([fused]), labs=["ℓ1","ℓ2","ℓ3","fused"], mx=3.2;
-    var W=460,H=150,pad=26,bw=70,gap=32,x0=40, sc=(H-2*pad)/mx;
+  var labs=["ℓ1","ℓ2","ℓ3","fused"];
+  function render(vals){   // vals = [l1,l2,l3,fused], possibly mid-tween
+    var mx=3.2, W=460,H=150,pad=26,bw=70,gap=32,x0=40, sc=(H-2*pad)/mx;
     var svg='<line x1="'+x0+'" y1="'+(H-pad)+'" x2="'+(W-8)+'" y2="'+(H-pad)+'" stroke="'+CG_GRID+'"/>';
-    bars.forEach(function(val,i){
-      var h=Math.max(1,val*sc), x=x0+i*(bw+gap), y=H-pad-h;
-      var col=i<3?CG_BLUE:CG_RED;
+    vals.forEach(function(val,i){
+      var h=Math.max(1,val*sc), x=x0+i*(bw+gap), y=H-pad-h, col=i<3?CG_BLUE:CG_RED;
       svg+='<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+h+'" rx="3" fill="'+col+'" opacity="'+(i<3?0.72:0.92)+'" data-tip="'+labs[i]+' · d′ = '+val.toFixed(2)+'"/>';
       svg+='<text x="'+(x+bw/2)+'" y="'+(y-4)+'" text-anchor="middle" font-size="11" font-weight="600" fill="currentColor">'+val.toFixed(2)+'</text>';
       svg+='<text x="'+(x+bw/2)+'" y="'+(H-pad+13)+'" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.7">'+labs[i]+'</text>';
     });
     cgEl("cgdf-svg").innerHTML=svg; cgWireTips(cgEl("cgdf-svg"));
+    var best=Math.max(vals[0],vals[1],vals[2]), fused=vals[3];
+    var errB=cgCdf(-best/2)*100, errF=cgCdf(-fused/2)*100;
     cgEl("cgdf-out").innerHTML='single best layer: d′='+best.toFixed(2)
       +' → error <b>'+errB.toFixed(1)+'%</b> &nbsp;·&nbsp; '
       +'fused across depth: d′='+fused.toFixed(2)+' → error <b style="color:'+CG_RED+'">'+errF.toFixed(1)+'%</b>'
       +' &nbsp;('+(errB-errF>=0?'−':'+')+Math.abs(errB-errF).toFixed(1)+' pts)';
   }
-  [0,1,2].forEach(function(i){cgEl("cgdf-s"+i).addEventListener("input",draw);});
-  draw();
+  var cur=null, raf=null;
+  var nowfn=(window.performance&&performance.now)?function(){return performance.now();}:function(){return Date.now();};
+  var RAF=window.requestAnimationFrame||function(f){return setTimeout(function(){f(nowfn());},16);};
+  var CAF=window.cancelAnimationFrame||clearTimeout;
+  function animateTo(target){
+    if(!cur){cur=target.slice(); render(cur); return;}
+    var start=cur.slice(), t0=nowfn(), dur=170;
+    if(raf) CAF(raf);
+    (function step(ts){
+      var k=Math.min(1,(ts-t0)/dur), e=k<0.5?2*k*k:1-Math.pow(-2*k+2,2)/2;  // easeInOutQuad
+      cur=start.map(function(s,i){return s+(target[i]-s)*e;});
+      render(cur);
+      if(k<1) raf=RAF(step);
+    })(t0);
+  }
+  function update(){
+    var v=[0,1,2].map(function(i){return parseFloat(cgEl("cgdf-s"+i).value);});
+    v.forEach(function(x,i){cgEl("cgdf-v"+i).textContent=x.toFixed(2);});
+    animateTo(v.concat([Math.sqrt(v.reduce(function(a,x){return a+x*x;},0))]));
+  }
+  [0,1,2].forEach(function(i){cgEl("cgdf-s"+i).addEventListener("input",update);});
+  update();
 }
 
 // ===================== widget 2: detection sandbox (live math on baked LLRs) =====================
