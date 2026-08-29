@@ -145,7 +145,7 @@ contributions together with their limitations
 (<a class="sref" href="#14-contributions">§1.4</a>).
 
 This objective is best understood against the broader space of methods for adapting a pretrained
-language model to a downstream purpose, which differ in cost, in expressiveness, and in how invasively
+language model to a downstream task, which differ in cost, in expressiveness, and in how invasively
 they alter the model. **Full fine-tuning** updates all of the model's weights; it is the most
 expressive option and the usual point of reference, but it is expensive and produces a separate copy
 of the model for every task. **Parameter-efficient** methods — adapter modules
