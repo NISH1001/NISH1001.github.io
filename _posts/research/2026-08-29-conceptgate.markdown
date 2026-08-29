@@ -662,6 +662,16 @@ the hall. The design keeps all $m$ readings rather than the single loudest one, 
 usually audible at several depths and combining independent readings is more reliable than trusting
 any one microphone — a claim the next two subsections make precise.
 
+Stated in signal-processing terms, the concept's presence is a signal that the network carries along
+its **depth** axis; the spectrogram is that signal sampled at the tapped layers, and reducing it to a
+decision is a filtering problem. This is the view that motivates the choice of combiner in
+<a class="sref" href="#35-the-depth-bandpass-filter">§3.5</a>: rather than pick a single layer by hand,
+the method learns a **matched filter over depth** — a bandpass filter that weights each layer by how
+cleanly it carries the concept — which is the classical, and provably optimal, way to combine several
+noisy measurements of the same signal. We use this framing only as intuition; the contribution is the
+measured effect of the fusion (<a class="sref" href="#41-depth-fusion-on-synthetic-data">§4.1</a>), not
+the metaphor.
+
 Each layer's individual contribution is summarized by its **discriminability** $d'$ (per layer
 $\ell$), the standardized gap between the two class means of $s_\ell$:
 
