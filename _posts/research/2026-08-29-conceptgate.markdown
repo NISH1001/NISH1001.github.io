@@ -87,7 +87,7 @@ a.sref:hover{color:var(--brand,#3aa99f)}
 .cg-chip.on{background:var(--cg-b,#26a99d);color:#fff;border-color:var(--cg-b,#26a99d)}
 
 /* --- code syntax highlighting (scoped; guarantees visible colors + wrapping in this post) --- */
-.content .highlighter-rouge .highlight{background:#f6f8fa;border:1px solid #e4e2d8;border-radius:.45rem}
+.content .highlighter-rouge .highlight{background:#f5f3ea;border:1px solid #e4e2d8;border-radius:.45rem}
 .content .highlight pre{margin:0;padding:.9rem 1rem}
 .content .highlight pre code,.content .highlight pre code *{white-space:pre-wrap!important;word-break:break-word}
 .content .highlight pre code{color:#24292f;font-size:.84rem;line-height:1.55}
@@ -104,7 +104,7 @@ a.sref:hover{color:var(--brand,#3aa99f)}
 /* copy-to-clipboard button on the BibTeX block */
 .content .language-bibtex{position:relative}
 .cg-copy{position:absolute;top:.5rem;right:.5rem;font:600 .68rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.03em;padding:.4em .7em;border-radius:6px;border:1px solid #d0d7de;background:rgba(255,255,255,.85);color:#57606a;cursor:pointer;opacity:.8;transition:opacity .15s,background .15s,color .15s}
-.cg-copy:hover{opacity:1;background:#f6f8fa}
+.cg-copy:hover{opacity:1;background:#efece2}
 .cg-copy.ok{color:#1a7f37;border-color:#1a7f37}
 </style>
 
