@@ -357,8 +357,13 @@ model is still resolving surface form; most clearly represented at intermediate 
 abstraction has formed; and increasingly diffuse in the late layers, which specialize toward
 next-token prediction. When a concept leaves a usable trace at several depths, reading only one of
 them discards available signal. ConceptGate instead projects the concept at every tapped layer and
-treats the resulting profile across depth as a single signal to be filtered, an approach justified by
-a standard matched-filter argument in <a class="sref" href="#36-why-depth-fusion-wins-the-quadrature-argument">§3.6</a> and tested against the single-layer baseline in <a class="sref" href="#41-depth-fusion-on-synthetic-data">§4.1</a>.
+treats the resulting profile across depth as a single signal to be filtered. This amounts to a
+signal-processing view of the residual stream, in which the network's **depth** is the signal axis and
+combining the layers into one decision is a filtering problem — solved, as a matter of classical
+theory, by a **matched filter** over depth rather than by a hand-picked layer. The view is developed
+in <a class="sref" href="#34-the-concept-spectrogram">§3.4</a>, justified by a matched-filter argument
+in <a class="sref" href="#36-why-depth-fusion-wins-the-quadrature-argument">§3.6</a>, and tested
+against the single-layer baseline in <a class="sref" href="#41-depth-fusion-on-synthetic-data">§4.1</a>.
 
 The second observation is the read/write duality noted above: a linear detector and a linear steerer
 are the same direction applied in the two directions of information flow, whereas a text classifier —
