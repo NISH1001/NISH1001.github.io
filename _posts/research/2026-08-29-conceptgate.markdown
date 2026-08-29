@@ -1362,6 +1362,11 @@ function cgCost(){
   // is transformed/clipped (common on mobile layouts), and so it is never hidden by the
   // simplified-mode rule that hides the technical body.
   document.body.appendChild(btn);
+  // force the critical positioning inline so no theme rule can hide or mis-place it on any device
+  var S=btn.style;
+  S.position='fixed'; S.right='14px'; S.bottom='14px'; S.zIndex='2147483647';
+  S.display='inline-block'; S.visibility='visible'; S.opacity='1'; S.margin='0';
+  S.transform='translateZ(0)';
   var IDS=['figure-1','cg-steer','cg-detect','cg-cost'];
   var homes=IDS.map(function(id){
     var el=document.getElementById(id);
@@ -1384,11 +1389,11 @@ function cgCost(){
     relocate(simple);
     content.classList.toggle('cg-simple', simple);
     btn.textContent = simple ? 'Technical view' : 'Simplified view';
-    // force a fresh paint of the fixed button after the large height change (some browsers,
-    // including mobile Firefox, otherwise fail to repaint the fixed element and it vanishes)
-    btn.style.display='none';
-    void btn.offsetHeight;
-    btn.style.display='';
+    // repaint nudge that never hides the button: bump the transform for one frame so mobile
+    // browsers repaint the fixed layer after the large height change, then settle it back
+    S.display='inline-block'; S.visibility='visible';
+    S.transform='translateZ(0) translateY(0.02px)';
+    (window.requestAnimationFrame||function(f){setTimeout(f,16);})(function(){ S.transform='translateZ(0)'; });
     try{ localStorage.setItem('cg-mode', mode); }catch(e){}
   }
   btn.addEventListener('click', function(){
