@@ -160,8 +160,13 @@ ConceptGate lies at the least-invasive end of this range: it performs no gradien
 estimating each concept in closed form in a low-sample, few-shot regime — on the order of ten examples
 per concept — and it operates on activations rather than weights. Unlike a linear probe, it uses the learned direction not only to detect the
 concept but to write it back into the residual stream and steer generation, which places it closest to
-the activation-steering and representation-engineering methods discussed in
-<a class="sref" href="#21-probes-and-representation-engineering">§2.1</a>–<a class="sref" href="#22-activation-steering-and-circuit-breakers">§2.2</a>;
+the representation-engineering and activation-steering methods — RepE
+<span class="cite" data-ref="Zou, A., et al. (2023). Representation Engineering: A Top-Down Approach to AI Transparency. arXiv:2310.01405."><a href="#ref-repe">[3]</a></span>,
+ActAdd
+<span class="cite" data-ref="Turner, A. M., et al. (2023). Steering Language Models With Activation Engineering. arXiv:2308.10248."><a href="#ref-actadd">[4]</a></span>,
+and CAA
+<span class="cite" data-ref="Panickssery, N., et al. (2023). Steering Llama 2 via Contrastive Activation Addition. arXiv:2312.06681."><a href="#ref-caa">[5]</a></span>
+— discussed in <a class="sref" href="#21-probes-and-representation-engineering">§2.1</a>–<a class="sref" href="#22-activation-steering-and-circuit-breakers">§2.2</a>;
 it differs from those mainly in reading a concept across several layers rather than one and in coupling
 detection and steering within a single calibrated module. The trade-off is deliberate: one linear
 direction per concept is far less powerful than a fine-tuned or LoRA-adapted model, and the method is
