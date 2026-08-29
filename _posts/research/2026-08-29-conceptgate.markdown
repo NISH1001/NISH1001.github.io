@@ -89,8 +89,9 @@ paper. Treat the results, numbers, and framing as preliminary, and expect sectio
 </p>
 
 <div class="paper-abstract" markdown="1">
-**Abstract.** As a frozen transformer processes a prompt, human-nameable concepts become linearly
-represented in its residual stream, typically most separably at intermediate layers. We describe
+**Abstract.** As a frozen language model — or, more generally, any transformer with a residual stream —
+processes a prompt, human-nameable concepts become linearly represented in that stream, typically most
+separably at intermediate layers. We describe
 ConceptGate, a lightweight, few-shot (approximately ten examples per class), training-free adapter
 that taps the residual stream at several layers and treats a concept's projection across depth as a
 single signal: a per-layer spectrogram combined by a learned depth filter and gated by a calibrated
