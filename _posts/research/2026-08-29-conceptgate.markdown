@@ -82,10 +82,11 @@ a.sref:hover{color:var(--brand,#3aa99f)}
 .content .highlight .nn,.content .highlight .nc,.content .highlight .n{color:#24292f!important}
 
 /* --- technical / simplified reading toggle --- */
-.cg-togglebar{position:sticky;top:8px;z-index:100;text-align:right;margin:0 0 1.2rem}
-.cg-floatbtn{display:inline-block;border:1px solid var(--brand,#3aa99f);
-  background:var(--brand,#3aa99f);color:#fff;padding:.5rem 1.1rem;border-radius:2rem;
-  cursor:pointer;font:inherit;font-size:.85rem;box-shadow:0 3px 12px rgba(0,0,0,.18);-webkit-appearance:none}
+.cg-togglebar{position:sticky;top:6px;z-index:100;text-align:right;margin:0 0 1rem;pointer-events:none}
+.cg-floatbtn{pointer-events:auto;display:inline-block;border:1px solid var(--brand,#3aa99f);
+  background:var(--brand,#3aa99f);color:#fff;padding:.22rem .6rem;border-radius:1rem;
+  cursor:pointer;font:inherit;font-size:.7rem;line-height:1.3;letter-spacing:.01em;
+  box-shadow:0 2px 7px rgba(0,0,0,.14);-webkit-appearance:none;opacity:.94}
 .cg-floatbtn:hover{filter:brightness(1.06)}
 .cg-simple-doc{display:none;max-width:42rem}
 .cg-simple-doc .lead{font-size:.88rem;opacity:.7;font-style:italic;margin:.2rem 0 1.5rem}
@@ -104,7 +105,7 @@ paper. Treat the results, numbers, and framing as preliminary, and expect sectio
 </p>
 
 <div class="cg-togglebar">
-<button type="button" id="cg-toggle" class="cg-floatbtn">Simplified view</button>
+<button type="button" id="cg-toggle" class="cg-floatbtn">Simplified</button>
 </div>
 
 <div class="cg-simple-doc" markdown="1">
@@ -1381,7 +1382,7 @@ function cgCost(){
     var simple = mode==='simple';
     relocate(simple);
     content.classList.toggle('cg-simple', simple);
-    btn.textContent = simple ? 'Technical view' : 'Simplified view';
+    btn.textContent = simple ? 'Technical' : 'Simplified';
     try{ localStorage.setItem('cg-mode', mode); }catch(e){}
   }
   btn.addEventListener('click', function(){
