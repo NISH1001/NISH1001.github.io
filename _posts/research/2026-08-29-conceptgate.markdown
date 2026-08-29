@@ -78,6 +78,13 @@ a.sref:hover{color:var(--brand,#3aa99f)}
   padding:.35rem .55rem;border-radius:.3rem;box-shadow:0 6px 20px rgba(0,0,0,.28);
   opacity:0;transition:opacity .12s;white-space:nowrap;transform:translate(-50%,-115%)}
 .cg-tip.on{opacity:1}
+.cg-chips{display:flex;flex-wrap:wrap;gap:.35rem;margin:.2rem 0 .3rem}
+.cg-chip{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.71rem;
+  padding:.28rem .55rem;border-radius:.4rem;border:1px solid var(--border,#ddd);
+  background:var(--bg,#fff);color:inherit;cursor:pointer;max-width:100%;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;transition:background .15s,border-color .15s,color .15s}
+.cg-chip:hover{border-color:var(--cg-b,#26a99d)}
+.cg-chip.on{background:var(--cg-b,#26a99d);color:#fff;border-color:var(--cg-b,#26a99d)}
 
 /* --- code syntax highlighting (scoped; guarantees visible colors + wrapping in this post) --- */
 .content .highlighter-rouge .highlight{background:#f6f8fa;border:1px solid #e4e2d8;border-radius:.45rem}
@@ -622,6 +629,13 @@ get a per-layer score (the spectrogram), blends those with a learned depth filte
 and gates on a calibrated likelihood ratio. On a firing it either aborts decoding or adds the
 concept direction back into the stream to steer. Reading and steering use the same direction.</figcaption>
 </figure>
+
+The same pipeline, run on a real prompt, is shown interactively below: choosing a prompt taps it at
+three blocks, turns each tap into one bar of the spectrogram, and passes the blend through the gate.
+The subsections that follow (<a class="sref" href="#31-setup-and-notation">§3.1</a> onward) then
+formalize each stage.
+
+<div id="cg-trace" class="cg-widget"></div>
 
 ### 3.1 Setup and notation
 
@@ -1384,8 +1398,70 @@ function cgCost(){
   cgEl("cgc-t").addEventListener("input",draw); draw();
 }
 
+// ===================== widget 0: trace one prompt through the pipeline =====================
+function cgTrace(){
+  var host=cgEl("cg-trace"); if(!host) return;
+  var D=CGDATA.detection, taps=D.taps, tau=D.tau, probes=D.probes;
+  host.innerHTML=''
+    +'<p class="cg-eyebrow">figure · interactive · one prompt through the pipeline</p>'
+    +'<h4>Trace a prompt through the gate</h4>'
+    +'<div class="cg-sub">Pick a prompt. It is tapped at blocks '+taps.join(', ')+'; each tap becomes one bar of '
+    +'the spectrogram (red-orange = toward the concept, teal = away); the bars are blended into a '
+    +'log-likelihood ratio, and the gate fires when that clears τ = '+tau.toFixed(1)+'. Real gpt-2 activations.</div>'
+    +'<div class="cg-chips" id="cgt-chips"></div>'
+    +'<svg id="cgt-svg" viewBox="0 0 460 150" style="width:100%;max-width:460px;margin-top:.5rem"></svg>'
+    +'<div class="cg-readout" id="cgt-out"></div>';
+  cgEl("cgt-chips").innerHTML=probes.map(function(p,i){
+    var t=p.text.length>30?p.text.slice(0,28)+'…':p.text;
+    return '<button type="button" class="cg-chip" data-i="'+i+'" title="'+cgEsc(p.text)+'">'+cgEsc(t)+'</button>';
+  }).join('');
+  var labs=taps.map(function(b){return 'blk '+b;});
+  function render(vals){   // vals = spectrogram [3], possibly mid-tween
+    var W=460,H=150,x0=46,bw=62,gap=54,zy=78,sc=58/24;
+    var svg='<line x1="'+(x0-10)+'" y1="'+zy+'" x2="'+(W-8)+'" y2="'+zy+'" stroke="'+CG_GRID+'"/>';
+    svg+='<text x="'+(x0-14)+'" y="'+(zy+3)+'" text-anchor="end" font-size="9" fill="currentColor" opacity="0.5">0</text>';
+    vals.forEach(function(val,i){
+      var x=x0+i*(bw+gap), h=val*sc, y=val>=0?zy-h:zy, hh=Math.abs(h), col=val>=0?CG_RED:CG_BLUE;
+      svg+='<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+Math.max(1,hh)+'" rx="3" fill="'+col+'" opacity="0.82" data-tip="'+labs[i]+' · loudness '+val.toFixed(2)+'"/>';
+      var ty=val>=0?y-4:y+hh+12;
+      svg+='<text x="'+(x+bw/2)+'" y="'+ty+'" text-anchor="middle" font-size="11" font-weight="600" fill="currentColor">'+val.toFixed(1)+'</text>';
+      svg+='<text x="'+(x+bw/2)+'" y="'+(H-6)+'" text-anchor="middle" font-size="10" fill="currentColor" opacity="0.6">'+labs[i]+'</text>';
+    });
+    cgEl("cgt-svg").innerHTML=svg; cgWireTips(cgEl("cgt-svg"));
+  }
+  var cur=null,raf=null;
+  var nowfn=(window.performance&&performance.now)?function(){return performance.now();}:function(){return Date.now();};
+  var RAF=window.requestAnimationFrame||function(f){return setTimeout(function(){f(nowfn());},16);};
+  var CAF=window.cancelAnimationFrame||clearTimeout;
+  function animateTo(target){
+    if(!cur){cur=target.slice();render(cur);return;}
+    var start=cur.slice(),t0=nowfn(),dur=300;
+    if(raf)CAF(raf);
+    (function step(ts){
+      var k=Math.min(1,(ts-t0)/dur),e=k<0.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
+      cur=start.map(function(s,i){return s+(target[i]-s)*e;});
+      render(cur);
+      if(k<1)raf=RAF(step);
+    })(t0);
+  }
+  function select(i){
+    var p=probes[i];
+    Array.prototype.forEach.call(cgEl("cgt-chips").children,function(c,j){c.className='cg-chip'+(j===i?' on':'');});
+    animateTo(p.spectro.slice());
+    var fires=p.llr>tau;
+    cgEl("cgt-out").innerHTML='<b>“'+cgEsc(p.text)+'”</b><br>blended LLR = '
+      +'<b class="cg-mono">'+p.llr.toFixed(1)+'</b> vs τ = '+tau.toFixed(1)+' → '
+      +'<span class="cg-badge '+(fires?'cg-fire':'cg-pass')+'">'+(fires?'FIRE':'pass')+'</span> '
+      +'<span style="opacity:.7;font-size:.82rem">(labelled '+(p.label?'jailbreak':'benign')+')</span>';
+  }
+  Array.prototype.forEach.call(cgEl("cgt-chips").children,function(c){
+    c.addEventListener('click',function(){select(parseInt(c.getAttribute('data-i'),10));});
+  });
+  select(0);
+}
+
 (function(){
-  function boot(){ [cgDepthFusion,cgDetect,cgSteer,cgCost].forEach(function(f){try{f();}catch(e){}}); }
+  function boot(){ [cgTrace,cgDepthFusion,cgDetect,cgSteer,cgCost].forEach(function(f){try{f();}catch(e){}}); }
   if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",boot);}else{boot();}
 })();
 </script>
