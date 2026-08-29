@@ -1416,27 +1416,27 @@ function cgTrace(){
     +'<h4>Trace a prompt through the gate</h4>'
     +'<div class="cg-sub">The concept is <b>jailbreak</b>, already learned from ~10 example prompts and '
     +'calibrated once. Pick a model and a prompt: its activations are projected onto that learned direction '
-    +'to form the spectrogram (red-orange = toward jailbreak, teal = away), and the blended LLR is tested '
-    +'against τ to fire or pass.</div>'
+    +'to form the spectrogram — one bar per tapped transformer block (red-orange = toward jailbreak, teal = '
+    +'away) — and the blended LLR is tested against τ to fire or pass.</div>'
     +'<div class="cg-ctrls"><div class="cg-ctrl"><label>model</label><select id="cgt-model">'
     +mkeys.map(function(m){return '<option value="'+m+'">'+m+'</option>';}).join('')+'</select></div></div>'
     +'<div class="cg-chips" id="cgt-chips"></div>'
-    +'<svg id="cgt-svg" viewBox="0 0 460 150" style="width:100%;max-width:460px;margin-top:.5rem"></svg>'
+    +'<svg id="cgt-svg" viewBox="0 0 460 184" style="width:100%;max-width:460px;margin-top:.5rem"></svg>'
     +'<div class="cg-readout" id="cgt-out"></div>';
   var D,taps,tau,probes,labs,maxabs,cur,raf;
   var nowfn=(window.performance&&performance.now)?function(){return performance.now();}:function(){return Date.now();};
   var RAF=window.requestAnimationFrame||function(f){return setTimeout(function(){f(nowfn());},16);};
   var CAF=window.cancelAnimationFrame||clearTimeout;
   function render(vals){   // vals = spectrogram [3], possibly mid-tween
-    var W=460,H=150,x0=46,bw=62,gap=54,zy=78,sc=58/maxabs;
+    var W=460,H=184,x0=46,bw=62,gap=54,zy=84,sc=60/maxabs;
     var svg='<line x1="'+(x0-10)+'" y1="'+zy+'" x2="'+(W-8)+'" y2="'+zy+'" stroke="'+CG_GRID+'"/>';
     svg+='<text x="'+(x0-14)+'" y="'+(zy+3)+'" text-anchor="end" font-size="9" fill="currentColor" opacity="0.5">0</text>';
     vals.forEach(function(val,i){
       var x=x0+i*(bw+gap), h=val*sc, y=val>=0?zy-h:zy, hh=Math.abs(h), col=val>=0?CG_RED:CG_BLUE;
       svg+='<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+Math.max(1,hh)+'" rx="3" fill="'+col+'" opacity="0.82" data-tip="'+labs[i]+' · loudness '+val.toFixed(2)+'"/>';
-      var ty=val>=0?y-4:y+hh+12;
+      var ty=val>=0?(y-5):(y+hh+13);
       svg+='<text x="'+(x+bw/2)+'" y="'+ty+'" text-anchor="middle" font-size="11" font-weight="600" fill="currentColor">'+val.toFixed(1)+'</text>';
-      svg+='<text x="'+(x+bw/2)+'" y="'+(H-6)+'" text-anchor="middle" font-size="10" fill="currentColor" opacity="0.6">'+labs[i]+'</text>';
+      svg+='<text x="'+(x+bw/2)+'" y="'+(H-6)+'" text-anchor="middle" font-size="10" fill="currentColor" opacity="0.55">'+labs[i]+'</text>';
     });
     cgEl("cgt-svg").innerHTML=svg; cgWireTips(cgEl("cgt-svg"));
   }
@@ -1463,7 +1463,7 @@ function cgTrace(){
   }
   function loadModel(){
     D=MODELS[cgEl("cgt-model").value]; taps=D.taps; tau=D.tau; probes=D.probes;
-    labs=taps.map(function(b){return 'blk '+b;});
+    labs=taps.map(function(b){return 'block '+b;});
     maxabs=Math.max(1,Math.max.apply(null,probes.map(function(p){return Math.max.apply(null,p.spectro.map(function(x){return Math.abs(x);}));})));
     cgEl("cgt-chips").innerHTML=probes.map(function(p,i){var t=p.text.length>30?p.text.slice(0,28)+'…':p.text;
       return '<button type="button" class="cg-chip" data-i="'+i+'" title="'+cgEsc(p.text)+'">'+cgEsc(t)+'</button>';}).join('');
