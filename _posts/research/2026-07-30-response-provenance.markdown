@@ -1786,6 +1786,11 @@ algorithm's internals — masks, scalars, drops — this is what a user actually
 @media (prefers-reduced-motion:reduce){ .pulse{animation:none;outline:2px solid var(--brand,#3aa99f)} }
 .sim-cap{font-size:.78rem;line-height:1.5;opacity:.8;padding:.5rem .8rem .7rem;margin:0;
   border-top:1px solid var(--border,#e6e4d9)}
+/* copy-to-clipboard button on the BibTeX citation block */
+.language-bibtex{position:relative}
+.cite-copy{position:absolute;top:.5rem;right:.5rem;font:600 .68rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.03em;padding:.4em .7em;border-radius:6px;border:1px solid var(--border,#e6e4d9);background:rgba(255,255,255,.85);color:#6b6658;cursor:pointer;opacity:.8;transition:opacity .15s,background .15s,color .15s}
+.cite-copy:hover{opacity:1;background:#fff}
+.cite-copy.ok{color:#2f7d55;border-color:#2f7d55}
 </style>
 
 <script>
@@ -2374,6 +2379,27 @@ Plain text:
   } else {
     linkify();
   }
+})();
+</script>
+
+<script>
+// copy-to-clipboard button on the BibTeX citation block
+(function(){
+  function attach(block){
+    if(block.querySelector('.cite-copy'))return;
+    var code=block.querySelector('code')||block;
+    var btn=document.createElement('button');
+    btn.type='button'; btn.className='cite-copy'; btn.textContent='Copy';
+    btn.addEventListener('click',function(){
+      var text=(code.innerText||code.textContent||'').replace(/\n+$/,'');
+      function done(){btn.textContent='Copied'; btn.classList.add('ok'); setTimeout(function(){btn.textContent='Copy'; btn.classList.remove('ok');},1400);}
+      function fallback(){var ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.focus(); ta.select(); try{document.execCommand('copy'); done();}catch(e){} document.body.removeChild(ta);}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(done,fallback);}else{fallback();}
+    });
+    block.appendChild(btn);
+  }
+  function boot(){document.querySelectorAll('.language-bibtex').forEach(attach);}
+  if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",boot);}else{boot();}
 })();
 </script>
 

@@ -99,6 +99,13 @@ a.sref:hover{color:var(--brand,#3aa99f)}
 .content .highlight .mi,.content .highlight .mf,.content .highlight .mh,.content .highlight .il{color:#0550ae!important}
 .content .highlight .o,.content .highlight .ow{color:#cf222e!important}
 .content .highlight .nn,.content .highlight .nc,.content .highlight .n{color:#24292f!important}
+/* citation: render BibTeX as a plain, copyable block, not syntax-highlighted like real code */
+.content .language-bibtex .highlight span{color:#24292f!important;font-style:normal!important;font-weight:normal!important}
+/* copy-to-clipboard button on the BibTeX block */
+.content .language-bibtex{position:relative}
+.cg-copy{position:absolute;top:.5rem;right:.5rem;font:600 .68rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.03em;padding:.4em .7em;border-radius:6px;border:1px solid #d0d7de;background:rgba(255,255,255,.85);color:#57606a;cursor:pointer;opacity:.8;transition:opacity .15s,background .15s,color .15s}
+.cg-copy:hover{opacity:1;background:#f6f8fa}
+.cg-copy.ok{color:#1a7f37;border-color:#1a7f37}
 </style>
 
 <p class="small-note" style="margin:0 0 1.4rem;padding:.5rem .7rem;border:1px dashed var(--border,#d8d6cc);border-radius:.35rem">
@@ -1475,5 +1482,26 @@ function cgKillshot(){
     })(content);
   }
   if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",linkify);}else{linkify();}
+})();
+</script>
+
+<script>
+// copy-to-clipboard button on the BibTeX citation block
+(function(){
+  function attach(block){
+    if(block.querySelector('.cg-copy'))return;
+    var code=block.querySelector('code')||block;
+    var btn=document.createElement('button');
+    btn.type='button'; btn.className='cg-copy'; btn.textContent='Copy';
+    btn.addEventListener('click',function(){
+      var text=(code.innerText||code.textContent||'').replace(/\n+$/,'');
+      function done(){btn.textContent='Copied'; btn.classList.add('ok'); setTimeout(function(){btn.textContent='Copy'; btn.classList.remove('ok');},1400);}
+      function fallback(){var ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.focus(); ta.select(); try{document.execCommand('copy'); done();}catch(e){} document.body.removeChild(ta);}
+      if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(done,fallback);}else{fallback();}
+    });
+    block.appendChild(btn);
+  }
+  function boot(){document.querySelectorAll('.content .language-bibtex').forEach(attach);}
+  if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",boot);}else{boot();}
 })();
 </script>
