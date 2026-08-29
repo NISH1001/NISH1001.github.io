@@ -1086,6 +1086,28 @@ visible in them.
 12. <a id="ref-adapters"></a>Houlsby, N., Giurgiu, A., Jastrzebski, S., Morrone, B., de Laroussilhe, Q., Gesmundo, A., Attariyan, M., & Gelly, S. (2019). *Parameter-Efficient Transfer Learning for NLP.* arXiv:1902.00751.
 </div>
 
+## Citation
+
+```bibtex
+@techreport{nish2026conceptgate,
+  author      = {Pantha, Nishan},
+  title       = {ConceptGate: Efficiently Learning and Steering Concepts in Language Models},
+  institution = {Bits and Paradoxes},
+  type        = {Technical Report},
+  year        = {2026},
+  month       = aug,
+  url         = {https://nishparadox.com/research/conceptgate/},
+  note        = {Few-shot, training-free concept detection and steering via a
+                 depth-wise spectrogram of residual-stream projections; reference
+                 implementation at https://github.com/NISH1001/conceptgate}
+}
+```
+
+Plain text:
+
+> Pantha, N. (2026). *ConceptGate: Efficiently Learning and Steering Concepts in Language Models.*
+> Technical Report. <https://nishparadox.com/research/conceptgate/>
+
 ---
 
 <script>

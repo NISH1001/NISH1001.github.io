@@ -2280,7 +2280,7 @@ arXiv identifiers are given for every entry so each can be verified directly.
 ## Citation
 
 ```bibtex
-@techreport{pantha2026provenance,
+@techreport{nish2026provenance,
   author      = {Pantha, Nishan},
   title       = {Response Provenance: Tracing Agent Claims Back to Their Causes},
   institution = {Bits and Paradoxes},
