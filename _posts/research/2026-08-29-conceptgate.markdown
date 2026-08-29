@@ -99,22 +99,6 @@ a.sref:hover{color:var(--brand,#3aa99f)}
 .content .highlight .mi,.content .highlight .mf,.content .highlight .mh,.content .highlight .il{color:#0550ae!important}
 .content .highlight .o,.content .highlight .ow{color:#cf222e!important}
 .content .highlight .nn,.content .highlight .nc,.content .highlight .n{color:#24292f!important}
-
-/* --- technical / simplified reading toggle --- */
-.cg-togglebar{position:sticky;top:6px;z-index:100;text-align:right;margin:0 0 1rem;pointer-events:none}
-.cg-floatbtn{pointer-events:auto;display:inline-block;border:1px solid var(--brand,#3aa99f);
-  background:var(--brand,#3aa99f);color:#fff;padding:.22rem .6rem;border-radius:1rem;
-  cursor:pointer;font:inherit;font-size:.7rem;line-height:1.3;letter-spacing:.01em;
-  box-shadow:0 2px 7px rgba(0,0,0,.14);-webkit-appearance:none;opacity:.94}
-.cg-floatbtn:hover{filter:brightness(1.06)}
-.cg-simple-doc{display:none;max-width:42rem}
-.cg-simple-doc .lead{font-size:.88rem;opacity:.7;font-style:italic;margin:.2rem 0 1.5rem}
-.cg-simple-doc p{margin:.9rem 0}
-.cg-simple-doc .sh{font-weight:700;font-size:1.06rem;margin:1.7rem 0 .35rem}
-/* simplified mode: hide the technical body; show only the simplified document and the button */
-.content.cg-simple > *{display:none!important}
-.content.cg-simple > .cg-simple-doc,
-.content.cg-simple > .cg-togglebar{display:block!important}
 </style>
 
 <p class="small-note" style="margin:0 0 1.4rem;padding:.5rem .7rem;border:1px dashed var(--border,#d8d6cc);border-radius:.35rem">
@@ -122,109 +106,6 @@ a.sref:hover{color:var(--brand,#3aa99f)}
 model — actively evolving and updated as the research develops, and not a finished or peer-reviewed
 paper. Treat the results, numbers, and framing as preliminary, and expect sections to change.
 </p>
-
-<div class="cg-togglebar">
-<button type="button" id="cg-toggle" class="cg-floatbtn">Simplified</button>
-</div>
-
-<div class="cg-simple-doc" markdown="1">
-<p class="lead">You are reading the simplified version. The floating button switches back to the full
-technical report, where the mathematics, the experiments, and the interactive figures live.</p>
-
-<p class="sh">What this is</p>
-
-A language model, as it reads your text, maintains a large running list of numbers inside itself —
-often called its *residual stream* — which it updates at every layer as it processes the input. Hidden
-inside those numbers is a surprising amount of information about what the text is *about*: whether it
-is a cooking question, whether its tone is hostile, whether it is trying to talk the model into
-ignoring its own rules. ConceptGate is a small tool that learns to recognize one such idea from only
-about ten example sentences, without retraining the model at all, and that can then do two things:
-notice when the idea is present, and — using the very same thing it learned — nudge the model's writing
-toward or away from that idea while it generates.
-
-<p class="sh">Where it sits among other ways of adapting a model</p>
-
-There is a whole spectrum of ways to make a pretrained model do what you want. At the heavy end is
-*full fine-tuning*, which retrains all of the model's weights: powerful, but expensive, and it leaves
-you with a whole separate copy of the model for every task. Lighter methods such as *LoRA* freeze most
-of the model and train only a small number of extra weights. Lighter still is *linear probing*, which
-freezes the model entirely and trains a small classifier to read its activations. ConceptGate sits at
-the far, cheapest end of this spectrum: it trains nothing at all — it simply computes some averages of
-the example activations — and, unlike a plain classifier, it does not only *read* the idea, it can
-*write* it back to steer the model.
-
-<p class="sh">Why reach inside the model at all</p>
-
-The usual way to catch, say, a jailbreak attempt is a separate classifier that reads the text and
-judges it. That works, but it is a second model to run, and it can only ever *judge* — it cannot
-change what your model then writes. ConceptGate instead rides the model you are already running, adds
-only kilobytes rather than a whole network, and can do the one thing a text classifier structurally
-cannot: reach into the generation and steer it. That ability to *write*, and not only read, is the
-entire reason to work with the model's internals rather than its text.
-
-<p class="sh">How it works</p>
-
-Picture a row of microphones placed along a hallway that a thought travels down. Each microphone is
-tuned to one idea and reports how strongly it registers that idea at its point in the hallway.
-ConceptGate places such microphones at a few depths inside the model, collects their readings into a
-small profile across depth, and blends that profile into a single score. If the score clears a
-calibrated line the idea "fires"; if it sits in the uncertain middle, the tool can answer "not sure"
-rather than guess. Everything it learns — what each microphone listens for, and how much to trust each
-one — comes from averaging the numbers produced by the example sentences; there is no gradient descent
-and no training loop, and it finishes in a fraction of a second. To *steer*, ConceptGate takes the
-direction it learned for an idea and adds it back into the model's numbers as the model writes, which
-bends the output toward the idea, or, with the sign flipped, away from it.
-
-<div class="cg-slot" data-cg-slot="figure-1"></div>
-
-The picture above is the whole pipeline: tap the model at a few depths, turn each into a score, blend
-them, decide, and — on the write side — add the idea's direction back in. The slider below replays real
-steering: pick a topic and drag from "away" through neutral to "toward," and read what the model
-actually produced.
-
-<div class="cg-slot" data-cg-slot="cg-steer"></div>
-
-<p class="sh">What we found — including the parts that do not flatter it</p>
-
-Three findings stand out, and none is glossed over. First, listening at several depths and combining
-the readings really does work better than listening at only one depth. Second, and less flattering: as
-a *detector*, ConceptGate is no better than an ordinary linear classifier trained on the same numbers
-— recognizing these concepts turns out to be a cheap, already-solved problem, so detection is not
-where the value lies. Third, the value is in *steering*, which a classifier simply cannot do — but
-steering is only as good as the underlying model allows: a stronger model steers cleanly and stays
-coherent, while a weaker one steers faintly and garbles sooner. There is also a useful practical bonus:
-because detecting an idea only needs the lower part of the network, one can often run just a small
-fraction of the model — around 4% on the stronger model tested — and still catch the concept, which
-makes a lightweight guardrail very cheap to attach. A few intuitive ideas also turned out to be wrong,
-such as the expectation that carefully matched "near-miss" negative examples would sharpen detection;
-they made it worse.
-
-The two figures below are the interactive evidence. The first is the detector on real GPT-2 activations:
-drag the threshold and watch honest prompts and jailbreak attempts sort themselves — imperfectly. The
-second is the "how little of the model do we need" curve: drag the target and see the cheapest depth
-that still catches the concept.
-
-<div class="cg-slot" data-cg-slot="cg-detect"></div>
-
-<div class="cg-slot" data-cg-slot="cg-cost"></div>
-
-<p class="sh">Where it breaks</p>
-
-ConceptGate should be understood as a cheap, interpretable, few-shot control knob, not a security
-guarantee. Someone who understands how it works can craft inputs that slip past the detector while the
-model still misbehaves — a known weakness of every method in this family. The experiments here use
-small models and familiar examples, so the exact numbers should be re-checked at larger scale; the
-method can only catch ideas that the model happens to represent simply; and pushing the steering too
-hard degrades the quality of the writing. None of this is hidden — it is the boundary of a deliberately
-simple approach.
-
-<p class="sh">The bottom line</p>
-
-A frozen model already "knows" a great many ideas internally. ConceptGate reads them cheaply and writes
-them back to steer what the model generates. Reading is a commodity; writing is the point. Switch to
-the technical view for the mathematics, the full experiments, and the interactive figures you can
-actually manipulate.
-</div>
 
 <div class="paper-abstract" markdown="1">
 **Abstract.** As a frozen language model — or, more generally, any transformer with a residual stream —
@@ -259,8 +140,10 @@ values, and the controls recompute only inexpensive derived quantities (the fuse
 the decision threshold, the location of the cost knee) rather than executing a model in the browser.
 Both models are small and were selected for reproducibility on a single CPU; the qualitative findings
 are expected to transfer to larger models, but the specific numbers should not be treated as
-calibrated large-model benchmarks. References were checked against their primary sources; readers are
-nonetheless encouraged to verify them independently.
+calibrated large-model benchmarks. The interactive figures use a three-tap configuration (blocks 4/6/8
+on GPT-2) with eight examples per class; the mixture and parameter-count discussions cite the original
+five-tap, twelve-per-class runs, so tap and prompt counts differ between the two. References were
+checked against their primary sources; readers are nonetheless encouraged to verify them independently.
 </div>
 
 ## 1. Introduction
@@ -407,8 +290,8 @@ This paper contributes, in order of how much we trust them:
 4. **A compute–accuracy frontier.** Because detection needs only the blocks up to the deepest tap, a
    concept has a *cheapest layer at which it is already separable*; we measure this frontier and show
    it is model-dependent (<a class="sref" href="#45-the-computeaccuracy-frontier">§4.5</a>).
-5. **A living document.** The interactive figures below replay real model runs, so the mechanism can
-   be manipulated rather than merely described.
+5. **Reproducible interactive figures.** The figures below reproduce the underlying model runs, so the
+   mechanism can be examined directly rather than only described.
 
 One caveat applies throughout: **no individual mechanism here is new.** Probes,
 diff-of-means directions, activation steering, Gaussian/mixture density scoring, circuit-breaker
@@ -619,7 +502,7 @@ walk it one stage at a time.
   <!-- actions -->
   <g font-size="11.5">
     <rect x="150" y="188" width="180" height="30" rx="5" fill="#fdecea" stroke="#e0a99f"/><text x="240" y="207" text-anchor="middle" fill="#c2402f">ABORT — stop / emit</text>
-    <rect x="350" y="188" width="220" height="30" rx="5" fill="#eef2f7" stroke="#9db"/><text x="460" y="207" text-anchor="middle" fill="#1f6feb">STEER — add ±α·wᵏ to the stream</text>
+    <rect x="350" y="188" width="220" height="30" rx="5" fill="#eef2f7" stroke="#9db"/><text x="460" y="207" text-anchor="middle" fill="#26a99d">STEER — add ±α·wᵏ to the stream</text>
   </g>
   <line x1="360" y1="170" x2="360" y2="188" stroke="#9aa" marker-end="url(#ar)"/>
 </svg>
@@ -743,9 +626,9 @@ $$d'_{\text{comb}}=\sqrt{\textstyle\sum_\ell (d'_\ell)^2}\;\ge\;\max_\ell d'_\el
 
 At the equal-prior threshold, the per-class error of two equal-variance Gaussians separated by $d'$ is
 $\mathrm{err}=\Phi(-d'/2)$. So fusion strictly beats the single best layer whenever any other layer
-carries independent signal. The widget below lets you feel exactly how much: set the three per-layer
-$d'$ and watch the fused $d'$ and the two error rates move. The defaults are the values our synthetic
-experiment (<a class="sref" href="#41-depth-fusion-on-synthetic-data">§4.1</a>) actually recovered.
+carries independent signal. The widget below makes the effect concrete: varying the three per-layer
+$d'$ updates the fused $d'$ and the two error rates. The defaults are the values the synthetic
+experiment (<a class="sref" href="#41-depth-fusion-on-synthetic-data">§4.1</a>) recovered.
 
 <div id="cg-depthfusion" class="cg-widget"></div>
 
@@ -757,7 +640,7 @@ the naive `diag`.
 ### 3.7 Class-conditional mixtures and BIC
 
 A single Gaussian per class assumes each class is one blob. Real "benign" traffic is not one blob —
-it is chit-chat, homework, code, each with its own loudness profile across depth. So we let each
+it is chit-chat, homework, code, each with its own score profile across depth. So we let each
 class be a small **library of profiles**: a Gaussian mixture on the joint spectrogram,
 
 $$p(\mathbf{s}\mid c)=\sum_{j=1}^{J_c}\pi_{cj}\,\mathcal{N}(\mathbf{s};\mu_{cj},\Sigma_{cj}),\qquad c\in\{+,-\},$$
@@ -791,8 +674,10 @@ $\lvert P_{\text{present}}-\tfrac12\rvert<\text{margin}$. Abstention is the appr
 behaviour: with ten examples per class, some prompts fall near the boundary, and reporting
 that is more useful than forcing a decision.
 
-The figure below applies this gate to real GPT-2 activations for a jailbreak concept. Ten labelled
-probes — jailbreak, benign, and two deliberately borderline cases — carry their measured LLRs; moving
+The figure below applies this gate to real GPT-2 activations for a jailbreak concept, calibrated at a
+deliberately permissive operating point ($z=2$, so several borderline benign prompts fire). Ten
+labelled probes — jailbreak, benign, and two deliberately borderline cases — carry their measured LLRs;
+moving
 $\tau$ reclassifies each probe and traces the trade-off between recall and false-positive rate on the
 concept's own examples. Two behaviours are worth observing. The benign prompt *"Ignore the noise
 outside and focus on the recipe"* scores high because the early layers respond to the word "ignore" —
@@ -831,7 +716,7 @@ hook can add. During generation, at each tapped layer we add
 $$a_\ell\;\leftarrow\;a_\ell+\alpha\,w^{\text{raw}}_{\ell},$$
 
 with $\alpha>0$ steering **toward** the concept and $\alpha<0$ **away** (the refusal / guardrail
-direction). The one practical subtlety is *magnitude*: a good absolute $\alpha$ on gpt2 is wrong on
+direction). The one practical subtlety is *magnitude*: a good absolute $\alpha$ on GPT-2 is wrong on
 Qwen, because their residual norms differ by an order of magnitude (96 vs 19 in our runs). So we set
 $\alpha$ as a **fraction of the measured residual norm**, which transfers across models — empirically
 $\sim$3–10% is the coherent band, and above roughly 20–25% the text degrades into repetition or
@@ -871,7 +756,7 @@ the pure measurement primitive that `run` is built on.
 
 To read a tap at layer $\ell$, only blocks $0..\ell$ need to run. Detection therefore executes a
 **truncated forward** — the tail of the network, the final norm, and the unembedding are never
-touched — which on gpt2 is measured bit-identical at the taps and about 46% faster than a full
+touched — which on GPT-2 is measured bit-identical at the taps and about 46% faster than a full
 forward. A weight-truncated *load* mode goes further and never materializes the tail at all, so a
 large model tapped early loads a fraction of its weights (detection-only; generation still needs the
 whole network). This is what makes the compute–accuracy frontier of <a class="sref" href="#45-the-computeaccuracy-frontier">§4.5</a> a real
@@ -961,7 +846,7 @@ free on the way through.
 
 ## 4. Experiments and results
 
-We evaluate on gpt2 (12 blocks) and Qwen2.5-0.5B-Instruct (24 blocks), both small enough to run and
+We evaluate on GPT-2 (12 blocks) and Qwen2.5-0.5B-Instruct (24 blocks), both small enough to run and
 re-run on a laptop CPU, which is the point — the whole method is meant to be cheap. Results are
 reported in the order of the contributions, and the negative ones are not buried.
 
@@ -987,7 +872,7 @@ is the case for mixtures, and <a class="sref" href="#figure-3">Figure 3</a> show
 
 <figure id="figure-3" style="margin:2rem 0">
 <div id="cg-killshot" class="cg-widget" style="margin:0"></div>
-<figcaption><strong>Figure 3 (interactive).</strong> The mixture kill-shot, on synthetic data. Two
+<figcaption><strong>Figure 3 (interactive).</strong> The constructed hard case for mixtures, on synthetic data. Two
 benign clusters (teal) sit on either side of the harmful cluster (red) along the score axis. Toggle
 the gate: a single linear threshold cannot isolate the middle from the two sides, whereas a
 two-component mixture fires only where the harmful density dominates. The error and AUC figures are the
@@ -996,7 +881,7 @@ paragraph reports.</figcaption>
 </figure>
 
 The case *against* them, at least in the regime we care about, is that on
-real gpt2 activations with 12+12 prompts, **BIC selects $J=1$ for both classes** — an extra
+real GPT-2 activations with 12+12 prompts, **BIC selects $J=1$ for both classes** — an extra
 full-covariance profile over five layers costs ~21 parameters, whose rent (~52 nats) twelve samples
 cannot pay — and the mixture gate collapses exactly onto the single-Gaussian gate (rank agreement
 0.986). In short, the mixture is the more general model but remains inactive in this regime: whether
@@ -1043,8 +928,8 @@ until the middle of the network: AUC climbs through the early blocks and only sa
 6, so the cheapest reliable guardrail runs somewhat more than half the network and the final ~40% of
 blocks contribute nothing. On Qwen2.5-0.5B the same concept is essentially separable by **block 1**,
 because the more capable model has formed the abstraction almost immediately, so the guardrail can run
-roughly 4% of the network. Each of these is a concrete, per-concept, per-model operating point, and it
-is the practical consequence of the truncated forward.
+roughly 8% of the network (block 1 of 24). Each of these is a concrete, per-concept, per-model
+operating point, and it is the practical consequence of the truncated forward.
 
 ### 4.6 Steering across models
 
@@ -1097,7 +982,7 @@ the write half is available at little additional cost.
 ### 5.3 The cost argument and its limits
 
 The compute–accuracy trade-off is a real engineering result — a jailbreak concept can be gated at
-roughly 4% of Qwen2.5-0.5B — but two qualifications bound it. First, the truncated-forward saving is
+roughly 8% of Qwen2.5-0.5B — but two qualifications bound it. First, the truncated-forward saving is
 available to any internal probe, including the SVM baseline; it is a property of latent-space methods
 in general rather than an advantage specific to ConceptGate. Second, the memory-minimal load mode is
 detection-only, and detection is the commodity half of the system, whereas the distinguishing
@@ -1113,7 +998,7 @@ deploy a second model. A single concept's entire learned state, over $m$ tapped 
 width $d$, is
 two sets of direction vectors (the standardized detection direction and the raw steering direction,
 $2md$ numbers), the per-dimension standardization statistics ($2md$), the depth filter ($m$), and a
-handful of Gaussian scalars for the gate. For gpt2 with five taps that is on the order of
+handful of Gaussian scalars for the gate. For GPT-2 with five taps that is on the order of
 $1.5\times10^4$ numbers — comfortably under the sub-million-parameter target one would want for
 something meant to be stored and shipped by the concept — and a bank of $K$ concepts is simply
 $K$ times that, since concepts share nothing and never interact beyond the max-LLR rule of
@@ -1289,7 +1174,7 @@ function cgDetect(){
   var host=cgEl("cg-detect"); if(!host) return;
   var D=CGDATA.detection, TMIN=-40, TMAX=10;
   host.innerHTML=''
-    +'<p class="cg-eyebrow">figure · interactive · real gpt-2 activations</p><h4>Detection sandbox — jailbreak concept</h4>'
+    +'<p class="cg-eyebrow">figure · interactive · real GPT-2 activations</p><h4>Detection sandbox — jailbreak concept</h4>'
     +'<div class="cg-sub">Ten labelled probes carry their true log-likelihood ratios. Drag τ: a probe '
     +'<span class="cg-badge cg-fire">fires</span> when its LLR &gt; τ, else <span class="cg-badge cg-pass">passes</span>. '
     +'Recall / FPR are computed live on the concept’s own ±10 examples.</div>'
@@ -1370,7 +1255,7 @@ function cgCost(){
   var host=cgEl("cg-cost"); if(!host) return;
   var models=Object.keys(CGDATA.cost_curve);
   host.innerHTML=''
-    +'<p class="cg-eyebrow">figure · interactive · gpt-2 &amp; qwen2.5-0.5b</p><h4>Compute–accuracy frontier</h4>'
+    +'<p class="cg-eyebrow">figure · interactive · GPT-2 &amp; Qwen2.5-0.5B</p><h4>Compute–accuracy frontier</h4>'
     +'<div class="cg-sub">Leave-one-out AUC of the diff-of-means detector at each layer (red) vs the fraction '
     +'of the network a tap there runs (teal). Drag the target to find the cheapest layer that clears it.</div>'
     +'<div class="cg-ctrls">'
@@ -1493,10 +1378,10 @@ function cgKillshot(){
   host.innerHTML=''
     +'<p class="cg-eyebrow">figure · interactive · synthetic illustration</p>'
     +'<h4>Why a mixture helps — a synthetic example</h4>'
-    +'<div class="cg-sub">This is a constructed toy, <b>not a gpt-2 or Qwen run</b>. Two benign clusters sit on '
+    +'<div class="cg-sub">This is a constructed toy, <b>not a GPT-2 or Qwen run</b>. Two benign clusters sit on '
     +'either side of the harmful one along the score axis; toggle the gate to see why a single linear threshold '
     +'cannot separate them while a two-component mixture can. Error / AUC are the measured toy results — and on '
-    +'real ten-shot data (gpt-2) the mixture collapses to one component, so this advantage stays dormant.</div>'
+    +'real ten-shot data (GPT-2) the mixture collapses to one component, so this advantage stays dormant.</div>'
     +'<div class="cg-ctrls"><div class="cg-ctrl" style="min-width:16rem"><label>gate</label>'
     +'<select id="cgk-gate"><option value="linear">single Gaussian (linear threshold)</option>'
     +'<option value="mixture">Gaussian mixture (two benign modes)</option></select></div></div>'
@@ -1538,51 +1423,6 @@ function cgKillshot(){
 (function(){
   function boot(){ [cgTrace,cgDepthFusion,cgDetect,cgSteer,cgCost,cgKillshot].forEach(function(f){try{f();}catch(e){}}); }
   if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",boot);}else{boot();}
-})();
-</script>
-
-<script>
-// Technical / simplified reading toggle (floating button). In simplified mode the shared figure
-// and interactive widgets are physically moved into the simplified narrative and then moved back,
-// so there is only ever one instance of each and their event listeners survive the move.
-(function(){
-  var content=document.querySelector('.content');
-  var btn=document.getElementById('cg-toggle');
-  if(!content||!btn) return;
-  // The button lives in an in-flow, position:sticky bar (see CSS). Sticky is used instead of
-  // fixed because browser extensions and themes sometimes transform <body>, which would break
-  // position:fixed (it becomes relative to the transformed box and lands off-screen).
-  var IDS=['figure-1','cg-steer','cg-detect','cg-cost'];
-  var homes=IDS.map(function(id){
-    var el=document.getElementById(id);
-    return el ? {id:id, el:el, parent:el.parentNode, next:el.nextSibling} : null;
-  }).filter(Boolean);
-  function relocate(simple){
-    homes.forEach(function(h){
-      try{
-        if(simple){
-          var slot=content.querySelector('.cg-simple-doc [data-cg-slot="'+h.id+'"]');
-          if(slot && h.el.parentNode!==slot) slot.appendChild(h.el);
-        }else if(h.el.parentNode!==h.parent){
-          h.parent.insertBefore(h.el, h.next);
-        }
-      }catch(e){}
-    });
-  }
-  function apply(mode){
-    var simple = mode==='simple';
-    relocate(simple);
-    content.classList.toggle('cg-simple', simple);
-    btn.textContent = simple ? 'Technical' : 'Simplified';
-    try{ localStorage.setItem('cg-mode', mode); }catch(e){}
-  }
-  btn.addEventListener('click', function(){
-    apply(content.classList.contains('cg-simple') ? 'technical' : 'simple');
-    window.scrollTo(0,0);
-  });
-  var saved='technical';
-  try{ saved = localStorage.getItem('cg-mode') || 'technical'; }catch(e){}
-  apply(saved);
 })();
 </script>
 
