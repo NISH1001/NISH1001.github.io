@@ -80,6 +80,20 @@ a.sref:hover{color:var(--brand,#3aa99f)}
 .content .highlight .mi,.content .highlight .mf,.content .highlight .mh,.content .highlight .il{color:#0550ae!important}
 .content .highlight .o,.content .highlight .ow{color:#cf222e!important}
 .content .highlight .nn,.content .highlight .nc,.content .highlight .n{color:#24292f!important}
+
+/* --- technical / simplified reading toggle --- */
+.cg-floatbtn{position:fixed;right:1rem;bottom:1rem;z-index:60;border:1px solid var(--brand,#3aa99f);
+  background:var(--brand,#3aa99f);color:#fff;padding:.5rem 1rem;border-radius:2rem;cursor:pointer;
+  font:inherit;font-size:.85rem;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.cg-floatbtn:hover{filter:brightness(1.06)}
+.cg-simple-doc{display:none;max-width:42rem}
+.cg-simple-doc .lead{font-size:.88rem;opacity:.7;font-style:italic;margin:.2rem 0 1.5rem}
+.cg-simple-doc p{margin:.9rem 0}
+.cg-simple-doc .sh{font-weight:700;font-size:1.06rem;margin:1.7rem 0 .35rem}
+/* simplified mode: hide the technical body; show only the simplified document and the button */
+.content.cg-simple > *{display:none!important}
+.content.cg-simple > .cg-simple-doc,
+.content.cg-simple > .cg-togglebar{display:block!important}
 </style>
 
 <p class="small-note" style="margin:0 0 1.4rem;padding:.5rem .7rem;border:1px dashed var(--border,#d8d6cc);border-radius:.35rem">
@@ -87,6 +101,91 @@ a.sref:hover{color:var(--brand,#3aa99f)}
 model — actively evolving and updated as the research develops, and not a finished or peer-reviewed
 paper. Treat the results, numbers, and framing as preliminary, and expect sections to change.
 </p>
+
+<div class="cg-togglebar">
+<button type="button" id="cg-toggle" class="cg-floatbtn">Simplified view</button>
+</div>
+
+<div class="cg-simple-doc" markdown="1">
+<p class="lead">You are reading the simplified version. The floating button switches back to the full
+technical report, where the mathematics, the experiments, and the interactive figures live.</p>
+
+<p class="sh">What this is</p>
+
+A language model, as it reads your text, maintains a large running list of numbers inside itself —
+often called its *residual stream* — which it updates at every layer as it processes the input. Hidden
+inside those numbers is a surprising amount of information about what the text is *about*: whether it
+is a cooking question, whether its tone is hostile, whether it is trying to talk the model into
+ignoring its own rules. ConceptGate is a small tool that learns to recognize one such idea from only
+about ten example sentences, without retraining the model at all, and that can then do two things:
+notice when the idea is present, and — using the very same thing it learned — nudge the model's writing
+toward or away from that idea while it generates.
+
+<p class="sh">Where it sits among other ways of adapting a model</p>
+
+There is a whole spectrum of ways to make a pretrained model do what you want. At the heavy end is
+*full fine-tuning*, which retrains all of the model's weights: powerful, but expensive, and it leaves
+you with a whole separate copy of the model for every task. Lighter methods such as *LoRA* freeze most
+of the model and train only a small number of extra weights. Lighter still is *linear probing*, which
+freezes the model entirely and trains a small classifier to read its activations. ConceptGate sits at
+the far, cheapest end of this spectrum: it trains nothing at all — it simply computes some averages of
+the example activations — and, unlike a plain classifier, it does not only *read* the idea, it can
+*write* it back to steer the model.
+
+<p class="sh">Why reach inside the model at all</p>
+
+The usual way to catch, say, a jailbreak attempt is a separate classifier that reads the text and
+judges it. That works, but it is a second model to run, and it can only ever *judge* — it cannot
+change what your model then writes. ConceptGate instead rides the model you are already running, adds
+only kilobytes rather than a whole network, and can do the one thing a text classifier structurally
+cannot: reach into the generation and steer it. That ability to *write*, and not only read, is the
+entire reason to work with the model's internals rather than its text.
+
+<p class="sh">How it works</p>
+
+Picture a row of microphones placed along a hallway that a thought travels down. Each microphone is
+tuned to one idea and reports how strongly it registers that idea at its point in the hallway.
+ConceptGate places such microphones at a few depths inside the model, collects their readings into a
+small profile across depth, and blends that profile into a single score. If the score clears a
+calibrated line the idea "fires"; if it sits in the uncertain middle, the tool can answer "not sure"
+rather than guess. Everything it learns — what each microphone listens for, and how much to trust each
+one — comes from averaging the numbers produced by the example sentences; there is no gradient descent
+and no training loop, and it finishes in a fraction of a second. To *steer*, ConceptGate takes the
+direction it learned for an idea and adds it back into the model's numbers as the model writes, which
+bends the output toward the idea, or, with the sign flipped, away from it.
+
+<p class="sh">What we found — including the parts that do not flatter it</p>
+
+Three findings stand out, and none is glossed over. First, listening at several depths and combining
+the readings really does work better than listening at only one depth. Second, and less flattering: as
+a *detector*, ConceptGate is no better than an ordinary linear classifier trained on the same numbers
+— recognizing these concepts turns out to be a cheap, already-solved problem, so detection is not
+where the value lies. Third, the value is in *steering*, which a classifier simply cannot do — but
+steering is only as good as the underlying model allows: a stronger model steers cleanly and stays
+coherent, while a weaker one steers faintly and garbles sooner. There is also a useful practical bonus:
+because detecting an idea only needs the lower part of the network, one can often run just a small
+fraction of the model — around 4% on the stronger model tested — and still catch the concept, which
+makes a lightweight guardrail very cheap to attach. A few intuitive ideas also turned out to be wrong,
+such as the expectation that carefully matched "near-miss" negative examples would sharpen detection;
+they made it worse.
+
+<p class="sh">Where it breaks</p>
+
+ConceptGate should be understood as a cheap, interpretable, few-shot control knob, not a security
+guarantee. Someone who understands how it works can craft inputs that slip past the detector while the
+model still misbehaves — a known weakness of every method in this family. The experiments here use
+small models and familiar examples, so the exact numbers should be re-checked at larger scale; the
+method can only catch ideas that the model happens to represent simply; and pushing the steering too
+hard degrades the quality of the writing. None of this is hidden — it is the boundary of a deliberately
+simple approach.
+
+<p class="sh">The bottom line</p>
+
+A frozen model already "knows" a great many ideas internally. ConceptGate reads them cheaply and writes
+them back to steer what the model generates. Reading is a commodity; writing is the point. Switch to
+the technical view for the mathematics, the full experiments, and the interactive figures you can
+actually manipulate.
+</div>
 
 <div class="paper-abstract" markdown="1">
 **Abstract.** As a frozen language model — or, more generally, any transformer with a residual stream —
@@ -1211,6 +1310,29 @@ function cgCost(){
 (function(){
   function boot(){ [cgDepthFusion,cgDetect,cgSteer,cgCost].forEach(function(f){try{f();}catch(e){}}); }
   if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",boot);}else{boot();}
+})();
+</script>
+
+<script>
+// Technical / simplified reading toggle (floating button; swaps the whole document).
+(function(){
+  var content=document.querySelector('.content');
+  var btn=document.getElementById('cg-toggle');
+  if(!content||!btn) return;
+  function apply(mode){
+    var simple = mode==='simple';
+    content.classList.toggle('cg-simple', simple);
+    btn.textContent = simple ? 'Technical view' : 'Simplified view';
+    try{ localStorage.setItem('cg-mode', mode); }catch(e){}
+  }
+  btn.addEventListener('click', function(){
+    var next = content.classList.contains('cg-simple') ? 'technical' : 'simple';
+    apply(next);
+    window.scrollTo(0,0);
+  });
+  var saved='technical';
+  try{ saved = localStorage.getItem('cg-mode') || 'technical'; }catch(e){}
+  apply(saved);
 })();
 </script>
 
