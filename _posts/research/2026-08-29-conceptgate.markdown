@@ -82,9 +82,10 @@ a.sref:hover{color:var(--brand,#3aa99f)}
 .content .highlight .nn,.content .highlight .nc,.content .highlight .n{color:#24292f!important}
 
 /* --- technical / simplified reading toggle --- */
-.cg-floatbtn{position:fixed;right:1rem;bottom:1rem;z-index:60;border:1px solid var(--brand,#3aa99f);
-  background:var(--brand,#3aa99f);color:#fff;padding:.5rem 1rem;border-radius:2rem;cursor:pointer;
-  font:inherit;font-size:.85rem;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.cg-floatbtn{position:fixed;right:1rem;bottom:max(1rem,env(safe-area-inset-bottom));z-index:99999;
+  border:1px solid var(--brand,#3aa99f);background:var(--brand,#3aa99f);color:#fff;
+  padding:.6rem 1.1rem;border-radius:2rem;cursor:pointer;font:inherit;font-size:.85rem;
+  box-shadow:0 4px 16px rgba(0,0,0,.25);-webkit-appearance:none}
 .cg-floatbtn:hover{filter:brightness(1.06)}
 .cg-simple-doc{display:none;max-width:42rem}
 .cg-simple-doc .lead{font-size:.88rem;opacity:.7;font-style:italic;margin:.2rem 0 1.5rem}
@@ -154,6 +155,15 @@ and no training loop, and it finishes in a fraction of a second. To *steer*, Con
 direction it learned for an idea and adds it back into the model's numbers as the model writes, which
 bends the output toward the idea, or, with the sign flipped, away from it.
 
+<div class="cg-slot" data-cg-slot="figure-1"></div>
+
+The picture above is the whole pipeline: tap the model at a few depths, turn each into a score, blend
+them, decide, and — on the write side — add the idea's direction back in. The slider below replays real
+steering: pick a topic and drag from "away" through neutral to "toward," and read what the model
+actually produced.
+
+<div class="cg-slot" data-cg-slot="cg-steer"></div>
+
 <p class="sh">What we found — including the parts that do not flatter it</p>
 
 Three findings stand out, and none is glossed over. First, listening at several depths and combining
@@ -168,6 +178,15 @@ fraction of the model — around 4% on the stronger model tested — and still c
 makes a lightweight guardrail very cheap to attach. A few intuitive ideas also turned out to be wrong,
 such as the expectation that carefully matched "near-miss" negative examples would sharpen detection;
 they made it worse.
+
+The two figures below are the interactive evidence. The first is the detector on real GPT-2 activations:
+drag the threshold and watch honest prompts and jailbreak attempts sort themselves — imperfectly. The
+second is the "how little of the model do we need" curve: drag the target and see the cheapest depth
+that still catches the concept.
+
+<div class="cg-slot" data-cg-slot="cg-detect"></div>
+
+<div class="cg-slot" data-cg-slot="cg-cost"></div>
 
 <p class="sh">Where it breaks</p>
 
@@ -209,7 +228,8 @@ requires only the blocks up to the deepest tap, there is a measurable compute–
 jailbreak concept becomes separable by block 6 of GPT-2 (58% of the network) and by block 1 of
 Qwen2.5-0.5B. Every mechanism used here is drawn from prior work; the contribution is the specific
 few-shot, dual-mode composition and an empirical characterization of where it helps and where it does
-not.
+not. A reference implementation is available at
+[github.com/NISH1001/conceptgate](https://github.com/NISH1001/conceptgate).
 </div>
 
 <div class="small-note" markdown="1">
@@ -1041,7 +1061,8 @@ backpropagation and no gradients, so a concept can be learned, discarded, and re
 interactively. Inference
 adds $m$ dot products of width $d$ plus a length-$m$ blend per gated position — negligible against a
 single transformer forward — and in the abort case it *removes* compute, since decoding stops early.
-The reference implementation keeps a deliberately legible shape: a pure-numpy mathematical core
+The reference implementation ([github.com/NISH1001/conceptgate](https://github.com/NISH1001/conceptgate))
+keeps a deliberately legible shape: a pure-numpy mathematical core
 (`spectral.py` for directions, spectrogram, and filters; `concept.py` for the calibrated gate;
 `mixture.py` for the GMM and its BIC selection) sits behind a thin PyTorch boundary that owns only
 the model-touching parts — the tap reader, the steering hooks, and the `ConceptGate` facade with its
@@ -1314,20 +1335,43 @@ function cgCost(){
 </script>
 
 <script>
-// Technical / simplified reading toggle (floating button; swaps the whole document).
+// Technical / simplified reading toggle (floating button). In simplified mode the shared figure
+// and interactive widgets are physically moved into the simplified narrative and then moved back,
+// so there is only ever one instance of each and their event listeners survive the move.
 (function(){
   var content=document.querySelector('.content');
   var btn=document.getElementById('cg-toggle');
   if(!content||!btn) return;
+  // Move the button to <body> so position:fixed is viewport-relative even if an ancestor
+  // is transformed/clipped (common on mobile layouts), and so it is never hidden by the
+  // simplified-mode rule that hides the technical body.
+  document.body.appendChild(btn);
+  var IDS=['figure-1','cg-steer','cg-detect','cg-cost'];
+  var homes=IDS.map(function(id){
+    var el=document.getElementById(id);
+    return el ? {id:id, el:el, parent:el.parentNode, next:el.nextSibling} : null;
+  }).filter(Boolean);
+  function relocate(simple){
+    homes.forEach(function(h){
+      try{
+        if(simple){
+          var slot=content.querySelector('.cg-simple-doc [data-cg-slot="'+h.id+'"]');
+          if(slot && h.el.parentNode!==slot) slot.appendChild(h.el);
+        }else if(h.el.parentNode!==h.parent){
+          h.parent.insertBefore(h.el, h.next);
+        }
+      }catch(e){}
+    });
+  }
   function apply(mode){
     var simple = mode==='simple';
+    relocate(simple);
     content.classList.toggle('cg-simple', simple);
     btn.textContent = simple ? 'Technical view' : 'Simplified view';
     try{ localStorage.setItem('cg-mode', mode); }catch(e){}
   }
   btn.addEventListener('click', function(){
-    var next = content.classList.contains('cg-simple') ? 'technical' : 'simple';
-    apply(next);
+    apply(content.classList.contains('cg-simple') ? 'technical' : 'simple');
     window.scrollTo(0,0);
   });
   var saved='technical';
