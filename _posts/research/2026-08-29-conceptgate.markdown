@@ -82,10 +82,11 @@ a.sref:hover{color:var(--brand,#3aa99f)}
 .content .highlight .nn,.content .highlight .nc,.content .highlight .n{color:#24292f!important}
 
 /* --- technical / simplified reading toggle --- */
-.cg-floatbtn{position:fixed;right:1rem;bottom:max(1rem,env(safe-area-inset-bottom));z-index:99999;
+.cg-floatbtn{position:fixed;right:14px;bottom:14px;z-index:99999;
   border:1px solid var(--brand,#3aa99f);background:var(--brand,#3aa99f);color:#fff;
   padding:.6rem 1.1rem;border-radius:2rem;cursor:pointer;font:inherit;font-size:.85rem;
-  box-shadow:0 4px 16px rgba(0,0,0,.25);-webkit-appearance:none}
+  box-shadow:0 4px 16px rgba(0,0,0,.25);-webkit-appearance:none;
+  transform:translateZ(0);-webkit-transform:translateZ(0);will-change:transform}
 .cg-floatbtn:hover{filter:brightness(1.06)}
 .cg-simple-doc{display:none;max-width:42rem}
 .cg-simple-doc .lead{font-size:.88rem;opacity:.7;font-style:italic;margin:.2rem 0 1.5rem}
@@ -1368,6 +1369,11 @@ function cgCost(){
     relocate(simple);
     content.classList.toggle('cg-simple', simple);
     btn.textContent = simple ? 'Technical view' : 'Simplified view';
+    // force a fresh paint of the fixed button after the large height change (some browsers,
+    // including mobile Firefox, otherwise fail to repaint the fixed element and it vanishes)
+    btn.style.display='none';
+    void btn.offsetHeight;
+    btn.style.display='';
     try{ localStorage.setItem('cg-mode', mode); }catch(e){}
   }
   btn.addEventListener('click', function(){
