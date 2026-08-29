@@ -83,13 +83,9 @@ a.sref:hover{color:var(--brand,#3aa99f)}
 </style>
 
 <p class="small-note" style="margin:0 0 1.4rem;padding:.5rem .7rem;border:1px dashed var(--border,#d8d6cc);border-radius:.35rem">
-<strong>⚠ Work in progress.</strong> This is a living technical report — actively evolving and updated
-as the research develops, not a finished or peer-reviewed paper. Treat the results, numbers, and
-framing as preliminary, and expect sections to change.
-</p>
-
-<p class="small-note" style="margin:0 0 1.4rem">
-<strong>Authorship.</strong> This report was co-written with a generative model.
+<strong>⚠ Work in progress.</strong> This is a living technical report, co-written with a generative
+model — actively evolving and updated as the research develops, and not a finished or peer-reviewed
+paper. Treat the results, numbers, and framing as preliminary, and expect sections to change.
 </p>
 
 <div class="paper-abstract" markdown="1">
