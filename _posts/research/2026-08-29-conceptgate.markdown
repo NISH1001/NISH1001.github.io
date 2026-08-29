@@ -171,12 +171,12 @@ it differs from those mainly in reading a concept across several layers rather t
 detection and steering within a single calibrated module. The trade-off is deliberate: steering a
 frozen model by adding a single linear direction per concept is far less powerful than adapting it by
 fine-tuning or LoRA, and the method is directed at lightweight, interpretable, concept-level control
-rather than at acquiring new capabilities. (The detection side is not restricted to a linear boundary
-in the same way: it fuses several per-layer directions and scores them with a Gaussian-mixture model
-whose decision surface is non-linear when a class needs more than one component — though, as
-<a class="sref" href="#42-mixture-densities-a-constructed-hard-case-and-a-few-shot-collapse">§4.2</a>
-shows, the low-sample regime typically selects a single component and the boundary reduces to a linear
-one.)
+rather than at acquiring new capabilities. That linearity, however, is a property of the write side.
+The read side is more expressive: it fuses several per-layer directions and scores them with a
+Gaussian-mixture model, whose decision surface becomes non-linear whenever a class is best described by
+more than one component — though in the low-sample regime we work in, model selection usually returns a
+single component and the boundary is again linear
+(<a class="sref" href="#42-mixture-densities-a-constructed-hard-case-and-a-few-shot-collapse">§4.2</a>).
 
 ### 1.1 The problem
 
