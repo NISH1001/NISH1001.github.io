@@ -42,30 +42,42 @@ a.sref{text-decoration:none;border-bottom:1px dotted currentColor;color:inherit}
 a.sref:hover{color:var(--brand,#3aa99f)}
 :target{background:rgba(58,169,159,.10)}
 
-/* ---- interactive widgets ---- */
-.cg-widget{border:1px solid var(--border,#e6e4d9);border-radius:.5rem;
-  background:var(--bg2,#f7f6f0);padding:1rem 1.1rem;margin:1.8rem 0;font-size:.9rem}
-.cg-widget h4{margin:.1rem 0 .2rem;font-size:.95rem}
-.cg-widget .cg-sub{font-size:.82rem;color:var(--text,#666);opacity:.85;margin-bottom:.8rem}
-.cg-ctrls{display:flex;flex-wrap:wrap;gap:.9rem 1.4rem;align-items:center;margin:.5rem 0 .9rem}
-.cg-ctrl{display:flex;flex-direction:column;gap:.2rem;font-size:.8rem;min-width:8rem}
-.cg-ctrl label{font-weight:600;opacity:.85}
-.cg-ctrl .cg-val{font-variant-numeric:tabular-nums;font-weight:400;opacity:.8}
-.cg-widget input[type=range]{width:100%;accent-color:var(--brand,#3aa99f)}
-.cg-widget select{padding:.25rem .4rem;border-radius:.3rem;border:1px solid var(--border,#ccc);
-  background:var(--bg,#fff);color:inherit;font-size:.85rem}
-.cg-readout{font-variant-numeric:tabular-nums;line-height:1.7}
-.cg-badge{display:inline-block;padding:.05rem .45rem;border-radius:.3rem;font-size:.78rem;
+/* ---- interactive widgets (warm panels, mono captions, teal + red-orange) ---- */
+.cg-widget{--cg-a:#c2402f;--cg-b:#26a99d;
+  border:1px solid var(--border,#e2e0d6);border-radius:.6rem;
+  background:var(--bg2,#faf9f4);padding:1.15rem 1.2rem 1.25rem;margin:2rem 0;font-size:.9rem;
+  box-shadow:0 1px 2px rgba(20,20,18,.05)}
+.cg-widget .cg-eyebrow{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;
+  letter-spacing:.09em;text-transform:uppercase;opacity:.5;margin:0 0 .45rem}
+.cg-widget h4{margin:0 0 .15rem;font-size:.96rem;font-weight:700}
+.cg-widget .cg-sub{font-size:.83rem;color:var(--text,#666);opacity:.88;margin-bottom:.9rem;line-height:1.5}
+.cg-ctrls{display:flex;flex-wrap:wrap;gap:.9rem 1.4rem;align-items:center;margin:.5rem 0 1rem}
+.cg-ctrl{display:flex;flex-direction:column;gap:.25rem;font-size:.78rem;min-width:8rem}
+.cg-ctrl label{font-weight:600;opacity:.8;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:.71rem;letter-spacing:.02em}
+.cg-ctrl .cg-val{font-variant-numeric:tabular-nums;font-weight:400;opacity:.75}
+.cg-widget input[type=range]{width:100%;accent-color:var(--cg-b)}
+.cg-widget select{padding:.28rem .45rem;border-radius:.35rem;border:1px solid var(--border,#ccc);
+  background:var(--bg,#fff);color:inherit;font-size:.82rem;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.cg-readout{font-variant-numeric:tabular-nums;line-height:1.75;font-size:.87rem}
+.cg-badge{display:inline-block;padding:.05rem .45rem;border-radius:.3rem;font-size:.75rem;
   font-weight:600;font-variant-numeric:tabular-nums}
-.cg-fire{background:rgba(194,64,47,.16);color:#c2402f}
-.cg-pass{background:rgba(31,111,235,.16);color:#1f6feb}
+.cg-fire{background:rgba(194,64,47,.15);color:var(--cg-a)}
+.cg-pass{background:rgba(38,169,157,.17);color:var(--cg-b)}
 .cg-out{background:var(--bg,#fff);border:1px solid var(--border,#e6e4d9);border-radius:.35rem;
-  padding:.6rem .75rem;line-height:1.55;min-height:3.5em}
-.cg-probe{display:flex;align-items:center;gap:.5rem;padding:.2rem 0;border-bottom:1px dashed var(--border,#eee)}
+  padding:.65rem .8rem;line-height:1.6;min-height:3.5em}
+.cg-probe{display:flex;align-items:center;gap:.5rem;padding:.22rem 0;border-bottom:1px dashed var(--border,#eee)}
 .cg-probe .t{flex:1}
-.cg-ok{color:#2e8b57;font-weight:700}
-.cg-no{color:#c2402f;font-weight:700}
+.cg-ok{color:var(--cg-b);font-weight:700}
+.cg-no{color:var(--cg-a);font-weight:700}
 .cg-mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.82rem}
+.cg-widget svg .cg-hit{cursor:crosshair}
+.cg-tip{position:fixed;z-index:200;pointer-events:none;background:#242625;color:#f4f4f0;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.45;
+  padding:.35rem .55rem;border-radius:.3rem;box-shadow:0 6px 20px rgba(0,0,0,.28);
+  opacity:0;transition:opacity .12s;white-space:nowrap;transform:translate(-50%,-115%)}
+.cg-tip.on{opacity:1}
 
 /* --- code syntax highlighting (scoped; guarantees visible colors + wrapping in this post) --- */
 .content .highlighter-rouge .highlight{background:#f6f8fa;border:1px solid #e4e2d8;border-radius:.45rem}
@@ -1168,14 +1180,25 @@ function cgErf(x){var s=x<0?-1:1;x=Math.abs(x);var t=1/(1+0.3275911*x);
 function cgCdf(z){return 0.5*(1+cgErf(z/Math.SQRT2));}   // standard normal CDF
 function cgEl(id){return document.getElementById(id);}
 function cgEsc(s){return String(s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
-var CG_RED="#C2402F", CG_BLUE="#1F6FEB", CG_GRID="#b9b9b9";
+var CG_RED="#C2402F", CG_BLUE="#26A99D", CG_GRID="#d8d5c8";
+var CG_TIP=null;
+function cgTipEl(){ if(!CG_TIP){CG_TIP=document.createElement('div');CG_TIP.className='cg-tip';document.body.appendChild(CG_TIP);} return CG_TIP; }
+function cgWireTips(svg){
+  if(!svg) return; var tip=cgTipEl();
+  Array.prototype.forEach.call(svg.querySelectorAll('[data-tip]'),function(el){
+    el.setAttribute('class',((el.getAttribute('class')||'')+' cg-hit').trim());
+    el.addEventListener('mouseenter',function(){tip.textContent=el.getAttribute('data-tip');tip.classList.add('on');});
+    el.addEventListener('mousemove',function(e){tip.style.left=e.clientX+'px';tip.style.top=e.clientY+'px';});
+    el.addEventListener('mouseleave',function(){tip.classList.remove('on');});
+  });
+}
 
 // ===================== widget 1: depth-fusion explorer (live math) =====================
 function cgDepthFusion(){
   var host=cgEl("cg-depthfusion"); if(!host) return;
   var d=CGDATA.depth_fusion.per_layer_dprime.slice();
   host.innerHTML=''
-    +'<h4>Depth-fusion explorer</h4>'
+    +'<p class="cg-eyebrow">figure · interactive · live math</p><h4>Depth-fusion explorer</h4>'
     +'<div class="cg-sub">Drag each layer’s discriminability d′. The fused detector combines them in '
     +'quadrature, d′<sub>comb</sub>=√Σ d′ℓ², and per-class error is Φ(−d′/2). '
     +'Live math — defaults are the values §4.1 recovered.</div>'
@@ -1197,11 +1220,11 @@ function cgDepthFusion(){
     bars.forEach(function(val,i){
       var h=Math.max(1,val*sc), x=x0+i*(bw+gap), y=H-pad-h;
       var col=i<3?CG_BLUE:CG_RED;
-      svg+='<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+h+'" rx="3" fill="'+col+'" opacity="'+(i<3?0.72:0.9)+'"/>';
-      svg+='<text x="'+(x+bw/2)+'" y="'+(y-4)+'" text-anchor="middle" font-size="11" fill="currentColor">'+val.toFixed(2)+'</text>';
+      svg+='<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+h+'" rx="3" fill="'+col+'" opacity="'+(i<3?0.72:0.92)+'" data-tip="'+labs[i]+' · d′ = '+val.toFixed(2)+'"/>';
+      svg+='<text x="'+(x+bw/2)+'" y="'+(y-4)+'" text-anchor="middle" font-size="11" font-weight="600" fill="currentColor">'+val.toFixed(2)+'</text>';
       svg+='<text x="'+(x+bw/2)+'" y="'+(H-pad+13)+'" text-anchor="middle" font-size="11" fill="currentColor" opacity="0.7">'+labs[i]+'</text>';
     });
-    cgEl("cgdf-svg").innerHTML=svg;
+    cgEl("cgdf-svg").innerHTML=svg; cgWireTips(cgEl("cgdf-svg"));
     cgEl("cgdf-out").innerHTML='single best layer: d′='+best.toFixed(2)
       +' → error <b>'+errB.toFixed(1)+'%</b> &nbsp;·&nbsp; '
       +'fused across depth: d′='+fused.toFixed(2)+' → error <b style="color:'+CG_RED+'">'+errF.toFixed(1)+'%</b>'
@@ -1216,7 +1239,7 @@ function cgDetect(){
   var host=cgEl("cg-detect"); if(!host) return;
   var D=CGDATA.detection, TMIN=-40, TMAX=10;
   host.innerHTML=''
-    +'<h4>Detection sandbox — real gpt2 activations, jailbreak concept</h4>'
+    +'<p class="cg-eyebrow">figure · interactive · real gpt-2 activations</p><h4>Detection sandbox — jailbreak concept</h4>'
     +'<div class="cg-sub">Ten labelled probes carry their true log-likelihood ratios. Drag τ: a probe '
     +'<span class="cg-badge cg-fire">fires</span> when its LLR &gt; τ, else <span class="cg-badge cg-pass">passes</span>. '
     +'Recall / FPR are computed live on the concept’s own ±10 examples.</div>'
@@ -1237,12 +1260,12 @@ function cgDetect(){
     var svg='<line x1="30" y1="30" x2="445" y2="30" stroke="'+CG_GRID+'"/>';
     svg+='<text x="30" y="50" font-size="9" fill="currentColor" opacity="0.6">≤'+TMIN+'</text>';
     svg+='<text x="430" y="50" font-size="9" fill="currentColor" opacity="0.6">'+TMAX+'</text>';
-    D.neg_llr.forEach(function(x){svg+='<circle cx="'+xpos(x)+'" cy="22" r="4" fill="'+CG_BLUE+'" opacity="0.6"/>';});
-    D.pos_llr.forEach(function(x){svg+='<circle cx="'+xpos(x)+'" cy="38" r="4" fill="'+CG_RED+'" opacity="0.7"/>';});
+    D.neg_llr.forEach(function(x){svg+='<circle cx="'+xpos(x)+'" cy="22" r="4.5" fill="'+CG_BLUE+'" opacity="0.62" data-tip="benign · LLR '+x.toFixed(1)+'"/>';});
+    D.pos_llr.forEach(function(x){svg+='<circle cx="'+xpos(x)+'" cy="38" r="4.5" fill="'+CG_RED+'" opacity="0.72" data-tip="jailbreak · LLR '+x.toFixed(1)+'"/>';});
     var tx=xpos(t);
     svg+='<line x1="'+tx+'" y1="6" x2="'+tx+'" y2="52" stroke="currentColor" stroke-width="1.4"/>';
-    svg+='<text x="'+tx+'" y="12" text-anchor="middle" font-size="9" fill="currentColor">τ</text>';
-    cgEl("cgd-strip").innerHTML=svg;
+    svg+='<text x="'+tx+'" y="12" text-anchor="middle" font-size="9" font-weight="600" fill="currentColor">τ</text>';
+    cgEl("cgd-strip").innerHTML=svg; cgWireTips(cgEl("cgd-strip"));
     // probes
     var rows=D.probes.map(function(p){
       var fires=p.llr>t, correct=(fires?1:0)===p.label;
@@ -1262,7 +1285,7 @@ function cgSteer(){
   var host=cgEl("cg-steer"); if(!host) return;
   var models=Object.keys(CGDATA.steering);
   host.innerHTML=''
-    +'<h4>Steering slider — real completions</h4>'
+    +'<p class="cg-eyebrow">figure · interactive · real completions</p><h4>Steering slider</h4>'
     +'<div class="cg-sub">Replays actual generations. Sweep the fraction of the residual norm from '
     +'“away” (−) through baseline (0) to “toward” (+).</div>'
     +'<div class="cg-ctrls">'
@@ -1297,9 +1320,9 @@ function cgCost(){
   var host=cgEl("cg-cost"); if(!host) return;
   var models=Object.keys(CGDATA.cost_curve);
   host.innerHTML=''
-    +'<h4>Compute–accuracy frontier</h4>'
+    +'<p class="cg-eyebrow">figure · interactive · gpt-2 &amp; qwen2.5-0.5b</p><h4>Compute–accuracy frontier</h4>'
     +'<div class="cg-sub">Leave-one-out AUC of the diff-of-means detector at each layer (red) vs the fraction '
-    +'of the network a tap there runs (blue). Drag the target to find the cheapest layer that clears it.</div>'
+    +'of the network a tap there runs (teal). Drag the target to find the cheapest layer that clears it.</div>'
     +'<div class="cg-ctrls">'
     +'<div class="cg-ctrl"><label>model</label><select id="cgc-model">'
     +models.map(function(m){return '<option value="'+m+'">'+m+'</option>';}).join('')+'</select></div>'
@@ -1324,6 +1347,7 @@ function cgCost(){
     function poly(arr,Y){return arr.map(function(v,i){return X(i)+','+Y(v);}).join(' ');}
     svg+='<polyline points="'+poly(C.cost,Ycost)+'" fill="none" stroke="'+CG_BLUE+'" stroke-width="1.8" opacity="0.85"/>';
     svg+='<polyline points="'+poly(C.auc,Yauc)+'" fill="none" stroke="'+CG_RED+'" stroke-width="2"/>';
+    for(var pi=0;pi<n;pi++){svg+='<circle cx="'+X(pi)+'" cy="'+Yauc(C.auc[pi])+'" r="3.2" fill="'+CG_RED+'" data-tip="block '+pi+' · AUC '+C.auc[pi].toFixed(2)+' · '+(C.cost[pi]*100).toFixed(0)+'% of the network"/>';}
     // knee
     var knee=-1; for(var i=0;i<n;i++){if(C.auc[i]>=target){knee=i;break;}}
     if(knee>=0){var kx=X(knee);
@@ -1334,7 +1358,7 @@ function cgCost(){
     svg+='<text x="'+(W-R-52)+'" y="10" font-size="10" fill="'+CG_BLUE+'">cost (frac)</text>';
     svg+='<text x="'+(L)+'" y="'+(H-6)+'" font-size="10" fill="currentColor" opacity="0.7">block 0</text>';
     svg+='<text x="'+(W-R-46)+'" y="'+(H-6)+'" font-size="10" fill="currentColor" opacity="0.7">block '+(n-1)+'</text>';
-    cgEl("cgc-svg").innerHTML=svg;
+    cgEl("cgc-svg").innerHTML=svg; cgWireTips(cgEl("cgc-svg"));
     cgEl("cgc-out").innerHTML= knee>=0
       ? 'cheapest layer clearing AUC '+target.toFixed(2)+': <b>block '+knee+'</b> — runs <b style="color:'+CG_BLUE+'">'
         +(C.cost[knee]*100).toFixed(0)+'%</b> of the network (AUC '+C.auc[knee].toFixed(2)+').'
