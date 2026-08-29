@@ -82,11 +82,10 @@ a.sref:hover{color:var(--brand,#3aa99f)}
 .content .highlight .nn,.content .highlight .nc,.content .highlight .n{color:#24292f!important}
 
 /* --- technical / simplified reading toggle --- */
-.cg-floatbtn{position:fixed;right:14px;bottom:14px;z-index:99999;
-  border:1px solid var(--brand,#3aa99f);background:var(--brand,#3aa99f);color:#fff;
-  padding:.6rem 1.1rem;border-radius:2rem;cursor:pointer;font:inherit;font-size:.85rem;
-  box-shadow:0 4px 16px rgba(0,0,0,.25);-webkit-appearance:none;
-  transform:translateZ(0);-webkit-transform:translateZ(0);will-change:transform}
+.cg-togglebar{position:sticky;top:8px;z-index:100;text-align:right;margin:0 0 1.2rem}
+.cg-floatbtn{display:inline-block;border:1px solid var(--brand,#3aa99f);
+  background:var(--brand,#3aa99f);color:#fff;padding:.5rem 1.1rem;border-radius:2rem;
+  cursor:pointer;font:inherit;font-size:.85rem;box-shadow:0 3px 12px rgba(0,0,0,.18);-webkit-appearance:none}
 .cg-floatbtn:hover{filter:brightness(1.06)}
 .cg-simple-doc{display:none;max-width:42rem}
 .cg-simple-doc .lead{font-size:.88rem;opacity:.7;font-style:italic;margin:.2rem 0 1.5rem}
@@ -1358,15 +1357,9 @@ function cgCost(){
   var content=document.querySelector('.content');
   var btn=document.getElementById('cg-toggle');
   if(!content||!btn) return;
-  // Move the button to <body> so position:fixed is viewport-relative even if an ancestor
-  // is transformed/clipped (common on mobile layouts), and so it is never hidden by the
-  // simplified-mode rule that hides the technical body.
-  document.body.appendChild(btn);
-  // force the critical positioning inline so no theme rule can hide or mis-place it on any device
-  var S=btn.style;
-  S.position='fixed'; S.right='14px'; S.bottom='14px'; S.zIndex='2147483647';
-  S.display='inline-block'; S.visibility='visible'; S.opacity='1'; S.margin='0';
-  S.transform='translateZ(0)';
+  // The button lives in an in-flow, position:sticky bar (see CSS). Sticky is used instead of
+  // fixed because browser extensions and themes sometimes transform <body>, which would break
+  // position:fixed (it becomes relative to the transformed box and lands off-screen).
   var IDS=['figure-1','cg-steer','cg-detect','cg-cost'];
   var homes=IDS.map(function(id){
     var el=document.getElementById(id);
@@ -1389,11 +1382,6 @@ function cgCost(){
     relocate(simple);
     content.classList.toggle('cg-simple', simple);
     btn.textContent = simple ? 'Technical view' : 'Simplified view';
-    // repaint nudge that never hides the button: bump the transform for one frame so mobile
-    // browsers repaint the fixed layer after the large height change, then settle it back
-    S.display='inline-block'; S.visibility='visible';
-    S.transform='translateZ(0) translateY(0.02px)';
-    (window.requestAnimationFrame||function(f){setTimeout(f,16);})(function(){ S.transform='translateZ(0)'; });
     try{ localStorage.setItem('cg-mode', mode); }catch(e){}
   }
   btn.addEventListener('click', function(){
