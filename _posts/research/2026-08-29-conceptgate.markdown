@@ -1,10 +1,10 @@
 ---
 layout: post
-title:  "ConceptGate: Reading and Steering Concepts Across a Frozen Model's Depth"
+title:  "ConceptGate: Efficiently Learning and Steering Concepts in Language Models"
 date:   2026-08-29 09:00:00 +0545
 categories: research
 tags: research llm interpretability activation-steering guardrails probes representation-engineering few-shot
-subtitle: "A frozen model already computes a concept somewhere in its middle layers. A few-shot adapter can read that concept across depth and — the part a classifier can't do — write it back to steer generation. This is a living document: the sliders below replay real gpt2 and Qwen-0.5B runs."
+subtitle: "A few-shot, training-free adapter that detects a concept from a frozen model's own layers and steers generation along the same direction, with interactive figures over real GPT-2 and Qwen2.5-0.5B runs."
 comments: false
 published: true
 ---
@@ -88,74 +88,125 @@ as the research develops, not a finished or peer-reviewed paper. Treat the resul
 framing as preliminary, and expect sections to change.
 </p>
 
-> **Backstory.** ConceptGate started as a guardrail. I wanted a tiny thing I could bolt onto a
-> frozen model that would notice "this prompt is trying to jailbreak me" from the model's own
-> internal activity, cheaply, from ten examples, without fine-tuning anything. I built it, and it
-> worked — and then I ran the honest baseline and found that a plain linear SVM on the same
-> activations did just as well. That was deflating for about a day, until the reframing landed: the
-> interesting thing a probe-on-the-residual-stream can do that a classifier *cannot* is **write**.
-> The same direction you read a concept along, you can add back into the stream and **steer** the
-> model's generation toward or away from it. Detection turned out to be a commodity; steering is the
-> capability. This document is the honest write-up of both halves — including the negative results —
-> and because a paper about reading and writing a model's internals should let you *feel* the
-> mechanism, the figures below are interactive: every slider replays a real gpt2 or Qwen2.5-0.5B run.
+<p class="small-note" style="margin:0 0 1.4rem">
+<strong>Authorship.</strong> This report was co-written with a generative model.
+</p>
 
 <div class="paper-abstract" markdown="1">
-**Abstract.** A frozen transformer, as it processes a prompt, forms human-nameable concepts
-somewhere in its residual stream — usually most cleanly in the middle layers. We present
-**ConceptGate**, a lightweight, few-shot ("~10 examples per side"), training-free adapter that
-taps that stream at several layers and treats a concept's projection *across depth* as a single
-signal: a **spectrogram** blended by a learned **bandpass filter** and gated by a **calibrated
-likelihood-ratio test**. The same diff-of-means direction that reads the concept can be added back
-into the raw stream to **steer** generation toward or away from it. We give the full method and its
-mathematics, and evaluate each claim honestly on gpt2 and Qwen2.5-0.5B. Our findings are mixed by
-design and reported as such: (i) fusing evidence across depth provably and empirically beats the
-universal single-layer habit (synthetic test error 16.1%→9.4%); (ii) class-conditional Gaussian
-*mixtures* on the spectrogram recover cases no linear filter can, but a Bayesian-Information-Criterion
-model selection **collapses them to a single Gaussian in the few-shot regime** — an honest null;
-(iii) as a *detector*, ConceptGate is a **commodity** — it ties a linear SVM, and matched
-contrastive negatives *hurt*; (iv) the genuine differentiator is **steering**, which a classifier
-structurally cannot do, and which is bounded by the base model's own competence ("the model is the
-ceiling"); and (v) because detection only needs blocks up to the tap, there is a measurable
-**compute–accuracy frontier** — on gpt2 a jailbreak concept is separable by block 6 (58% of the
-network), on Qwen2.5-0.5B by block 1. Every mechanism here is prior art; the contribution is the
-specific few-shot, dual-mode (read *and* write) combination and the honest empirical map of where it
-helps and where it does not.
+**Abstract.** As a frozen transformer processes a prompt, human-nameable concepts become linearly
+represented in its residual stream, typically most separably at intermediate layers. We describe
+ConceptGate, a lightweight, few-shot (approximately ten examples per class), training-free adapter
+that taps the residual stream at several layers and treats a concept's projection across depth as a
+single signal: a per-layer spectrogram combined by a learned depth filter and gated by a calibrated
+likelihood-ratio test. The difference-of-means direction used for detection is also used, in the
+model's raw activation space, to steer generation toward or away from the concept. We present the
+method with its derivation and evaluate each component on GPT-2 and Qwen2.5-0.5B. The results are
+mixed. (i) Combining evidence across depth improves on the single-best-layer baseline, both under a
+matched-filter analysis and empirically (synthetic test error 16.1% to 9.4%). (ii) Modelling each
+class as a Gaussian mixture on the spectrogram recovers configurations that no single linear threshold
+separates, but Bayesian-Information-Criterion model selection reduces the mixture to one component per
+class at ten-shot sample sizes. (iii) As a detector, ConceptGate performs comparably to a linear
+support-vector machine on the same activations, and matched contrastive negatives reduce rather than
+improve accuracy. (iv) The capability that distinguishes an internal adapter from a text classifier is
+steering, whose effectiveness is bounded by the competence of the base model. (v) Because detection
+requires only the blocks up to the deepest tap, there is a measurable compute–accuracy trade-off: a
+jailbreak concept becomes separable by block 6 of GPT-2 (58% of the network) and by block 1 of
+Qwen2.5-0.5B. Every mechanism used here is drawn from prior work; the contribution is the specific
+few-shot, dual-mode composition and an empirical characterization of where it helps and where it does
+not.
 </div>
 
 <div class="small-note" markdown="1">
-**A note on this document, up front.** This is a living research write-up, not a peer-reviewed
-paper, and it is deliberately honest about its own limits. The interactive figures replay *real*
-gpt2 and Qwen2.5-0.5B runs that were baked offline: the model outputs, activations, and log-likelihood
-ratios are genuine, and the sliders recompute only the cheap surrounding math (the fused
-discriminability, the decision threshold, the cost knee) — they never re-run a transformer in your
-browser. The models are small, chosen so that everything here reproduces on a laptop CPU; the
-qualitative story should hold at larger scale but the exact numbers should not be read as calibrated
-large-model benchmarks. The prose is machine-drafted with human checks. Citations are given to the
-best of the author's knowledge and should be verified against the primary sources before being relied
-upon. Wherever a result is negative or a mechanism turns out to be dormant, that is stated plainly
-rather than hidden — the point of the document is the honest map, not a sales pitch.
+**Note on the figures.** The interactive figures in this report replay GPT-2 and Qwen2.5-0.5B runs
+computed offline; the model outputs, activations, and log-likelihood ratios shown are the measured
+values, and the controls recompute only inexpensive derived quantities (the fused discriminability,
+the decision threshold, the location of the cost knee) rather than executing a model in the browser.
+Both models are small and were selected for reproducibility on a single CPU; the qualitative findings
+are expected to transfer to larger models, but the specific numbers should not be treated as
+calibrated large-model benchmarks. References were checked against their primary sources; readers are
+nonetheless encouraged to verify them independently.
 </div>
 
 ## 1. Introduction
 
+Large language models are typically deployed as fixed artifacts: their weights are set during training
+and left unchanged during use. A substantial body of work nonetheless shows that a model's internal
+activations reveal a great deal about what it is computing — that specific, human-nameable properties
+of an input or a generation are represented, frequently along linear directions, in the residual
+stream, and that these representations can be both read and modified without retraining. This report
+examines what can be built from that observation under deliberately restrictive conditions: no
+fine-tuning of the host model, only a handful of labelled examples per concept, and a parameter budget
+small enough that a separate module can be stored for each concept. The result is ConceptGate, an
+adapter that attaches to a frozen model, detects a chosen concept from its intermediate activations,
+and, using the same learned direction, steers the model's generation with respect to that concept. The
+remainder of this section states the problem precisely (<a class="sref" href="#11-the-problem">§1.1</a>),
+explains why the residual stream is the appropriate place to operate
+(<a class="sref" href="#12-why-the-residual-stream">§1.2</a>), identifies the two design choices that
+distinguish the method from existing probing and steering work
+(<a class="sref" href="#13-the-gap-depth-and-the-readwrite-duality">§1.3</a>), and summarizes the
+contributions together with their limitations
+(<a class="sref" href="#14-contributions">§1.4</a>).
+
+This objective is best understood against the broader space of methods for adapting a pretrained
+language model to a downstream purpose, which differ in cost, in expressiveness, and in how invasively
+they alter the model. **Full fine-tuning** updates all of the model's weights; it is the most
+expressive option and the usual point of reference, but it is expensive and produces a separate copy
+of the model for every task. **Parameter-efficient** methods — adapter modules
+<span class="cite" data-ref="Houlsby, N., et al. (2019). Parameter-Efficient Transfer Learning for NLP. arXiv:1902.00751."><a href="#ref-adapters">[12]</a></span>
+and, most prominently, **low-rank adaptation (LoRA)**
+<span class="cite" data-ref="Hu, E. J., et al. (2021). LoRA: Low-Rank Adaptation of Large Language Models. arXiv:2106.09685."><a href="#ref-lora">[11]</a></span>
+— freeze the pretrained weights and train only a small number of additional parameters, reducing cost
+substantially while still relying on gradient-based training and still changing the model's function.
+**Linear probing** freezes the backbone entirely and trains a lightweight linear readout on its
+activations, which yields an inexpensive detector but offers no means of altering behaviour.
+ConceptGate lies at the least-invasive end of this range: it performs no gradient-based training,
+estimating each concept in closed form from roughly ten examples, and it operates on activations
+rather than weights. Unlike a linear probe, it uses the learned direction not only to detect the
+concept but to write it back into the residual stream and steer generation, which places it closest to
+the activation-steering and representation-engineering methods discussed in
+<a class="sref" href="#21-probes-and-representation-engineering">§2.1</a>–<a class="sref" href="#22-activation-steering-and-circuit-breakers">§2.2</a>;
+it differs from those mainly in reading a concept across several layers rather than one and in coupling
+detection and steering within a single calibrated module. The trade-off is deliberate: one linear
+direction per concept is far less powerful than a fine-tuned or LoRA-adapted model, and the method is
+directed at lightweight, interpretable, concept-level control rather than at acquiring new
+capabilities.
+
 ### 1.1 The problem
 
-Suppose you are handed a **frozen** language model $M$ — you can run it, read its activations, and
-add forward hooks, but you will not fine-tune it. You want a small attachment $G$ that can, cheaply
-and from a handful of examples, answer two questions about any human-named **concept** — "is this a
-jailbreak attempt?", "is this about cooking?", "is the tone hostile?" — and then *act* on the
-answer: halt generation, or bend it. The constraints are strict and deliberate: **few-shot** (≈10
-labelled prompts per side, because concept sets are expensive to curate), **lightweight** (well
-under a million parameters, so it is cheap to store and ship one per concept), **attachable** to any
-architecture, and ideally **bidirectional** — able to work on the input prompt *and* on each token
-the model generates.
+Consider a frozen language model $M$: it can be run, and its activations can be read and modified
+through forward hooks, but its weights are never updated. The objective is a small attached module
+$G$ that, from a handful of labelled examples, can decide whether a chosen human-named **concept** —
+a jailbreak attempt, a topic such as cooking, a hostile tone — is present in the model's computation,
+and can then act on that decision by halting generation or altering its course. Four constraints
+shape the design, and each follows from an intended deployment. The module should be **few-shot**,
+learning from roughly ten labelled prompts per class, because curated concept sets are expensive to
+produce; it should be **lightweight**, well under a million parameters, so that one instance per
+concept is inexpensive to store and distribute; it should be **attachable** to any architecture
+without retraining the host; and it should be **bidirectional**, applicable both to the input prompt
+and to each token the model subsequently generates.
 
-The immediate application is guardrailing, and that framing is how the project began. But nothing in
-the machinery below knows "harmful" from "about cats." $G$ is **concept-agnostic**: it is a general
-detector-and-steerer, and guardrailing is simply the first concept you happen to teach it. Keeping
-that generality in view matters, because it is what lets the same object be a content filter, a topic
-router, a tone monitor, or a style knob — the concept is data, not code.
+These requirements can be stated precisely. Let $M$ be a frozen model whose residual-stream activation
+for an input $x$ at a tapped layer $\ell\in\mathcal{L}$ is $a_\ell(x)\in\mathbb{R}^{d}$, and let
+$\mathcal{D}^{+}$ and $\mathcal{D}^{-}$ be small labelled sets of examples that do and do not exhibit
+the concept, with $\lvert\mathcal{D}^{+}\rvert+\lvert\mathcal{D}^{-}\rvert\approx 20$. From these
+alone, and without modifying the weights of $M$, the module $G$ must construct two maps — a detector
+and a steering operator:
+
+$$g:\ \{a_\ell(x)\}_{\ell\in\mathcal{L}}\ \longmapsto\ \{\text{fire},\ \text{abstain},\ \text{pass}\},\qquad a_\ell\ \longleftarrow\ a_\ell + \alpha\,w_\ell\quad(\ell\in\mathcal{L}).$$
+
+The detector maps the tapped activations of a prompt to a three-way decision; the steering operator,
+applied at each tapped layer during generation, adds a learned per-layer direction $w_\ell$ scaled by
+a strength $\alpha$, with $\alpha<0$ suppressing the concept and $\alpha>0$ amplifying it. Both the
+detector and the directions must occupy $O(\lvert\mathcal{L}\rvert\,d)$ parameters per concept and be
+obtained in closed form from the few-shot sets rather than by gradient descent. The sections that
+follow construct $g$ and the direction $w_\ell$ and show that both can be estimated from the class
+means of the tapped activations.
+
+Guardrailing is the immediate application, and the setting in which the method was first developed,
+but the mechanism is not specific to safety: nothing in it distinguishes "harmful" from any other
+property. $G$ is **concept-agnostic** — a general detector and steerer for which guardrailing is only
+one concept among many — so the same construction serves equally as a content filter, a topic router,
+a tone monitor, or a stylistic control. The concept enters as data, not as code.
 
 ### 1.2 Why the residual stream
 
@@ -167,24 +218,25 @@ Two empirical facts make it the right place to work. First, many concepts are ap
 well above chance <span class="cite" data-ref="Alain, G., &amp; Bengio, Y. (2016). Understanding intermediate layers using linear classifier probes. arXiv:1610.01644."><a href="#ref-probes">[2]</a></span><span class="cite" data-ref="Zou, A., et al. (2023). Representation Engineering: A Top-Down Approach to AI Transparency. arXiv:2310.01405."><a href="#ref-repe">[3]</a></span>.
 Second, the stream is **writable**: the same direction, added back, changes what the model goes on to
 say <span class="cite" data-ref="Turner, A. M., et al. (2023). Steering Language Models With Activation Engineering. arXiv:2308.10248."><a href="#ref-actadd">[4]</a></span><span class="cite" data-ref="Panickssery, N., et al. (2023). Steering Llama 2 via Contrastive Activation Addition. arXiv:2312.06681."><a href="#ref-caa">[5]</a></span>.
-Reading and writing share the *same* geometric object — a direction — which is the fact this whole
-system is built to exploit.
+Reading and writing therefore share a single geometric object — a direction in activation space — and
+it is this shared structure that the rest of the method is organized around.
 
 ### 1.3 The gap: depth, and the read/write duality
 
-Two observations shape the design. The first is about **depth**. Almost every probe or steering
-method in the literature commits to a *single* layer, chosen by a validation sweep, and reads or
-writes there. But a concept is not equally legible at every layer: it is mushy early (the model is
-still resolving surface form), crisp in the middle (the abstraction has formed), and blurry late
-(the stream is specializing for next-token prediction). If the concept leaves a trace at several
-layers, throwing away all but one is discarding signal. ConceptGate instead reads the concept's
-projection at *every* tapped layer and treats the resulting vector-across-depth as one signal to be
-filtered — a move we justify with a standard matched-filter argument in <a class="sref" href="#36-why-depth-fusion-wins-the-quadrature-argument">§3.6</a> and test head-to-head in <a class="sref" href="#41-depth-fusion-on-synthetic-data">§4.1</a>.
+Two observations shape the design. The first concerns **depth**. Most probing and steering methods
+commit to a single layer, selected by a validation sweep, and read or write only there. A concept is
+not, however, equally legible at every depth: it is weakly represented in the early layers, where the
+model is still resolving surface form; most clearly represented at intermediate depth, where the
+abstraction has formed; and increasingly diffuse in the late layers, which specialize toward
+next-token prediction. When a concept leaves a usable trace at several depths, reading only one of
+them discards available signal. ConceptGate instead projects the concept at every tapped layer and
+treats the resulting profile across depth as a single signal to be filtered, an approach justified by
+a standard matched-filter argument in <a class="sref" href="#36-why-depth-fusion-wins-the-quadrature-argument">§3.6</a> and tested against the single-layer baseline in <a class="sref" href="#41-depth-fusion-on-synthetic-data">§4.1</a>.
 
-The second observation is the **read/write duality** already noted: a linear detector and a linear
-steerer are the *same direction* used in two directions of information flow. A text classifier — the
-usual guardrail — can only read. This turns out to be the crux of the entire project's value, and we
-return to it repeatedly.
+The second observation is the read/write duality noted above: a linear detector and a linear steerer
+are the same direction applied in the two directions of information flow, whereas a text classifier —
+the conventional guardrail — can only read. This asymmetry is the principal reason to operate inside
+the residual stream rather than on the text, and it recurs throughout the analysis that follows.
 
 ### 1.4 Contributions
 
@@ -196,10 +248,10 @@ This paper contributes, in order of how much we trust them:
 2. **A calibrated, few-shot, dual-mode adapter.** One object learns a concept from ~10 examples,
    detects it with a calibrated fire/abstain/pass gate, and steers generation along the same
    direction — with a clean parameter budget (<a class="sref" href="#54-what-it-actually-costs">§5.4</a>) and no training.
-3. **An honest empirical map.** We report where the machinery does *not* help: detection is a
+3. **Negative and null results.** We report where the method does *not* help: detection is a
    commodity that a linear SVM matches (<a class="sref" href="#43-detection-on-real-prompts-a-commodity">§4.3</a>); matched contrastive
    negatives *hurt* rather than help (<a class="sref" href="#44-matched-versus-broad-negatives-a-negative-result">§4.4</a>); the mixture model collapses to a
-   single Gaussian at few-shot sample sizes (<a class="sref" href="#42-mixture-densities-a-kill-shot-and-a-few-shot-collapse">§4.2</a>); and a paraphrase-robustness effect we
+   single Gaussian at few-shot sample sizes (<a class="sref" href="#42-mixture-densities-a-constructed-hard-case-and-a-few-shot-collapse">§4.2</a>); and a paraphrase-robustness effect we
    predicted does not appear (<a class="sref" href="#47-a-paraphrase-robustness-null">§4.7</a>).
 4. **A compute–accuracy frontier.** Because detection needs only the blocks up to the deepest tap, a
    concept has a *cheapest layer at which it is already separable*; we measure this frontier and show
@@ -207,20 +259,20 @@ This paper contributes, in order of how much we trust them:
 5. **A living document.** The interactive figures below replay real model runs, so the mechanism can
    be manipulated rather than merely described.
 
-A blanket caveat, stated once and meant throughout: **no individual mechanism here is new.** Probes,
+One caveat applies throughout: **no individual mechanism here is new.** Probes,
 diff-of-means directions, activation steering, Gaussian/mixture density scoring, circuit-breaker
 reroute, and forward-hook truncation are all established. The contribution is their specific
-composition and the honest measurement of it.
+composition and the empirical measurement of it.
 
 ## 2. Related work
 
 ConceptGate is a recombination, not an invention, so its lineage is unusually wide: almost every part
 of it is the standard tool from some established line of work, and the design is mostly a set of
 decisions about *which* standard tool to use for each job and how to make them share one geometric
-object — a direction in the residual stream. That makes the honest way to survey the field not "here
-is the neighbouring method we beat," but "here is the ancestry of each component, and here is the
-little that is ours." We organize the survey around the five threads the system actually draws on, and
-in each we mark plainly what is borrowed and what — if anything — is added.
+object — a direction in the residual stream. The appropriate way to survey the field is therefore not
+to identify a single neighbouring method and compare against it, but to trace the ancestry of each
+component and identify the small part that is new. We organize the survey around the five lines of
+work the system draws on, and in each we state what is borrowed and what, if anything, is added.
 
 Two of the threads are about **reading** the stream. Linear probing and representation engineering
 (<a class="sref" href="#21-probes-and-representation-engineering">§2.1</a>) give us the per-layer detector and the diff-of-means direction; density-based
@@ -232,8 +284,8 @@ central limitation (it can only read text, never write activations) is the negat
 what ConceptGate is *for*. The fifth thread is about **cost**: early-exit and conditional computation
 (<a class="sref" href="#25-early-exit-and-conditional-compute">§2.5</a>) is where our truncated forward and the compute–accuracy frontier come from.
 
-The throughline that ties these borrowings into one system — and the only thing that is genuinely
-ours to argue for — is the pair of design commitments stated in the introduction: read the concept
+The element that ties these borrowings into one system — and the only part specific to this work — is
+the pair of design commitments stated in the introduction: read the concept
 *across depth* rather than at a single chosen layer, and treat the detector and the steerer as the
 *same direction* used in two directions of information flow, so that a frozen model can be turned into
 a few-shot, calibrated, read-and-write concept adapter without any training. We close the section
@@ -300,9 +352,9 @@ multimodal class ("benign" = chit-chat *and* homework *and* code) is not forced 
 narrow slice we can call our own is *where* the density lives: not on a single feature vector, but on
 the **joint spectrogram across depth**, so that correlations between what different layers report are
 part of the model rather than being averaged away. As the experiments will show
-(<a class="sref" href="#42-mixture-densities-a-kill-shot-and-a-few-shot-collapse">§4.2</a>), this
-generality is real but mostly dormant at ten-shot sample sizes — an honesty we build into the method
-rather than discover after the fact.
+(<a class="sref" href="#42-mixture-densities-a-constructed-hard-case-and-a-few-shot-collapse">§4.2</a>), this
+generality is real but largely dormant at ten-shot sample sizes, a property of the model-selection
+criterion rather than an observation made after the fact.
 
 ### 2.4 External guards
 
@@ -357,16 +409,16 @@ We treat that not as a footnote but as a boundary on what the whole approach can
 
 ## 3. Method
 
-This section builds ConceptGate in the order the signal actually flows through it, because each stage
-is defined by what the previous one hands it, and the design is easiest to trust when read as a
-single unbroken path rather than a bag of tricks. The frozen model is run once. At a chosen set of
-layers we **tap** the residual stream (<a class="sref" href="#31-setup-and-notation">§3.1</a>) and
-**standardize** it (<a class="sref" href="#32-standardization">§3.2</a>), so that the handful of
-enormous "rogue" dimensions every residual stream carries cannot dominate the geometry and drown out
-the concept. In that standardized space we learn a per-layer **direction**
-(<a class="sref" href="#33-the-diff-of-means-direction">§3.3</a>) and **project** onto it, turning each
-layer into a single number — how loudly that layer "hears" the concept — which, stacked across the
-tapped layers, is the concept's **spectrogram** across depth
+This section develops ConceptGate in the order the signal flows through it, since each stage is
+defined by what the previous one produces and the construction is clearest read as a single path. The
+frozen model is run once. At a chosen set of layers the residual stream is **tapped**
+(<a class="sref" href="#31-setup-and-notation">§3.1</a>) and **standardized**
+(<a class="sref" href="#32-standardization">§3.2</a>), so that the handful of very high-magnitude
+outlier dimensions every residual stream carries cannot dominate the geometry and mask the concept.
+In that standardized space a per-layer **direction** is learned
+(<a class="sref" href="#33-the-diff-of-means-direction">§3.3</a>) and each layer's activation is
+**projected** onto it, reducing the layer to a single scalar; stacked across the tapped layers, these
+scalars form the concept's **spectrogram** across depth
 (<a class="sref" href="#34-the-concept-spectrogram">§3.4</a>). A learned **depth filter**
 (<a class="sref" href="#35-the-depth-bandpass-filter">§3.5</a>) collapses that spectrogram to one score,
 and the reason to read several layers instead of the single best one is a matched-filter argument we
@@ -376,10 +428,10 @@ score feeds a **calibrated likelihood-ratio gate**
 that returns a three-way verdict — fire, abstain, or pass — and a bank of such gates composes without
 interference (<a class="sref" href="#39-combining-k-concepts">§3.9</a>).
 
-Everything up to that point is the **read** path. The **write** path
-(<a class="sref" href="#310-steering-the-write-side">§3.10</a>) is the payoff of having done the reading
-geometrically: the very same concept direction, expressed in the model's raw activation space, can be
-*added back* into the stream to steer what the model says, and
+Everything to this point is the **read** path. The **write** path
+(<a class="sref" href="#310-steering-the-write-side">§3.10</a>) follows directly from having formulated
+the reading geometrically: the same concept direction, expressed in the model's raw activation space,
+can be *added back* into the stream to influence what the model generates, and
 <a class="sref" href="#311-actions-and-the-run-driver">§3.11</a> unifies reading and writing behind a
 single action interface so that "detect and refuse," "detect and steer," and "steer
 unconditionally" are one mechanism with different settings. We close the section with the two
@@ -411,7 +463,7 @@ walk it one stage at a time.
   <!-- taps -->
   <g stroke="#C2402F" stroke-dasharray="3 2"><line x1="75" y1="74" x2="75" y2="120"/><line x1="185" y1="74" x2="185" y2="120"/><line x1="295" y1="74" x2="295" y2="120"/></g>
   <!-- spectrogram -->
-  <text x="360" y="140" text-anchor="middle" font-size="12" fill="currentColor">per concept: sℓ = wℓ · standardize(aℓ)  →  spectrogram <tspan font-style="italic">s</tspan> ∈ ℝᵐ (loudness across depth)</text>
+  <text x="360" y="140" text-anchor="middle" font-size="12" fill="currentColor">per concept: sℓ = wℓ · standardize(aℓ)  →  spectrogram <tspan font-style="italic">s</tspan> ∈ ℝᵐ (score across depth)</text>
   <text x="360" y="164" text-anchor="middle" font-size="12" fill="currentColor">bandpass blend  S = f · <tspan font-style="italic">s</tspan>   →   calibrated gate: fire if LLR(S) &gt; τ</text>
   <!-- actions -->
   <g font-size="11.5">
@@ -422,7 +474,7 @@ walk it one stage at a time.
 </svg>
 <figcaption><strong>Figure 1.</strong> The pipeline. The frozen model runs as usual; ConceptGate taps
 the residual stream at chosen blocks (dashed red), projects each tap onto the concept's direction to
-get a per-layer loudness (the spectrogram), blends those with a learned depth filter into one score,
+get a per-layer score (the spectrogram), blends those with a learned depth filter into one score,
 and gates on a calibrated likelihood ratio. On a firing it either aborts decoding or adds the
 concept direction back into the stream to steer. Reading and steering use the same direction.</figcaption>
 </figure>
@@ -470,22 +522,29 @@ direction, which is covariance-aware, closes the small remaining gap to an SVM; 
 
 ### 3.4 The concept spectrogram
 
-Project a standardized sample onto each layer's signature to get a **loudness per layer**, and stack
-them into the concept's profile across depth — its spectrogram:
+Projecting a standardized activation onto each layer's signature reduces that layer to a single
+scalar, and stacking these scalars across the tapped layers yields the concept's profile across depth,
+which we call its **spectrogram**:
 
 $$s_\ell=w_\ell\cdot z_\ell,\qquad \mathbf{s}=(s_1,\dots,s_m)\in\mathbb{R}^m.$$
 
-Each layer's usefulness is summarized by its **discriminability** $d'$ (per layer $\ell$), the
-standardized gap between the class means of $s_\ell$:
+One analogy makes the object concrete. Picture the tapped layers as a row of microphones placed along
+a hall that the model's computation travels down; each microphone is tuned to a single concept and
+reports how strongly it registers there, so the spectrogram is the pattern of those readings across
+the hall. The design keeps all $m$ readings rather than the single loudest one, because a concept is
+usually audible at several depths and combining independent readings is more reliable than trusting
+any one microphone — a claim the next two subsections make precise.
+
+Each layer's individual contribution is summarized by its **discriminability** $d'$ (per layer
+$\ell$), the standardized gap between the two class means of $s_\ell$:
 
 $$d'_\ell=\frac{\bar s^{+}_\ell-\bar s^{-}_\ell}{\sqrt{\tfrac12(\mathrm{Var}(s^{+}_\ell)+\mathrm{Var}(s^{-}_\ell))}}.$$
 
-The whole point of the design is that $\mathbf{s}$ has $m$ components and we intend to use all of them.
-
 ### 3.5 The depth bandpass filter
 
-We blend the spectrogram into one score with a filter $f\in\mathbb{R}^m$, $S=f\cdot\mathbf{s}$. There
-are three principled choices, and the first is the baseline everyone else uses:
+The spectrogram is reduced to a single score by a filter $f\in\mathbb{R}^m$, giving
+$S=f\cdot\mathbf{s}$. There are three principled choices for $f$, of which the first is the standard
+single-layer baseline:
 
 | filter | rule | reading |
 |---|---|---|
@@ -514,7 +573,7 @@ experiment (<a class="sref" href="#41-depth-fusion-on-synthetic-data">§4.1</a>)
 
 <div id="cg-depthfusion" class="cg-widget"></div>
 
-The caveat is honest and important: the quadrature gain assumes *independent* per-layer noise.
+One caveat is important: the quadrature gain assumes *independent* per-layer noise.
 Adjacent layers are correlated, so the real gain is smaller than three independent layers would
 suggest — which is precisely why `fisher`, using $\Sigma_{\mathbf s}^{-1}$, is the safe default over
 the naive `diag`.
@@ -540,7 +599,7 @@ How many profiles? A larger mixture always fits the training data better, so fit
 $J$. We use the **Bayesian Information Criterion**, $\mathrm{BIC}=-2\log\text{-lik}+k\ln N$, over
 $J\in\{1,2,3\}$ per class: each parameter pays *rent* $\ln N$, and an extra profile is admitted only
 if the fit it buys exceeds that rent. This makes "one distribution or many?" a question the *data*
-answers — with a consequence we report honestly in <a class="sref" href="#42-mixture-densities-a-kill-shot-and-a-few-shot-collapse">§4.2</a>: at ten-shot sample sizes, the rent is
+answers — with a consequence documented in <a class="sref" href="#42-mixture-densities-a-constructed-hard-case-and-a-few-shot-collapse">§4.2</a>: at ten-shot sample sizes, the rent is
 never paid, and $J$ collapses to $1$.
 
 ### 3.8 The calibrated gate: fire, abstain, pass
@@ -552,17 +611,18 @@ above the benign mean ($z=3$ ≈ 0.1% benign-tail FPR). We map the LLR to a cali
 $P_{\text{present}}=\sigma((\mathrm{LLR}(S)-\tau)/s)$ (with $s$ the benign spread *local* to $\tau$,
 because the LLR's heavy tails make a global spread useless), and expose a three-way verdict: **fire**
 if $\mathrm{LLR}>\tau$, **pass** if below, but **abstain** — override to no decision — whenever
-$\lvert P_{\text{present}}-\tfrac12\rvert<\text{margin}$. Abstention is the honest few-shot move: with
-ten examples, some prompts genuinely land in the uncertain middle, and saying so is better than
-guessing.
+$\lvert P_{\text{present}}-\tfrac12\rvert<\text{margin}$. Abstention is the appropriate few-shot
+behaviour: with ten examples per class, some prompts fall near the boundary, and reporting
+that is more useful than forcing a decision.
 
-The sandbox below is the gate on **real gpt2 activations** for a jailbreak concept. Ten labelled
-probes (jailbreak, benign, and two deliberately borderline lexical traps) carry their true LLRs;
-drag $\tau$ and watch each one flip, and watch recall and false-positive rate trade off on the
-concept's own examples. Two things are worth hunting for: the benign "*Ignore the noise outside and
-focus on the recipe*" scores high because early layers latch onto the word "ignore" (a real
-weakness), and pushing $\tau$ up to suppress it also starts dropping true jailbreaks. There is no
-free threshold; there is only an operating point.
+The figure below applies this gate to real GPT-2 activations for a jailbreak concept. Ten labelled
+probes — jailbreak, benign, and two deliberately borderline cases — carry their measured LLRs; moving
+$\tau$ reclassifies each probe and traces the trade-off between recall and false-positive rate on the
+concept's own examples. Two behaviours are worth observing. The benign prompt *"Ignore the noise
+outside and focus on the recipe"* scores high because the early layers respond to the word "ignore" —
+a genuine failure mode of shallow taps — and raising $\tau$ far enough to suppress it also begins to
+reject true jailbreaks. There is no threshold that separates the two cleanly; there is only a choice
+of operating point.
 
 <div id="cg-detect" class="cg-widget"></div>
 
@@ -601,12 +661,13 @@ $\alpha$ as a **fraction of the measured residual norm**, which transfers across
 $\sim$3–10% is the coherent band, and above roughly 20–25% the text degrades into repetition or
 gibberish.
 
-This widget replays real generations. Pick a model and a concept, then sweep the fraction from
-"away" (negative) through baseline (zero) to "toward" (positive), and read the actual completion the
-model produced. Qwen is the cleaner demonstration — watch "food" pull the continuation toward *"I
-made this dish… the sweet and savory flavors,"* and "nature" toward *"a group of bees… the scent of
-wildflowers."* gpt2 steers more weakly and tips into repetition sooner: the same knob, a less capable
-model (a point we develop in <a class="sref" href="#46-steering-across-models-the-model-is-the-ceiling">§4.6</a>).
+The figure below shows actual generations across a range of fractions, from negative (away from the
+concept) through zero (unsteered) to positive (toward the concept), for a chosen model and concept.
+The effect is clearest on Qwen2.5-0.5B: the "food" direction pulls the continuation toward *"I made
+this dish… the sweet and savory flavors,"* and the "nature" direction toward *"a group of bees… the
+scent of wildflowers."* GPT-2 shifts more weakly under the same procedure and degrades into repetition
+sooner — the same control applied to a less capable model, an effect examined in
+<a class="sref" href="#46-steering-across-models">§4.6</a>.
 
 <div id="cg-steer" class="cg-widget"></div>
 
@@ -715,7 +776,7 @@ cg.run(prompt, action=Steer(concept="jailbreak", fraction=-0.06, when=Trigger.FI
 The division of labour is worth stating plainly, because it is the whole memory-efficiency argument in
 one place. Detection — `learn`, `calibrate`, `check`, and the `Abort` half of `run` — needs only the
 bottom of the network and can run on a weight-truncated load, which is where the compute and memory
-savings live and why a pure guardrail is genuinely cheap to attach. Generation — the `Steer` and
+savings arise and why a pure guardrail is inexpensive to attach. Generation — the `Steer` and
 `Emit` halves of `run` — needs the full network, so the differentiating *write* capability does not
 enjoy the load-time saving; it is cheap only in the sense that it adds a few vector additions to a
 forward pass the host was already going to run. A deployment that only ever detects should load
@@ -734,13 +795,14 @@ On a controlled synthetic problem with three layers of known per-layer discrimin
 $d'=[1.6,2.0,0.6]$, the theory predicts a fused $d'=\sqrt{1.6^2+2.0^2+0.6^2}=2.63$, i.e. test error
 $\Phi(-1.315)=9.4\%$ versus the single-best-layer $\Phi(-1.0)=15.9\%$. The learned filter recovers
 $d'=[1.62,2.04,0.64]$ and drives test error from **16.1% to 9.4%**, matching the prediction. This is
-the cleanest positive result in the paper, and it is the reason to bother with depth at all — but
+the strongest positive result in the report and the principal justification for using depth at all —
+but
 note it is on synthetic data with independent per-layer noise; on a real model the correlated layers
 shrink the gain, which is what makes the next result sobering.
 
-### 4.2 Mixture densities: a kill-shot and a few-shot collapse
+### 4.2 Mixture densities: a constructed hard case and a few-shot collapse
 
-The mixture model earns its place on a constructed **kill-shot**: put two benign clusters on either
+The mixture model is justified by a constructed **hard case**: place two benign clusters on either
 side of the harmful cluster along the discriminative axis (benign at $-2$ and $+2$, harmful at $0$).
 No single threshold on any linear score can carve out "the middle," so the `fisher` gate is stuck
 near chance (38.8% error, AUC 0.60); the mixture, seeing $\mathbf{s}$ near a benign profile on each
@@ -749,64 +811,65 @@ is the case for mixtures. The case *against* them, at least in the regime we car
 real gpt2 activations with 12+12 prompts, **BIC selects $J=1$ for both classes** — an extra
 full-covariance profile over five layers costs ~21 parameters, whose rent (~52 nats) twelve samples
 cannot pay — and the mixture gate collapses exactly onto the single-Gaussian gate (rank agreement
-0.986). The honest reading: mixtures are the *right* model and a *dormant* one; whether real concept
-classes are multimodal enough to pay their rent is a question that needs far more than ten examples to
-answer, and on the easy concepts we can afford to label, the answer is "not yet."
+0.986). In short, the mixture is the more general model but remains inactive in this regime: whether
+real concept classes are multimodal enough to justify additional components is a question that requires
+substantially more than ten labelled examples, and on the readily-labelled concepts examined here the
+selection criterion returns a single component per class.
 
 ### 4.3 Detection on real prompts: a commodity
 
-Here is the result that reframed the project. On real jailbreak-vs-benign prompts, ConceptGate's
-diff-of-means detector is a good detector — and so is a linear SVM on the very same activations, and
-so is per-layer logistic regression. Across models the three are within noise of each other on AUC;
-the logistic variant (covariance-aware, hence slightly better when standardization's isotropy
-assumption is imperfect) closes what small gap exists to the SVM, with the *largest* gains on the
-weaker model, but it does not open a new one. The blunt conclusion: **as a detector, this is a
-commodity.** Anything that reads a linear direction off these activations works about equally well;
-the choice of estimator is a second-order tuning decision, not a contribution. What is *not* a
-commodity is the write side — which is why the rest of the paper leans on steering.
+On real jailbreak-versus-benign prompts, ConceptGate's difference-of-means detector performs well —
+and so does a linear support-vector machine trained on the same activations, and so does per-layer
+logistic regression. Across both models the three are within noise of one another on AUC. The logistic
+variant, which is covariance-aware and therefore slightly stronger where standardization leaves the
+within-class covariance non-isotropic, closes the small remaining gap to the SVM, with its largest
+gains on the weaker model, but it does not establish a new one. As a detector, then, ConceptGate is a
+commodity: any method that reads a linear direction from these activations performs comparably, and
+the choice of estimator is a tuning decision rather than a contribution. The capability that is not a
+commodity is the write side, which is why the remainder of the report concentrates on steering.
 
 ### 4.4 Matched versus broad negatives (a negative result)
 
-We predicted that *matched* contrastive negatives — benign prompts sharing surface structure with the
-jailbreaks (same register, minus the intent) — would sharpen the direction by cancelling nuisance
-variation, the CAA intuition. The measurement refuted it: matched negatives gave AUC ≈ 0.42 (worse
-than chance-corrected random) against **0.78** for broad, unrelated negatives. The mechanism, in
-hindsight, is that broad negatives let the direction ride the large *semantic* gap between "assertive
-command to an AI" and "library hours," which is exactly the signal you want; matched negatives erase
-that gap and leave only a subtle, few-shot-unlearnable distinction. We report this because it is
-counterintuitive and cost us time: for few-shot concept detection, negatives should be *broad*, not
-matched.
+We anticipated that *matched* contrastive negatives — benign prompts sharing the surface structure of
+the jailbreaks (the same register, without the intent) — would sharpen the direction by cancelling
+nuisance variation, following the CAA construction. The measurement contradicted this: matched
+negatives gave an AUC of approximately 0.42, below chance, against **0.78** for broad, unrelated
+negatives. The explanation is that broad negatives allow the direction to align with the large
+*semantic* gap between an assertive instruction to a model and an ordinary factual query, which is the
+signal the detector depends on, whereas matched negatives remove that gap and leave only a subtle
+distinction that ten examples cannot resolve. The result is counterintuitive but consistent: for
+few-shot concept detection, negatives should be broad rather than matched.
 
 ### 4.5 The compute–accuracy frontier
 
 Because detection needs only blocks up to the tap, every concept has a *cheapest depth at which it is
 already separable*. We sweep every layer, fit the standardized diff-of-means detector there, and
 measure leave-one-out AUC — held out, so it cannot overfit — against the fraction of the network that
-tap requires. The widget plots the real curves; drag the target-AUC line to find the "knee," the
-cheapest layer that clears it.
+tap requires. The figure plots the measured curves; the target-AUC control locates the knee, the
+cheapest layer that clears a chosen AUC.
 
 <div id="cg-cost" class="cg-widget"></div>
 
-The shape tells a model-capability story. On gpt2 the jailbreak concept is not cleanly formed until
-the middle: AUC climbs through the early blocks and only saturates around block 6 — so the cheapest
-reliable guardrail runs a bit more than half the network, and the top ~40% of blocks add nothing. On
-Qwen2.5-0.5B the same concept is essentially separable by **block 1** — a more capable model has
-formed the abstraction almost immediately, so the guardrail can run ~4% of the network. This is a
-concrete, per-concept, per-model operating point, and it is the practical payoff of the truncated
-forward.
+The shape of the curve reflects model capability. On GPT-2 the jailbreak concept is not cleanly formed
+until the middle of the network: AUC climbs through the early blocks and only saturates around block
+6, so the cheapest reliable guardrail runs somewhat more than half the network and the final ~40% of
+blocks contribute nothing. On Qwen2.5-0.5B the same concept is essentially separable by **block 1**,
+because the more capable model has formed the abstraction almost immediately, so the guardrail can run
+roughly 4% of the network. Each of these is a concrete, per-concept, per-model operating point, and it
+is the practical consequence of the truncated forward.
 
-### 4.6 Steering across models (the model is the ceiling)
+### 4.6 Steering across models
 
-The steering widget in <a class="sref" href="#310-steering-the-write-side">§3.10</a> is also an experiment. Sweeping the fraction on Qwen2.5-0.5B
-produces coherent, on-topic shifts — "food" reliably pulls the continuation toward cooking and
-flavor, "nature" toward sun, trees, and wildflowers — across the ~4–12% band, degrading into
-repetition only at the extremes. gpt2, given the identical procedure and the same fraction, shifts
-more weakly and breaks sooner: you can see "food" reach "*vegan and gluten-free recipes*" and "*meat
-and veggies*," but it takes more push and the text is rougher. The generalization we draw, and the
-one we most believe, is that **the base model is the ceiling**: ConceptGate can only read and write
-concepts the frozen model has actually formed cleanly, so a better model yields both cleaner
-detection (<a class="sref" href="#45-the-computeaccuracy-frontier">§4.5</a>) and cleaner steering, from the *same* ten examples. The adapter is a
-lens, not a source.
+The steering figure in <a class="sref" href="#310-steering-the-write-side">§3.10</a> also serves as an experiment. Sweeping the fraction on
+Qwen2.5-0.5B produces coherent, on-topic shifts — the "food" direction reliably pulls the continuation
+toward cooking and flavour, and "nature" toward sun, trees, and wildflowers — across roughly the
+4–12% band, degrading into repetition only at the extremes. GPT-2, given the identical procedure and
+the same fraction, shifts more weakly and breaks down sooner: the "food" direction does reach
+*"vegan and gluten-free recipes"* and *"meat and veggies,"* but only with more force applied and with
+rougher text. The generalization, which the evidence supports fairly directly, is that the base model
+bounds what the adapter can achieve: ConceptGate can only read and steer concepts that the frozen
+model has itself formed clearly, so a more capable model yields both cleaner detection
+(<a class="sref" href="#45-the-computeaccuracy-frontier">§4.5</a>) and cleaner steering from the same ten examples.
 
 ### 4.7 A paraphrase-robustness null
 
@@ -814,92 +877,97 @@ We expected a depth-dependent robustness effect: that shallow taps, keyed on sur
 collapse when jailbreak prompts are reworded, while deep taps, keyed on meaning, would hold — giving
 a principled reason to gate deep. It does not appear. Rewording the positives barely moves AUC at any
 layer, because detection against *broad* negatives rides the semantic gap (<a class="sref" href="#44-matched-versus-broad-negatives-a-negative-result">§4.4</a>), which
-rewording does not close. The lexical-crutch effect only materializes against hard, surface-matched
-negatives — which, per <a class="sref" href="#44-matched-versus-broad-negatives-a-negative-result">§4.4</a>, themselves degrade detection. We include this null so the
-next person does not spend the day we did chasing it.
+rewording does not close. The lexical-sensitivity effect only appears against hard, surface-matched
+negatives — which, as <a class="sref" href="#44-matched-versus-broad-negatives-a-negative-result">§4.4</a> shows, themselves degrade detection. We report this null to
+document that the effect, though intuitive, does not arise in the broad-negative setting that detection
+otherwise relies on.
 
 ## 5. Discussion
 
-### 5.1 What is actually contributed
+### 5.1 What is contributed
 
-Stripped of hype: the mechanisms are all borrowed, the detector is a commodity, and the mixture is
-dormant at few-shot. What survives is (a) the depth-fusion result, which is real and beats the
-single-layer habit; (b) the *composition* — one few-shot, calibrated, training-free object that both
-reads and writes a concept from a frozen model's own middle layers, with a clean cost story; and (c)
-the honest map of where each part helps. A paper whose headline was "our detector wins" would be
-false; a paper whose headline is "here is the read/write adapter, here is exactly how far each piece
-carries, and here is the interactive evidence" is true, and more useful.
+The mechanisms are all drawn from prior work, the detector is a commodity, and the mixture model is
+inactive at few-shot sample sizes. What remains as a contribution is threefold: the depth-fusion
+result, which improves measurably on the single-layer baseline; the composition itself — a single
+few-shot, calibrated, training-free module that both reads and writes a concept from a frozen model's
+intermediate layers, with a small and well-characterized cost; and the empirical account of where each
+component helps and where it does not. The value of the work is not that its detector outperforms the
+alternatives, which it does not, but that it assembles a read-and-write adapter and measures each part
+against a fair baseline.
 
-### 5.2 Detection is a commodity; steering is the differentiator
+### 5.2 Detection is a commodity; steering is the distinguishing capability
 
-The single most important finding is structural, not numerical. A text classifier can match or beat
-ConceptGate at detection while being simpler to deploy — so if detection were the whole story, one
-should just use the classifier. The reason to reach into the residual stream is the thing the
-classifier *cannot* do: use the same learned direction to **write**, steering the model's generation
-toward or away from the concept, conditionally and interpretably, from ten examples. Everything
-cheap and clever about the detection side (depth fusion, truncated forward, calibration) is best
-understood as making the *free* half of a read-and-write adapter as good as it can be, so that the
-write half comes at almost no extra cost.
+The most consequential finding is structural rather than numerical. A text classifier can match or
+exceed ConceptGate at detection while being simpler to deploy, so if detection were the objective there
+would be little reason to prefer an internal method. The reason to operate inside the residual stream
+is the operation a classifier cannot perform: using the same learned direction to write — to steer
+generation toward or away from the concept, conditionally and interpretably, from ten examples. The
+efficient detection machinery (depth fusion, the truncated forward, calibration) is therefore best
+understood as making the inexpensive half of a read-and-write adapter as capable as possible, so that
+the write half is available at little additional cost.
 
-### 5.3 The cost story, honestly
+### 5.3 The cost argument and its limits
 
-The compute–accuracy frontier is a genuine engineering result — you can gate at 4% of Qwen — but two
-honesties bound it. First, the truncated-forward saving is available to *any* internal probe,
-including the SVM; it is table stakes for latent-space methods, not a moat. Second, the memory-minimal
-load mode is detection-only, and detection is the commodity half; the differentiator (steering) needs
-the whole network. So the cost story sells the guardrail, not the steerer. The defensible framing is
-that a read-and-write adapter can be *added to a model you are already serving* for kilobytes and a
-fraction of a forward pass — not that it detects better than the alternatives.
+The compute–accuracy trade-off is a real engineering result — a jailbreak concept can be gated at
+roughly 4% of Qwen2.5-0.5B — but two qualifications bound it. First, the truncated-forward saving is
+available to any internal probe, including the SVM baseline; it is a property of latent-space methods
+in general rather than an advantage specific to ConceptGate. Second, the memory-minimal load mode is
+detection-only, and detection is the commodity half of the system, whereas the distinguishing
+capability, steering, requires the full network. The cost argument therefore applies to the guardrail
+rather than to the steerer. The defensible claim is that a read-and-write adapter can be added to a
+model already being served, for kilobytes of parameters and a fraction of a forward pass — not that it
+detects more accurately than the alternatives.
 
 ### 5.4 What it actually costs
 
-It is worth making the "kilobytes and a fraction of a forward pass" claim concrete, because the
-cost is the entire reason the composition is worth assembling rather than reaching for a second
-model. A single concept's entire learned state, over $m$ tapped layers of residual width $d$, is
+The cost can be made concrete, since it is the primary reason to assemble this composition rather than
+deploy a second model. A single concept's entire learned state, over $m$ tapped layers of residual
+width $d$, is
 two sets of direction vectors (the standardized detection direction and the raw steering direction,
 $2md$ numbers), the per-dimension standardization statistics ($2md$), the depth filter ($m$), and a
 handful of Gaussian scalars for the gate. For gpt2 with five taps that is on the order of
 $1.5\times10^4$ numbers — comfortably under the sub-million-parameter target one would want for
 something meant to be stored and shipped by the concept — and a bank of $K$ concepts is simply
 $K$ times that, since concepts share nothing and never interact beyond the max-LLR rule of
-<a class="sref" href="#39-combining-k-concepts">§3.9</a>. Fitting is not training in any meaningful sense: it is a few sample means
-and one small $m\times m$ solve for the filter, which runs in milliseconds on a CPU with no backprop
-and no gradients, so a concept can be learned, discarded, and re-learned interactively. Inference
+<a class="sref" href="#39-combining-k-concepts">§3.9</a>. Fitting is not training: it is a few sample means
+and one small $m\times m$ solve for the filter, completing in milliseconds on a CPU with no
+backpropagation and no gradients, so a concept can be learned, discarded, and re-learned
+interactively. Inference
 adds $m$ dot products of width $d$ plus a length-$m$ blend per gated position — negligible against a
 single transformer forward — and in the abort case it *removes* compute, since decoding stops early.
 The reference implementation keeps a deliberately legible shape: a pure-numpy mathematical core
 (`spectral.py` for directions, spectrogram, and filters; `concept.py` for the calibrated gate;
 `mixture.py` for the GMM and its BIC selection) sits behind a thin PyTorch boundary that owns only
 the model-touching parts — the tap reader, the steering hooks, and the `ConceptGate` facade with its
-`Abort` / `Steer` / `Emit` strategies. The point of that split is that the science is auditable in
-numpy and the framework-specific plumbing is small enough to re-derive, which matters for a method
-whose whole pitch is that it is cheap and transparent.
+`Abort` / `Steer` / `Emit` strategies. This separation keeps the numerical method auditable in numpy
+while the framework-specific code remains small enough to re-derive, which is appropriate for a method
+whose value rests on being inexpensive and transparent.
 
 ## 6. Limitations and threats to validity
 
-The load-bearing caveat, the one that should be read before any other, is **adversarial
-fragility**. ConceptGate is a latent-space defense, and latent-space defenses are known to be
-breakable: obfuscated-activation attacks can drive a harmfulness probe's recall from 100% to 0%
-while the model's *behavior* is unchanged, by finding inputs that keep the activation off the
-probe's direction even as the model does the forbidden thing
+The most important limitation, which should be read before any other, is **adversarial fragility**.
+ConceptGate is a latent-space defense, and latent-space defenses are known to be breakable:
+obfuscated-activation attacks can drive a harmfulness probe's recall from 100% to 0% while the model's
+*behaviour* is unchanged, by finding inputs that keep the activation off the probe's direction even as
+the model performs the prohibited action
 <span class="cite" data-ref="Bailey, L., et al. (2024). Obfuscated Activations Bypass LLM Latent-Space Defenses. arXiv:2412.09565."><a href="#ref-obfusc">[10]</a></span>.
 This attack class targets exactly the family ConceptGate belongs to — linear probes, SAEs, and
 Gaussian/mixture density gates alike — so nothing in <a class="sref" href="#4-experiments-and-results">§4</a> should be read as
-a security guarantee. The honest positioning is that ConceptGate is a cheap, interpretable,
-few-shot *layer* in a defense stack, useful precisely because it is nearly free to add, and never a
-boundary that a motivated adversary cannot cross. Its steering side is more robust in this respect
-than its detection side — writing a direction changes behavior whether or not an attacker knows the
-direction — but steering is not a filter, so the two do different jobs.
+a security guarantee. In practical terms, ConceptGate is best regarded as a cheap, interpretable,
+few-shot *layer* within a defense stack — useful because it is nearly free to add, but not a boundary
+that a motivated adversary cannot cross. Its steering side is somewhat more robust in this respect than
+its detection side, since writing a direction alters behaviour whether or not an attacker knows the
+direction, but steering is not a filter, so the two serve different purposes.
 
-The second cluster of caveats is about **the evidence being small and in-distribution**. We deliberately
-evaluate on gpt2 and Qwen2.5-0.5B so that every number here reproduces on a laptop CPU, but that
-choice bounds how far the numbers travel: the qualitative stories — detection is a commodity, the
-model is the ceiling for steering, the cost frontier is real and model-dependent — are the parts we
-expect to survive at the 2–8B instruct scale, whereas the exact AUCs, error rates, and knee locations
+The second group of limitations concerns **the evidence being small and in-distribution**. We evaluate
+on GPT-2 and Qwen2.5-0.5B so that every result reproduces on a single CPU, but that choice bounds how
+far the numbers extend: the qualitative findings — detection is a commodity, the base model bounds
+steering quality, and the cost trade-off is real and model-dependent — are expected to hold at the
+2–8B instruct scale, whereas the specific AUCs, error rates, and knee locations
 should be re-measured there before being quoted. Within these small models, the detection numbers are
 in-distribution: probe-based detection is known to generalize poorly off-distribution, so a detector
-that looks perfect on held-out prompts from the same distribution can degrade sharply on a genuinely
-new attack style, and our figures do not test that. And because the whole method rests on a *linear*
+that appears accurate on held-out prompts from the same distribution can degrade sharply on a
+substantially different attack style, and the figures here do not test that. And because the whole method rests on a *linear*
 direction, any concept that the frozen model encodes non-linearly is invisible to it; the intended
 mitigations — the layer sweep, and an MLP-probe variant that trades interpretability for capacity —
 are gestured at here but not fully explored.
@@ -912,19 +980,20 @@ sets, which we have done only partially. On the write side, steering hard enough
 the topic also degrades fluency, and generated text drifts out of the clean-prompt distribution as it
 grows — degenerate repetition alone can nudge a benign continuation across the gate — so a deployed
 system must tune its operating point against false-refusal and output quality, not against recall in
-isolation. None of these limits is hidden in the design; each is a knob the operating point exposes,
-and naming them is the price of the honesty the rest of the document is trying to keep.
+isolation. None of these limitations is incidental; each corresponds to a parameter that the operating
+point exposes, and they are stated here so that the results are read with appropriate caution.
 
 ## 7. Conclusion
 
-A frozen model already contains the concepts we care about; ConceptGate is a small, honest attempt to
-read them across depth and write them back. The reading is a commodity — useful, cheap, and no better
-than a linear classifier — and the depth-fusion and cost-frontier results are the parts of the
-reading worth keeping. The writing is the reason to do any of it inside the residual stream at all: a
-few-shot, training-free steering knob that shares its direction with the detector and is bounded only
-by what the base model has learned. The most useful thing this document can be is not a claim but an
-instrument: the sliders above are the argument, run on real models, and they say plainly where the
-method is strong and where it is not.
+A frozen model already represents many concepts of interest in its residual stream; ConceptGate reads
+them across depth and writes them back. The reading is a commodity — inexpensive, and no more accurate
+than a linear classifier — and the parts of the reading worth retaining are the depth-fusion result
+and the compute–accuracy trade-off. The writing is what justifies operating inside the residual stream
+rather than on the text: a few-shot, training-free steering control that shares its direction with the
+detector and is bounded by the competence of the base model. The interactive figures are included so
+that these claims can be examined directly against the underlying model runs rather than taken on
+assertion; the points at which the method is effective and the points at which it fails are both
+visible in them.
 
 ## References
 
@@ -939,6 +1008,8 @@ method is strong and where it is not.
 8. <a id="ref-llamaguard"></a>Inan, H., et al. (2023). *Llama Guard: LLM-based Input-Output Safeguard for Human-AI Conversations.* arXiv:2312.06674.
 9. <a id="ref-calm"></a>Schuster, T., et al. (2022). *Confident Adaptive Language Modeling.* arXiv:2207.07061.
 10. <a id="ref-obfusc"></a>Bailey, L., et al. (2024). *Obfuscated Activations Bypass LLM Latent-Space Defenses.* arXiv:2412.09565.
+11. <a id="ref-lora"></a>Hu, E. J., Shen, Y., Wallis, P., Allen-Zhu, Z., Li, Y., Wang, S., Wang, L., & Chen, W. (2021). *LoRA: Low-Rank Adaptation of Large Language Models.* arXiv:2106.09685.
+12. <a id="ref-adapters"></a>Houlsby, N., Giurgiu, A., Jastrzebski, S., Morrone, B., de Laroussilhe, Q., Gesmundo, A., Attariyan, M., & Gelly, S. (2019). *Parameter-Efficient Transfer Learning for NLP.* arXiv:1902.00751.
 </div>
 
 ---
