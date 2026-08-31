@@ -1141,9 +1141,65 @@ and the raw results
 tabulated in [`docs/evaluation.md`](https://github.com/NISH1001/conceptgate/blob/main/docs/evaluation.md))
 are in the repository.
 
-<figure id="figure-11" style="margin:2rem 0">
+<figure id="figure-11">
+<svg viewBox="0 0 720 252" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ConceptGate concept bank and read-write duality" font-family="ui-sans-serif,system-ui,sans-serif">
+  <defs><marker id="bkar" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0L6,3L0,6Z" fill="#9aa"/></marker></defs>
+  <text x="360" y="14" text-anchor="middle" font-size="12" fill="currentColor">one truncated forward — computed once, read by every concept</text>
+  <rect x="12" y="24" width="696" height="48" rx="8" fill="none" stroke="#9aa" stroke-width="1.2"/>
+  <text x="20" y="20" font-size="10" fill="#889">M (frozen)</text>
+  <g font-size="11" fill="#889" text-anchor="middle">
+    <rect x="30"  y="32" width="60" height="32" rx="5" fill="#eef2f7" stroke="#bcc"/><text x="60"  y="52">&#8467;1</text>
+    <rect x="98"  y="32" width="60" height="32" rx="5" fill="#fdecea" stroke="#e0a99f"/><text x="128" y="52">&#8467;2</text>
+    <rect x="166" y="32" width="60" height="32" rx="5" fill="#eef2f7" stroke="#bcc"/><text x="196" y="52">&#8467;3</text>
+    <rect x="234" y="32" width="60" height="32" rx="5" fill="#fdecea" stroke="#e0a99f"/><text x="264" y="52">&#8467;4</text>
+    <rect x="302" y="32" width="60" height="32" rx="5" fill="#fdecea" stroke="#e0a99f"/><text x="332" y="52">&#8467;5</text>
+    <rect x="378" y="32" width="318" height="32" rx="5" fill="#f2f1ec" stroke="#cfcbc0" stroke-dasharray="4 3"/><text x="537" y="52" fill="#a8a49a">layers above the deepest tap — not run</text>
+  </g>
+  <line x1="4" y1="48" x2="30" y2="48" stroke="#9aa"/>
+  <g stroke="#C2402F" stroke-dasharray="3 2"><line x1="128" y1="64" x2="128" y2="88"/><line x1="264" y1="64" x2="264" y2="88"/><line x1="332" y1="64" x2="332" y2="88"/></g>
+  <rect x="40" y="88" width="620" height="24" rx="6" fill="#eef2f7" stroke="#bcc"/>
+  <text x="350" y="104" text-anchor="middle" font-size="11" fill="currentColor">tapped activations &#160;<tspan font-style="italic">a</tspan> &#8712; &#8477;<tspan baseline-shift="super" font-size="8">m&#215;d</tspan> &#160;— broadcast to all K concepts</text>
+  <g stroke="#9aa"><line x1="115" y1="112" x2="115" y2="136" marker-end="url(#bkar)"/><line x1="275" y1="112" x2="275" y2="136" marker-end="url(#bkar)"/><line x1="435" y1="112" x2="435" y2="136" marker-end="url(#bkar)"/></g>
+  <line x1="623" y1="112" x2="623" y2="136" stroke="#c9c6bd" stroke-dasharray="3 2"/>
+  <text x="40" y="128" font-size="10" fill="#889">concept bank</text>
+  <g>
+    <rect x="40" y="136" width="150" height="72" rx="7" fill="#faf9f4" stroke="#e2e0d6"/>
+    <text x="52" y="156" font-size="11" fill="#26a99d" font-weight="600">concept 1</text>
+    <rect x="150" y="143" width="34" height="18" rx="9" fill="#e7f5f3" stroke="#26a99d"/><text x="167" y="156" text-anchor="middle" font-size="10.5" fill="#1c7d74" font-style="italic">w&#185;</text>
+    <text x="52" y="182" font-size="10.5" fill="#C2402F">detect &#160; w&#185;&#183;a &gt; &#964;</text>
+    <text x="52" y="200" font-size="10.5" fill="#26a99d">steer &#160; + &#945;&#183;w&#185;</text>
+    <rect x="200" y="136" width="150" height="72" rx="7" fill="#faf9f4" stroke="#e2e0d6"/>
+    <text x="212" y="156" font-size="11" fill="#26a99d" font-weight="600">concept 2</text>
+    <rect x="310" y="143" width="34" height="18" rx="9" fill="#e7f5f3" stroke="#26a99d"/><text x="327" y="156" text-anchor="middle" font-size="10.5" fill="#1c7d74" font-style="italic">w&#178;</text>
+    <text x="212" y="182" font-size="10.5" fill="#C2402F">detect &#160; w&#178;&#183;a &gt; &#964;</text>
+    <text x="212" y="200" font-size="10.5" fill="#26a99d">steer &#160; + &#945;&#183;w&#178;</text>
+    <rect x="360" y="136" width="150" height="72" rx="7" fill="#faf9f4" stroke="#e2e0d6"/>
+    <text x="372" y="156" font-size="11" fill="#26a99d" font-weight="600">concept 3</text>
+    <rect x="470" y="143" width="34" height="18" rx="9" fill="#e7f5f3" stroke="#26a99d"/><text x="487" y="156" text-anchor="middle" font-size="10.5" fill="#1c7d74" font-style="italic">w&#179;</text>
+    <text x="372" y="182" font-size="10.5" fill="#C2402F">detect &#160; w&#179;&#183;a &gt; &#964;</text>
+    <text x="372" y="200" font-size="10.5" fill="#26a99d">steer &#160; + &#945;&#183;w&#179;</text>
+    <rect x="548" y="136" width="150" height="72" rx="7" fill="#faf9f4" stroke="#d8d5c8" stroke-dasharray="4 3"/>
+    <text x="560" y="156" font-size="11" fill="#8ab5b0" font-weight="600">concept K</text>
+    <rect x="658" y="143" width="34" height="18" rx="9" fill="#f0f7f5" stroke="#9cc9c3"/><text x="675" y="156" text-anchor="middle" font-size="10.5" fill="#6fa39d" font-style="italic">w<tspan baseline-shift="super" font-size="8">K</tspan></text>
+    <text x="560" y="182" font-size="10.5" fill="#cc9b96">detect &#160; w<tspan baseline-shift="super" font-size="7">K</tspan>&#183;a</text>
+    <text x="560" y="200" font-size="10.5" fill="#8cc5bf">steer &#160; + &#945;&#183;w<tspan baseline-shift="super" font-size="7">K</tspan></text>
+  </g>
+  <text x="524" y="178" text-anchor="middle" font-size="16" fill="#bbb">&#8943;</text>
+  <text x="360" y="234" text-anchor="middle" font-size="11" fill="currentColor">each concept = one closed-form direction <tspan font-style="italic">w</tspan><tspan baseline-shift="super" font-size="8">k</tspan> (~ms, ~kB); the same direction reads (detect) and writes (steer)</text>
+</svg>
+<figcaption><strong>Figure 11.</strong> <em>The concept bank and the read/write duality.</em> A single
+truncated forward — the frozen model run only up to the deepest tap, never the layers above — produces one
+set of tapped activations <em>a</em> that every concept reads. Each concept is a single direction
+<em>w<sup>k</sup></em>, fitted in closed form (milliseconds, kilobytes) and added to the bank without
+touching the others. The <em>same</em> <em>w<sup>k</sup></em> serves twice: as a detector (project
+<em>a</em> onto it and threshold) and as a steering vector (add ±α·<em>w<sup>k</sup></em> back into the
+stream). So one forward serves all <em>K</em> concepts, adding a concept is one closed-form fit, and
+detection and steering share the learned state — the cost behaviour Figures 12–13 measure.</figcaption>
+</figure>
+
+<figure id="figure-12" style="margin:2rem 0">
 <div id="cg-scale-cost" class="cg-widget" style="margin:0"></div>
-<figcaption><strong>Figure 11 (interactive).</strong> <em>The cost of a K-concept bank.</em> Build
+<figcaption><strong>Figure 12 (interactive).</strong> <em>The cost of a K-concept bank.</em> Build
 wall-time, per-prompt inference, or learned parameters (toggle the axis) as the bank grows from one
 concept to fourteen, on a log scale. ConceptGate (teal) and a linear-probe bank (red) reuse one forward
 pass and add each concept in closed form or a single trained head; LoRA (amber, dashed) fine-tunes an
@@ -1155,9 +1211,9 @@ negligible beside the resident model. Measured on an Apple M4 under MPS; toggle 
 point.</figcaption>
 </figure>
 
-<figure id="figure-12" style="margin:2rem 0">
+<figure id="figure-13" style="margin:2rem 0">
 <div id="cg-scale-auc" class="cg-widget" style="margin:0"></div>
-<figcaption><strong>Figure 12 (interactive).</strong> <em>Detection across the whole taxonomy.</em>
+<figcaption><strong>Figure 13 (interactive).</strong> <em>Detection across the whole taxonomy.</em>
 Held-out AUC for each of the fourteen BeaverTails harm categories, from N=32 examples per class. Each row
 pairs ConceptGate (teal) with the full-model linear probe (red); the amber ✕ marks the three categories
 where a LoRA adapter was trained for comparison. Dashed lines are the per-method means. The training-free
