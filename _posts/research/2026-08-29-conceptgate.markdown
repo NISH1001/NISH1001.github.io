@@ -33,10 +33,10 @@ figure img,figure svg{max-width:100%}
 figure figcaption{font-size:.85rem;line-height:1.5;color:var(--text,#666);opacity:.8;margin-top:.5rem}
 table{font-size:.9rem}
 .small-note{font-size:.85rem;color:var(--text,#666);opacity:.8}
-.content h2, .content h3 { scroll-margin-top: 1.5rem; }
+.content h2, .content h3, .content h4 { scroll-margin-top: 1.5rem; }
 a.hanchor{margin-left:.45rem;text-decoration:none;font-weight:400;font-size:.72em;
   color:var(--brand,#3aa99f);opacity:0;transition:opacity .12s;}
-.content h2:hover a.hanchor, .content h3:hover a.hanchor, a.hanchor:focus{opacity:.75}
+.content h2:hover a.hanchor, .content h3:hover a.hanchor, .content h4:hover a.hanchor, a.hanchor:focus{opacity:.75}
 a.hanchor:hover{opacity:1}
 a.sref{text-decoration:none;border-bottom:1px dotted currentColor;color:inherit}
 a.sref:hover{color:var(--brand,#3aa99f)}
