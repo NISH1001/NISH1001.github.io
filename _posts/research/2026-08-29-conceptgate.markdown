@@ -52,6 +52,7 @@ a.sref:hover{color:var(--brand,#3aa99f)}
 .cg-widget h4{margin:0 0 .7rem;font-size:1.02rem;font-weight:700;text-align:center}
 .cg-widget .cg-sub{font-size:.83rem;color:var(--text,#666);opacity:.88;margin-bottom:1rem;line-height:1.5;text-align:center}
 .cg-widget svg{display:block;margin:0 auto}
+.cg-widget .cg-readout svg{display:inline-block;margin:0;vertical-align:-1px}
 .cg-ctrls{display:flex;flex-wrap:wrap;gap:.9rem 1.4rem;align-items:center;margin:.5rem 0 1rem}
 .cg-ctrl{display:flex;flex-direction:column;gap:.25rem;font-size:.78rem;min-width:8rem}
 .cg-ctrl label{font-weight:600;opacity:.8;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
