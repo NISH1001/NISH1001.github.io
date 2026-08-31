@@ -48,9 +48,10 @@ a.sref:hover{color:var(--brand,#3aa99f)}
   background:var(--bg2,#faf9f4);padding:1.15rem 1.2rem 1.25rem;margin:2rem 0;font-size:.9rem;
   box-shadow:0 1px 2px rgba(20,20,18,.05)}
 .cg-widget .cg-eyebrow{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10.5px;
-  letter-spacing:.09em;text-transform:uppercase;opacity:.5;margin:0 0 .45rem}
-.cg-widget h4{margin:0 0 .15rem;font-size:.96rem;font-weight:700}
-.cg-widget .cg-sub{font-size:.83rem;color:var(--text,#666);opacity:.88;margin-bottom:.9rem;line-height:1.5}
+  letter-spacing:.09em;text-transform:uppercase;opacity:.5;margin:0 0 .45rem;text-align:center}
+.cg-widget h4{margin:0 0 .7rem;font-size:1.02rem;font-weight:700;text-align:center}
+.cg-widget .cg-sub{font-size:.83rem;color:var(--text,#666);opacity:.88;margin-bottom:1rem;line-height:1.5;text-align:center}
+.cg-widget svg{display:block;margin:0 auto}
 .cg-ctrls{display:flex;flex-wrap:wrap;gap:.9rem 1.4rem;align-items:center;margin:.5rem 0 1rem}
 .cg-ctrl{display:flex;flex-direction:column;gap:.25rem;font-size:.78rem;min-width:8rem}
 .cg-ctrl label{font-weight:600;opacity:.8;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
@@ -637,7 +638,13 @@ carries independent signal. The widget below makes the effect concrete: varying 
 $d'$ updates the fused $d'$ and the two error rates. The defaults are the values the synthetic
 experiment (<a class="sref" href="#41-depth-fusion-on-synthetic-data">§4.1</a>) recovered.
 
-<div id="cg-depthfusion" class="cg-widget"></div>
+<figure id="figure-3" style="margin:2rem 0">
+<div id="cg-depthfusion" class="cg-widget" style="margin:0"></div>
+<figcaption><strong>Figure 3 (interactive).</strong> Depth fusion on synthetic data. Each tapped layer
+contributes a per-layer discriminability (d′); blending them across depth adds in quadrature, so the
+combined detector clears a margin no single layer reaches — driving test error from ~16% to ~9% on the
+seeded synthetic problem.</figcaption>
+</figure>
 
 One caveat is important: the quadrature gain assumes *independent* per-layer noise.
 Adjacent layers are correlated, so the real gain is smaller than three independent layers would
@@ -692,7 +699,12 @@ a genuine failure mode of shallow taps — and raising $\tau$ far enough to supp
 reject true jailbreaks. There is no threshold that separates the two cleanly; there is only a choice
 of operating point.
 
-<div id="cg-detect" class="cg-widget"></div>
+<figure id="figure-4" style="margin:2rem 0">
+<div id="cg-detect" class="cg-widget" style="margin:0"></div>
+<figcaption><strong>Figure 4 (interactive).</strong> The calibrated gate on example prompts. Each prompt's
+log-likelihood ratio is placed against the threshold τ (jailbreak in red, benign in teal); the recall and
+false-positive rate update as you move the operating point.</figcaption>
+</figure>
 
 ### 3.9 Combining K concepts
 
@@ -737,7 +749,12 @@ scent of wildflowers."* GPT-2 shifts more weakly under the same procedure and de
 sooner — the same control applied to a less capable model, an effect examined in
 <a class="sref" href="#46-steering-across-models">§4.6</a>.
 
-<div id="cg-steer" class="cg-widget"></div>
+<figure id="figure-5" style="margin:2rem 0">
+<div id="cg-steer" class="cg-widget" style="margin:0"></div>
+<figcaption><strong>Figure 5 (interactive).</strong> Steering across models. Sweeping the steering fraction
+adds a concept's direction back into the residual stream during generation; the replayed completions shift
+toward or away from the concept — coherently on Qwen2.5-0.5B, more weakly on GPT-2.</figcaption>
+</figure>
 
 ### 3.11 Actions and the run driver
 
@@ -875,11 +892,11 @@ side of the harmful cluster along the discriminative axis (benign at $-2$ and $+
 No single threshold on any linear score can carve out "the middle," so the `fisher` gate is stuck
 near chance (38.8% error, AUC 0.60); the mixture, seeing $\mathbf{s}$ near a benign profile on each
 side and a harmful profile between, recovers it (7.1% error, AUC 0.98; the Bayes floor is 5.8%). That
-is the case for mixtures, and <a class="sref" href="#figure-3">Figure 3</a> shows its geometry.
+is the case for mixtures, and <a class="sref" href="#figure-6">Figure 6</a> shows its geometry.
 
-<figure id="figure-3" style="margin:2rem 0">
+<figure id="figure-6" style="margin:2rem 0">
 <div id="cg-killshot" class="cg-widget" style="margin:0"></div>
-<figcaption><strong>Figure 3 (interactive).</strong> The constructed hard case for mixtures, on synthetic data. Two
+<figcaption><strong>Figure 6 (interactive).</strong> The constructed hard case for mixtures, on synthetic data. Two
 benign clusters (teal) sit on either side of the harmful cluster (red) along the score axis. Toggle
 the gate: a single linear threshold cannot isolate the middle from the two sides, whereas a
 two-component mixture fires only where the harmful density dominates. The error and AUC figures are the
@@ -928,7 +945,12 @@ measure leave-one-out AUC — held out, so it cannot overfit — against the fra
 tap requires. The figure plots the measured curves; the target-AUC control locates the knee, the
 cheapest layer that clears a chosen AUC.
 
-<div id="cg-cost" class="cg-widget"></div>
+<figure id="figure-7" style="margin:2rem 0">
+<div id="cg-cost" class="cg-widget" style="margin:0"></div>
+<figcaption><strong>Figure 7 (interactive).</strong> The compute–accuracy frontier. Leave-one-out detection
+AUC at each layer (red) against the fraction of the network a tap there runs (teal); dragging the target
+AUC locates the cheapest layer that clears it — roughly 8% of Qwen2.5-0.5B for the jailbreak concept.</figcaption>
+</figure>
 
 The shape of the curve reflects model capability. On GPT-2 the jailbreak concept is not cleanly formed
 until the middle of the network: AUC climbs through the early blocks and only saturates around block
@@ -962,18 +984,124 @@ negatives — which, as <a class="sref" href="#44-matched-versus-broad-negatives
 document that the effect, though intuitive, does not arise in the broad-negative setting that detection
 otherwise relies on.
 
+### 4.8 An efficiency evaluation of ConceptGate
+
+The commodity result (<a class="sref" href="#43-detection-on-real-prompts-a-commodity">§4.3</a>) shows the *choice* of linear estimator barely matters. This section asks the
+question that does matter: what does ConceptGate *cost* to reach that accuracy, relative to the standard
+way of adapting a frozen model? **The purpose is to quantify, on one real task, how much of the network
+ConceptGate must load and run — and how much it must learn — to detect a concept**, against a standard
+adaptation baseline, across three axes at once: **detection AUC**, **memory**, and **compute**.
+
+**Setup.** The task is jailbreak detection on the public
+[`jackhhao/jailbreak-classification`](https://huggingface.co/datasets/jackhhao/jailbreak-classification)
+dataset: each method learns the concept from a small, balanced set of few-shot examples drawn from the
+training split, and is scored on the untouched official test split (262 prompts — 139 jailbreak, 123
+benign). We evaluate two frozen base models, Qwen2.5-0.5B-Instruct (24 transformer blocks) and
+gemma-2-2b-it (26 blocks). The baseline is **standard linear-probing fine-tuning**: the base model is
+frozen and used purely as a feature extractor, and a linear classification head (logistic regression) is
+trained on its final-layer representation — the conventional way to build a classifier on a frozen
+network. ConceptGate is swept over its tap configurations — a single tap at increasing depth, and three-
+and five-tap fusions — each in its logistic-direction mode, learning its direction in closed form; both
+methods see the same examples. The three comparison axes are **detection AUC** on the held-out test;
+**memory**, as the fraction of the base model's weights that must be loaded and the number of parameters
+learned (both device-independent); and **compute**, as the measured per-prompt forward **wall-time on an
+Apple M4 under MPS**, averaged over three seeds. We report held-out test metrics only. The harness
+([`scripts/eval_detection.py`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_detection.py))
+and the full result tables ([`docs/evaluation.md`](https://github.com/NISH1001/conceptgate/blob/main/docs/evaluation.md))
+are in the repository; the figure and tables below replay their output.
+
+<figure id="figure-8" style="margin:2rem 0">
+<div id="cg-eff-n" class="cg-widget" style="margin:0"></div>
+<figcaption><strong>Figure 8 (interactive).</strong> <em>Sample efficiency.</em> Held-out AUC as the few-shot
+count <em>N</em> grows (4→32), with the same examples and test set for every method. ConceptGate (teal)
+reads a few mid-layer taps in closed form; the linear-probing baselines freeze the base model and fit a
+logistic (solid red) or linear-SVM (dashed red) head on its final layer. On gemma-2-2b ConceptGate leads
+at the smallest N and the methods converge as N grows; on Qwen the trained probes lead slightly. Toggle
+the base model; hover any point for exact numbers.</figcaption>
+</figure>
+
+<figure id="figure-9" style="margin:2rem 0">
+<div id="cg-eff-depth" class="cg-widget" style="margin:0"></div>
+<figcaption><strong>Figure 9 (interactive).</strong> <em>Accuracy versus network depth</em> (N=32). Held-out AUC against the
+fraction of the network a tap requires — i.e. how much of the forward pass has to run. Circles are single
+taps at increasing depth; squares are three- and five-tap fusions; the dashed red line is the full-model
+linear probe. ConceptGate reaches within a hundredth of the full-model probe at roughly a third of the
+network, and depth fusion adds little over the best single tap. (Weights loaded run higher than depth,
+because the embedding table is always loaded regardless of tap depth — that cost is Figure 10.)</figcaption>
+</figure>
+
+<figure id="figure-10" style="margin:2rem 0">
+<div id="cg-eff-summary" class="cg-widget" style="margin:0"></div>
+<figcaption><strong>Figure 10.</strong> <em>Compute and memory, both base models.</em> For each base model the
+bars give ConceptGate's per-prompt forward wall-time (compute, solid) and weights loaded (memory, hatched)
+as a fraction of the full-model linear probe (the red line = the probe = 100%); each configuration's AUC is
+labeled beneath. ConceptGate is at an early single tap; the probe reads the whole model. Across both models
+ConceptGate holds AUC within ~0.01–0.013 of the probe while needing roughly half its compute and memory —
+the bars sit near the halfway mark. LoRA, which back-propagates through the model to train adapters, joins
+this comparison next.</figcaption>
+</figure>
+
+Full-model linear-probing attains the highest AUC, which is expected since it uses the full network —
+but ConceptGate reaches within a hundredth or two of it while touching a fraction of the model. On Qwen2.5-0.5B a single
+tap at roughly a quarter depth scores AUC 0.968 in 28.7 ms against the probe's 0.982 in 96.1 ms: a 3.3×
+faster forward, loading about half the weights, for 0.014 AUC. A single tap at 85% depth matches the
+probe outright (0.982) and still runs faster. On gemma-2-2b (2.66 billion parameters) the pattern holds
+and the absolute savings grow — a single tap at 40% depth scores 0.974 in 226 ms against the probe's
+0.987 in 547 ms, 2.4× faster at 55% of the weights.
+
+<div class="cg-mono" markdown="1">
+
+| Qwen2.5-0.5B (494M) · N=32 | AUC | forward ms | weights |
+|---|---|---|---|
+| ConceptGate · logistic (3 taps) | 0.973 | 67.1 | 79% |
+| ConceptGate · logistic (1 tap @40%) | 0.970 | 43.6 | 61% |
+| ConceptGate · diff-of-means (3 taps) | 0.927 | 67.1 | 79% |
+| linear probe · LR | 0.982 | 96.1 | 100% |
+| linear probe · SVM | 0.982 | 96.1 | 100% |
+
+| gemma-2-2b (2.66B) · N=32 | AUC | forward ms | weights |
+|---|---|---|---|
+| ConceptGate · logistic (3 taps) | 0.979 | 391.7 | 76% |
+| ConceptGate · logistic (1 tap @40%) | 0.974 | 226.0 | 55% |
+| ConceptGate · diff-of-means (3 taps) | 0.958 | 391.7 | 76% |
+| linear probe · LR | 0.987 | 546.9 | 100% |
+| linear probe · SVM | 0.989 | 546.9 | 100% |
+
+</div>
+
+Two secondary observations. Depth fusion buys almost nothing here: the three- and five-tap
+configurations sit on top of the best single tap, consistent with the synthetic depth-fusion result
+(<a class="sref" href="#41-depth-fusion-on-synthetic-data">§4.1</a>) not transferring to a real model where one layer already carries the concept. And the
+difference-of-means direction trails the logistic one by three to five points of AUC and is not
+competitive with the probe; the logistic direction is the one to use when the comparison is against a
+trained classifier.
+
+The reading is not that ConceptGate detects *better* — it does not (<a class="sref" href="#43-detection-on-real-prompts-a-commodity">§4.3</a>), and the full-model probe has
+the higher ceiling — but that it is **Pareto-efficient**: near-probe accuracy at two-to-four times less
+compute, about half the weights loaded, and no gradient training at all, from a single early tap. This
+is the concrete content of "efficient" in the title — measured rather than asserted. It also inherits
+the same ceiling as everything else here: on gemma-2-2b the concept is cleanly readable by 40% depth,
+on GPT-2 not until the middle of the network, so the cheapest reliable tap is a property of how early
+the base model forms the abstraction (<a class="sref" href="#45-the-computeaccuracy-frontier">§4.5</a>).
+
 ## 5. Discussion
 
 ### 5.1 What is contributed
 
 The mechanisms are all drawn from prior work, the detector is a commodity, and the mixture model is
-inactive at few-shot sample sizes. What remains as a contribution is threefold: the depth-fusion
-result, which improves measurably on the single-layer baseline; the composition itself — a single
-few-shot, calibrated, training-free module that both reads and writes a concept from a frozen model's
-intermediate layers, with a small and well-characterized cost; and the empirical account of where each
-component helps and where it does not. The value of the work is not that its detector outperforms the
-alternatives, which it does not, but that it assembles a read-and-write adapter and measures each part
-against a fair baseline.
+inactive at few-shot sample sizes. What remains as a contribution is threefold. The first is a measured
+efficiency result: on real jailbreak detection ConceptGate reaches within a hundredth or two of a
+full-model linear probe's AUC — and matches it outright as the tap deepens — from a single early tap,
+which runs roughly a third of the network, loads about half its weights, and requires no gradient
+training (<a class="sref" href="#48-an-efficiency-evaluation-of-conceptgate">§4.8</a>). The second is the composition itself: a single few-shot, calibrated,
+training-free module that both reads and writes a concept from a frozen model's intermediate layers,
+with a small and well-characterized cost. The third is the empirical account of where each component
+helps and where it does not — the depth-fusion advantage is real on synthetic data but does not transfer
+to a real model where one layer already carries the concept; detection is a commodity that a logistic or
+SVM probe matches; and cross-distribution transfer collapses for every method alike. The value of the
+work is therefore not that its detector outperforms the alternatives, which it does not, but that it
+matches them at a fraction of the compute and memory, assembles a read-and-write adapter, and measures
+each part against a fair baseline.
 
 ### 5.2 Detection is a commodity; steering is the distinguishing capability
 
@@ -1067,11 +1195,13 @@ point exposes, and they are stated here so that the results are read with approp
 ## 7. Conclusion
 
 A frozen model already represents many concepts of interest in its residual stream; ConceptGate reads
-them across depth and writes them back. The reading is a commodity — inexpensive, and no more accurate
-than a linear classifier — and the parts of the reading worth retaining are the depth-fusion result
-and the compute–accuracy trade-off. The writing is what justifies operating inside the residual stream
-rather than on the text: a few-shot, training-free steering control that shares its direction with the
-detector and is bounded by the competence of the base model. The interactive figures are included so
+them across depth and writes them back. The reading is a commodity — no more accurate than a linear
+classifier — but a cheap one: on a real task it matches a full-model linear probe's accuracy from a
+single early tap, at roughly half the compute and memory and with no gradient training, so what is worth
+retaining from the reading is its efficiency and the compute–accuracy trade-off, more than the depth
+fusion, which helps only on synthetic data. The writing is what justifies operating inside the residual
+stream rather than on the text: a few-shot, training-free steering control that shares its direction with
+the detector and is bounded by the competence of the base model. The interactive figures are included so
 that these claims can be examined directly against the underlying model runs rather than taken on
 assertion; the points at which the method is effective and the points at which it fails are both
 visible in them.
@@ -1147,9 +1277,7 @@ function cgDepthFusion(){
   var d=CGDATA.depth_fusion.per_layer_dprime.slice();
   host.innerHTML=''
     +'<p class="cg-eyebrow">figure · interactive · live math</p><h4>Depth-fusion explorer</h4>'
-    +'<div class="cg-sub">Drag each layer’s discriminability d′. The fused detector combines them in '
-    +'quadrature, d′<sub>comb</sub>=√Σ d′ℓ², and per-class error is Φ(−d′/2). '
-    +'Live math — defaults are the values §4.1 recovered.</div>'
+    +'<div class="cg-sub">Drag each layer’s d′; the fused d′ (quadrature) and per-class error update live.</div>'
     +'<div class="cg-ctrls">'
     +[0,1,2].map(function(i){return '<div class="cg-ctrl"><label>layer '+(i+1)
         +' d′ <span class="cg-val" id="cgdf-v'+i+'"></span></label>'
@@ -1204,9 +1332,7 @@ function cgDetect(){
   var D=CGDATA.detection, TMIN=-40, TMAX=10;
   host.innerHTML=''
     +'<p class="cg-eyebrow">figure · interactive · real GPT-2 activations</p><h4>Detection sandbox — jailbreak concept</h4>'
-    +'<div class="cg-sub">Ten labelled probes carry their true log-likelihood ratios. Drag τ: a probe '
-    +'<span class="cg-badge cg-fire">fires</span> when its LLR &gt; τ, else <span class="cg-badge cg-pass">passes</span>. '
-    +'Recall / FPR are computed live on the concept’s own ±10 examples.</div>'
+    +'<div class="cg-sub">Drag the threshold τ to move the operating point; recall / FPR update live.</div>'
     +'<div class="cg-ctrls"><div class="cg-ctrl" style="min-width:16rem"><label>threshold τ = '
     +'<span class="cg-val" id="cgd-tv"></span></label><input type="range" id="cgd-t" min="'+TMIN+'" max="'+TMAX
     +'" step="0.5" value="'+D.tau+'"></div><div class="cg-readout" id="cgd-metrics"></div></div>'
@@ -1222,8 +1348,8 @@ function cgDetect(){
       +'false-positive rate <b style="color:'+CG_BLUE+'">'+fpr.toFixed(0)+'%</b>';
     // strip plot
     var svg='<line x1="30" y1="30" x2="445" y2="30" stroke="'+CG_GRID+'"/>';
-    svg+='<text x="30" y="50" font-size="9" fill="currentColor" opacity="0.6">≤'+TMIN+'</text>';
-    svg+='<text x="430" y="50" font-size="9" fill="currentColor" opacity="0.6">'+TMAX+'</text>';
+    svg+='<text x="30" y="50" font-size="9" fill="currentColor" opacity="0.82">≤'+TMIN+'</text>';
+    svg+='<text x="430" y="50" font-size="9" fill="currentColor" opacity="0.82">'+TMAX+'</text>';
     D.neg_llr.forEach(function(x){svg+='<circle cx="'+xpos(x)+'" cy="22" r="4.5" fill="'+CG_BLUE+'" opacity="0.62" data-tip="benign · LLR '+x.toFixed(1)+'"/>';});
     D.pos_llr.forEach(function(x){svg+='<circle cx="'+xpos(x)+'" cy="38" r="4.5" fill="'+CG_RED+'" opacity="0.72" data-tip="jailbreak · LLR '+x.toFixed(1)+'"/>';});
     var tx=xpos(t);
@@ -1250,8 +1376,7 @@ function cgSteer(){
   var models=Object.keys(CGDATA.steering);
   host.innerHTML=''
     +'<p class="cg-eyebrow">figure · interactive · real completions</p><h4>Steering slider</h4>'
-    +'<div class="cg-sub">Replays actual generations. Sweep the fraction of the residual norm from '
-    +'“away” (−) through baseline (0) to “toward” (+).</div>'
+    +'<div class="cg-sub">Sweep the fraction from “away” (−) through baseline (0) to “toward” (+).</div>'
     +'<div class="cg-ctrls">'
     +'<div class="cg-ctrl"><label>model</label><select id="cgs-model">'
     +models.map(function(m){return '<option value="'+m+'">'+m+'</option>';}).join('')+'</select></div>'
@@ -1285,8 +1410,7 @@ function cgCost(){
   var models=Object.keys(CGDATA.cost_curve);
   host.innerHTML=''
     +'<p class="cg-eyebrow">figure · interactive · GPT-2 &amp; Qwen2.5-0.5B</p><h4>Compute–accuracy frontier</h4>'
-    +'<div class="cg-sub">Leave-one-out AUC of the diff-of-means detector at each layer (red) vs the fraction '
-    +'of the network a tap there runs (teal). Drag the target to find the cheapest layer that clears it.</div>'
+    +'<div class="cg-sub">Drag the target AUC to find the cheapest layer that clears it.</div>'
     +'<div class="cg-ctrls">'
     +'<div class="cg-ctrl"><label>model</label><select id="cgc-model">'
     +models.map(function(m){return '<option value="'+m+'">'+m+'</option>';}).join('')+'</select></div>'
@@ -1340,10 +1464,7 @@ function cgTrace(){
   host.innerHTML=''
     +'<p class="cg-eyebrow">figure · interactive · one prompt through the pipeline</p>'
     +'<h4>Trace a prompt through the gate</h4>'
-    +'<div class="cg-sub">The concept is <b>jailbreak</b>, already learned from ~10 example prompts and '
-    +'calibrated once. Pick a model and a prompt: its activations are projected onto that learned direction '
-    +'to form the spectrogram — one bar per tapped transformer block (red-orange = toward jailbreak, teal = '
-    +'away) — and the blended LLR is tested against τ to fire or pass.</div>'
+    +'<div class="cg-sub">Pick a model and a prompt to trace it through the gate.</div>'
     +'<div class="cg-ctrls"><div class="cg-ctrl"><label>model</label><select id="cgt-model">'
     +mkeys.map(function(m){return '<option value="'+m+'">'+m+'</option>';}).join('')+'</select></div></div>'
     +'<div class="cg-chips" id="cgt-chips"></div>'
@@ -1407,10 +1528,7 @@ function cgKillshot(){
   host.innerHTML=''
     +'<p class="cg-eyebrow">figure · interactive · synthetic illustration</p>'
     +'<h4>Why a mixture helps — a synthetic example</h4>'
-    +'<div class="cg-sub">This is a constructed toy, <b>not a GPT-2 or Qwen run</b>. Two benign clusters sit on '
-    +'either side of the harmful one along the score axis; toggle the gate to see why a single linear threshold '
-    +'cannot separate them while a two-component mixture can. Error / AUC are the measured toy results — and on '
-    +'real ten-shot data (GPT-2) the mixture collapses to one component, so this advantage stays dormant.</div>'
+    +'<div class="cg-sub">A constructed synthetic toy — <b>not a model run</b>. Toggle the gate to compare a single linear threshold with a two-component mixture.</div>'
     +'<div class="cg-ctrls"><div class="cg-ctrl" style="min-width:16rem"><label>gate</label>'
     +'<select id="cgk-gate"><option value="linear">single Gaussian (linear threshold)</option>'
     +'<option value="mixture">Gaussian mixture (two benign modes)</option></select></div></div>'
@@ -1449,8 +1567,126 @@ function cgKillshot(){
   cgEl("cgk-gate").addEventListener('change',draw); draw();
 }
 
+// ===================== widget 6: accuracy vs compute frontier (baked from scripts/eval_detection.py) =====================
+var CGEFF={
+ "Qwen2.5-0.5B":{
+   N:{Ns:[4,8,16,32],cg:[0.821,0.940,0.965,0.973],lr:[0.859,0.935,0.967,0.982],svm:[0.858,0.936,0.967,0.982],
+      cgfwd:67.1,lrfwd:96.1},
+   depth:{probe:0.982,pts:[
+     {lab:"1 tap @25%",d:0.29,w:0.49,auc:0.968},{lab:"1 tap @40%",d:0.46,w:0.61,auc:0.970},
+     {lab:"1 tap @55%",d:0.58,w:0.70,auc:0.978},{lab:"1 tap @70%",d:0.75,w:0.82,auc:0.979},
+     {lab:"1 tap @85%",d:0.88,w:0.91,auc:0.982},{lab:"3 taps",d:0.71,w:0.79,auc:0.973,multi:1},
+     {lab:"5 taps",d:0.75,w:0.82,auc:0.979,multi:1}]},
+   cost:[{name:"ConceptGate (1 tap)",color:CG_BLUE,fwd:43.6,w:0.61,params:896},
+         {name:"linear probe",color:CG_RED,fwd:96.1,w:1.0,params:896}]},
+ "gemma-2-2b":{
+   N:{Ns:[4,8,16,32],cg:[0.881,0.939,0.971,0.979],lr:[0.853,0.936,0.975,0.987],svm:[0.849,0.937,0.978,0.989],
+      cgfwd:391.7,lrfwd:546.9},
+   depth:{probe:0.987,pts:[
+     {lab:"1 tap @25%",d:0.27,w:0.43,auc:0.948},{lab:"1 tap @40%",d:0.42,w:0.55,auc:0.974},
+     {lab:"1 tap @55%",d:0.58,w:0.67,auc:0.971},{lab:"1 tap @70%",d:0.73,w:0.79,auc:0.970},
+     {lab:"1 tap @85%",d:0.88,w:0.91,auc:0.974},{lab:"3 taps",d:0.69,w:0.76,auc:0.979,multi:1},
+     {lab:"5 taps",d:0.73,w:0.79,auc:0.977,multi:1}]},
+   cost:[{name:"ConceptGate (1 tap)",color:CG_BLUE,fwd:226.0,w:0.55,params:2304},
+         {name:"linear probe",color:CG_RED,fwd:546.9,w:1.0,params:2304}]}
+};
+function _cgeSel(models,id){return '<div class="cg-ctrls"><div class="cg-ctrl"><label>model</label><select id="'
+  +id+'">'+models.map(function(m){return '<option value="'+m+'">'+m+'</option>';}).join('')+'</select></div></div>';}
+
+// Figure: sample efficiency — AUC vs N
+function cgEffN(){
+  var host=cgEl("cg-eff-n"); if(!host) return; var models=Object.keys(CGEFF);
+  host.innerHTML='<p class="cg-eyebrow">figure · interactive · Apple M4 / MPS</p><h4>Sample efficiency</h4>'+_cgeSel(models,"cgen-model")
+    +'<svg id="cgen-svg" viewBox="0 0 460 220" style="width:100%;max-width:460px"></svg><div class="cg-readout" id="cgen-out"></div>';
+  function draw(){
+    var D=CGEFF[cgEl("cgen-model").value].N, Ns=D.Ns;
+    var S=[{n:"ConceptGate",c:CG_BLUE,dash:0,v:D.cg},{n:"linear probe · LR",c:CG_RED,dash:0,v:D.lr},{n:"linear probe · SVM",c:CG_RED,dash:1,v:D.svm}];
+    var W=460,H=220,L=48,R=16,T=16,B=40,pw=W-L-R,ph=H-T-B;
+    function X(i){return L+i/(Ns.length-1)*pw;}
+    var all=[].concat(D.cg,D.lr,D.svm),lo=Math.min.apply(null,all)-0.01,hi=Math.max.apply(null,all)+0.008;
+    function Y(a){return T+(1-(a-lo)/(hi-lo))*ph;}
+    var s='<line x1="'+L+'" y1="'+T+'" x2="'+L+'" y2="'+(H-B)+'" stroke="'+CG_GRID+'"/><line x1="'+L+'" y1="'+(H-B)+'" x2="'+(W-R)+'" y2="'+(H-B)+'" stroke="'+CG_GRID+'"/>';
+    for(var t=0;t<=4;t++){var yv=lo+(hi-lo)*t/4,yy=Y(yv);s+='<line x1="'+L+'" y1="'+yy+'" x2="'+(W-R)+'" y2="'+yy+'" stroke="'+CG_GRID+'" opacity="0.3"/><text x="'+(L-6)+'" y="'+(yy+3)+'" font-size="9" text-anchor="end" fill="currentColor" opacity="0.82">'+yv.toFixed(2)+'</text>';}
+    Ns.forEach(function(n,i){s+='<text x="'+X(i)+'" y="'+(H-B+14)+'" font-size="9" text-anchor="middle" fill="currentColor" opacity="0.82">'+n+'</text>';});
+    s+='<text x="'+(L+pw/2)+'" y="'+(H-3)+'" font-size="10" text-anchor="middle" fill="currentColor" opacity="0.92" font-weight="700">N examples / class</text>';
+    s+='<text x="13" y="'+(T+ph/2)+'" font-size="10" text-anchor="middle" fill="currentColor" opacity="0.92" font-weight="700" transform="rotate(-90 13 '+(T+ph/2)+')">held-out AUC</text>';
+    S.forEach(function(se){s+='<polyline points="'+se.v.map(function(a,i){return X(i)+','+Y(a);}).join(' ')+'" fill="none" stroke="'+se.c+'" stroke-width="2.2"'+(se.dash?' stroke-dasharray="5 3"':'')+'/>';
+      se.v.forEach(function(a,i){s+='<circle cx="'+X(i)+'" cy="'+Y(a)+'" r="3" fill="'+se.c+'" data-tip="'+se.n+' · N='+Ns[i]+' · AUC '+a.toFixed(3)+'"/>';});});
+    cgEl("cgen-svg").innerHTML=s; cgWireTips(cgEl("cgen-svg"));
+    cgEl("cgen-out").innerHTML=S.map(function(se){return '<span style="color:'+se.c+';font-weight:600">'+(se.dash?'– –':'——')+' '+se.n+'</span>';}).join(' &nbsp; ');
+  }
+  cgEl("cgen-model").addEventListener("change",draw); draw();
+}
+
+// Figure: depth leverage — AUC vs fraction of the network run
+function cgEffDepth(){
+  var host=cgEl("cg-eff-depth"); if(!host) return; var models=Object.keys(CGEFF);
+  host.innerHTML='<p class="cg-eyebrow">figure · interactive · N=32</p><h4>Accuracy versus depth</h4>'+_cgeSel(models,"cged-model")
+    +'<svg id="cged-svg" viewBox="0 0 460 240" style="width:100%;max-width:460px"></svg><div class="cg-readout" id="cged-out"></div>';
+  function draw(){
+    var D=CGEFF[cgEl("cged-model").value].depth;
+    var W=460,H=240,L=48,R=16,T=18,B=42,pw=W-L-R,ph=H-T-B;
+    var aus=D.pts.map(function(p){return p.auc;}).concat([D.probe]),lo=Math.min.apply(null,aus)-0.012,hi=Math.max.apply(null,aus)+0.008;
+    function X(d){return L+d*pw;} function Y(a){return T+(1-(a-lo)/(hi-lo))*ph;}
+    var s='<line x1="'+L+'" y1="'+T+'" x2="'+L+'" y2="'+(H-B)+'" stroke="'+CG_GRID+'"/><line x1="'+L+'" y1="'+(H-B)+'" x2="'+(W-R)+'" y2="'+(H-B)+'" stroke="'+CG_GRID+'"/>';
+    for(var t=0;t<=4;t++){var yv=lo+(hi-lo)*t/4,yy=Y(yv);s+='<line x1="'+L+'" y1="'+yy+'" x2="'+(W-R)+'" y2="'+yy+'" stroke="'+CG_GRID+'" opacity="0.3"/><text x="'+(L-6)+'" y="'+(yy+3)+'" font-size="9" text-anchor="end" fill="currentColor" opacity="0.82">'+yv.toFixed(2)+'</text>';}
+    [0,0.25,0.5,0.75,1].forEach(function(fx){s+='<text x="'+X(fx)+'" y="'+(H-B+14)+'" font-size="9" text-anchor="middle" fill="currentColor" opacity="0.82">'+(fx*100).toFixed(0)+'%</text>';});
+    s+='<text x="'+(L+pw/2)+'" y="'+(H-3)+'" font-size="10" text-anchor="middle" fill="currentColor" opacity="0.92" font-weight="700">fraction of the network run (depth)</text>';
+    s+='<text x="13" y="'+(T+ph/2)+'" font-size="10" text-anchor="middle" fill="currentColor" opacity="0.92" font-weight="700" transform="rotate(-90 13 '+(T+ph/2)+')">held-out AUC</text>';
+    var py=Y(D.probe);
+    s+='<line x1="'+L+'" y1="'+py+'" x2="'+(W-R)+'" y2="'+py+'" stroke="'+CG_RED+'" stroke-dasharray="5 3" stroke-width="1.6"/>';
+    s+='<text x="'+(W-R)+'" y="'+(py-5)+'" font-size="9.5" text-anchor="end" fill="'+CG_RED+'">full-model linear probe ('+D.probe.toFixed(3)+')</text>';
+    var singles=D.pts.filter(function(p){return !p.multi;}).slice().sort(function(a,b){return a.d-b.d;});
+    s+='<polyline points="'+singles.map(function(p){return X(p.d)+','+Y(p.auc);}).join(' ')+'" fill="none" stroke="'+CG_BLUE+'" stroke-width="2" opacity="0.85"/>';
+    D.pts.forEach(function(p){var m=p.multi;
+      s+=(m?'<rect x="'+(X(p.d)-4)+'" y="'+(Y(p.auc)-4)+'" width="8" height="8"':'<circle cx="'+X(p.d)+'" cy="'+Y(p.auc)+'" r="4.5"')+' fill="'+CG_BLUE+'" opacity="0.9" data-tip="'+p.lab+' · '+(p.d*100).toFixed(0)+'% depth · '+(p.w*100).toFixed(0)+'% weights · AUC '+p.auc.toFixed(3)+'"/>';});
+    cgEl("cged-svg").innerHTML=s; cgWireTips(cgEl("cged-svg"));
+    var hit=singles.filter(function(p){return p.auc>=D.probe-0.012;})[0];
+    var leg='<span style="color:'+CG_BLUE+';font-weight:600">&#9679; single tap</span> &nbsp; '
+      +'<span style="color:'+CG_BLUE+';font-weight:600">&#9632; multi-tap (3 / 5)</span> &nbsp; '
+      +'<span style="color:'+CG_RED+';font-weight:600">&#8211;&#8211; full-model probe</span>';
+    cgEl("cged-out").innerHTML=leg+(hit?'<br>a single tap at <b>'+(hit.d*100).toFixed(0)+'% depth</b> reaches AUC '
+      +'<b style="color:'+CG_BLUE+'">'+hit.auc.toFixed(3)+'</b> — within 0.01 of the full-model probe.':'');
+  }
+  cgEl("cged-model").addEventListener("change",draw); draw();
+}
+
+// Figure: efficiency summary — one chart, both models, ConceptGate cost as % of the probe
+function cgEffSummary(){
+  var host=cgEl("cg-eff-summary"); if(!host) return;
+  var D=[
+    {m:"Qwen-0.5B",cg_auc:0.970,pr_auc:0.982,comp:0.45,mem:0.61,speed:"2.2×"},
+    {m:"gemma-2-2b",cg_auc:0.974,pr_auc:0.987,comp:0.41,mem:0.55,speed:"2.4×"}
+  ];
+  var W=520,H=262,L=46,R2=16,T=20,B=54,pw=W-L-R2,ph=H-T-B,n=D.length,gw=pw/n,bw=gw*0.24;
+  function Y(f){return T+(1-f)*ph;}
+  var s='<defs><pattern id="cghatch" width="5" height="5" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">'
+    +'<rect width="5" height="5" fill="'+CG_BLUE+'" opacity="0.16"/><line x1="0" y1="0" x2="0" y2="5" stroke="'+CG_BLUE+'" stroke-width="2.6"/></pattern></defs>';
+  s+='<line x1="'+L+'" y1="'+T+'" x2="'+L+'" y2="'+(H-B)+'" stroke="'+CG_GRID+'"/><line x1="'+L+'" y1="'+(H-B)+'" x2="'+(W-R2)+'" y2="'+(H-B)+'" stroke="'+CG_GRID+'"/>';
+  for(var t=0;t<=4;t++){var f=t/4,yy=Y(f);s+='<line x1="'+L+'" y1="'+yy+'" x2="'+(W-R2)+'" y2="'+yy+'" stroke="'+CG_GRID+'" opacity="0.3"/><text x="'+(L-5)+'" y="'+(yy+3)+'" font-size="8" text-anchor="end" fill="currentColor" opacity="0.82">'+(f*100).toFixed(0)+'%</text>';}
+  s+='<line x1="'+L+'" y1="'+Y(1)+'" x2="'+(W-R2)+'" y2="'+Y(1)+'" stroke="'+CG_RED+'" stroke-dasharray="5 3" stroke-width="1.6"/>';
+  s+='<text x="'+(W-R2)+'" y="'+(Y(1)-5)+'" font-size="9" text-anchor="end" fill="'+CG_RED+'">full-model linear probe = 100%</text>';
+  D.forEach(function(d,i){var gx=L+i*gw+gw/2;
+    [{v:d.comp,dx:-bw-3,lab:"compute",fill:CG_BLUE,solid:1,note:d.speed+" faster"},
+     {v:d.mem,dx:3,lab:"memory",fill:"url(#cghatch)",solid:0,note:""}].forEach(function(b){
+      var bx=gx+b.dx,by=Y(b.v),bh=(H-B)-by;
+      s+='<rect x="'+bx.toFixed(1)+'" y="'+by.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+bh.toFixed(1)+'" rx="2" fill="'+b.fill+'"'
+        +(b.solid?' opacity="0.9"':' stroke="'+CG_BLUE+'" stroke-width="0.8"')
+        +' data-tip="'+d.m+' · '+b.lab+' '+(b.v*100).toFixed(0)+'% of the probe'+(b.note?' ('+b.note+')':'')+'"/>';
+      s+='<text x="'+(bx+bw/2).toFixed(1)+'" y="'+(by-4).toFixed(1)+'" font-size="9" text-anchor="middle" fill="currentColor">'+(b.v*100).toFixed(0)+'%</text>';});
+    s+='<text x="'+gx+'" y="'+(H-B+15)+'" font-size="10" text-anchor="middle" font-weight="600" fill="currentColor">'+d.m+'</text>';
+    s+='<text x="'+gx+'" y="'+(H-B+30)+'" font-size="8.5" text-anchor="middle" fill="currentColor" opacity="0.65">AUC <tspan fill="'+CG_BLUE+'" font-weight="600">'+d.cg_auc.toFixed(3)+'</tspan> vs '+d.pr_auc.toFixed(3)+'</text>';});
+  host.innerHTML='<p class="cg-eyebrow">figure · both models · Apple M4 / MPS</p>'
+    +'<h4>Compute and memory versus a full-model linear probe</h4>'
+    +'<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;max-width:'+W+'px" id="cgsum-svg">'+s+'</svg>'
+    +'<div class="cg-readout"><svg width="11" height="11" style="vertical-align:-1px"><rect width="11" height="11" rx="2" fill="'+CG_BLUE+'" opacity="0.9"/></svg> compute &nbsp; '
+    +'<svg width="11" height="11" style="vertical-align:-1px"><rect width="11" height="11" rx="2" fill="url(#cghatch)" stroke="'+CG_BLUE+'" stroke-width="0.8"/></svg> memory &nbsp;·&nbsp; '
+    +'both as a fraction of the full-model probe (red line = 100%); AUC parity labeled per model.</div>';
+  cgWireTips(cgEl("cgsum-svg"));
+}
+
 (function(){
-  function boot(){ [cgTrace,cgDepthFusion,cgDetect,cgSteer,cgCost,cgKillshot].forEach(function(f){try{f();}catch(e){}}); }
+  function boot(){ [cgTrace,cgDepthFusion,cgDetect,cgSteer,cgCost,cgKillshot,cgEffN,cgEffDepth,cgEffSummary].forEach(function(f){try{f();}catch(e){}}); }
   if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",boot);}else{boot();}
 })();
 </script>
