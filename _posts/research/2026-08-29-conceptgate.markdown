@@ -723,7 +723,10 @@ The attributed concept is the one whose direction is used if the action steers, 
 max-LLR rule that decides *whether* to act also decides *along which concept* to steer — a small but
 convenient coupling that keeps a multi-concept bank behaving like a single decision. Each concept is
 independent kilobytes, so a bank scales linearly and stays tiny, and concepts never interfere because
-each carries its own calibrated threshold.
+each carries its own calibrated threshold. This bank — one shared truncated forward broadcast to the $K$
+concept directions, each of which both detects and steers — is drawn in
+<a class="sref" href="#figure-11">Figure 11</a>, and its cost as $K$ grows is measured in
+<a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a>.
 
 ### 3.10 Steering: the write side
 
