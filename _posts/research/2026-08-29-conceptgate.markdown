@@ -298,7 +298,12 @@ This paper contributes, in order of how much we trust them:
 4. **A compute–accuracy frontier.** Because detection needs only the blocks up to the deepest tap, a
    concept has a *cheapest layer at which it is already separable*; we measure this frontier and show
    it is model-dependent (<a class="sref" href="#45-the-computeaccuracy-frontier">§4.5</a>).
-5. **Reproducible interactive figures.** The figures below reproduce the underlying model runs, so the
+5. **Multi-concept amortization.** As a training-free bank the adapter adds each category of a
+   fourteen-way safety taxonomy in milliseconds and kilobytes and scores all of them in one shared
+   forward, so its cost stays flat in the number of concepts where per-concept LoRA fine-tuning grows
+   linearly — at a trained probe's per-category accuracy, and far above few-shot fine-tuning
+   (<a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a>).
+6. **Reproducible interactive figures.** The figures below reproduce the underlying model runs, so the
    mechanism can be examined directly rather than only described.
 
 One caveat applies throughout: **no individual mechanism here is new.** Probes,
@@ -986,11 +991,19 @@ otherwise relies on.
 
 ### 4.8 An efficiency evaluation of ConceptGate
 
-The commodity result (<a class="sref" href="#43-detection-on-real-prompts-a-commodity">§4.3</a>) shows the *choice* of linear estimator barely matters. This section asks the
-question that does matter: what does ConceptGate *cost* to reach that accuracy, relative to the standard
-way of adapting a frozen model? **The purpose is to quantify, on one real task, how much of the network
-ConceptGate must load and run — and how much it must learn — to detect a concept**, against a standard
-adaptation baseline, across three axes at once: **detection AUC**, **memory**, and **compute**.
+The commodity result (<a class="sref" href="#43-detection-on-real-prompts-a-commodity">§4.3</a>) shows that the *choice* of linear estimator barely
+affects accuracy. What separates methods is **cost**, and this section measures it: how much of a frozen
+model ConceptGate must load, run, and learn to reach that accuracy, against the standard ways of adapting
+a frozen model.
+The task throughout is content-safety detection, used not because the method is specific to safety but
+because it comes with public datasets and a natural multi-concept structure: the concept is a single
+category in <a class="sref" href="#481-learning-a-single-concept">§4.8.1</a> and the fourteen categories
+of a guardrail taxonomy in <a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a>. Both
+subsections report the same axes — **detection AUC**, **memory** (weights loaded and parameters learned,
+both device-independent), and **compute** (per-prompt forward wall-time on an Apple M4 under MPS) — first
+for one concept, then for a bank of many as their number grows.
+
+#### 4.8.1 Learning a single concept
 
 **Setup.** The task is jailbreak detection on the public
 [`jackhhao/jailbreak-classification`](https://huggingface.co/datasets/jackhhao/jailbreak-classification)
@@ -1037,8 +1050,9 @@ bars give ConceptGate's per-prompt forward wall-time (compute, solid) and weight
 as a fraction of the full-model linear probe (the red line = the probe = 100%); each configuration's AUC is
 labeled beneath. ConceptGate is at an early single tap; the probe reads the whole model. Across both models
 ConceptGate holds AUC within ~0.01–0.013 of the probe while needing roughly half its compute and memory —
-the bars sit near the halfway mark. LoRA, which back-propagates through the model to train adapters, joins
-this comparison next.</figcaption>
+the bars sit near the halfway mark. LoRA, which back-propagates through the model to train adapters, enters
+the comparison in <a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a>,
+where the cost is measured across a whole taxonomy of concepts rather than one.</figcaption>
 </figure>
 
 Full-model linear-probing attains the highest AUC, which is expected since it uses the full network —
@@ -1079,10 +1093,130 @@ trained classifier.
 The reading is not that ConceptGate detects *better* — it does not (<a class="sref" href="#43-detection-on-real-prompts-a-commodity">§4.3</a>), and the full-model probe has
 the higher ceiling — but that it is **Pareto-efficient**: near-probe accuracy at two-to-four times less
 compute, about half the weights loaded, and no gradient training at all, from a single early tap. This
-is the concrete content of "efficient" in the title — measured rather than asserted. It also inherits
+is what "efficient" means concretely here — measured rather than asserted. It also inherits
 the same ceiling as everything else here: on gemma-2-2b the concept is cleanly readable by 40% depth,
 on GPT-2 not until the middle of the network, so the cheapest reliable tap is a property of how early
 the base model forms the abstraction (<a class="sref" href="#45-the-computeaccuracy-frontier">§4.5</a>).
+
+#### 4.8.2 Learning multiple concepts
+
+The single-concept saving of <a class="sref" href="#481-learning-a-single-concept">§4.8.1</a> is not,
+on its own, specific to ConceptGate: a truncated forward is available to any latent probe
+(<a class="sref" href="#53-the-cost-argument-and-its-limits">§5.3</a>). The setting where a training-free
+adapter separates from the alternatives is the one a real deployment faces — many concepts, not one. A
+content-safety guardrail is the familiar instance: Llama Guard
+<span class="cite" data-ref="Inan, H., et al. (2023). Llama Guard: LLM-based Input-Output Safeguard for Human-AI Conversations. arXiv:2312.06674."><a href="#ref-llamaguard">[8]</a></span>
+scores a taxonomy of roughly a dozen hazards, and GLiGuard, a recent GLiNER-family guardrail
+<span class="cite" data-ref="Zaratiana, U., Tomeh, N., Holat, P., & Charnois, T. (2023). GLiNER: Generalist Model for Named Entity Recognition using Bidirectional Transformer. arXiv:2311.08526."><a href="#ref-gliner">[13]</a></span>,
+hosts fourteen harm categories and eleven jailbreak strategies in a single encoder. This subsection
+measures what a **bank of $K$ concepts** costs to build, extend, run, and store, and how that cost grows
+with $K$.
+
+There are two standard ways to add a concept to a frozen model, and ConceptGate is a third. The first
+is a **linear-probe bank**: freeze the model and train one linear head per concept on a shared
+representation. The second is **fine-tuning** — a LoRA
+<span class="cite" data-ref="Hu, E. J., et al. (2021). LoRA: Low-Rank Adaptation of Large Language Models. arXiv:2106.09685."><a href="#ref-lora">[11]</a></span>
+adapter per concept, or, at the monolithic extreme, a single model fine-tuned once over the whole
+taxonomy — the way GLiGuard fully fine-tunes its encoder, so that changing the taxonomy means
+retraining. ConceptGate is instead a **training-free concept bank**: one truncated forward produces the
+activations that *every* concept reads; each concept is a closed-form direction fitted in milliseconds
+and stored in kilobytes; and concepts are added or removed without touching the others (the max-LLR
+combination of <a class="sref" href="#39-combining-k-concepts">§3.9</a>). Because reading and writing
+share a direction (<a class="sref" href="#310-steering-the-write-side">§3.10</a>), each entry in the
+bank is also a steering control at no extra cost.
+
+**Setup.** The concepts are the fourteen harm categories of BeaverTails
+<span class="cite" data-ref="Ji, J., et al. (2023). BeaverTails: Towards Improved Safety Alignment of LLM via a Human-Preference Dataset. NeurIPS 2023 Datasets and Benchmarks. arXiv:2307.04657."><a href="#ref-beavertails">[14]</a></span>
+([`PKU-Alignment/BeaverTails`](https://huggingface.co/datasets/PKU-Alignment/BeaverTails)) — the same
+*kind* of safety taxonomy the guardrails above target. For each category, positives are prompts whose
+responses were annotated with that harm and negatives are a shared pool of benign prompts; every method
+sees the same $N=32$ examples per class and is scored on the held-out test split, averaged over three
+seeds, on both base models. As $K$ grows from 1 to 14 we measure **build time** (learning the whole
+bank), **inference** (per-prompt wall-time to score against all $K$ concepts), **memory** (parameters
+learned), and per-category **detection AUC**. ConceptGate and the probe learn on frozen features; LoRA
+back-propagates a rank-8 adapter and a classification head. The harness
+([`scripts/eval_detection.py --scaling`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_detection.py))
+and the raw results
+([`scripts/eval_scaling_results.json`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_scaling_results.json),
+tabulated in [`docs/evaluation.md`](https://github.com/NISH1001/conceptgate/blob/main/docs/evaluation.md))
+are in the repository.
+
+<figure id="figure-11" style="margin:2rem 0">
+<div id="cg-scale-cost" class="cg-widget" style="margin:0"></div>
+<figcaption><strong>Figure 11 (interactive).</strong> <em>The cost of a K-concept bank.</em> Build
+wall-time, per-prompt inference, or learned parameters (toggle the axis) as the bank grows from one
+concept to fourteen, on a log scale. ConceptGate (teal) and a linear-probe bank (red) reuse one forward
+pass and add each concept in closed form or a single trained head; LoRA (amber, dashed) fine-tunes an
+independent adapter per concept and needs a separate forward for each at inference. Against LoRA the gap
+widens with every concept — 15–40× by K=14. Against the probe the two run close: ConceptGate's forward is
+truncated, so its compute is constant in K and at or below the probe's, while its learned-parameter count
+runs a few times higher because it stores a direction at each of its three taps — both kilobytes, and
+negligible beside the resident model. Measured on an Apple M4 under MPS; toggle the base model and hover any
+point.</figcaption>
+</figure>
+
+<figure id="figure-12" style="margin:2rem 0">
+<div id="cg-scale-auc" class="cg-widget" style="margin:0"></div>
+<figcaption><strong>Figure 12 (interactive).</strong> <em>Detection across the whole taxonomy.</em>
+Held-out AUC for each of the fourteen BeaverTails harm categories, from N=32 examples per class. Each row
+pairs ConceptGate (teal) with the full-model linear probe (red); the amber ✕ marks the three categories
+where a LoRA adapter was trained for comparison. Dashed lines are the per-method means. The training-free
+bank tracks the trained probe category by category — within a few hundredths on Qwen2.5-0.5B and slightly
+ahead on gemma-2-2b — while few-shot LoRA sits well to the left of both. Toggle the base model; hover any
+marker.</figcaption>
+</figure>
+
+**The bank grows cheaply.** Adding a concept to ConceptGate is a closed-form fit — 6 ms on
+Qwen2.5-0.5B, 11 ms on gemma-2-2b — against a LoRA training run of 17 s and 126 s, three to four orders
+of magnitude more. Two memory costs matter separately. The **per-concept artifact** — what must be
+stored to add a concept — is 2.7–6.9 thousand numbers for ConceptGate: a few times the probe's single
+final-layer head, because ConceptGate keeps a direction at each of its three taps, but both are
+kilobyte-scale against LoRA's half-to-1.6 million. The **model itself** — the hundreds of millions of
+weights that must be resident and run for every prompt — is where that is repaid: ConceptGate loads and
+runs only up to its deepest tap, never the layers above it, so a single truncated forward serves the
+*whole* bank at a per-prompt cost that is **constant in $K$ and at or below the probe's full-model
+forward**, whereas $K$ LoRA adapters need $K$ forwards. The few extra kilobytes ConceptGate stores are
+immaterial next to the part of the network it skips. Against fine-tuning the gap compounds with every
+concept: building the full fourteen-category bank takes about 8 seconds on Qwen and 46 on gemma, against
+LoRA's 3.9 and 29 minutes — 30× and 38×.
+
+<div class="cg-mono" markdown="1">
+
+| per concept added | ConceptGate | linear probe | LoRA |
+|---|---|---|---|
+| learn — Qwen-0.5B | 6 ms | 2 ms | 16.7 s |
+| learn — gemma-2-2b | 11 ms | 2 ms | 125.8 s |
+| parameters | 2.7 – 6.9 K | 0.9 – 2.3 K | 0.54 – 1.6 M |
+| training | none (closed form) | head only | back-propagation |
+| inference over all K | one shared forward | one shared forward | one forward *each* |
+| mean AUC / 14 cats (Qwen / gemma) | 0.832 / 0.881 | 0.855 / 0.874 | — |
+
+</div>
+
+**The bank is also accurate.** The low cost does not come at the expense of detection. Across the
+fourteen categories the training-free bank trails the full-model linear probe by 0.023 on Qwen2.5-0.5B
+(mean AUC 0.832 vs 0.855) and slightly exceeds it on gemma-2-2b (0.881 vs 0.874). Few-shot LoRA is both
+the slowest to train and the weakest to read: on the three categories where it was run it reaches mean
+AUC 0.685 on Qwen and 0.814 on gemma, against ConceptGate's 0.889 and 0.913 on those same three — a
+randomly-initialized head simply does not have enough signal in $2N$ examples. Harm content is read best
+deeper than jailbreak framing, at 50–85% depth rather than a quarter, which is why the taps here sit
+lower than in <a class="sref" href="#481-learning-a-single-concept">§4.8.1</a>; where a
+category emerges late (sexual content on Qwen) a mid-depth read gives up some AUC, and where the base
+model forms the abstraction cleanly (most categories on gemma-2-2b) the closed-form direction is as good
+as the trained head.
+
+**What this establishes.** The multi-concept setting is where the training-free design matters. A
+*latent bank* — ConceptGate, or equally a linear-probe bank — amortizes across a taxonomy in a way that
+per-concept or monolithic fine-tuning cannot: constant inference, closed-form extension, kilobytes per
+concept, and no retraining to change the taxonomy. That is a genuine result, and it is honest that a
+detect-only probe bank shares it. Over such a probe bank ConceptGate's cost is at worst a tie — a
+truncated forward is never more than the probe's full one, and its extra per-concept kilobytes are
+negligible — while it adds one thing the probe cannot: a *second* use of the same $K$ directions,
+steering (<a class="sref" href="#46-steering-across-models">§4.6</a>), so the one object that gates
+fourteen harms can also bend generation away from them. A taxonomy-scale bank that is cheap to build and
+extend, competitive with a trained probe on every category, far ahead of few-shot fine-tuning, and
+steerable from the identical learned state is what distinguishes ConceptGate from both a detect-only
+probe bank and a retrained guardrail.
 
 ## 5. Discussion
 
@@ -1093,7 +1227,13 @@ inactive at few-shot sample sizes. What remains as a contribution is threefold. 
 efficiency result: on real jailbreak detection ConceptGate reaches within a hundredth or two of a
 full-model linear probe's AUC — and matches it outright as the tap deepens — from a single early tap,
 which runs roughly a third of the network, loads about half its weights, and requires no gradient
-training (<a class="sref" href="#48-an-efficiency-evaluation-of-conceptgate">§4.8</a>). The second is the composition itself: a single few-shot, calibrated,
+training (<a class="sref" href="#48-an-efficiency-evaluation-of-conceptgate">§4.8</a>); and that this
+efficiency *amortizes* across a bank, adding each category of a fourteen-way safety taxonomy in
+milliseconds and kilobytes and scoring all of them in one shared forward, where per-concept LoRA
+fine-tuning costs seconds-to-minutes and a forward each — so the total cost stays flat in the number of
+concepts while matching a trained probe's per-category accuracy
+(<a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a>).
+The second is the composition itself: a single few-shot, calibrated,
 training-free module that both reads and writes a concept from a frozen model's intermediate layers,
 with a small and well-characterized cost. The third is the empirical account of where each component
 helps and where it does not — the depth-fusion advantage is real on synthetic data but does not transfer
@@ -1119,7 +1259,13 @@ the write half is available at little additional cost.
 The compute–accuracy trade-off is a real engineering result — a jailbreak concept can be gated at
 roughly 8% of Qwen2.5-0.5B — but two qualifications bound it. First, the truncated-forward saving is
 available to any internal probe, including the SVM baseline; it is a property of latent-space methods
-in general rather than an advantage specific to ConceptGate. Second, the memory-minimal load mode is
+in general rather than an advantage specific to ConceptGate. The sharper and better-measured version of
+the cost claim is at the *bank* level
+(<a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a>): a training-free
+concept bank amortizes across a taxonomy — flat inference and closed-form, kilobyte-scale extension where
+fine-tuning pays seconds-to-minutes and a fresh forward per concept — but that advantage, too, is shared
+with a linear-probe bank, so what remains specific to ConceptGate is not the reading cost but that the
+same learned directions also steer. Second, the memory-minimal load mode is
 detection-only, and detection is the commodity half of the system, whereas the distinguishing
 capability, steering, requires the full network. The cost argument therefore applies to the guardrail
 rather than to the steerer. The defensible claim is that a read-and-write adapter can be added to a
@@ -1197,9 +1343,11 @@ point exposes, and they are stated here so that the results are read with approp
 A frozen model already represents many concepts of interest in its residual stream; ConceptGate reads
 them across depth and writes them back. The reading is a commodity — no more accurate than a linear
 classifier — but a cheap one: on a real task it matches a full-model linear probe's accuracy from a
-single early tap, at roughly half the compute and memory and with no gradient training, so what is worth
-retaining from the reading is its efficiency and the compute–accuracy trade-off, more than the depth
-fusion, which helps only on synthetic data. The writing is what justifies operating inside the residual
+single early tap, at roughly half the compute and memory and with no gradient training, and across a
+fourteen-category safety taxonomy it hosts the whole bank training-free — adding each concept in
+milliseconds and kilobytes where per-concept fine-tuning takes minutes, so the efficiency compounds with
+the number of concepts rather than eroding. What is worth retaining from the reading is therefore its
+efficiency and how it amortizes, more than the depth fusion, which helps only on synthetic data. The writing is what justifies operating inside the residual
 stream rather than on the text: a few-shot, training-free steering control that shares its direction with
 the detector and is bounded by the competence of the base model. The interactive figures are included so
 that these claims can be examined directly against the underlying model runs rather than taken on
@@ -1221,6 +1369,8 @@ visible in them.
 10. <a id="ref-obfusc"></a>Bailey, L., et al. (2024). *Obfuscated Activations Bypass LLM Latent-Space Defenses.* arXiv:2412.09565.
 11. <a id="ref-lora"></a>Hu, E. J., Shen, Y., Wallis, P., Allen-Zhu, Z., Li, Y., Wang, S., Wang, L., & Chen, W. (2021). *LoRA: Low-Rank Adaptation of Large Language Models.* arXiv:2106.09685.
 12. <a id="ref-adapters"></a>Houlsby, N., Giurgiu, A., Jastrzebski, S., Morrone, B., de Laroussilhe, Q., Gesmundo, A., Attariyan, M., & Gelly, S. (2019). *Parameter-Efficient Transfer Learning for NLP.* arXiv:1902.00751.
+13. <a id="ref-gliner"></a>Zaratiana, U., Tomeh, N., Holat, P., & Charnois, T. (2023). *GLiNER: Generalist Model for Named Entity Recognition using Bidirectional Transformer.* NAACL 2024. arXiv:2311.08526.
+14. <a id="ref-beavertails"></a>Ji, J., Liu, M., Dai, J., Pan, X., Zhang, C., Bian, C., Sun, R., Wang, Y., & Yang, Y. (2023). *BeaverTails: Towards Improved Safety Alignment of LLM via a Human-Preference Dataset.* NeurIPS 2023 Datasets and Benchmarks. arXiv:2307.04657.
 </div>
 
 ## Citation
@@ -1685,8 +1835,126 @@ function cgEffSummary(){
   cgWireTips(cgEl("cgsum-svg"));
 }
 
+// ---- Multi-concept scaling over BeaverTails' 14 harm categories (cost-vs-K + per-category AUC) ----
+// Measured constants from scripts/eval_detection.py --scaling (Apple M4 / MPS, N=32/class, 3 seeds).
+// cats rows: [label, ConceptGate AUC, linear-probe AUC, LoRA AUC or null]. fit/fwd/train in ms; params counts.
+var CG_AMB="#d98a2b";
+var CGSCALE={
+ "Qwen2.5-0.5B":{nfit:32,safe:256,taps:"12/17/20",
+   cg_pc:2688,pr_pc:897,lora_pc:542464,
+   fwd_cg:11.08,fwd_pr:12.45,fit_cg:6.14,fit_pr:1.63,train_lora:16721.8,read_cg:1.23,head_pr:0.59,
+   meanCG:0.832,meanPR:0.855,
+   cats:[["animal abuse",0.918,0.941,0.817],["child abuse",0.919,0.932,0.617],
+     ["controversial/politics",0.829,0.846,0.620],["discrimination",0.779,0.808,null],
+     ["drugs/weapons",0.861,0.931,null],["financial crime",0.827,0.855,null],
+     ["hate speech",0.819,0.808,null],["misinformation",0.697,0.706,null],
+     ["non-violent unethical",0.740,0.725,null],["privacy",0.851,0.865,null],
+     ["self-harm",0.910,0.919,null],["sexual content",0.832,0.908,null],
+     ["terrorism",0.843,0.893,null],["violence",0.825,0.831,null]]},
+ "gemma-2-2b":{nfit:32,safe:256,taps:"13/18/22",
+   cg_pc:6912,pr_pc:2305,lora_pc:1602048,
+   fwd_cg:65.08,fwd_pr:66.95,fit_cg:11.23,fit_pr:2.49,train_lora:125768.6,read_cg:3.79,head_pr:1.50,
+   meanCG:0.881,meanPR:0.874,
+   cats:[["animal abuse",0.940,0.942,0.837],["child abuse",0.957,0.955,0.879],
+     ["controversial/politics",0.843,0.849,0.726],["discrimination",0.855,0.850,null],
+     ["drugs/weapons",0.945,0.954,null],["financial crime",0.901,0.883,null],
+     ["hate speech",0.851,0.858,null],["misinformation",0.690,0.637,null],
+     ["non-violent unethical",0.761,0.757,null],["privacy",0.919,0.923,null],
+     ["self-harm",0.949,0.935,null],["sexual content",0.949,0.951,null],
+     ["terrorism",0.938,0.921,null],["violence",0.836,0.816,null]]}
+};
+var CGSK=[1,2,4,6,8,10,12,14];
+function _cgScaleCurves(D,metric){
+  function v(k,who){
+    if(metric=='build')return who=='lora'?k*D.train_lora
+      :(D.safe+k*D.nfit)*(who=='cg'?D.fwd_cg:D.fwd_pr)+k*(who=='cg'?D.fit_cg:D.fit_pr);
+    if(metric=='infer')return who=='lora'?k*D.fwd_pr
+      :(who=='cg'?D.fwd_cg+k*D.read_cg/1000:D.fwd_pr+k*D.head_pr/1000);
+    return k*(who=='cg'?D.cg_pc:who=='pr'?D.pr_pc:D.lora_pc);
+  }
+  return {cg:CGSK.map(function(k){return {k:k,v:v(k,'cg')};}),
+          pr:CGSK.map(function(k){return {k:k,v:v(k,'pr')};}),
+          lora:CGSK.map(function(k){return {k:k,v:v(k,'lora')};})};
+}
+function _cgScaleFmt(metric,v){
+  if(metric=='memory')return v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':v.toFixed(0);
+  return v>=60000?(v/60000).toFixed(1)+' min':v>=1000?(v/1000).toFixed(1)+' s':v.toFixed(v<10?1:0)+' ms';
+}
+// Figure: cost of a K-concept bank — build / inference / memory vs number of concepts (log-y)
+function cgScaleCost(){
+  var host=cgEl("cg-scale-cost"); if(!host) return; var models=Object.keys(CGSCALE);
+  host.innerHTML='<p class="cg-eyebrow">figure · interactive · Apple M4 / MPS</p><h4>The cost of a K-concept bank</h4>'
+   +'<div class="cg-ctrls"><div class="cg-ctrl"><label>base model</label><select id="cgsc-model">'
+   +models.map(function(m){return '<option value="'+m+'">'+m+'</option>';}).join('')+'</select></div>'
+   +'<div class="cg-ctrl"><label>cost axis</label><select id="cgsc-metric">'
+   +'<option value="build">build time (learn all K)</option><option value="infer">inference (per prompt, all K)</option>'
+   +'<option value="memory">learned parameters</option></select></div></div>'
+   +'<svg id="cgsc-svg" viewBox="0 0 480 250" style="width:100%;max-width:480px"></svg><div class="cg-readout" id="cgsc-out"></div>';
+  function draw(){
+    var D=CGSCALE[cgEl("cgsc-model").value], metric=cgEl("cgsc-metric").value, C=_cgScaleCurves(D,metric);
+    var W=480,H=250,L=60,R=14,T=16,B=42,pw=W-L-R,ph=H-T-B;
+    var all=C.cg.concat(C.pr,C.lora).map(function(p){return p.v;});
+    var lo=Math.log10(Math.min.apply(null,all)*0.8), hi=Math.log10(Math.max.apply(null,all)*1.3);
+    function X(k){return L+(k-1)/13*pw;} function Y(v){return T+(1-(Math.log10(v)-lo)/(hi-lo))*ph;}
+    var s='<line x1="'+L+'" y1="'+T+'" x2="'+L+'" y2="'+(H-B)+'" stroke="'+CG_GRID+'"/><line x1="'+L+'" y1="'+(H-B)+'" x2="'+(W-R)+'" y2="'+(H-B)+'" stroke="'+CG_GRID+'"/>';
+    for(var e=Math.floor(lo);e<=Math.ceil(hi);e++){var yv=Math.pow(10,e); if(Math.log10(yv)<lo||Math.log10(yv)>hi)continue; var yy=Y(yv);
+      s+='<line x1="'+L+'" y1="'+yy+'" x2="'+(W-R)+'" y2="'+yy+'" stroke="'+CG_GRID+'" opacity="0.3"/><text x="'+(L-6)+'" y="'+(yy+3)+'" font-size="9" text-anchor="end" fill="currentColor" opacity="0.82">'+_cgScaleFmt(metric,yv)+'</text>';}
+    [1,4,8,14].forEach(function(k){s+='<text x="'+X(k)+'" y="'+(H-B+14)+'" font-size="9" text-anchor="middle" fill="currentColor" opacity="0.82">'+k+'</text>';});
+    s+='<text x="'+(L+pw/2)+'" y="'+(H-3)+'" font-size="10" text-anchor="middle" fill="currentColor" opacity="0.92" font-weight="700">K — concepts in the bank</text>';
+    var ylab=metric=='memory'?'learned parameters (log)':(metric=='infer'?'ms / prompt (log)':'wall-time (log)');
+    s+='<text x="14" y="'+(T+ph/2)+'" font-size="10" text-anchor="middle" fill="currentColor" opacity="0.92" font-weight="700" transform="rotate(-90 14 '+(T+ph/2)+')">'+ylab+'</text>';
+    var series=[{n:"LoRA — fine-tune per concept",c:CG_AMB,dash:1,v:C.lora},
+                {n:"linear-probe bank",c:CG_RED,dash:0,v:C.pr},{n:"ConceptGate bank",c:CG_BLUE,dash:0,v:C.cg}];
+    series.forEach(function(se){s+='<polyline points="'+se.v.map(function(p){return X(p.k)+','+Y(p.v);}).join(' ')+'" fill="none" stroke="'+se.c+'" stroke-width="2.2"'+(se.dash?' stroke-dasharray="6 3"':'')+'/>';
+      se.v.forEach(function(p){s+='<circle cx="'+X(p.k)+'" cy="'+Y(p.v)+'" r="2.6" fill="'+se.c+'" data-tip="'+se.n+' · K='+p.k+' · '+_cgScaleFmt(metric,p.v)+'"/>';});});
+    cgEl("cgsc-svg").innerHTML=s; cgWireTips(cgEl("cgsc-svg"));
+    var f=function(v){return _cgScaleFmt(metric,v);};
+    var cg14=C.cg[7].v, pr14=C.pr[7].v, lo14=C.lora[7].v, r=lo14/cg14;
+    var note={build:'ConceptGate and the probe reuse one forward and add a concept cheaply, so build stays flat in K; LoRA retrains per concept.',
+      infer:'One truncated forward scores the whole bank — ConceptGate is constant in K and at or below the probe; LoRA needs a forward per adapter.',
+      memory:'Per-concept artifact only: ConceptGate keeps a direction at each of its 3 taps (a few× the probe’s head), both kilobytes. The resident model dominates memory, and ConceptGate loads only up to its taps.'}[metric];
+    cgEl("cgsc-out").innerHTML='<span style="color:'+CG_BLUE+';font-weight:600">—— ConceptGate</span> &nbsp; '
+      +'<span style="color:'+CG_RED+';font-weight:600">—— linear probe</span> &nbsp; '
+      +'<span style="color:'+CG_AMB+';font-weight:600">– – LoRA</span><br>'
+      +'at <b>K=14</b>: ConceptGate <b style="color:'+CG_BLUE+'">'+f(cg14)+'</b> · probe '+f(pr14)
+      +' · LoRA <b style="color:'+CG_AMB+'">'+f(lo14)+'</b> — <b>'+(r>=10?Math.round(r):r.toFixed(1))+'×</b> the ConceptGate cost.'
+      +'<br><span style="opacity:.82">'+note+'</span>';
+  }
+  cgEl("cgsc-model").addEventListener("change",draw); cgEl("cgsc-metric").addEventListener("change",draw); draw();
+}
+// Figure: per-category detection across the taxonomy — ConceptGate vs probe (dumbbell), LoRA where measured
+function cgScaleAuc(){
+  var host=cgEl("cg-scale-auc"); if(!host) return; var models=Object.keys(CGSCALE);
+  host.innerHTML='<p class="cg-eyebrow">figure · interactive · N=32 / class</p><h4>Detection across the whole taxonomy</h4>'
+   +'<div class="cg-ctrls"><div class="cg-ctrl"><label>base model</label><select id="cgsa-model">'
+   +models.map(function(m){return '<option value="'+m+'">'+m+'</option>';}).join('')+'</select></div></div>'
+   +'<svg id="cgsa-svg" viewBox="0 0 480 402" style="width:100%;max-width:480px"></svg><div class="cg-readout" id="cgsa-out"></div>';
+  function draw(){
+    var D=CGSCALE[cgEl("cgsa-model").value], rows=D.cats;
+    var W=480,H=402,L=120,R=16,T=30,B=42,pw=W-L-R,ph=H-T-B,n=rows.length,rh=ph/n,xlo=0.55,xhi=1.0;
+    function X(a){return L+(Math.max(xlo,Math.min(xhi,a))-xlo)/(xhi-xlo)*pw;} function YR(i){return T+i*rh+rh/2;}
+    var s='<line x1="'+L+'" y1="'+T+'" x2="'+L+'" y2="'+(H-B)+'" stroke="'+CG_GRID+'"/><line x1="'+L+'" y1="'+(H-B)+'" x2="'+(W-R)+'" y2="'+(H-B)+'" stroke="'+CG_GRID+'"/>';
+    [0.6,0.7,0.8,0.9,1.0].forEach(function(a){var xx=X(a);s+='<line x1="'+xx+'" y1="'+T+'" x2="'+xx+'" y2="'+(H-B)+'" stroke="'+CG_GRID+'" opacity="0.3"/><text x="'+xx+'" y="'+(H-B+14)+'" font-size="9" text-anchor="middle" fill="currentColor" opacity="0.82">'+a.toFixed(2)+'</text>';});
+    s+='<text x="'+(L+pw/2)+'" y="'+(H-4)+'" font-size="10" text-anchor="middle" fill="currentColor" opacity="0.92" font-weight="700">held-out AUC</text>';
+    s+='<line x1="'+X(D.meanCG)+'" y1="'+T+'" x2="'+X(D.meanCG)+'" y2="'+(H-B)+'" stroke="'+CG_BLUE+'" stroke-dasharray="4 3" opacity="0.75"/>';
+    s+='<line x1="'+X(D.meanPR)+'" y1="'+T+'" x2="'+X(D.meanPR)+'" y2="'+(H-B)+'" stroke="'+CG_RED+'" stroke-dasharray="4 3" opacity="0.55"/>';
+    rows.forEach(function(r,i){var y=YR(i),cg=r[1],pr=r[2],lo=r[3];
+      s+='<text x="'+(L-8)+'" y="'+(y+3)+'" font-size="9" text-anchor="end" fill="currentColor" opacity="0.9">'+r[0]+'</text>';
+      s+='<line x1="'+X(Math.min(cg,pr))+'" y1="'+y+'" x2="'+X(Math.max(cg,pr))+'" y2="'+y+'" stroke="'+CG_GRID+'" stroke-width="2"/>';
+      if(lo!=null)s+='<path d="M'+(X(lo)-3.5)+' '+(y-3.5)+'l7 7M'+(X(lo)+3.5)+' '+(y-3.5)+'l-7 7" stroke="'+CG_AMB+'" stroke-width="1.7" data-tip="'+r[0]+' · LoRA few-shot AUC '+lo.toFixed(3)+'"/>';
+      s+='<circle cx="'+X(pr)+'" cy="'+y+'" r="4" fill="'+CG_RED+'" opacity="0.85" data-tip="'+r[0]+' · linear probe AUC '+pr.toFixed(3)+'"/>';
+      s+='<circle cx="'+X(cg)+'" cy="'+y+'" r="4" fill="'+CG_BLUE+'" data-tip="'+r[0]+' · ConceptGate AUC '+cg.toFixed(3)+'"/>';});
+    cgEl("cgsa-svg").innerHTML=s; cgWireTips(cgEl("cgsa-svg"));
+    cgEl("cgsa-out").innerHTML='<span style="color:'+CG_BLUE+';font-weight:600">&#9679; ConceptGate</span> &nbsp; '
+      +'<span style="color:'+CG_RED+';font-weight:600">&#9679; linear probe</span> &nbsp; '
+      +'<span style="color:'+CG_AMB+';font-weight:600">&#10005; LoRA (few-shot, 3 cats)</span> &nbsp;·&nbsp; dashed = mean.<br>'
+      +'mean AUC over 14 categories: ConceptGate <b style="color:'+CG_BLUE+'">'+D.meanCG.toFixed(3)+'</b> vs probe '+D.meanPR.toFixed(3)+'; few-shot LoRA trails both.';
+  }
+  cgEl("cgsa-model").addEventListener("change",draw); draw();
+}
+
 (function(){
-  function boot(){ [cgTrace,cgDepthFusion,cgDetect,cgSteer,cgCost,cgKillshot,cgEffN,cgEffDepth,cgEffSummary].forEach(function(f){try{f();}catch(e){}}); }
+  function boot(){ [cgTrace,cgDepthFusion,cgDetect,cgSteer,cgCost,cgKillshot,cgEffN,cgEffDepth,cgEffSummary,cgScaleCost,cgScaleAuc].forEach(function(f){try{f();}catch(e){}}); }
   if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",boot);}else{boot();}
 })();
 </script>
@@ -1697,12 +1965,12 @@ function cgEffSummary(){
   function linkify(){
     var content=document.querySelector('.content'); if(!content) return;
     var byNum={};
-    Array.prototype.forEach.call(content.querySelectorAll('h2[id],h3[id]'),function(h){
-      var m=h.textContent.trim().match(/^(\d+(?:\.\d+)?)[.\s]/); if(m) byNum[m[1]]=h.id;
+    Array.prototype.forEach.call(content.querySelectorAll('h2[id],h3[id],h4[id]'),function(h){
+      var m=h.textContent.trim().match(/^(\d+(?:\.\d+){0,2})[.\s]/); if(m) byNum[m[1]]=h.id;
       var a=document.createElement('a'); a.className='hanchor'; a.href='#'+h.id; a.textContent='#';
       a.title='Permalink to this section'; h.appendChild(a);
     });
-    var SKIP=/^(PRE|CODE|A|SCRIPT|STYLE|H1|H2|H3|H4|TEXTAREA|BUTTON|SELECT|SVG)$/, REF=/§(\d+(?:\.\d+)?)/g;
+    var SKIP=/^(PRE|CODE|A|SCRIPT|STYLE|H1|H2|H3|H4|TEXTAREA|BUTTON|SELECT|SVG)$/, REF=/§(\d+(?:\.\d+){0,2})/g;
     (function walk(node){
       var kids=node.childNodes;
       for(var i=0;i<kids.length;i++){var n=kids[i];
