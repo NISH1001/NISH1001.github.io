@@ -317,7 +317,9 @@ This paper contributes, in order of how much each distinguishes ConceptGate from
    milliseconds and kilobytes with no gradient run, so hosting a fourteen-way safety taxonomy costs a
    fraction of per-concept LoRA fine-tuning and needs no retraining to extend
    (<a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a>). This amortization is shared with a
-   linear-probe bank; what ConceptGate adds is that each entry also steers.
+   linear-probe bank; what ConceptGate adds is that each entry also supplies a steering direction at no
+   extra fitting cost — though for these harm categories the write is a measured *null* on behaviour
+   (<a class="sref" href="#the-same-experiment-on-the-concept-bank-a-negative-result">§4.10</a>).
 4. **A calibrated, few-shot, dual-mode adapter.** One object learns a concept from ~10 examples, detects
    it with a calibrated fire/abstain/pass gate, and steers along a closely related direction, with a small,
    well-characterized parameter budget (<a class="sref" href="#54-what-it-actually-costs">§5.4</a>) and no
@@ -334,8 +336,11 @@ This paper contributes, in order of how much each distinguishes ConceptGate from
    collapses to a single Gaussian at few-shot sizes
    (<a class="sref" href="#42-mixture-densities-a-constructed-hard-case-and-a-few-shot-collapse">§4.2</a>);
    a predicted paraphrase-robustness effect does not appear
-   (<a class="sref" href="#47-a-paraphrase-robustness-null">§4.7</a>); and generalization to an unseen harm
-   category is only partial (<a class="sref" href="#49-out-of-distribution-generalization">§4.9</a>).
+   (<a class="sref" href="#47-a-paraphrase-robustness-null">§4.7</a>); generalization to an unseen harm
+   category is only partial (<a class="sref" href="#49-out-of-distribution-generalization">§4.9</a>); and
+   steering with the bank's own harm-category directions is a null on behaviour — the write direction
+   comes free, but it does not make the model decline
+   (<a class="sref" href="#the-same-experiment-on-the-concept-bank-a-negative-result">§4.10</a>).
 6. **Reproducible interactive figures.** The figures below reproduce the underlying model runs, so the
    mechanism can be examined directly rather than only described.
 
@@ -1639,8 +1644,53 @@ would be a catastrophic false-positive rate in deployment. The gate is a sharp i
 distribution its ten examples came from, and
 <a class="sref" href="#49-out-of-distribution-generalization">§4.9</a>'s partial-generalization finding
 applies here with more force, because a false fire now rewrites the output rather than merely raising a
-flag. The harness is
-[`scripts/eval_gate.py`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_gate.py).
+flag.
+
+#### The same experiment on the concept bank: a negative result
+
+The bank of <a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a> has only ever been measured
+as a *detector*, while the contribution claim is that each of its entries also steers. That deserves a
+direct test, so we ran the identical three arms on five BeaverTails harm categories, fitting each
+direction from 32 harmful prompts of the category against the shared benign pool and evaluating on twelve
+held-out prompts of that category. On the behavioural axis the result is a **null**.
+
+<div class="cg-mono" markdown="1">
+
+| BeaverTails category | gate fires: harmful / benign | refusal: none → always → gate | benign untouched: always / gate |
+|---|---|---|---|
+| violence, incitement | 50% / 8% | 8.3 → 0.0 → 8.3 | 0% / 92% |
+| drug abuse, weapons | 58% / 25% | 0.0 → 0.0 → 0.0 | 0% / 75% |
+| financial & property crime | 67% / 25% | 25.0 → 0.0 → 16.7 | 0% / 75% |
+| privacy violation | 92% / 33% | 8.3 → 25.0 → 25.0 | 0% / 67% |
+| hate speech | 58% / 42% | 41.7 → 33.3 → 33.3 | 0% / 58% |
+| **mean** | **65% / 27%** | **16.7 → 11.7 → 16.7** | **0% / 73%** |
+
+</div>
+
+Two of the three findings replicate and one fails. Gating still confines the intervention — it leaves
+73% of benign generation byte-identical where blanket steering leaves none — and blanket steering is
+again the worse of the two write policies, here actively *reducing* mean refusal from 16.7% to 11.7%.
+But gating no longer *improves* anything: refusal is unchanged at 16.7%. Steering away from a harm
+category does not make this model decline the request.
+
+We think the contrast with the jailbreak concept is the substantive finding rather than a defect of the
+setup. "Jailbreak framing" is a concept about the *intent and register of the request*, and it sits close
+to the behaviour the model was safety-tuned to produce, so pushing along it moves the model toward
+refusing. "Violence" or "privacy violation" is a concept about the *topic of the content*; steering away
+from it changes what the continuation is about, not whether the model complies. These directions also
+gate far less cleanly (65% against 27% firing, versus 54% against 10% for the jailbreak concept), which
+is the same partial-generalization limit
+<a class="sref" href="#49-out-of-distribution-generalization">§4.9</a> measures, and a gate this leaky
+cannot target a write precisely even when the write works.
+
+The honest reading of "each bank entry also steers" is therefore narrower than the phrase suggests: each
+entry supplies a usable write *direction* at no extra fitting cost, and that is a real property of the
+construction, but a demonstrated behavioural control exists in this paper only for the topical concepts
+of <a class="sref" href="#46-steering-across-models">§4.6</a> and the jailbreak framing above. Two
+caveats bound the null rather than excuse it: refusal is scored by an explicit-decline lexicon, so a
+reduction in harmful *content* that stops short of refusing would not register, and we tested one
+magnitude on one 0.5B model. Both would be worth closing before treating the null as general. The harness
+is [`scripts/eval_gate.py`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_gate.py).
 
 ## 5. Discussion
 
@@ -1650,14 +1700,19 @@ The mechanisms are all drawn from prior work; the detector is a commodity; the s
 saving is the truncated forward, which a depth-matched probe shares
 (<a class="sref" href="#481-learning-a-single-concept">§4.8.1</a>); depth fusion does not transfer beyond
 synthetic data; and the mixture is inactive at few-shot sizes. What remains is narrow but real. The most
-distinctive part is **steering**: a direction fit from the same few-shot data as the detector is written back to
-steer generation, a measured, monotonic dose-response bounded by the base model
-(<a class="sref" href="#46-steering-across-models">§4.6</a>) — the one operation a classifier or probe
-cannot perform. The second is **amortization**: as a training-free bank the adapter extends to a
-fourteen-way taxonomy in milliseconds and kilobytes and scores all of it in one forward, where per-concept
-LoRA fine-tuning costs a training run each; this beats *fine-tuning*, though a linear-probe bank shares it
-— what ConceptGate adds is that each entry also steers
-(<a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a>). The third is the composition and its
+distinctive part is the **conditional write**: a direction fit from the same few-shot data as the detector
+is written back to steer generation — a measured, monotonic dose-response bounded by the base model
+(<a class="sref" href="#46-steering-across-models">§4.6</a>) — and, more sharply, written back *only when
+the gate fires*, which beats writing on every prompt both in effect and in collateral
+(<a class="sref" href="#410-gate-conditioned-steering-what-the-gate-is-for">§4.10</a>). The write rule
+alone is activation addition and needs none of the read machinery; the conditioning is the part no
+classifier or probe can supply. The second is **amortization**: as a training-free bank the adapter
+extends to a fourteen-way taxonomy in milliseconds and kilobytes and scores all of it in one forward,
+where per-concept LoRA fine-tuning costs a training run each; this beats *fine-tuning*, though a
+linear-probe bank shares it — what ConceptGate adds is a steering direction per entry at no extra fitting
+cost, whose behavioural effect on those harm categories we measure and find null
+(<a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a>,
+<a class="sref" href="#the-same-experiment-on-the-concept-bank-a-negative-result">§4.10</a>). The third is the composition and its
 honest account: a single few-shot, calibrated, training-free module that both reads and writes a concept
 at a small, well-characterized cost, each part measured against a fair baseline including where it fails —
 detection is a commodity a probe matches, and generalization to an unseen category is only partial
