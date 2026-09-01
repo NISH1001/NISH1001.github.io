@@ -123,8 +123,9 @@ separably at intermediate layers. We describe
 ConceptGate, a lightweight, few-shot (approximately ten examples per class), training-free adapter
 that taps the residual stream at several layers and treats a concept's projection across depth as a
 single signal: a per-layer spectrogram combined by a learned depth filter and gated by a calibrated
-likelihood-ratio test. The difference-of-means direction used for detection is also used, in the
-model's raw activation space, to steer generation toward or away from the concept. We present the
+likelihood-ratio test. A direction fit from the same examples is used, in the model's raw activation
+space, to steer generation toward or away from the concept — related to the detection direction but not
+identical to it (their per-tap cosine is ~0.5–0.6; §3.10). We present the
 method with its derivation and evaluate each component on GPT-2, Qwen2.5-0.5B, and gemma-2-2b. The
 results are mixed, and we report the negatives as prominently as the positives. (i) As a detector
 ConceptGate is a commodity: it performs comparably to a linear support-vector machine on the same
@@ -137,7 +138,7 @@ single-best-layer baseline under a matched-filter analysis and on synthetic data
 separates, but model selection reduces the mixture to one component per class at ten-shot sizes.
 (iv) Matched contrastive negatives reduce rather than improve accuracy, and generalization to unseen harm
 categories is only partial. (v) The one capability that distinguishes an internal adapter from a text
-classifier is **steering** — writing the same few-shot direction back into the residual stream — which we
+classifier is **steering** — writing a direction fit from the same few-shot examples back into the residual stream — which we
 measure as a monotonic dose-response bounded by the competence of the base model. Every mechanism used
 here is drawn from prior work; the contribution is the specific few-shot, dual-mode read-and-write
 composition, the training-free amortization of a concept bank against fine-tuning, and an empirical
@@ -170,7 +171,7 @@ examines what can be built from that observation under deliberately restrictive 
 fine-tuning of the host model, only a handful of labelled examples per concept, and a parameter budget
 small enough that a separate module can be stored for each concept. The result is ConceptGate, an
 adapter that attaches to a frozen model, detects a chosen concept from its intermediate activations,
-and, using the same learned direction, steers the model's generation with respect to that concept. The
+and, using a closely related direction fit from the same data, steers the model's generation with respect to that concept. The
 remainder of this section states the problem precisely (<a class="sref" href="#11-the-problem">§1.1</a>),
 explains why the residual stream is the appropriate place to operate
 (<a class="sref" href="#12-why-the-residual-stream">§1.2</a>), identifies the two design choices that
@@ -339,8 +340,8 @@ Two of the threads are about **reading** the stream. Linear probing and represen
 (<a class="sref" href="#21-probes-and-representation-engineering">§2.1</a>) give us the per-layer detector and the diff-of-means direction; density-based
 out-of-distribution scoring (<a class="sref" href="#23-density-based-detection-and-out-of-distribution-scoring">§2.3</a>) gives us the calibrated, class-conditional
 likelihood-ratio gate. Two are about **acting** on it: activation steering and circuit breakers
-(<a class="sref" href="#22-activation-steering-and-circuit-breakers">§2.2</a>) give us the write side — the same direction, added back — while the external-guard
-literature (<a class="sref" href="#24-external-guards">§2.4</a>) is the incumbent we are implicitly compared against, and the one whose
+(<a class="sref" href="#22-activation-steering-and-circuit-breakers">§2.2</a>) give us the write side — the same direction, added back — while the external-classifier
+literature (<a class="sref" href="#24-external-classifiers">§2.4</a>) is the incumbent we are implicitly compared against, and the one whose
 central limitation (it can only read text, never write activations) is the negative space that defines
 what ConceptGate is *for*. The fifth thread is about **cost**: early-exit and conditional computation
 (<a class="sref" href="#25-early-exit-and-conditional-compute">§2.5</a>) is where our truncated forward and the compute–accuracy frontier come from.
@@ -383,9 +384,11 @@ and, in the form we adopt most directly, Contrastive Activation Addition (CAA), 
 steering vector from the mean difference of paired positive/negative prompts and adds it during
 generation to shift behaviour along a named axis
 <span class="cite" data-ref="Panickssery, N., et al. (2023). Steering Llama 2 via Contrastive Activation Addition. arXiv:2312.06681."><a href="#ref-caa">[5]</a></span>.
-Our steering rule is literally theirs — add $\pm\alpha\,w^{\text{raw}}$ at the tapped layers — and the
-diff-of-means construction means the *detection* direction and the *steering* direction are the same
-geometric object read twice. The guardrail-flavoured cousin is **Circuit Breakers**, which makes a
+Our steering rule is literally theirs — add $\pm\alpha\,w^{\text{raw}}$ at the tapped layers.
+ConceptGate's steering direction is the diff-of-means of the same few-shot examples the detector is fit
+from — a *related* direction (per-tap cosine ~0.5–0.6,
+<a class="sref" href="#310-steering-the-write-side">§3.10</a>), not the detector's standardized, and in
+practice logistic, direction itself. The guardrail-flavoured cousin is **Circuit Breakers**, which makes a
 model reroute its own harmful representations so that continuing down a harmful path collapses into
 refusal
 <span class="cite" data-ref="Zou, A., et al. (2024). Improving Alignment and Robustness with Circuit Breakers. arXiv:2406.04313."><a href="#ref-cb">[6]</a></span>.
@@ -417,23 +420,25 @@ part of the model rather than being averaged away. As the experiments will show
 generality is real but largely dormant at ten-shot sample sizes, a property of the model-selection
 criterion rather than an observation made after the fact.
 
-### 2.4 External guards
+### 2.4 External classifiers
 
-The incumbent against which any practical guardrail is judged is the **external text classifier** —
-Llama Guard and the family of input/output safety models around it
-<span class="cite" data-ref="Inan, H., et al. (2023). Llama Guard: LLM-based Input-Output Safeguard for Human-AI Conversations. arXiv:2312.06674."><a href="#ref-llamaguard">[8]</a></span>,
+ConceptGate reads and writes *arbitrary* concepts from a frozen model's activations; safety is only the
+domain where a public labelled comparison is readily available, so it is where the contrast with an
+external classifier is clearest. Where the concept is a safety policy, the incumbent is the **external
+text classifier** — Llama Guard and the family of input/output safety models around it
+<span class="cite" data-ref="Inan, H., et al. (2023). Llama Guard: LLM-based Input-Output Safeguard for Human-AI Conversations. arXiv:2312.06674."><a href="#ref-llamaguard">[8]</a></span> —
 which read the prompt or the completion *as text* and classify it against a policy. These are strong,
-they generalize well because they are trained on large labelled corpora, and they are the right answer
-when detection quality is the only thing that matters. But they carry three structural costs that
-define the space ConceptGate occupies: they are a **second model** to load, serve, and pay for
-alongside the one you are already running; they operate purely on text, so they see nothing of the
-host model's internal state and cannot exploit the fact that it has *already computed* the concept;
-and, most importantly, they can only **read** — a classifier can flag a jailbreak but it cannot reach
-into the generation and bend it. ConceptGate makes the opposite trade at every point: it rides the
-model already in memory, adds kilobytes rather than a network, reads the concept straight from the
-activations the host produced for free, and can write. It will not out-detect a well-trained guard
+generalize well because they are trained on large labelled corpora, and are the right answer when
+detection quality is the only thing that matters. But three structural differences define the space
+ConceptGate occupies, and they hold for any concept, not just safety. An external classifier is a
+**second model** to load, serve, and pay for alongside the one already running; it operates purely on
+text, so it sees nothing of the host model's internal state and cannot exploit the fact that the host has
+*already computed* the concept; and it can only **read** — it can flag a concept but cannot reach into the
+generation and bend it. ConceptGate makes the opposite trade at every point: it rides the model already in
+memory, adds kilobytes rather than a network, reads the concept straight from the activations the host
+produced for free, and can write. It will not out-detect a well-trained classifier
 (<a class="sref" href="#43-detection-on-real-prompts-a-commodity">§4.3</a>); its reason to exist is the
-capability the guard structurally lacks.
+write capability the classifier structurally lacks.
 
 ### 2.5 Early exit and conditional compute
 
@@ -759,7 +764,13 @@ $$w^{\text{raw}}_\ell=\frac{\bar a^{+}_\ell-\bar a^{-}_\ell}{\lVert \bar a^{+}_\
 This is deliberately *decoupled* from the standardized detection direction of <a class="sref" href="#33-the-diff-of-means-direction">§3.3</a>:
 the detector wants the whitened direction that separates classes, whereas the steerer wants the
 direction that actually exists in the model's native activation space, since that is what the forward
-hook can add. During generation, at each tapped layer we add
+hook can add. The two are therefore related but **not identical** — fit from the same ~10 examples and
+pointing broadly the same way, but decoupled by the standardization (and, when detection uses the logistic
+mode of <a class="sref" href="#43-detection-on-real-prompts-a-commodity">§4.3</a>, by its
+covariance-awareness). Their per-tap cosine is ~0.5 on Qwen2.5-0.5B and ~0.6 on gemma-2-2b: well above
+orthogonal, but not "one direction read twice." What the read and write sides genuinely share is the
+fitting data and the class-mean construction, not the exact geometry. During generation, at each tapped
+layer we add
 
 $$a_\ell\;\leftarrow\;a_\ell+\alpha\,w^{\text{raw}}_{\ell},$$
 
@@ -1286,7 +1297,7 @@ are in the repository.
     <text x="560" y="200" font-size="10.5" fill="#8cc5bf">steer &#160; + &#945;&#183;w<tspan baseline-shift="super" font-size="7">K</tspan></text>
   </g>
   <text x="524" y="178" text-anchor="middle" font-size="16" fill="#bbb">&#8943;</text>
-  <text x="360" y="234" text-anchor="middle" font-size="11" fill="currentColor">each concept = one closed-form direction <tspan font-style="italic">w</tspan><tspan baseline-shift="super" font-size="8">k</tspan> (~ms, ~kB); the same direction reads (detect) and writes (steer)</text>
+  <text x="360" y="234" text-anchor="middle" font-size="11" fill="currentColor">each concept = one closed-form direction <tspan font-style="italic">w</tspan><tspan baseline-shift="super" font-size="8">k</tspan> (~ms, ~kB); reading and steering are fit from the same examples (cosine ~0.5–0.6)</text>
 </svg>
 <figcaption><strong>Figure 12.</strong> <em>The concept bank and the read/write duality.</em> A single
 truncated forward — the frozen model run only up to the deepest tap, never the layers above — produces one
@@ -1373,7 +1384,7 @@ negligible — while it adds one thing the probe cannot: a *second* use of the s
 steering (<a class="sref" href="#46-steering-across-models">§4.6</a>), so the one object that gates
 fourteen harms can also bend generation away from them. A taxonomy-scale bank that is cheap to build and
 extend, competitive with a trained probe on every category, far ahead of few-shot fine-tuning, and
-steerable from the identical learned state is what distinguishes ConceptGate from both a detect-only
+steerable from the same few-shot data is what distinguishes ConceptGate from both a detect-only
 probe bank and a retrained guardrail.
 
 ### 4.9 Out-of-distribution generalization
@@ -1443,7 +1454,7 @@ The mechanisms are all drawn from prior work; the detector is a commodity; the s
 saving is the truncated forward, which a depth-matched probe shares
 (<a class="sref" href="#481-learning-a-single-concept">§4.8.1</a>); depth fusion does not transfer beyond
 synthetic data; and the mixture is inactive at few-shot sizes. What remains is narrow but real. The most
-distinctive part is **steering**: the same few-shot direction that detects a concept is written back to
+distinctive part is **steering**: a direction fit from the same few-shot data as the detector is written back to
 steer generation, a measured, monotonic dose-response bounded by the base model
 (<a class="sref" href="#46-steering-across-models">§4.6</a>) — the one operation a classifier or probe
 cannot perform. The second is **amortization**: as a training-free bank the adapter extends to a
@@ -1463,7 +1474,7 @@ adapter whose write side a classifier cannot match, and reports each part agains
 The most consequential finding is structural rather than numerical. A text classifier can match or
 exceed ConceptGate at detection while being simpler to deploy, so if detection were the objective there
 would be little reason to prefer an internal method. The reason to operate inside the residual stream
-is the operation a classifier cannot perform: using the same learned direction to write — to steer
+is the operation a classifier cannot perform: using a closely related direction, fit from the same data, to write — to steer
 generation toward or away from the concept, conditionally and interpretably, from ten examples. Steering
 is a measured, monotonic dose-response with an effective window in which content shifts while fluency
 holds (<a class="sref" href="#46-steering-across-models">§4.6</a>), bounded like everything else by the
@@ -1483,7 +1494,7 @@ the cost claim is at the *bank* level
 concept bank amortizes across a taxonomy — flat inference and closed-form, kilobyte-scale extension where
 fine-tuning pays seconds-to-minutes and a fresh forward per concept — but that advantage, too, is shared
 with a linear-probe bank, so what remains specific to ConceptGate is not the reading cost but that the
-same learned directions also steer. Second, the memory-minimal load mode is
+directions, fit from the same data, also steer. Second, the memory-minimal load mode is
 detection-only, and detection is the commodity half of the system, whereas the distinguishing
 capability, steering, requires the full network. The cost argument therefore applies to the guardrail
 rather than to the steerer. The defensible claim is that a read-and-write adapter can be added to a
@@ -1571,7 +1582,7 @@ the truncated forward that any latent method shares. What survives from the read
 milliseconds and kilobytes, where per-concept fine-tuning needs a training run — an amortization it shares
 with a probe bank but that fine-tuning does not have. The writing is what justifies operating inside the
 residual stream rather than on the text, and it is the part a classifier cannot reproduce: a few-shot,
-training-free steering control that shares its direction with the detector, measured as a monotonic
+training-free steering control fit from the same data as the detector (and moderately aligned with it), measured as a monotonic
 dose-response with a coherent operating window
 (<a class="sref" href="#46-steering-across-models">§4.6</a>) and bounded by the competence of the base
 model. The interactive figures are included so
@@ -1771,7 +1782,8 @@ function cgSteer(){
     var dir=fr>0?'toward':(fr<0?'away from':'baseline —');
     cgEl("cgs-fv").textContent=(fr>0?'+':'')+fr.toFixed(2)+' ('+dir+' '+c+')';
     cgEl("cgs-prompt").innerHTML='prompt: “'+cgEsc(S.prompt)+'” &nbsp;·&nbsp; residual norm ≈ '+S.resid_norm;
-    cgEl("cgs-out").innerHTML='… '+cgEsc(S.concepts[c][fr.toString()]);
+    var _k=(fr===0)?'0.0':fr.toString();
+    cgEl("cgs-out").innerHTML='… '+cgEsc(S.concepts[c][_k]);
   }
   cgEl("cgs-model").addEventListener("change",function(){fillConcepts();draw();});
   cgEl("cgs-concept").addEventListener("change",draw);
@@ -2030,8 +2042,8 @@ function cgEffDepth(){
 function cgEffSummary(){
   var host=cgEl("cg-eff-summary"); if(!host) return;
   var D=[
-    {m:"Qwen-0.5B",cg_auc:0.970,pr_auc:0.982,comp:0.45,mem:0.61,speed:"2.2×"},
-    {m:"gemma-2-2b",cg_auc:0.974,pr_auc:0.987,comp:0.41,mem:0.55,speed:"2.4×"}
+    {m:"Qwen-0.5B",cg_auc:0.970,pr_auc:0.982,comp:0.44,mem:0.61,speed:"2.3×"},
+    {m:"gemma-2-2b",cg_auc:0.974,pr_auc:0.987,comp:0.33,mem:0.55,speed:"3.0×"}
   ];
   var W=520,H=262,L=46,R2=16,T=20,B=54,pw=W-L-R2,ph=H-T-B,n=D.length,gw=pw/n,bw=gw*0.24;
   function Y(f){return T+(1-f)*ph;}
