@@ -1015,6 +1015,15 @@ produces cleanly — the same ceiling that bounds detection
 (<a class="sref" href="#45-the-computeaccuracy-frontier">§4.5</a>): a more capable model steers more
 cleanly from the same ten examples.
 
+Across the three signals, steering is a measured, controllable capability rather than a demonstration:
+within an effective window it shifts generated content monotonically — an operation no detector or
+classifier can perform — and its quality, like detection's, is bounded by the base model rather than by
+the number of examples. It is a soft control, strongest on concepts the model represents clearly and
+weaker on abstract ones such as technology, so it is best used as a nudge within its window rather than as
+a hard guarantee. This measured write capability, sharing a single few-shot direction with the detector,
+is what justifies operating on a concept inside the residual stream rather than filtering on the output
+text.
+
 ### 4.7 A paraphrase-robustness null
 
 We expected a depth-dependent robustness effect: that shallow taps, keyed on surface words, would
