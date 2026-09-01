@@ -908,11 +908,13 @@ reported in the order of the contributions, and the negative ones are not buried
 On a controlled synthetic problem with three layers of known per-layer discriminability
 $d'=[1.6,2.0,0.6]$, the theory predicts a fused $d'=\sqrt{1.6^2+2.0^2+0.6^2}=2.63$, i.e. test error
 $\Phi(-1.315)=9.4\%$ versus the single-best-layer $\Phi(-1.0)=15.9\%$. The learned filter recovers
-$d'=[1.62,2.04,0.64]$ and drives test error from **16.1% to 9.4%**, matching the prediction. This is
-the strongest positive result in the report and the principal justification for using depth at all —
-but
-note it is on synthetic data with independent per-layer noise; on a real model the correlated layers
-shrink the gain, which is what makes the next result sobering.
+$d'=[1.62,2.04,0.64]$ and drives test error from **16.1% to 9.4%**, matching the prediction. This
+verifies that the implementation realizes the matched-filter algebra; it is *not* evidence about residual
+streams. The synthetic data is generated under the filter's own assumption of *independent* per-layer
+Gaussian noise, so recovering the predicted $d'$ is close to tautological. On a real model the layers are
+correlated, the gain vanishes, and a probe on the same concatenated taps matches or beats the fusion
+(<a class="sref" href="#481-learning-a-single-concept">§4.8.1</a>); we therefore treat depth fusion as a
+mechanism that does not transfer, not as a contribution.
 
 ### 4.2 Mixture densities: a constructed hard case and a few-shot collapse
 
@@ -1107,8 +1109,10 @@ are in the repository; the figure and tables below replay their output.
 <figcaption><strong>Figure 9 (interactive).</strong> <em>Sample efficiency.</em> Held-out AUC as the few-shot
 count <em>N</em> grows (4→32), with the same examples and test set for every method. ConceptGate (teal)
 reads a few mid-layer taps in closed form; the linear-probing baselines freeze the base model and fit a
-logistic (solid red) or linear-SVM (dashed red) head on its final layer. On gemma-2-2b ConceptGate leads
-at the smallest N and the methods converge as N grows; on Qwen the trained probes lead slightly. Toggle
+logistic (solid red) or linear-SVM (dashed red) head on its **final layer** — these red lines are the
+full-model probe, which runs the whole network. A logistic probe on the *same taps ConceptGate reads* (a
+depth-matched probe, not drawn) coincides with the teal curve, so the fair single-concept comparison is a
+tie; the full-model probe sits slightly higher because it uses the whole model. Toggle
 the base model; hover any point for exact numbers.</figcaption>
 </figure>
 
@@ -1117,8 +1121,9 @@ the base model; hover any point for exact numbers.</figcaption>
 <figcaption><strong>Figure 10 (interactive).</strong> <em>Accuracy versus network depth</em> (N=32). Held-out AUC against the
 fraction of the network a tap requires — i.e. how much of the forward pass has to run. Circles are single
 taps at increasing depth; squares are three- and five-tap fusions; the dashed red line is the full-model
-linear probe. ConceptGate reaches within a hundredth of the full-model probe at roughly a third of the
-network, and depth fusion adds little over the best single tap. (Weights loaded run higher than depth,
+probe. The teal curve is also a *depth-matched* probe on the same taps — the two are identical — so the
+gap to the dashed line is the cost of running the whole network, not a ConceptGate advantage; depth fusion
+adds nothing over the best single tap. (Weights loaded run higher than depth,
 because the embedding table is always loaded regardless of tap depth — that cost is Figure 11.)</figcaption>
 </figure>
 
@@ -1127,9 +1132,10 @@ because the embedding table is always loaded regardless of tap depth — that co
 <figcaption><strong>Figure 11.</strong> <em>Compute and memory, both base models.</em> For each base model the
 bars give ConceptGate's per-prompt forward wall-time (compute, solid) and weights loaded (memory, hatched)
 as a fraction of the full-model linear probe (the red line = the probe = 100%); each configuration's AUC is
-labeled beneath. ConceptGate is at an early single tap; the probe reads the whole model. Across both models
-ConceptGate holds AUC within ~0.01–0.013 of the probe while needing roughly half its compute and memory —
-the bars sit near the halfway mark. LoRA, which back-propagates through the model to train adapters, enters
+labeled beneath. ConceptGate is at an early single tap; the red line is the **full-model** probe. The bars
+near the halfway mark are the cost of the truncated forward — which a depth-matched probe on the same taps
+achieves *identically* (<a class="sref" href="#481-learning-a-single-concept">§4.8.1</a>) — so they measure
+how early the concept is readable, not a saving specific to ConceptGate. LoRA, which back-propagates through the model to train adapters, enters
 the comparison in <a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a>,
 where the cost is measured across a whole taxonomy of concepts rather than one.</figcaption>
 </figure>
@@ -1427,27 +1433,24 @@ of categories than from any one alone.
 
 ### 5.1 What is contributed
 
-The mechanisms are all drawn from prior work, the detector is a commodity, and the mixture model is
-inactive at few-shot sample sizes. What remains as a contribution is threefold. The first is a measured
-efficiency result: on real jailbreak detection ConceptGate reaches within a hundredth or two of a
-full-model linear probe's AUC — and matches it outright as the tap deepens — from a single early tap,
-which runs roughly a third of the network, loads about half its weights, and requires no gradient
-training (<a class="sref" href="#48-an-efficiency-evaluation-of-conceptgate">§4.8</a>); and that this
-efficiency *amortizes* across a bank, adding each category of a fourteen-way safety taxonomy in
-milliseconds and kilobytes and scoring all of them in one shared forward, where per-concept LoRA
-fine-tuning costs seconds-to-minutes and a forward each — so the total cost stays flat in the number of
-concepts while matching a trained probe's per-category accuracy
-(<a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a>).
-The second is the composition itself: a single few-shot, calibrated,
-training-free module that both reads and writes a concept from a frozen model's intermediate layers,
-with a small and well-characterized cost. The third is the empirical account of where each component
-helps and where it does not — the depth-fusion advantage is real on synthetic data but does not transfer
-to a real model where one layer already carries the concept; detection is a commodity that a logistic or
-SVM probe matches; and generalization to an unseen harm category is only partial, though no worse for
-ConceptGate than for a trained probe (<a class="sref" href="#49-out-of-distribution-generalization">§4.9</a>). The value of the
-work is therefore not that its detector outperforms the alternatives, which it does not, but that it
-matches them at a fraction of the compute and memory, assembles a read-and-write adapter, and measures
-each part against a fair baseline.
+The mechanisms are all drawn from prior work; the detector is a commodity; the single-concept compute
+saving is the truncated forward, which a depth-matched probe shares
+(<a class="sref" href="#481-learning-a-single-concept">§4.8.1</a>); depth fusion does not transfer beyond
+synthetic data; and the mixture is inactive at few-shot sizes. What remains is narrow but real. The most
+distinctive part is **steering**: the same few-shot direction that detects a concept is written back to
+steer generation, a measured, monotonic dose-response bounded by the base model
+(<a class="sref" href="#46-steering-across-models">§4.6</a>) — the one operation a classifier or probe
+cannot perform. The second is **amortization**: as a training-free bank the adapter extends to a
+fourteen-way taxonomy in milliseconds and kilobytes and scores all of it in one forward, where per-concept
+LoRA fine-tuning costs a training run each; this beats *fine-tuning*, though a linear-probe bank shares it
+— what ConceptGate adds is that each entry also steers
+(<a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a>). The third is the composition and its
+honest account: a single few-shot, calibrated, training-free module that both reads and writes a concept
+at a small, well-characterized cost, each part measured against a fair baseline including where it fails —
+detection is a commodity a probe matches, and generalization to an unseen category is only partial
+(<a class="sref" href="#49-out-of-distribution-generalization">§4.9</a>). The value of the work is not
+that its detector outperforms the alternatives — it does not — but that it assembles a read-and-write
+adapter whose write side a classifier cannot match, and reports each part against a fair comparison.
 
 ### 5.2 Detection is a commodity; steering is the distinguishing capability
 
@@ -1556,14 +1559,14 @@ point exposes, and they are stated here so that the results are read with approp
 
 A frozen model already represents many concepts of interest in its residual stream; ConceptGate reads
 them across depth and writes them back. The reading is a commodity — no more accurate than a linear
-classifier — but a cheap one: on a real task it matches a full-model linear probe's accuracy from a
-single early tap, at roughly half the compute and memory and with no gradient training, and across a
-fourteen-category safety taxonomy it hosts the whole bank training-free — adding each concept in
-milliseconds and kilobytes where per-concept fine-tuning takes minutes, so the efficiency compounds with
-the number of concepts rather than eroding. What is worth retaining from the reading is therefore its
-efficiency and how it amortizes, more than the depth fusion, which helps only on synthetic data. The writing is what justifies operating inside the residual
-stream rather than on the text: a few-shot, training-free steering control that shares its direction with
-the detector, measured as a monotonic dose-response with a coherent operating window
+classifier, and no cheaper than a depth-matched probe on the same taps, since the single-concept saving is
+the truncated forward that any latent method shares. What survives from the reading is not efficiency but
+*extensibility*: as a training-free bank it hosts a fourteen-category taxonomy by adding each concept in
+milliseconds and kilobytes, where per-concept fine-tuning needs a training run — an amortization it shares
+with a probe bank but that fine-tuning does not have. The writing is what justifies operating inside the
+residual stream rather than on the text, and it is the part a classifier cannot reproduce: a few-shot,
+training-free steering control that shares its direction with the detector, measured as a monotonic
+dose-response with a coherent operating window
 (<a class="sref" href="#46-steering-across-models">§4.6</a>) and bounded by the competence of the base
 model. The interactive figures are included so
 that these claims can be examined directly against the underlying model runs rather than taken on
