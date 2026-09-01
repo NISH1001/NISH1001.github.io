@@ -4,7 +4,7 @@ title:  "ConceptGate: Efficiently Learning and Steering Concepts in Language Mod
 date:   2026-08-29 09:00:00 +0545
 categories: research
 tags: research llm interpretability activation-steering guardrails probes representation-engineering few-shot
-subtitle: "A few-shot, training-free adapter that detects a concept from a frozen model's own layers and steers generation along the same direction, with interactive figures over real GPT-2 and Qwen2.5-0.5B runs."
+subtitle: "A few-shot, training-free adapter that detects a concept from a frozen model's own layers and steers generation along a closely related direction, with interactive figures over real GPT-2 and Qwen2.5-0.5B runs."
 comments: false
 published: true
 ---
@@ -259,9 +259,9 @@ the embedding to the unembedding <span class="cite" data-ref="Elhage, N., et al.
 Two empirical facts make it the right place to work. First, many concepts are approximately
 **linearly readable** from the stream — a single direction separates positive from negative examples
 well above chance <span class="cite" data-ref="Alain, G., &amp; Bengio, Y. (2016). Understanding intermediate layers using linear classifier probes. arXiv:1610.01644."><a href="#ref-probes">[2]</a></span><span class="cite" data-ref="Zou, A., et al. (2023). Representation Engineering: A Top-Down Approach to AI Transparency. arXiv:2310.01405."><a href="#ref-repe">[3]</a></span>.
-Second, the stream is **writable**: the same direction, added back, changes what the model goes on to
+Second, the stream is **writable**: a closely related direction, added back, changes what the model goes on to
 say <span class="cite" data-ref="Turner, A. M., et al. (2023). Steering Language Models With Activation Engineering. arXiv:2308.10248."><a href="#ref-actadd">[4]</a></span><span class="cite" data-ref="Panickssery, N., et al. (2023). Steering Llama 2 via Contrastive Activation Addition. arXiv:2312.06681."><a href="#ref-caa">[5]</a></span>.
-Reading and writing therefore share a single geometric object — a direction in activation space — and
+Reading and writing therefore share their few-shot fitting data and a closely related direction (per-tap cosine ~0.5–0.6, <a class="sref" href="#310-steering-the-write-side">§3.10</a>) — and
 it is this shared structure that the rest of the method is organized around.
 
 ### 1.3 The gap: depth, and the read/write duality
@@ -282,7 +282,7 @@ in <a class="sref" href="#36-why-depth-fusion-wins-the-quadrature-argument">§3.
 against the single-layer baseline in <a class="sref" href="#41-depth-fusion-on-synthetic-data">§4.1</a>.
 
 The second observation is the read/write duality noted above: a linear detector and a linear steerer
-are the same direction applied in the two directions of information flow, whereas a text classifier —
+are closely related directions, fit from the same data, applied in the two directions of information flow, whereas a text classifier —
 the conventional guardrail — can only read. This asymmetry is the principal reason to operate inside
 the residual stream rather than on the text, and it recurs throughout the analysis that follows.
 
@@ -301,7 +301,7 @@ This paper contributes, in order of how much each distinguishes ConceptGate from
    (<a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a>). This amortization is shared with a
    linear-probe bank; what ConceptGate adds is that each entry also steers.
 3. **A calibrated, few-shot, dual-mode adapter.** One object learns a concept from ~10 examples, detects
-   it with a calibrated fire/abstain/pass gate, and steers along the same direction, with a small,
+   it with a calibrated fire/abstain/pass gate, and steers along a closely related direction, with a small,
    well-characterized parameter budget (<a class="sref" href="#54-what-it-actually-costs">§5.4</a>) and no
    training.
 4. **Negative and honest results, reported as prominently as the positives.** Detection is a commodity a
@@ -330,8 +330,8 @@ composition and the empirical measurement of it.
 
 ConceptGate is a recombination, not an invention, so its lineage is unusually wide: almost every part
 of it is the standard tool from some established line of work, and the design is mostly a set of
-decisions about *which* standard tool to use for each job and how to make them share one geometric
-object — a direction in the residual stream. The appropriate way to survey the field is therefore not
+decisions about *which* standard tool to use for each job and how to fit them from one shared few-shot
+set of examples in the residual stream. The appropriate way to survey the field is therefore not
 to identify a single neighbouring method and compare against it, but to trace the ancestry of each
 component and identify the small part that is new. We organize the survey around the five lines of
 work the system draws on, and in each we state what is borrowed and what, if anything, is added.
@@ -340,7 +340,7 @@ Two of the threads are about **reading** the stream. Linear probing and represen
 (<a class="sref" href="#21-probes-and-representation-engineering">§2.1</a>) give us the per-layer detector and the diff-of-means direction; density-based
 out-of-distribution scoring (<a class="sref" href="#23-density-based-detection-and-out-of-distribution-scoring">§2.3</a>) gives us the calibrated, class-conditional
 likelihood-ratio gate. Two are about **acting** on it: activation steering and circuit breakers
-(<a class="sref" href="#22-activation-steering-and-circuit-breakers">§2.2</a>) give us the write side — the same direction, added back — while the external-classifier
+(<a class="sref" href="#22-activation-steering-and-circuit-breakers">§2.2</a>) give us the write side — a related direction, added back — while the external-classifier
 literature (<a class="sref" href="#24-external-classifiers">§2.4</a>) is the incumbent we are implicitly compared against, and the one whose
 central limitation (it can only read text, never write activations) is the negative space that defines
 what ConceptGate is *for*. The fifth thread is about **cost**: early-exit and conditional computation
@@ -396,7 +396,7 @@ The decisive difference is training: Circuit Breakers *fine-tunes* the model aga
 buying robustness at the cost of a training run and a modified model, whereas ConceptGate steers a
 **frozen** model from roughly ten examples, buying cheapness and interpretability at the cost of
 power — a single linear nudge is weaker than a trained reroute. Our contribution here is therefore not
-the steering rule but its *packaging*: the write side of a detector that shares its direction, dialed
+the steering rule but its *packaging*: the write side of a detector fit from the same data, dialed
 as a fraction of the residual norm so the same setting transfers across models
 (<a class="sref" href="#310-steering-the-write-side">§3.10</a>), and gated so it fires only when the
 concept is actually present.
@@ -496,7 +496,7 @@ interference (<a class="sref" href="#39-combining-k-concepts">§3.9</a>).
 
 Everything to this point is the **read** path. The **write** path
 (<a class="sref" href="#310-steering-the-write-side">§3.10</a>) follows directly from having formulated
-the reading geometrically: the same concept direction, expressed in the model's raw activation space,
+the reading geometrically: a related concept direction, expressed in the model's raw activation space,
 can be *added back* into the stream to influence what the model generates, and
 <a class="sref" href="#311-actions-and-the-run-driver">§3.11</a> unifies reading and writing behind a
 single action interface so that "detect and refuse," "detect and steer," and "steer
@@ -542,7 +542,7 @@ walk it one stage at a time.
 the residual stream at chosen blocks (dashed red), projects each tap onto the concept's direction to
 get a per-layer score (the spectrogram), blends those with a learned depth filter into one score,
 and gates on a calibrated likelihood ratio. On a firing it either aborts decoding or adds the
-concept direction back into the stream to steer. Reading and steering use the same direction.</figcaption>
+concept direction back into the stream to steer. Reading and steering use closely related directions fit from the same examples (cosine ~0.5–0.6, §3.10).</figcaption>
 </figure>
 
 The same pipeline, run on a real prompt, is shown interactively in
@@ -749,7 +749,7 @@ directions independent, but they do **not** compose into a calibrated bank: the 
 the union over the $K$ concepts, so a per-concept $z=3$ ($\approx 0.1\%$ FPR) OR-ed over $K=14$ gives a
 bank-level FPR near $1.4\%$ — the operating point has to be set against the whole bank, not one concept
 at a time. This bank — one shared truncated forward broadcast to the $K$
-concept directions, each of which both detects and steers — is drawn in
+concept directions, each with a detection direction and a related raw direction that steers — is drawn in
 <a class="sref" href="#figure-12">Figure 12</a>, and its cost as $K$ grows is measured in
 <a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a>.
 
@@ -1067,7 +1067,7 @@ within an effective window it shifts generated content monotonically — an oper
 classifier can perform — and its quality, like detection's, is bounded by the base model rather than by
 the number of examples. It is a soft control, strongest on concepts the model represents clearly and
 weaker on abstract ones such as technology, so it is best used as a nudge within its window rather than as
-a hard guarantee. This measured write capability, sharing a single few-shot direction with the detector,
+a hard guarantee. This measured write capability, fit from the same few-shot data as the detector,
 is what justifies operating on a concept inside the residual stream rather than filtering on the output
 text.
 
@@ -1201,8 +1201,8 @@ probe matches it at the same compute and beats its fusion. What §4.8.1 establis
 truncated forward suffices and the top of the network can be skipped; how shallow that tap can be is set
 by how early the base model forms the abstraction (<a class="sref" href="#45-the-computeaccuracy-frontier">§4.5</a>).
 The truncated forward is genuinely cheaper than running the whole model, but it is a property any latent
-probe shares, not a contribution of ConceptGate. What is specific to ConceptGate is that the *same*
-few-shot direction it reads can also be written back to steer
+probe shares, not a contribution of ConceptGate. What is specific to ConceptGate is that a direction fit
+from the same few-shot data can also be written back to steer
 (<a class="sref" href="#46-steering-across-models">§4.6</a>), and the cost of extending a *bank* of many
 concepts, which §4.8.2 measures against fine-tuning.
 
@@ -1230,7 +1230,7 @@ retraining. ConceptGate is instead a **training-free concept bank**: one truncat
 activations that *every* concept reads; each concept is a closed-form direction fitted in milliseconds
 and stored in kilobytes; and concepts are added or removed without touching the others (the max-LLR
 combination of <a class="sref" href="#39-combining-k-concepts">§3.9</a>). Because reading and writing
-share a direction (<a class="sref" href="#310-steering-the-write-side">§3.10</a>), each entry in the
+share their fitting data (<a class="sref" href="#310-steering-the-write-side">§3.10</a>), each entry in the
 bank is also a steering control at no extra cost.
 
 **Setup.** The concepts are the fourteen harm categories of BeaverTails
@@ -1304,10 +1304,11 @@ are in the repository.
 truncated forward — the frozen model run only up to the deepest tap, never the layers above — produces one
 set of tapped activations <em>a</em> that every concept reads. Each concept is a single direction
 <em>w<sup>k</sup></em>, fitted in closed form (milliseconds, kilobytes) and added to the bank without
-touching the others. The <em>same</em> <em>w<sup>k</sup></em> serves twice: as a detector (project
-<em>a</em> onto it and threshold) and as a steering vector (add ±α·<em>w<sup>k</sup></em> back into the
-stream). So one forward serves all <em>K</em> concepts, adding a concept is one closed-form fit, and
-detection and steering share the learned state — the cost behaviour Figures 13–14 measure.</figcaption>
+touching the others. Its detection direction <em>w<sup>k</sup></em> and a raw steering direction are fit
+from the same examples (cosine ~0.5–0.6): one detects (project <em>a</em> onto it and threshold), the
+other steers (add ±α back into the stream). So one forward serves all <em>K</em> concepts, adding a
+concept is one closed-form fit, and detection and steering share their fitting data — the cost behaviour
+Figures 13–14 measure.</figcaption>
 </figure>
 
 <figure id="figure-13" style="margin:2rem 0">
@@ -1381,7 +1382,7 @@ per-concept or monolithic fine-tuning cannot: constant inference, closed-form ex
 concept, and no retraining to change the taxonomy. That is a genuine result, and it is honest that a
 detect-only probe bank shares it. Over such a probe bank ConceptGate's cost is at worst a tie — a
 truncated forward is never more than the probe's full one, and its extra per-concept kilobytes are
-negligible — while it adds one thing the probe cannot: a *second* use of the same $K$ directions,
+negligible — while it adds one thing the probe cannot: a *second*, steering use of the same $K$ concepts (a related raw direction per concept),
 steering (<a class="sref" href="#46-steering-across-models">§4.6</a>), so the one object that gates
 fourteen harms can also bend generation away from them. A taxonomy-scale bank that is cheap to build and
 extend, competitive with a trained probe on every category, far ahead of few-shot fine-tuning, and
