@@ -1544,11 +1544,16 @@ whereas controversial-political content (0.29–0.47) and, on gemma-2-2b, sexual
 fall to or below chance. Harmfulness is therefore encoded partly as a shared, category-independent
 direction and partly as category-specific structure that a held-out estimate does not recover.
 
-ConceptGate is at least as robust to this shift as the full-model probe. On both base models its held-out
-AUC is within seed noise of the probe's, and its degradation is smaller on Qwen2.5-0.5B (0.18 versus 0.24)
-and indistinguishable on gemma-2-2b (0.25 versus 0.26, a difference well inside three-seed noise); the
-mid-layer tapped direction is thus no less transferable
-than a final-layer one. The absolute level nonetheless indicates that a single few-shot direction is only
+ConceptGate is at least as robust to this shift as the full-model probe, and on one model it is
+measurably more so. Because every category is scored by both methods, the two can be compared pairwise
+across the fourteen held-out categories rather than through an aggregate. On Qwen2.5-0.5B ConceptGate's
+held-out AUC exceeds the probe's in **13 of 14** categories, by $0.037 \pm 0.032$ (sign test,
+$p=0.002$), and its degradation is smaller by $0.057 \pm 0.044$ — a consistent advantage rather than a
+tie. On gemma-2-2b the two are genuinely indistinguishable: ConceptGate is ahead in 7 of 14 categories
+($p=1.0$), by $0.007 \pm 0.028$. The mid-layer tapped direction is therefore no less transferable than a
+final-layer one, and on the smaller model somewhat more so. We report the paired test rather than a
+seed-level standard deviation because the per-category results are what the harness records; the
+comparison is paired on the same categories and the same examples, with only the scoring method varying. The absolute level nonetheless indicates that a single few-shot direction is only
 a partial detector for categories outside its estimation set, and is better estimated from a diverse set
 of categories than from any one alone.
 
@@ -1787,10 +1792,17 @@ the truncated forward that any latent method shares. What survives from the read
 milliseconds and kilobytes, where per-concept fine-tuning needs a training run — an amortization it shares
 with a probe bank but that fine-tuning does not have. The writing is what justifies operating inside the
 residual stream rather than on the text, and it is the part a classifier cannot reproduce: a few-shot,
-training-free steering control fit from the same data as the detector (and moderately aligned with it), measured as a monotonic
-dose-response with a coherent operating window
+training-free steering control fit from the same data as the detector (and moderately aligned with it,
+cosine 0.45–0.79), measured as a monotonic dose-response with a coherent operating window
 (<a class="sref" href="#46-steering-across-models">§4.6</a>) and bounded by the competence of the base
-model. The interactive figures are included so
+model. But the write rule alone is activation addition, which needs none of this machinery, so the claim
+has to be put more precisely still: what the composition uniquely provides is the *conditional* write —
+using a calibrated read to decide when to steer. Measured against blanket steering, gating suppresses
+more of what it targets while leaving benign generation almost entirely alone
+(<a class="sref" href="#410-gate-conditioned-steering-what-the-gate-is-for">§4.10</a>), and that
+conjunction of a cheap read with a targeted write is the whole reason to assemble the parts this way.
+Its reach is bounded by the same thing that bounds the read: a gate whose ten examples do not match the
+prompts it will see is worse than no gate at all. The interactive figures are included so
 that these claims can be examined directly against the underlying model runs rather than taken on
 assertion; the points at which the method is effective and the points at which it fails are both
 visible in them.
