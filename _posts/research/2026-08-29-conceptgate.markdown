@@ -1323,7 +1323,7 @@ ahead on gemma-2-2b — while few-shot LoRA sits well to the left of both. Toggl
 marker.</figcaption>
 </figure>
 
-**The bank grows cheaply.** Adding a concept to ConceptGate is a closed-form fit — 6 ms on
+Adding a concept to ConceptGate is a closed-form fit — 6 ms on
 Qwen2.5-0.5B, 11 ms on gemma-2-2b — against a LoRA training run of 17 s and 126 s, three to four orders
 of magnitude more. Two memory costs matter separately. The **per-concept artifact** — what must be
 stored to add a concept — is 11–28 thousand numbers for ConceptGate: the detection and steering
@@ -1350,7 +1350,7 @@ LoRA's 3.9 and 29 minutes — 30× and 38×.
 
 </div>
 
-**The bank is also accurate.** The low cost does not come at the expense of detection. Across the
+The low cost does not come at the expense of detection. Across the
 fourteen categories the training-free bank trails the full-model linear probe by 0.023 on Qwen2.5-0.5B
 (mean AUC 0.832 vs 0.855) and is statistically indistinguishable on gemma-2-2b (0.881 vs 0.874 — within
 seed noise at three seeds). Few-shot LoRA is both
@@ -1363,7 +1363,7 @@ category emerges late (sexual content on Qwen) a mid-depth read gives up some AU
 model forms the abstraction cleanly (most categories on gemma-2-2b) the closed-form direction is as good
 as the trained head.
 
-**What this establishes.** The multi-concept setting is where the training-free design matters. A
+The multi-concept setting is where the training-free design matters. A
 *latent bank* — ConceptGate, or equally a linear-probe bank — amortizes across a taxonomy in a way that
 per-concept or monolithic fine-tuning cannot: constant inference, closed-form extension, kilobytes per
 concept, and no retraining to change the taxonomy. That is a genuine result, and it is honest that a
