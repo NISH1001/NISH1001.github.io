@@ -272,14 +272,19 @@ not, however, equally legible at every depth: it is weakly represented in the ea
 model is still resolving surface form; most clearly represented at intermediate depth, where the
 abstraction has formed; and increasingly diffuse in the late layers, which specialize toward
 next-token prediction. When a concept leaves a usable trace at several depths, reading only one of
-them discards available signal. ConceptGate instead projects the concept at every tapped layer and
-treats the resulting profile across depth as a single signal to be filtered. This amounts to a
+them ought to discard available signal. ConceptGate therefore projects the concept at every tapped layer
+and treats the resulting profile across depth as a single signal to be filtered. This amounts to a
 signal-processing view of the residual stream, in which the network's **depth** is the signal axis and
 combining the layers into one decision is a filtering problem — solved, as a matter of classical
 theory, by a **matched filter** over depth rather than by a hand-picked layer. The view is developed
-in <a class="sref" href="#34-the-concept-spectrogram">§3.4</a>, justified by a matched-filter argument
-in <a class="sref" href="#36-why-depth-fusion-wins-the-quadrature-argument">§3.6</a>, and tested
-against the single-layer baseline in <a class="sref" href="#41-depth-fusion-on-synthetic-data">§4.1</a>.
+in <a class="sref" href="#34-the-concept-spectrogram">§3.4</a> and justified by a matched-filter
+argument in <a class="sref" href="#36-the-quadrature-argument-for-depth-fusion">§3.6</a>. We flag at
+the outset that the expectation is **not borne out**. The argument needs the per-layer noise to be
+independent; the fusion recovers exactly the predicted gain on synthetic data built to satisfy that
+assumption (<a class="sref" href="#41-depth-fusion-on-synthetic-data">§4.1</a>), and on real models the
+tapped layers are correlated enough that a linear probe on the same concatenated taps matches or beats
+the fusion (<a class="sref" href="#481-learning-a-single-concept">§4.8.1</a>). Depth fusion is reported
+in this paper as a mechanism that does not transfer, not as a contribution.
 
 The second observation is the read/write duality noted above: a linear detector and a linear steerer
 are closely related directions, fit from the same data, applied in the two directions of information flow, whereas a text classifier —
@@ -291,9 +296,10 @@ the residual stream rather than on the text, and it recurs throughout the analys
 This paper contributes, in order of how much each distinguishes ConceptGate from a plain probe:
 
 1. **Steering — the read/write duality, measured.** The one operation a detector or classifier cannot
-   perform: the *same* few-shot direction that detects a concept is written back into the residual stream
-   to steer generation toward or away from it — a monotonic dose-response with a coherent operating
-   window, bounded by the base model (<a class="sref" href="#46-steering-across-models">§4.6</a>,
+   perform: a direction fit from the *same ten examples* as the detector — related to it but not identical
+   (cosine $\approx$0.5–0.6) — is written back into the residual stream to steer generation toward or away
+   from the concept, a monotonic dose-response with a coherent operating window, bounded by the base model
+   (<a class="sref" href="#46-steering-across-models">§4.6</a>,
    <a class="sref" href="#310-steering-the-write-side">§3.10</a>).
 2. **Training-free amortization across a concept bank.** Adding a concept is a closed-form fit in
    milliseconds and kilobytes with no gradient run, so hosting a fourteen-way safety taxonomy costs a
@@ -348,8 +354,10 @@ what ConceptGate is *for*. The fifth thread is about **cost**: early-exit and co
 
 The element that ties these borrowings into one system — and the only part specific to this work — is
 the pair of design commitments stated in the introduction: read the concept
-*across depth* rather than at a single chosen layer, and treat the detector and the steerer as the
-*same direction* used in two directions of information flow, so that a frozen model can be turned into
+*across depth* rather than at a single chosen layer, and fit the detector and the steerer *from one set
+of examples* so they act in the two directions of information flow — closely related directions rather
+than one shared vector (per-tap cosine $\approx$0.5–0.6,
+<a class="sref" href="#310-steering-the-write-side">§3.10</a>) — so that a frozen model can be turned into
 a few-shot, calibrated, read-and-write concept adapter without any training. We close the section
 (<a class="sref" href="#26-positioning">§2.6</a>) by making that positioning explicit, including the adversarial caveat that bounds
 the whole class of method.
@@ -371,9 +379,12 @@ difference of the two class means — is precisely the "reading vector" RepE con
 examples; we claim novelty for neither. What the probing and RepE lines almost universally do, and
 what we deliberately break from, is to commit to a **single** layer, chosen by a validation sweep, and
 read or steer there. Because a concept leaves a usable trace at several depths, discarding all but one
-throws away signal; ConceptGate instead reads the probe's output at every tapped layer and treats the
-resulting profile-across-depth as one signal to be fused (<a class="sref" href="#34-the-concept-spectrogram">§3.4</a>–<a class="sref" href="#36-why-depth-fusion-wins-the-quadrature-argument">§3.6</a>). That single change — from "pick the best layer" to "combine the layers" — is the only
-place in the reading path where we depart from established practice.
+ought to throw away signal; ConceptGate instead reads the probe's output at every tapped layer and treats
+the resulting profile-across-depth as one signal to be fused (<a class="sref" href="#34-the-concept-spectrogram">§3.4</a>–<a class="sref" href="#36-the-quadrature-argument-for-depth-fusion">§3.6</a>). That single change — from "pick the best layer" to "combine the layers" — is the only
+place in the reading path where we depart from established practice, and it is a departure that does
+not pay off: on real prompts a probe on the same concatenated taps matches or slightly beats the fusion
+(<a class="sref" href="#481-learning-a-single-concept">§4.8.1</a>), so the established single-layer
+practice gives up nothing worth recovering.
 
 ### 2.2 Activation steering and circuit breakers
 
@@ -488,7 +499,10 @@ scalars form the concept's **spectrogram** across depth
 (<a class="sref" href="#34-the-concept-spectrogram">§3.4</a>). A learned **depth filter**
 (<a class="sref" href="#35-the-depth-bandpass-filter">§3.5</a>) collapses that spectrogram to one score,
 and the reason to read several layers instead of the single best one is a matched-filter argument we
-make precise in <a class="sref" href="#36-why-depth-fusion-wins-the-quadrature-argument">§3.6</a>. That
+make precise in <a class="sref" href="#36-the-quadrature-argument-for-depth-fusion">§3.6</a> — an
+argument resting on an independence assumption that real tapped layers violate, which is why the fusion
+does not beat a probe on the same taps
+(<a class="sref" href="#481-learning-a-single-concept">§4.8.1</a>). That
 score feeds a **calibrated likelihood-ratio gate**
 (<a class="sref" href="#37-class-conditional-mixtures-and-bic">§3.7</a>–<a class="sref" href="#38-the-calibrated-gate-fire-abstain-pass">§3.8</a>)
 that returns a three-way verdict — fire, abstain, or pass — and a bank of such gates composes without
@@ -581,8 +595,10 @@ $$\mu_0=\operatorname{mean}_{a\in\mathcal{A}}(a),\qquad \sigma_0=\operatorname{s
 
 with $\epsilon=10^{-6}$. All *detection* math operates on the standardized $z$; steering
 (<a class="sref" href="#310-steering-the-write-side">§3.10</a>) deliberately works in raw space, because the hook that writes the stream sees
-raw activations. This one preprocessing step is what lets a plain diff-of-means approximate the optimal
-direction, as the next section explains.
+raw activations. This one preprocessing step is what brings a plain diff-of-means *within reach* of the
+optimal direction — only partway, as the next section shows: standardization equalizes marginal
+variances but leaves the correlations, and the residual gap to a covariance-aware estimator is real and
+measured.
 
 ### 3.3 The diff-of-means direction
 
@@ -648,10 +664,12 @@ single-layer baseline:
 | `fisher` | $f\propto \Sigma_{\mathbf s}^{-1}(\bar{\mathbf s}^{+}-\bar{\mathbf s}^{-})$ | optimal linear combine; accounts for correlated layers |
 
 with $\Sigma_{\mathbf s}$ the pooled within-class covariance of $\mathbf s$, ridge-regularized for
-small samples. The crucial design decision is that `best` is a **nested special case** of the others
-(a one-hot $f$), so comparing them answers "does using depth help?" cleanly, with no confound.
+small samples. The design decision that keeps the comparison clean is that `best` is a **nested special
+case** of the others (a one-hot $f$), so comparing them answers "does using depth help?" with no
+confound. On synthetic data the answer is yes; on real prompts it is no
+(<a class="sref" href="#481-learning-a-single-concept">§4.8.1</a>).
 
-### 3.6 Why depth fusion wins (the quadrature argument)
+### 3.6 The quadrature argument for depth fusion
 
 Model each per-layer score as signal plus independent noise, $s_\ell=a_\ell y+n_\ell$ with
 $y\in\{\pm1\}$ and $n_\ell\sim\mathcal{N}(0,\sigma_\ell^2)$ independent across layers. The matched
@@ -662,7 +680,12 @@ $$d'_{\text{comb}}=\sqrt{\textstyle\sum_\ell (d'_\ell)^2}\;\ge\;\max_\ell d'_\el
 
 At the equal-prior threshold, the per-class error of two equal-variance Gaussians separated by $d'$ is
 $\mathrm{err}=\Phi(-d'/2)$. So fusion strictly beats the single best layer whenever any other layer
-carries independent signal. The widget below makes the effect concrete: varying the three per-layer
+carries independent signal. The independence premise is the load-bearing one, and it is where the
+argument fails in practice: adjacent residual-stream taps are strongly correlated, the quadrature sum
+overstates what is actually available, and the measured gain over a probe on the same concatenated taps
+is zero or negative (<a class="sref" href="#481-learning-a-single-concept">§4.8.1</a>). What follows is
+therefore the argument for why fusion *should* help, presented so that its failure on real models is
+legible. The widget below makes the effect concrete: varying the three per-layer
 $d'$ updates the fused $d'$ and the two error rates. The defaults are the values the synthetic
 experiment (<a class="sref" href="#41-depth-fusion-on-synthetic-data">§4.1</a>) recovered.
 
@@ -767,9 +790,20 @@ direction that actually exists in the model's native activation space, since tha
 hook can add. The two are therefore related but **not identical** — fit from the same ~10 examples and
 pointing broadly the same way, but decoupled by the standardization (and, when detection uses the logistic
 mode of <a class="sref" href="#43-detection-on-real-prompts-a-commodity">§4.3</a>, by its
-covariance-awareness). Their per-tap cosine is ~0.5 on Qwen2.5-0.5B and ~0.6 on gemma-2-2b: well above
-orthogonal, but not "one direction read twice." What the read and write sides genuinely share is the
-fitting data and the class-mean construction, not the exact geometry. During generation, at each tapped
+covariance-awareness). The quantity we measure is the cosine between the **logistic** detection
+direction mapped back into raw space — $w_\ell$ divided elementwise by the per-feature scale
+$\sigma_\ell$, then renormalized — and the raw steering direction $w^{\text{raw}}_\ell$. That is the
+relevant pair, because logistic mode is what every configuration reported in
+<a class="sref" href="#4-experiments-and-results">§4</a> uses. Per tap it is $\approx0.5$ on
+Qwen2.5-0.5B ($d=896$) and $\approx0.6$ on gemma-2-2b ($d=2304$).
+
+Both halves of that number matter, and quoting either alone misleads. Two random unit vectors in
+$\mathbb{R}^d$ have cosine of order $1/\sqrt d$ — $0.033$ and $0.021$ at these widths — so the measured
+values sit roughly $15\sigma$ and $29\sigma$ above chance: the read and write directions are
+unmistakably related, not coincidentally aligned. But $0.5$ is also $60°$ and $0.6$ is $53°$, which is
+nowhere near identity. A reader should take neither "the same direction used twice" nor "two unrelated
+directions" from this. What the read and write sides genuinely share is the fitting data and the
+class-mean construction, not the exact geometry. During generation, at each tapped
 layer we add
 
 $$a_\ell\;\leftarrow\;a_\ell+\alpha\,w^{\text{raw}}_{\ell},$$
@@ -777,7 +811,9 @@ $$a_\ell\;\leftarrow\;a_\ell+\alpha\,w^{\text{raw}}_{\ell},$$
 with $\alpha>0$ steering **toward** the concept and $\alpha<0$ **away** (the refusal / guardrail
 direction). The one practical subtlety is *magnitude*: a good absolute $\alpha$ on GPT-2 is wrong on
 Qwen, because their residual norms differ by about fivefold (96 vs 19 in our runs). So we set
-$\alpha$ as a **fraction of the measured residual norm**, which transfers across models — empirically
+$\alpha$ as a **fraction of the measured residual norm**, which transfers approximately across the three
+models tested — the coherent band is similar but not identical on each, and we have not verified it
+beyond them — empirically
 $\sim$3–10% is the coherent band, and above roughly 20–25% the text degrades into repetition or
 gibberish.
 
@@ -910,9 +946,14 @@ free on the way through.
 
 ## 4. Experiments and results
 
-We evaluate on GPT-2 (12 blocks) and Qwen2.5-0.5B-Instruct (24 blocks), both small enough to run and
-re-run on a laptop CPU, which is the point — the whole method is meant to be cheap. Results are
-reported in the order of the contributions, and the negative ones are not buried.
+We evaluate on GPT-2 (12 blocks), Qwen2.5-0.5B-Instruct (24 blocks), and gemma-2-2b-it (26 blocks) —
+all small enough to run and re-run on a laptop, which is the point, since the whole method is meant to
+be cheap. The subsections follow the method's own order: the reading path first
+(<a class="sref" href="#41-depth-fusion-on-synthetic-data">§4.1</a>–<a class="sref" href="#45-the-computeaccuracy-frontier">§4.5</a>),
+then the write side (<a class="sref" href="#46-steering-across-models">§4.6</a>), then cost
+(<a class="sref" href="#48-an-efficiency-evaluation-of-conceptgate">§4.8</a>). That is deliberately
+*not* the order of the contributions — the one capability we defend as specific to the method is
+steering, which appears sixth. The negative results are not buried.
 
 ### 4.1 Depth fusion on synthetic data
 
@@ -965,7 +1006,11 @@ selection criterion returns a single component per class.
 
 On real jailbreak-versus-benign prompts, ConceptGate's difference-of-means detector performs well —
 and so does a linear support-vector machine trained on the same activations, and so does per-layer
-logistic regression. Across both models the three are within noise of one another on AUC. The logistic
+logistic regression. Across both models the three are within noise of one another on AUC.
+<a class="sref" href="#481-learning-a-single-concept">§4.8.1</a> puts numbers on "within noise" over 262
+held-out prompts: at 32 examples per class, ConceptGate-logistic reaches $0.973$ against $0.978$ for a
+probe on the same taps and $0.982$ for both a probe and an SVM on the full model (Qwen2.5-0.5B), and
+$0.979$ against $0.978$, $0.987$, and $0.989$ respectively on gemma-2-2b. The logistic
 variant, which is covariance-aware and therefore slightly stronger where standardization leaves the
 within-class covariance non-isotropic, closes the small remaining gap to the SVM, with its largest
 gains on the weaker model, but it does not establish a new one. As a detector, then, ConceptGate is a
@@ -981,12 +1026,12 @@ nuisance variation, following the CAA construction. The measurement contradicted
 negatives gave an AUC of approximately 0.42, below chance, against **0.78** for broad, unrelated
 negatives. The explanation is that broad negatives allow the direction to align with the large
 *semantic* gap between an assertive instruction to a model and an ordinary factual query, which is the
-signal the detector depends on, whereas matched negatives remove that gap. Note that 0.42 is *below*
-chance, not merely unresolved: the fitted direction ranks jailbreaks slightly beneath benign rather than
-at random, which suggests matched negatives pull it onto the shared surface structure itself. With ten
-examples we cannot separate a stable anti-signal from sampling variation around 0.5, but either reading
-supports the same conclusion: for few-shot concept detection, negatives should be broad rather than
-matched.
+signal the detector depends on, whereas matched negatives remove that gap. We read $0.42$ as the
+direction **failing to separate the classes**, and not as evidence that it inverts them. The point
+estimate does sit below $0.5$, which would mean jailbreaks ranked slightly beneath benign prompts, but
+with ten examples per class the sampling spread around chance is wide enough that $0.42$ is not evidence
+of a stable anti-signal, and we do not claim one. The practical conclusion needs only the weaker
+reading: for few-shot concept detection, negatives should be broad rather than matched.
 
 ### 4.5 The compute–accuracy frontier
 
@@ -1002,7 +1047,10 @@ measured curves; the target-AUC control locates the knee, the cheapest layer tha
 <div id="cg-cost" class="cg-widget" style="margin:0"></div>
 <figcaption><strong>Figure 7 (interactive).</strong> The compute–accuracy frontier. Leave-one-out detection
 AUC at each layer (red) against the fraction of the network a tap there runs (teal); dragging the target
-AUC locates the cheapest layer that clears it — roughly 8% of Qwen2.5-0.5B for the jailbreak concept.</figcaption>
+AUC locates the cheapest layer that clears it. The depths located here come from a ~20-prompt
+leave-one-out sweep with the knee chosen on that same estimate, so they are optimistically biased and
+high-variance — the 262-prompt held-out figures in
+<a class="sref" href="#481-learning-a-single-concept">§4.8.1</a> are the ones to quote.</figcaption>
 </figure>
 
 The shape of the curve reflects model capability. On GPT-2 the jailbreak concept is not cleanly formed
@@ -1025,7 +1073,10 @@ cannot perform, and the part of the system that most needs measuring rather than
 of three concepts — food, nature, technology — we generate a continuation of five neutral prompts at each
 value of the steering fraction (the magnitude of the added direction, as a fraction of the residual norm)
 and score every greedy generation three ways: the share of content words matching a concept keyword list
-(an *independent* measure of the semantic shift, not derived from the steering direction), the perplexity
+(independent of the steering direction, in that the word list is written by hand and never enters the
+fit — but not independent of the concept's framing, since the same author chose both the keyword list
+and the few-shot prompts, so the two share whatever conception of "nature" or "food" that author had),
+the perplexity
 of the continuation under the base model (fluency), and the concept's own detector log-likelihood ratio on
 the generated text (the internal read of what the write produced). There is no baseline method to compare
 against — a linear probe or classifier cannot steer at all, and the mechanism itself is standard
@@ -1279,34 +1330,36 @@ are in the repository.
     <rect x="40" y="136" width="150" height="72" rx="7" fill="#faf9f4" stroke="#e2e0d6"/>
     <text x="52" y="156" font-size="11" fill="#26a99d" font-weight="600">concept 1</text>
     <rect x="150" y="143" width="34" height="18" rx="9" fill="#e7f5f3" stroke="#26a99d"/><text x="167" y="156" text-anchor="middle" font-size="10.5" fill="#1c7d74" font-style="italic">w&#185;</text>
-    <text x="52" y="182" font-size="10.5" fill="#C2402F">detect &#160; w&#185;&#183;a &gt; &#964;</text>
-    <text x="52" y="200" font-size="10.5" fill="#26a99d">steer &#160; + &#945;&#183;w&#185;</text>
+    <text x="52" y="182" font-size="10.5" fill="#C2402F">detect &#160; w&#185;<tspan baseline-shift="sub" font-size="7">det</tspan>&#183;z &gt; &#964;</text>
+    <text x="52" y="200" font-size="10.5" fill="#26a99d">steer &#160; + &#945;&#183;w&#185;<tspan baseline-shift="sub" font-size="7">raw</tspan></text>
     <rect x="200" y="136" width="150" height="72" rx="7" fill="#faf9f4" stroke="#e2e0d6"/>
     <text x="212" y="156" font-size="11" fill="#26a99d" font-weight="600">concept 2</text>
     <rect x="310" y="143" width="34" height="18" rx="9" fill="#e7f5f3" stroke="#26a99d"/><text x="327" y="156" text-anchor="middle" font-size="10.5" fill="#1c7d74" font-style="italic">w&#178;</text>
-    <text x="212" y="182" font-size="10.5" fill="#C2402F">detect &#160; w&#178;&#183;a &gt; &#964;</text>
-    <text x="212" y="200" font-size="10.5" fill="#26a99d">steer &#160; + &#945;&#183;w&#178;</text>
+    <text x="212" y="182" font-size="10.5" fill="#C2402F">detect &#160; w&#178;<tspan baseline-shift="sub" font-size="7">det</tspan>&#183;z &gt; &#964;</text>
+    <text x="212" y="200" font-size="10.5" fill="#26a99d">steer &#160; + &#945;&#183;w&#178;<tspan baseline-shift="sub" font-size="7">raw</tspan></text>
     <rect x="360" y="136" width="150" height="72" rx="7" fill="#faf9f4" stroke="#e2e0d6"/>
     <text x="372" y="156" font-size="11" fill="#26a99d" font-weight="600">concept 3</text>
     <rect x="470" y="143" width="34" height="18" rx="9" fill="#e7f5f3" stroke="#26a99d"/><text x="487" y="156" text-anchor="middle" font-size="10.5" fill="#1c7d74" font-style="italic">w&#179;</text>
-    <text x="372" y="182" font-size="10.5" fill="#C2402F">detect &#160; w&#179;&#183;a &gt; &#964;</text>
-    <text x="372" y="200" font-size="10.5" fill="#26a99d">steer &#160; + &#945;&#183;w&#179;</text>
+    <text x="372" y="182" font-size="10.5" fill="#C2402F">detect &#160; w&#179;<tspan baseline-shift="sub" font-size="7">det</tspan>&#183;z &gt; &#964;</text>
+    <text x="372" y="200" font-size="10.5" fill="#26a99d">steer &#160; + &#945;&#183;w&#179;<tspan baseline-shift="sub" font-size="7">raw</tspan></text>
     <rect x="548" y="136" width="150" height="72" rx="7" fill="#faf9f4" stroke="#d8d5c8" stroke-dasharray="4 3"/>
     <text x="560" y="156" font-size="11" fill="#8ab5b0" font-weight="600">concept K</text>
     <rect x="658" y="143" width="34" height="18" rx="9" fill="#f0f7f5" stroke="#9cc9c3"/><text x="675" y="156" text-anchor="middle" font-size="10.5" fill="#6fa39d" font-style="italic">w<tspan baseline-shift="super" font-size="8">K</tspan></text>
-    <text x="560" y="182" font-size="10.5" fill="#cc9b96">detect &#160; w<tspan baseline-shift="super" font-size="7">K</tspan>&#183;a</text>
-    <text x="560" y="200" font-size="10.5" fill="#8cc5bf">steer &#160; + &#945;&#183;w<tspan baseline-shift="super" font-size="7">K</tspan></text>
+    <text x="560" y="182" font-size="10.5" fill="#cc9b96">detect &#160; w<tspan baseline-shift="super" font-size="7">K</tspan><tspan baseline-shift="sub" font-size="7">det</tspan>&#183;z</text>
+    <text x="560" y="200" font-size="10.5" fill="#8cc5bf">steer &#160; + &#945;&#183;w<tspan baseline-shift="super" font-size="7">K</tspan><tspan baseline-shift="sub" font-size="7">raw</tspan></text>
   </g>
   <text x="524" y="178" text-anchor="middle" font-size="16" fill="#bbb">&#8943;</text>
-  <text x="360" y="234" text-anchor="middle" font-size="11" fill="currentColor">each concept = one closed-form direction <tspan font-style="italic">w</tspan><tspan baseline-shift="super" font-size="8">k</tspan> (~ms, ~kB); reading and steering are fit from the same examples (cosine ~0.5–0.6)</text>
+  <text x="360" y="234" text-anchor="middle" font-size="11" fill="currentColor">each concept = one closed-form fit (~ms, ~kB) giving <tspan font-style="italic">two</tspan> directions: w<tspan baseline-shift="sub" font-size="8">det</tspan> reads standardized z, w<tspan baseline-shift="sub" font-size="8">raw</tspan> writes the raw stream (cosine ~0.5–0.6)</text>
 </svg>
 <figcaption><strong>Figure 12.</strong> <em>The concept bank and the read/write duality.</em> A single
 truncated forward — the frozen model run only up to the deepest tap, never the layers above — produces one
-set of tapped activations <em>a</em> that every concept reads. Each concept is a single direction
-<em>w<sup>k</sup></em>, fitted in closed form (milliseconds, kilobytes) and added to the bank without
-touching the others. Its detection direction <em>w<sup>k</sup></em> and a raw steering direction are fit
-from the same examples (cosine ~0.5–0.6): one detects (project <em>a</em> onto it and threshold), the
-other steers (add ±α back into the stream). So one forward serves all <em>K</em> concepts, adding a
+set of tapped activations <em>a</em> that every concept reads. Each concept is one closed-form fit
+(milliseconds, kilobytes), added to the bank without touching the others, and it yields <em>two</em>
+directions rather than one: <em>w<sup>k</sup><sub>det</sub></em> detects (project the standardized
+activation onto it and threshold) while <em>w<sup>k</sup><sub>raw</sub></em> steers (add ±α back into the
+raw stream). They come from the same examples and the same class-mean construction, but they are not the
+same vector — per-tap cosine ~0.5–0.6, far from chance and far from identity
+(<a class="sref" href="#310-steering-the-write-side">§3.10</a>). So one forward serves all <em>K</em> concepts, adding a
 concept is one closed-form fit, and detection and steering share their fitting data — the cost behaviour
 Figures 13–14 measure.</figcaption>
 </figure>
@@ -1487,8 +1540,10 @@ the write half is available at little additional cost.
 
 ### 5.3 The cost argument and its limits
 
-The compute–accuracy trade-off is a real engineering result — a jailbreak concept can be gated at
-roughly 8% of Qwen2.5-0.5B — but two qualifications bound it. First, the truncated-forward saving is
+The compute–accuracy trade-off is a real engineering result — on 262 held-out prompts a jailbreak
+concept reaches AUC $0.968\pm0.01$ from a tap at 29% of Qwen2.5-0.5B's depth, about 28% of a full
+forward pass in wall-clock, against $0.982\pm0.00$ for a probe on the complete model
+(<a class="sref" href="#481-learning-a-single-concept">§4.8.1</a>) — but two qualifications bound it. First, the truncated-forward saving is
 available to any internal probe, including the SVM baseline; it is a property of latent-space methods
 in general rather than an advantage specific to ConceptGate. The sharper and better-measured version of
 the cost claim is at the *bank* level
@@ -1549,10 +1604,13 @@ The second group of limitations concerns **the evidence being small and in-distr
 primarily on GPT-2 and Qwen2.5-0.5B, small enough that the core results reproduce on a single CPU, and
 add gemma-2-2b for the multi-concept, generalization, and steering results (§4.8–4.9, §4.6), which we run
 on an Apple M4 GPU (MPS). That choice bounds how
-far the numbers extend: the qualitative findings — detection is a commodity, the base model bounds
-steering quality, and the cost trade-off is real and model-dependent — are expected to hold at the
-2–8B instruct scale, whereas the specific AUCs, error rates, and knee locations
-should be re-measured there before being quoted. Within these small models, the detection numbers are
+far the numbers extend. The qualitative findings — detection is a commodity, the base model bounds
+steering quality, and the cost trade-off is real and model-dependent — hold on all three models we
+tested, and gemma-2-2b is the useful data point here: it is roughly five times Qwen2.5-0.5B and the
+qualitative pattern is unchanged, with the read/write cosine even slightly higher ($\approx0.6$ against
+$\approx0.5$). That is evidence, not proof, and 2B is not 8B; we expect the qualitative findings to
+survive to the 2–8B instruct scale on the strength of it, while the specific AUCs, error rates, and knee
+locations should be re-measured there before being quoted. Within these small models, the detection numbers are
 in-distribution: probe-based detection is known to generalize poorly off-distribution.
 <a class="sref" href="#49-out-of-distribution-generalization">§4.9</a> tests one clean version of this —
 holding the concept fixed and holding out whole harm categories — and finds only *partial* generalization
