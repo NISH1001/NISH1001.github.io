@@ -1127,9 +1127,10 @@ are in the repository; the figure and tables below replay their output.
 count <em>N</em> grows (4→32), with the same examples and test set for every method. ConceptGate (teal)
 reads a few mid-layer taps in closed form; the linear-probing baselines freeze the base model and fit a
 logistic (solid red) or linear-SVM (dashed red) head on its **final layer** — these red lines are the
-full-model probe, which runs the whole network. A logistic probe on the *same taps ConceptGate reads* (a
-depth-matched probe, not drawn) coincides with the teal curve, so the fair single-concept comparison is a
-tie; the full-model probe sits slightly higher because it uses the whole model. Toggle
+full-model probe, which runs the whole network. The **depth-matched probe** (dark-teal dashed) — a
+logistic head on the *same taps ConceptGate reads* — tracks the teal ConceptGate curve, so the fair
+single-concept comparison is a tie; the red full-model probe sits slightly higher because it uses the
+whole model. Toggle
 the base model; hover any point for exact numbers.</figcaption>
 </figure>
 
@@ -1169,8 +1170,8 @@ depth-matched probe reaches ConceptGate's number at ConceptGate's compute.
 
 | Qwen2.5-0.5B (494M) · N=32 | AUC | forward ms | weights |
 |---|---|---|---|
-| ConceptGate — logistic, 1 tap @40% | 0.970 | 43 | 61% |
-| depth-matched probe, 1 tap @40% | 0.970 | 43 | 61% |
+| ConceptGate — logistic, 1 tap (early) | 0.970 | 43 | 61% |
+| depth-matched probe, 1 tap (early) | 0.970 | 43 | 61% |
 | ConceptGate — logistic, 3 taps | 0.973 | 68 | 79% |
 | depth-matched probe, 3 taps | 0.978 | 68 | 79% |
 | ConceptGate — diff-of-means, 3 taps | 0.927 | 68 | 79% |
@@ -1178,8 +1179,8 @@ depth-matched probe reaches ConceptGate's number at ConceptGate's compute.
 
 | gemma-2-2b (2.66B) · N=32 | AUC | forward ms | weights |
 |---|---|---|---|
-| ConceptGate — logistic, 1 tap @40% | 0.974 | 188 | 55% |
-| depth-matched probe, 1 tap @40% | 0.974 | 188 | 55% |
+| ConceptGate — logistic, 1 tap (early) | 0.974 | 188 | 55% |
+| depth-matched probe, 1 tap (early) | 0.974 | 188 | 55% |
 | ConceptGate — logistic, 3 taps | 0.979 | 342 | 76% |
 | depth-matched probe, 3 taps | 0.978 | 342 | 76% |
 | ConceptGate — diff-of-means, 3 taps | 0.958 | 342 | 76% |
@@ -1667,7 +1668,7 @@ function cgDepthFusion(){
     +'<div class="cg-ctrls">'
     +[0,1,2].map(function(i){return '<div class="cg-ctrl"><label>layer '+(i+1)
         +' d′ <span class="cg-val" id="cgdf-v'+i+'"></span></label>'
-        +'<input type="range" id="cgdf-s'+i+'" min="0" max="3" step="0.05" value="'+d[i]+'"></div>';}).join('')
+        +'<input type="range" id="cgdf-s'+i+'" min="0" max="3" step="0.01" value="'+d[i]+'"></div>';}).join('')
     +'</div><svg id="cgdf-svg" viewBox="0 0 460 150" style="width:100%;max-width:460px"></svg>'
     +'<div class="cg-readout" id="cgdf-out"></div>';
   var labs=["ℓ1","ℓ2","ℓ3","fused"];
@@ -1731,7 +1732,8 @@ function cgDetect(){
     var rec=D.pos_llr.filter(function(x){return x>t;}).length/D.pos_llr.length*100;
     var fpr=D.neg_llr.filter(function(x){return x>t;}).length/D.neg_llr.length*100;
     cgEl("cgd-metrics").innerHTML='recall <b style="color:'+CG_RED+'">'+rec.toFixed(0)+'%</b> &nbsp;·&nbsp; '
-      +'false-positive rate <b style="color:'+CG_BLUE+'">'+fpr.toFixed(0)+'%</b>';
+      +'false-positive rate <b style="color:'+CG_BLUE+'">'+fpr.toFixed(0)+'%</b>'
+      +' <span style="opacity:.6;font-size:.8rem">on the '+D.pos_llr.length+' jailbreak / '+D.neg_llr.length+' benign held-out examples (dots)</span>';
     // strip plot
     var svg='<line x1="30" y1="30" x2="445" y2="30" stroke="'+CG_GRID+'"/>';
     svg+='<text x="30" y="50" font-size="9" fill="currentColor" opacity="0.82">≤'+TMIN+'</text>';
@@ -1751,7 +1753,7 @@ function cgDetect(){
       return '<div class="cg-probe">'+mark+' '+badge+'<span class="t">'+cgEsc(p.text)+'</span>'
         +'<span class="cg-mono" style="opacity:.7">'+p.llr.toFixed(1)+'</span> <span style="font-size:.78rem">'+tag+'</span></div>';
     }).join('');
-    cgEl("cgd-probes").innerHTML=rows;
+    cgEl("cgd-probes").innerHTML='<div style="font-size:.78rem;opacity:.65;margin-bottom:.3rem">A separate set of ten illustrative probes (some deliberately borderline); ✓/✗ marks each example at the current τ, not the rate above:</div>'+rows;
   }
   cgEl("cgd-t").addEventListener("input",draw); draw();
 }
@@ -1957,7 +1959,7 @@ function cgKillshot(){
 // ===================== widget 6: accuracy vs compute frontier (baked from scripts/eval_detection.py) =====================
 var CGEFF={
  "Qwen2.5-0.5B":{
-   N:{Ns:[4,8,16,32],cg:[0.821,0.940,0.965,0.973],lr:[0.859,0.935,0.967,0.982],svm:[0.858,0.936,0.967,0.982],
+   N:{Ns:[4,8,16,32],cg:[0.821,0.940,0.965,0.973],tap:[0.837,0.940,0.967,0.978],lr:[0.859,0.935,0.967,0.982],svm:[0.858,0.936,0.967,0.982],
       cgfwd:67.1,lrfwd:96.1},
    depth:{probe:0.982,pts:[
      {lab:"1 tap @25%",d:0.29,w:0.49,auc:0.968},{lab:"1 tap @40%",d:0.46,w:0.61,auc:0.970},
@@ -1967,7 +1969,7 @@ var CGEFF={
    cost:[{name:"ConceptGate (1 tap)",color:CG_BLUE,fwd:43.6,w:0.61,params:896},
          {name:"linear probe",color:CG_RED,fwd:96.1,w:1.0,params:896}]},
  "gemma-2-2b":{
-   N:{Ns:[4,8,16,32],cg:[0.881,0.939,0.971,0.979],lr:[0.853,0.936,0.975,0.987],svm:[0.849,0.937,0.978,0.989],
+   N:{Ns:[4,8,16,32],cg:[0.881,0.939,0.971,0.979],tap:[0.895,0.943,0.971,0.978],lr:[0.853,0.936,0.975,0.987],svm:[0.849,0.937,0.978,0.989],
       cgfwd:391.7,lrfwd:546.9},
    depth:{probe:0.987,pts:[
      {lab:"1 tap @25%",d:0.27,w:0.43,auc:0.948},{lab:"1 tap @40%",d:0.42,w:0.55,auc:0.974},
@@ -1987,7 +1989,7 @@ function cgEffN(){
     +'<svg id="cgen-svg" viewBox="0 0 460 220" style="width:100%;max-width:460px"></svg><div class="cg-readout" id="cgen-out"></div>';
   function draw(){
     var D=CGEFF[cgEl("cgen-model").value].N, Ns=D.Ns;
-    var S=[{n:"ConceptGate",c:CG_BLUE,dash:0,v:D.cg},{n:"linear probe · LR",c:CG_RED,dash:0,v:D.lr},{n:"linear probe · SVM",c:CG_RED,dash:1,v:D.svm}];
+    var S=[{n:"ConceptGate",c:CG_BLUE,dash:0,v:D.cg},{n:"depth-matched probe (same taps)",c:"#1c7d74",dash:1,v:D.tap},{n:"linear probe · LR (full model)",c:CG_RED,dash:0,v:D.lr},{n:"linear probe · SVM (full model)",c:CG_RED,dash:1,v:D.svm}];
     var W=460,H=220,L=48,R=16,T=16,B=40,pw=W-L-R,ph=H-T-B;
     function X(i){return L+i/(Ns.length-1)*pw;}
     var all=[].concat(D.cg,D.lr,D.svm),lo=Math.min.apply(null,all)-0.01,hi=Math.max.apply(null,all)+0.008;
