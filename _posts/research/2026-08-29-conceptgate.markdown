@@ -143,11 +143,12 @@ not. A reference implementation is available at
 </div>
 
 <div class="small-note" markdown="1">
-**Note on the figures.** The interactive figures in this report replay GPT-2 and Qwen2.5-0.5B runs
-computed offline; the model outputs, activations, and log-likelihood ratios shown are the measured
+**Note on the figures.** The interactive figures replay real runs computed offline — GPT-2 and
+Qwen2.5-0.5B on CPU, plus gemma-2-2b (on an Apple M4 GPU) for the efficiency, multi-concept,
+generalization, and steering figures; the model outputs, activations, and log-likelihood ratios shown are the measured
 values, and the controls recompute only inexpensive derived quantities (the fused discriminability,
 the decision threshold, the location of the cost knee) rather than executing a model in the browser.
-Both models are small and were selected for reproducibility on a single CPU; the qualitative findings
+The small models were chosen so the core results reproduce cheaply; the qualitative findings
 are expected to transfer to larger models, but the specific numbers should not be treated as
 calibrated large-model benchmarks. The interactive figures use a three-tap configuration (blocks 4/6/8
 on GPT-2) with eight examples per class; the mixture and parameter-count discussions cite the original
@@ -567,8 +568,8 @@ $$\mu_0=\operatorname{mean}_{a\in\mathcal{A}}(a),\qquad \sigma_0=\operatorname{s
 
 with $\epsilon=10^{-6}$. All *detection* math operates on the standardized $z$; steering
 (<a class="sref" href="#310-steering-the-write-side">§3.10</a>) deliberately works in raw space, because the hook that writes the stream sees
-raw activations. This one preprocessing step is what lets a plain diff-of-means be near-optimal, as
-the next section explains.
+raw activations. This one preprocessing step is what lets a plain diff-of-means approximate the optimal
+direction, as the next section explains.
 
 ### 3.3 The diff-of-means direction
 
@@ -577,15 +578,19 @@ class means in standardized space:
 
 $$w_\ell=\frac{\bar z^{+}_\ell-\bar z^{-}_\ell}{\lVert \bar z^{+}_\ell-\bar z^{-}_\ell\rVert}\in\mathbb{R}^d.$$
 
-This is not a heuristic. Model each class as a Gaussian with a shared covariance $\Sigma$; the
-Bayes-optimal (LDA) decision direction is $\Sigma^{-1}(\mu^+-\mu^-)$. Standardization pushes the
-within-class covariance toward isotropy ($\Sigma\propto I$), and under isotropy the optimal direction
-collapses to exactly $\mu^+-\mu^-$ — diff-of-means *is* the optimal linear direction. It is also why
-the method is few-shot stable: $w_\ell$ depends only on two *mean* vectors, which are well estimated
-from ten prompts even though any single activation is noisy — we are estimating a first moment, not
-fitting $d$ free parameters. (When the isotropy assumption is too strong, a per-layer logistic
-direction, which is covariance-aware, closes the small remaining gap to an SVM; we return to this in
-<a class="sref" href="#43-detection-on-real-prompts-a-commodity">§4.3</a>. It is an opt-in, not the default.)
+This has a rationale, but it is an approximation, not an identity. Model each class as a Gaussian with
+a shared covariance $\Sigma$; the Bayes-optimal (LDA) direction is $\Sigma^{-1}(\mu^+-\mu^-)$.
+Per-dimension standardization equalizes the *marginal* variances — it turns $\Sigma$ into a correlation
+matrix with unit diagonal, not into $I$ — so diff-of-means coincides with the optimum only under the
+further assumption that the standardized dimensions are approximately uncorrelated. When that assumption
+fails, a per-layer **logistic** direction, which is covariance-aware, closes the small remaining gap to
+an SVM (<a class="sref" href="#43-detection-on-real-prompts-a-commodity">§4.3</a>), and it is the mode we
+report whenever the comparison is against a trained classifier. Two caveats follow. The standardization
+is *pooled* over $\mathcal{A}^+\cup\mathcal{A}^-$, so a dimension that carries the concept has its large
+between-class gap folded into the pooled variance and is thereby *shrunk* by standardization — which
+plausibly accounts for part of the diff-of-means gap. And the few-shot stability is only partial:
+$w_\ell$ rests on two mean vectors that are well estimated from ten prompts, but $\mu_0$ and $\sigma_0$
+are $2d$ moment estimates from the same handful of examples, entering the direction multiplicatively.
 
 ### 3.4 The concept spectrogram
 
@@ -726,8 +731,11 @@ $$\mathrm{fire}(a)=\bigvee_{k=1}^{K}\big[\mathrm{LLR}_k>\tau_k\big],\qquad \math
 The attributed concept is the one whose direction is used if the action steers, so the same
 max-LLR rule that decides *whether* to act also decides *along which concept* to steer — a small but
 convenient coupling that keeps a multi-concept bank behaving like a single decision. Each concept is
-independent kilobytes, so a bank scales linearly and stays tiny, and concepts never interfere because
-each carries its own calibrated threshold. This bank — one shared truncated forward broadcast to the $K$
+independent kilobytes, so a bank scales linearly and stays tiny. Per-concept thresholds keep the
+directions independent, but they do **not** compose into a calibrated bank: the false-positive rate is
+the union over the $K$ concepts, so a per-concept $z=3$ ($\approx 0.1\%$ FPR) OR-ed over $K=14$ gives a
+bank-level FPR near $1.4\%$ — the operating point has to be set against the whole bank, not one concept
+at a time. This bank — one shared truncated forward broadcast to the $K$
 concept directions, each of which both detects and steers — is drawn in
 <a class="sref" href="#figure-12">Figure 12</a>, and its cost as $K$ grows is measured in
 <a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a>.
@@ -749,7 +757,7 @@ $$a_\ell\;\leftarrow\;a_\ell+\alpha\,w^{\text{raw}}_{\ell},$$
 
 with $\alpha>0$ steering **toward** the concept and $\alpha<0$ **away** (the refusal / guardrail
 direction). The one practical subtlety is *magnitude*: a good absolute $\alpha$ on GPT-2 is wrong on
-Qwen, because their residual norms differ by an order of magnitude (96 vs 19 in our runs). So we set
+Qwen, because their residual norms differ by about fivefold (96 vs 19 in our runs). So we set
 $\alpha$ as a **fraction of the measured residual norm**, which transfers across models — empirically
 $\sim$3–10% is the coherent band, and above roughly 20–25% the text degrades into repetition or
 gibberish.
@@ -776,7 +784,7 @@ object with a single method, `decide(ctx) → Decision`, given a narrow view of 
 executes the returned decision. Three actions ship:
 
 - **`Abort`** → halts decoding and appends a fixed marker *after* generation has stopped — a hard
-  gate that also *saves* the rest of the forward pass.
+  gate whose saving is the *decoding* it skips (the prompt's forward has already run for the check).
 - **`Steer`** → adds the per-layer steering vectors for the whole generation (<a class="sref" href="#310-steering-the-write-side">§3.10</a>),
   with the magnitude as a fraction of the residual norm and an optional named concept to steer along.
 - **`Emit`** → seeds a fixed string into the completion and lets the model *continue from it* — a
@@ -946,17 +954,22 @@ nuisance variation, following the CAA construction. The measurement contradicted
 negatives gave an AUC of approximately 0.42, below chance, against **0.78** for broad, unrelated
 negatives. The explanation is that broad negatives allow the direction to align with the large
 *semantic* gap between an assertive instruction to a model and an ordinary factual query, which is the
-signal the detector depends on, whereas matched negatives remove that gap and leave only a subtle
-distinction that ten examples cannot resolve. The result is counterintuitive but consistent: for
-few-shot concept detection, negatives should be broad rather than matched.
+signal the detector depends on, whereas matched negatives remove that gap. Note that 0.42 is *below*
+chance, not merely unresolved: the fitted direction ranks jailbreaks slightly beneath benign rather than
+at random, which suggests matched negatives pull it onto the shared surface structure itself. With ten
+examples we cannot separate a stable anti-signal from sampling variation around 0.5, but either reading
+supports the same conclusion: for few-shot concept detection, negatives should be broad rather than
+matched.
 
 ### 4.5 The compute–accuracy frontier
 
 Because detection needs only blocks up to the tap, every concept has a *cheapest depth at which it is
 already separable*. We sweep every layer, fit the standardized diff-of-means detector there, and
-measure leave-one-out AUC — held out, so it cannot overfit — against the fraction of the network that
-tap requires. The figure plots the measured curves; the target-AUC control locates the knee, the
-cheapest layer that clears a chosen AUC.
+measure leave-one-out AUC against the fraction of the network that tap requires. Leave-one-out keeps the
+held-out prompt out of the fit, but *selecting* the knee on the same ~20-prompt estimate makes the AUC at
+the chosen layer optimistically biased and, on so few prompts, high-variance; read these curves as
+locating roughly where the concept becomes readable, not as a precise operating AUC. The figure plots the
+measured curves; the target-AUC control locates the knee, the cheapest layer that clears a chosen AUC.
 
 <figure id="figure-7" style="margin:2rem 0">
 <div id="cg-cost" class="cg-widget" style="margin:0"></div>
@@ -1003,8 +1016,10 @@ Steering is a monotonic dose-response. On Qwen2.5-0.5B, raising the toward-fract
 content smoothly — the food direction moves the continuation to homemade-salsa completions, the nature
 direction to sun-over-the-mountains ones — while perplexity stays flat through roughly $|\text{fraction}|
 \le 0.1$, giving an effective window in which content shifts and fluency holds. The concept's own detector
-tracks it (the food LLR rises from 646 to 1089 over the sweep, nature from −20 to +51), so on a capable
-model the read and the write agree.
+tracks the shift ordinally (the food LLR climbs monotonically over the sweep, nature from below zero to
+above), so on a capable model the read and the write agree — though these LLR *magnitudes* are not
+calibrated probabilities: the Gaussian density is badly misspecified for generated text far from the
+few-shot fitting set, which is why the independent lexicon is the primary signal here.
 
 GPT-2 shows the same shape under the identical procedure, bounded by the weaker model. It shifts content
 even harder at the largest fractions — the nature direction reaches a 23% keyword rate against Qwen's 9% —
@@ -1152,9 +1167,9 @@ on its own, specific to ConceptGate: a truncated forward is available to any lat
 adapter separates from the alternatives is the one a real deployment faces — many concepts, not one. A
 content-safety guardrail is the familiar instance: Llama Guard
 <span class="cite" data-ref="Inan, H., et al. (2023). Llama Guard: LLM-based Input-Output Safeguard for Human-AI Conversations. arXiv:2312.06674."><a href="#ref-llamaguard">[8]</a></span>
-scores a taxonomy of roughly a dozen hazards, and GLiGuard, a recent GLiNER-family guardrail
+scores a fixed hazard taxonomy, and GLiGuard, a recent guardrail built on GLiNER
 <span class="cite" data-ref="Zaratiana, U., Tomeh, N., Holat, P., & Charnois, T. (2023). GLiNER: Generalist Model for Named Entity Recognition using Bidirectional Transformer. arXiv:2311.08526."><a href="#ref-gliner">[13]</a></span>,
-hosts fourteen harm categories and eleven jailbreak strategies in a single encoder. This subsection
+is fine-tuned to score fourteen harm categories and eleven jailbreak strategies in a single encoder. This subsection
 measures what a **bank of $K$ concepts** costs to build, extend, run, and store, and how that cost grows
 with $K$.
 
@@ -1479,7 +1494,9 @@ its detection side, since writing a direction alters behaviour whether or not an
 direction, but steering is not a filter, so the two serve different purposes.
 
 The second group of limitations concerns **the evidence being small and in-distribution**. We evaluate
-on GPT-2 and Qwen2.5-0.5B so that every result reproduces on a single CPU, but that choice bounds how
+primarily on GPT-2 and Qwen2.5-0.5B, small enough that the core results reproduce on a single CPU, and
+add gemma-2-2b for the multi-concept, generalization, and steering results (§4.8–4.9, §4.6), which we run
+on an Apple M4 GPU (MPS). That choice bounds how
 far the numbers extend: the qualitative findings — detection is a commodity, the base model bounds
 steering quality, and the cost trade-off is real and model-dependent — are expected to hold at the
 2–8B instruct scale, whereas the specific AUCs, error rates, and knee locations
