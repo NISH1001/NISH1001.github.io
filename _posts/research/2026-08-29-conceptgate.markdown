@@ -982,9 +982,14 @@ The shape of the curve reflects model capability. On GPT-2 the jailbreak concept
 until the middle of the network: AUC climbs through the early blocks and only saturates around block
 6, so the cheapest reliable guardrail runs somewhat more than half the network and the final ~40% of
 blocks contribute nothing. On Qwen2.5-0.5B the same concept is essentially separable by **block 1**,
-because the more capable model has formed the abstraction almost immediately, so the guardrail can run
-roughly 8% of the network (block 1 of 24). Each of these is a concrete, per-concept, per-model
-operating point, and it is the practical consequence of the truncated forward.
+so the guardrail can run roughly 8% of the network (block 1 of 24). We describe this throughout as the
+base model being more *capable*, but the comparison is confounded: GPT-2 is a 2019 base model while
+Qwen2.5 is an *instruction-tuned* model post-trained on refusal, so jailbreak-ness being salient at
+block 1 may be safety tuning as much as raw capability. The two are entangled here and we do not separate
+them. (This 8% figure is also from the leave-one-out sweep of §4.5, on ~20 prompts; the 262-prompt
+held-out measurement of <a class="sref" href="#481-learning-a-single-concept">§4.8.1</a> is the one to
+quote for a precise depth.) Each of these is a concrete, per-concept, per-model operating point, and it is
+the practical consequence of the truncated forward.
 
 ### 4.6 Steering across models
 
@@ -1192,9 +1197,14 @@ bank is also a steering control at no extra cost.
 *kind* of safety taxonomy the guardrails above target. For each category, positives are prompts whose
 responses were annotated with that harm and negatives are a shared pool of benign prompts; every method
 sees the same $N=32$ examples per class and is scored on the held-out test split, averaged over three
-seeds, on both base models. As $K$ grows from 1 to 14 we measure **build time** (learning the whole
-bank), **inference** (per-prompt wall-time to score against all $K$ concepts), **memory** (parameters
-learned), and per-category **detection AUC**. ConceptGate and the probe learn on frozen features; LoRA
+seeds, on both base models. Two caveats on this labelling. The annotation is on the *response*, so a
+response-derived label stands in for a prompt-level concept; and because a single benign pool is shared
+across all fourteen categories, the fourteen directions are pulled toward one common benign centroid — so
+what presents as fourteen independent concepts is closer to one harmfulness direction with
+category-specific variation, which also colours the generalization result of
+<a class="sref" href="#49-out-of-distribution-generalization">§4.9</a>. As $K$ grows from 1 to 14 we
+measure **build time** (learning the whole bank), **inference** (per-prompt wall-time to score against all
+$K$ concepts), **memory** (parameters learned), and per-category **detection AUC**. ConceptGate and the probe learn on frozen features; LoRA
 back-propagates a rank-8 adapter and a classification head. The harness
 ([`scripts/eval_detection.py --scaling`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_detection.py))
 and the raw results
@@ -1312,7 +1322,8 @@ LoRA's 3.9 and 29 minutes — 30× and 38×.
 
 **The bank is also accurate.** The low cost does not come at the expense of detection. Across the
 fourteen categories the training-free bank trails the full-model linear probe by 0.023 on Qwen2.5-0.5B
-(mean AUC 0.832 vs 0.855) and slightly exceeds it on gemma-2-2b (0.881 vs 0.874). Few-shot LoRA is both
+(mean AUC 0.832 vs 0.855) and is statistically indistinguishable on gemma-2-2b (0.881 vs 0.874 — within
+seed noise at three seeds). Few-shot LoRA is both
 the slowest to train and the weakest to read: on the three categories where it was run it reaches mean
 AUC 0.685 on Qwen and 0.814 on gemma, against ConceptGate's 0.889 and 0.913 on those same three — a
 randomly-initialized head simply does not have enough signal in $2N$ examples. Harm content is read best
@@ -1387,8 +1398,9 @@ fall to or below chance. Harmfulness is therefore encoded partly as a shared, ca
 direction and partly as category-specific structure that a held-out estimate does not recover.
 
 ConceptGate is at least as robust to this shift as the full-model probe. On both base models its held-out
-AUC equals or exceeds the probe's, and its degradation is smaller on Qwen2.5-0.5B (0.18 versus 0.24) and
-comparable on gemma-2-2b (0.25 versus 0.26); the mid-layer tapped direction is thus no less transferable
+AUC is within seed noise of the probe's, and its degradation is smaller on Qwen2.5-0.5B (0.18 versus 0.24)
+and indistinguishable on gemma-2-2b (0.25 versus 0.26, a difference well inside three-seed noise); the
+mid-layer tapped direction is thus no less transferable
 than a final-layer one. The absolute level nonetheless indicates that a single few-shot direction is only
 a partial detector for categories outside its estimation set, and is better estimated from a diverse set
 of categories than from any one alone.
