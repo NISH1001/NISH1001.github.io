@@ -125,7 +125,7 @@ that taps the residual stream at several layers and treats a concept's projectio
 single signal: a per-layer spectrogram combined by a learned depth filter and gated by a calibrated
 likelihood-ratio test. A direction fit from the same examples is used, in the model's raw activation
 space, to steer generation toward or away from the concept — related to the detection direction but not
-identical to it (their per-tap cosine is ~0.5–0.6; §3.10). We present the
+identical to it (their per-tap cosine is 0.45–0.79 depending on model, concept, and detection mode; §3.10). We present the
 method with its derivation and evaluate each component on GPT-2, Qwen2.5-0.5B, and gemma-2-2b. The
 results are mixed, and we report the negatives as prominently as the positives. (i) As a detector
 ConceptGate is a commodity: it performs comparably to a linear support-vector machine on the same
@@ -265,7 +265,7 @@ Two empirical facts make it the right place to work. First, many concepts are ap
 well above chance <span class="cite" data-ref="Alain, G., &amp; Bengio, Y. (2016). Understanding intermediate layers using linear classifier probes. arXiv:1610.01644."><a href="#ref-probes">[2]</a></span><span class="cite" data-ref="Zou, A., et al. (2023). Representation Engineering: A Top-Down Approach to AI Transparency. arXiv:2310.01405."><a href="#ref-repe">[3]</a></span>.
 Second, the stream is **writable**: a closely related direction, added back, changes what the model goes on to
 say <span class="cite" data-ref="Turner, A. M., et al. (2023). Steering Language Models With Activation Engineering. arXiv:2308.10248."><a href="#ref-actadd">[4]</a></span><span class="cite" data-ref="Panickssery, N., et al. (2023). Steering Llama 2 via Contrastive Activation Addition. arXiv:2312.06681."><a href="#ref-caa">[5]</a></span>.
-Reading and writing therefore share their few-shot fitting data and a closely related direction (per-tap cosine ~0.5–0.6, <a class="sref" href="#310-steering-the-write-side">§3.10</a>) — and
+Reading and writing therefore share their few-shot fitting data and a closely related direction (per-tap cosine 0.45–0.79, <a class="sref" href="#310-steering-the-write-side">§3.10</a>) — and
 it is this shared structure that the rest of the method is organized around.
 
 ### 1.3 The gap: depth, and the read/write duality
@@ -373,7 +373,7 @@ The element that ties these borrowings into one system — and the only part spe
 the pair of design commitments stated in the introduction: read the concept
 *across depth* rather than at a single chosen layer, and fit the detector and the steerer *from one set
 of examples* so they act in the two directions of information flow — closely related directions rather
-than one shared vector (per-tap cosine $\approx$0.5–0.6,
+than one shared vector (per-tap cosine 0.45–0.79,
 <a class="sref" href="#310-steering-the-write-side">§3.10</a>) — so that a frozen model can be turned into
 a few-shot, calibrated, read-and-write concept adapter without any training. We close the section
 (<a class="sref" href="#26-positioning">§2.6</a>) by making that positioning explicit, including the adversarial caveat that bounds
@@ -414,7 +414,7 @@ generation to shift behaviour along a named axis
 <span class="cite" data-ref="Panickssery, N., et al. (2023). Steering Llama 2 via Contrastive Activation Addition. arXiv:2312.06681."><a href="#ref-caa">[5]</a></span>.
 Our steering rule is literally theirs — add $\pm\alpha\,w^{\text{raw}}$ at the tapped layers.
 ConceptGate's steering direction is the diff-of-means of the same few-shot examples the detector is fit
-from — a *related* direction (per-tap cosine ~0.5–0.6,
+from — a *related* direction (per-tap cosine 0.45–0.79,
 <a class="sref" href="#310-steering-the-write-side">§3.10</a>), not the detector's standardized, and in
 practice logistic, direction itself. The guardrail-flavoured cousin is **Circuit Breakers**, which makes a
 model reroute its own harmful representations so that continuing down a harmful path collapses into
@@ -490,8 +490,9 @@ Every subsection above names a component ConceptGate *uses*, and the plumbing be
 and writing activations through forward hooks, running a partial forward — is commodity engineering,
 not method. The one-paragraph stance we keep in view for the rest of the paper is therefore
 deliberately modest: ConceptGate introduces **no new mechanism**. It is a specific composition —
-few-shot, calibrated, depth-fused, and *dual-mode* (read and write) over a frozen model's own middle
-layers — and its worth is an empirical question, settled by the map in
+few-shot, calibrated, multi-tap, and *dual-mode* (read and write) over a frozen model's own middle
+layers, with the write conditioned on the read — and its worth is an empirical question, settled by the
+map in
 <a class="sref" href="#4-experiments-and-results">§4</a> rather than by any single clever part. That map
 includes results that cut against the method as much as for it, and it comes with a caveat that is not
 optional but constitutive: obfuscated-activation attacks are known to defeat this entire class of
@@ -573,7 +574,7 @@ walk it one stage at a time.
 the residual stream at chosen blocks (dashed red), projects each tap onto the concept's direction to
 get a per-layer score (the spectrogram), blends those with a learned depth filter into one score,
 and gates on a calibrated likelihood ratio. On a firing it either aborts decoding or adds the
-concept direction back into the stream to steer. Reading and steering use closely related directions fit from the same examples (cosine ~0.5–0.6, §3.10).</figcaption>
+concept direction back into the stream to steer. Reading and steering use closely related directions fit from the same examples (cosine 0.45–0.79, §3.10).</figcaption>
 </figure>
 
 The same pipeline, run on a real prompt, is shown interactively in
@@ -1405,7 +1406,7 @@ are in the repository.
     <text x="560" y="200" font-size="10.5" fill="#8cc5bf">steer &#160; + &#945;&#183;w<tspan baseline-shift="super" font-size="7">K</tspan><tspan baseline-shift="sub" font-size="7">raw</tspan></text>
   </g>
   <text x="524" y="178" text-anchor="middle" font-size="16" fill="#bbb">&#8943;</text>
-  <text x="360" y="234" text-anchor="middle" font-size="11" fill="currentColor">each concept = one closed-form fit (~ms, ~kB) giving <tspan font-style="italic">two</tspan> directions: w<tspan baseline-shift="sub" font-size="8">det</tspan> reads standardized z, w<tspan baseline-shift="sub" font-size="8">raw</tspan> writes the raw stream (cosine ~0.5–0.6)</text>
+  <text x="360" y="234" text-anchor="middle" font-size="11" fill="currentColor">each concept = one closed-form fit (~ms, ~kB) giving <tspan font-style="italic">two</tspan> directions: w<tspan baseline-shift="sub" font-size="8">det</tspan> reads standardized z, w<tspan baseline-shift="sub" font-size="8">raw</tspan> writes the raw stream (cosine 0.45–0.79)</text>
 </svg>
 <figcaption><strong>Figure 12.</strong> <em>The concept bank and the read/write duality.</em> A single
 truncated forward — the frozen model run only up to the deepest tap, never the layers above — produces one
@@ -1414,7 +1415,7 @@ set of tapped activations <em>a</em> that every concept reads. Each concept is o
 directions rather than one: <em>w<sup>k</sup><sub>det</sub></em> detects (project the standardized
 activation onto it and threshold) while <em>w<sup>k</sup><sub>raw</sub></em> steers (add ±α back into the
 raw stream). They come from the same examples and the same class-mean construction, but they are not the
-same vector — per-tap cosine ~0.5–0.6, far from chance and far from identity
+same vector — per-tap cosine 0.45–0.79, far from chance and far from identity
 (<a class="sref" href="#310-steering-the-write-side">§3.10</a>). So one forward serves all <em>K</em> concepts, adding a
 concept is one closed-form fit, and detection and steering share their fitting data — the cost behaviour
 Figures 13–14 measure.</figcaption>
