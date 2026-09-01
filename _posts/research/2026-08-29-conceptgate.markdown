@@ -294,8 +294,10 @@ This paper contributes, in order of how much we trust them:
 3. **Negative and null results.** We report where the method does *not* help: detection is a
    commodity that a linear SVM matches (<a class="sref" href="#43-detection-on-real-prompts-a-commodity">§4.3</a>); matched contrastive
    negatives *hurt* rather than help (<a class="sref" href="#44-matched-versus-broad-negatives-a-negative-result">§4.4</a>); the mixture model collapses to a
-   single Gaussian at few-shot sample sizes (<a class="sref" href="#42-mixture-densities-a-constructed-hard-case-and-a-few-shot-collapse">§4.2</a>); and a paraphrase-robustness effect we
-   predicted does not appear (<a class="sref" href="#47-a-paraphrase-robustness-null">§4.7</a>).
+   single Gaussian at few-shot sample sizes (<a class="sref" href="#42-mixture-densities-a-constructed-hard-case-and-a-few-shot-collapse">§4.2</a>); a paraphrase-robustness effect we
+   predicted does not appear (<a class="sref" href="#47-a-paraphrase-robustness-null">§4.7</a>); and
+   generalization to an unseen harm category is only partial, if no worse for ConceptGate than for a
+   trained probe (<a class="sref" href="#49-out-of-distribution-generalization">§4.9</a>).
 4. **A compute–accuracy frontier.** Because detection needs only the blocks up to the deepest tap, a
    concept has a *cheapest layer at which it is already separable*; we measure this frontier and show
    it is model-dependent (<a class="sref" href="#45-the-computeaccuracy-frontier">§4.5</a>).
@@ -1278,6 +1280,64 @@ extend, competitive with a trained probe on every category, far ahead of few-sho
 steerable from the identical learned state is what distinguishes ConceptGate from both a detect-only
 probe bank and a retrained guardrail.
 
+### 4.9 Out-of-distribution generalization
+
+In-distribution detection accuracy need not predict performance under distribution shift, and linear
+probes are known to generalize poorly off-distribution.
+<a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a> estimated a separate direction for each
+harm category and evaluated it on that same category; here we instead measure how a harmfulness direction
+transfers to categories it was not estimated from. Fixing the concept and varying only the harm category
+isolates out-of-distribution generalization within a single concept, and avoids the confound of
+transferring between two distinct concepts — for instance jailbreak framing and harmful content — where a
+change of concept is entangled with the change of distribution.
+
+**Setup.** We use leave-one-category-out cross-validation over the fourteen BeaverTails categories. For
+each held-out category, ConceptGate and the full-model linear probe estimate the harmful direction from
+the remaining thirteen categories together with a shared benign pool ($N=32$ per class) and are evaluated
+on the held-out category; an in-distribution reference instead estimates the direction from the held-out
+category itself. The two conditions share the same benign examples, test set, sample size, and seeds, so
+the only difference is whether the evaluated category was present during estimation. We report the mean
+over three seeds for both base models, reusing the activations of
+<a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a>. Harness:
+[`--ood`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_detection.py); results:
+[`eval_ood_results.json`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_ood_results.json).
+
+<figure id="figure-14" style="margin:2rem 0">
+<div id="cg-ood" class="cg-widget" style="margin:0"></div>
+<figcaption><strong>Figure 14 (interactive).</strong> <em>Generalization to an unseen category.</em>
+Each row is one held-out BeaverTails category, with ConceptGate (teal) and the full-model linear probe
+(red) each shown as a pair: a hollow marker at the in-distribution AUC (the category was in training) and
+a solid marker at the held-out AUC (the direction was trained on the other thirteen). The connecting line
+is the drop; the dashed lines are the per-method means, and the grey line is chance. Both methods fall
+well below their in-distribution values, ConceptGate's solid markers lie at or to the right of the
+probe's, and a few categories (controversial/politics, discrimination) fall to chance. Toggle the base
+model; hover any marker.</figcaption>
+</figure>
+
+<div class="cg-mono" markdown="1">
+
+| Base model | ConceptGate  in → held-out (drop) | linear probe  in → held-out (drop) |
+|---|---|---|
+| Qwen2.5-0.5B | 0.827 → 0.647 (0.181) | 0.847 → 0.610 (0.237) |
+| gemma-2-2b | 0.868 → 0.616 (0.251) | 0.866 → 0.610 (0.256) |
+
+</div>
+
+Generalization is partial. Averaged over the fourteen held-out categories, a harmfulness direction
+estimated from the remaining thirteen attains a mean AUC of 0.62–0.65 — above chance, but substantially
+below the 0.83–0.87 obtained in-distribution. The degradation is uneven: violence, self-harm,
+drug-and-weapon, terrorism, and financial-crime prompts remain detectable when held out (AUC ≈ 0.75–0.81),
+whereas controversial-political content (0.29–0.47) and, on gemma-2-2b, sexually explicit content (0.43)
+fall to or below chance. Harmfulness is therefore encoded partly as a shared, category-independent
+direction and partly as category-specific structure that a held-out estimate does not recover.
+
+ConceptGate is at least as robust to this shift as the full-model probe. On both base models its held-out
+AUC equals or exceeds the probe's, and its degradation is smaller on Qwen2.5-0.5B (0.18 versus 0.24) and
+comparable on gemma-2-2b (0.25 versus 0.26); the mid-layer tapped direction is thus no less transferable
+than a final-layer one. The absolute level nonetheless indicates that a single few-shot direction is only
+a partial detector for categories outside its estimation set, and is better estimated from a diverse set
+of categories than from any one alone.
+
 ## 5. Discussion
 
 ### 5.1 What is contributed
@@ -1298,7 +1358,8 @@ training-free module that both reads and writes a concept from a frozen model's 
 with a small and well-characterized cost. The third is the empirical account of where each component
 helps and where it does not — the depth-fusion advantage is real on synthetic data but does not transfer
 to a real model where one layer already carries the concept; detection is a commodity that a logistic or
-SVM probe matches; and cross-distribution transfer collapses for every method alike. The value of the
+SVM probe matches; and generalization to an unseen harm category is only partial, though no worse for
+ConceptGate than for a trained probe (<a class="sref" href="#49-out-of-distribution-generalization">§4.9</a>). The value of the
 work is therefore not that its detector outperforms the alternatives, which it does not, but that it
 matches them at a fraction of the compute and memory, assembles a read-and-write adapter, and measures
 each part against a fair baseline.
@@ -1380,9 +1441,12 @@ far the numbers extend: the qualitative findings — detection is a commodity, t
 steering quality, and the cost trade-off is real and model-dependent — are expected to hold at the
 2–8B instruct scale, whereas the specific AUCs, error rates, and knee locations
 should be re-measured there before being quoted. Within these small models, the detection numbers are
-in-distribution: probe-based detection is known to generalize poorly off-distribution, so a detector
-that appears accurate on held-out prompts from the same distribution can degrade sharply on a
-substantially different attack style, and the figures here do not test that. And because the whole method rests on a *linear*
+in-distribution: probe-based detection is known to generalize poorly off-distribution.
+<a class="sref" href="#49-out-of-distribution-generalization">§4.9</a> tests one clean version of this —
+holding the concept fixed and holding out whole harm categories — and finds only *partial* generalization
+(a direction trained on thirteen categories catches an unseen fourteenth well above chance but well below
+in-distribution), with ConceptGate no less robust than a trained probe. But a substantially different
+*attack style* is a larger shift than a held-out category, and that is not tested here. And because the whole method rests on a *linear*
 direction, any concept that the frozen model encodes non-linearly is invisible to it; the intended
 mitigations — the layer sweep, and an MLP-probe variant that trades interpretability for capacity —
 are gestured at here but not fully explored.
@@ -2013,8 +2077,67 @@ function cgScaleAuc(){
   cgEl("cgsa-model").addEventListener("change",draw); draw();
 }
 
+// ---- Within-concept OOD: leave-one-category-out (in-distribution -> unseen category) ----
+// rows: [label, cg_in, cg_ood, pr_in, pr_ood]. Measured by scripts/eval_detection.py --ood.
+var CGOOD={
+ "Qwen2.5-0.5B":{cgIn:0.827,cgOod:0.647,prIn:0.847,prOod:0.610,rows:[
+   ["animal abuse",0.919,0.632,0.937,0.530],["child abuse",0.948,0.718,0.967,0.655],
+   ["controversial/politics",0.800,0.390,0.837,0.382],["discrimination",0.768,0.490,0.810,0.464],
+   ["drugs/weapons",0.892,0.741,0.936,0.725],["financial crime",0.843,0.782,0.851,0.688],
+   ["hate speech",0.796,0.567,0.797,0.536],["misinformation",0.696,0.631,0.653,0.620],
+   ["non-violent unethical",0.716,0.670,0.716,0.636],["privacy",0.854,0.564,0.871,0.516],
+   ["self-harm",0.902,0.766,0.928,0.741],["sexual content",0.759,0.584,0.842,0.534],
+   ["terrorism",0.856,0.744,0.892,0.760],["violence",0.833,0.775,0.823,0.751]]},
+ "gemma-2-2b":{cgIn:0.868,cgOod:0.616,prIn:0.866,prOod:0.610,rows:[
+   ["animal abuse",0.932,0.591,0.938,0.565],["child abuse",0.973,0.639,0.956,0.638],
+   ["controversial/politics",0.826,0.466,0.845,0.473],["discrimination",0.846,0.521,0.847,0.501],
+   ["drugs/weapons",0.940,0.743,0.951,0.750],["financial crime",0.893,0.735,0.877,0.694],
+   ["hate speech",0.826,0.545,0.832,0.499],["misinformation",0.660,0.643,0.654,0.613],
+   ["non-violent unethical",0.730,0.654,0.719,0.609],["privacy",0.926,0.526,0.930,0.561],
+   ["self-harm",0.889,0.709,0.897,0.712],["sexual content",0.931,0.432,0.931,0.462],
+   ["terrorism",0.931,0.752,0.928,0.775],["violence",0.845,0.673,0.815,0.682]]}
+};
+// Figure: within-concept generalization — each category's in-distribution -> unseen-category AUC
+function cgOOD(){
+  var host=cgEl("cg-ood"); if(!host) return; var models=Object.keys(CGOOD);
+  host.innerHTML='<p class="cg-eyebrow">figure · interactive · N=32 / class · leave-one-category-out</p><h4>Generalization to an unseen category</h4>'
+   +'<div class="cg-ctrls"><div class="cg-ctrl"><label>base model</label><select id="cgood-model">'
+   +models.map(function(m){return '<option value="'+m+'">'+m+'</option>';}).join('')+'</select></div></div>'
+   +'<svg id="cgood-svg" viewBox="0 0 480 432" style="width:100%;max-width:480px"></svg><div class="cg-readout" id="cgood-out"></div>';
+  function draw(){
+    var D=CGOOD[cgEl("cgood-model").value];
+    var rows=D.rows.slice().sort(function(a,b){return b[2]-a[2];});
+    var W=480,H=432,L=118,R=16,T=30,B=46,pw=W-L-R,ph=H-T-B,n=rows.length,rh=ph/n,xlo=0.3,xhi=1.0;
+    function X(a){return L+(Math.max(xlo,Math.min(xhi,a))-xlo)/(xhi-xlo)*pw;}
+    function YR(i){return T+i*rh+rh/2;}
+    var s='<line x1="'+L+'" y1="'+T+'" x2="'+L+'" y2="'+(H-B)+'" stroke="'+CG_GRID+'"/><line x1="'+L+'" y1="'+(H-B)+'" x2="'+(W-R)+'" y2="'+(H-B)+'" stroke="'+CG_GRID+'"/>';
+    [0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0].forEach(function(a){var xx=X(a);
+      if(a!=0.5)s+='<line x1="'+xx+'" y1="'+T+'" x2="'+xx+'" y2="'+(H-B)+'" stroke="'+CG_GRID+'" opacity="0.3"/>';
+      s+='<text x="'+xx+'" y="'+(H-B+14)+'" font-size="9" text-anchor="middle" fill="currentColor" opacity="0.82">'+a.toFixed(1)+'</text>';});
+    s+='<line x1="'+X(0.5)+'" y1="'+T+'" x2="'+X(0.5)+'" y2="'+(H-B)+'" stroke="#a09c92" stroke-dasharray="2 3" opacity="0.8"/>'
+      +'<text x="'+X(0.5)+'" y="'+(T-4)+'" font-size="9" text-anchor="middle" fill="#a09c92">chance</text>';
+    s+='<text x="'+(L+pw/2)+'" y="'+(H-4)+'" font-size="10" text-anchor="middle" fill="currentColor" opacity="0.92" font-weight="700">held-out AUC (unseen category)</text>';
+    s+='<line x1="'+X(D.cgOod)+'" y1="'+T+'" x2="'+X(D.cgOod)+'" y2="'+(H-B)+'" stroke="'+CG_BLUE+'" stroke-dasharray="4 3" opacity="0.7"/>';
+    s+='<line x1="'+X(D.prOod)+'" y1="'+T+'" x2="'+X(D.prOod)+'" y2="'+(H-B)+'" stroke="'+CG_RED+'" stroke-dasharray="4 3" opacity="0.5"/>';
+    rows.forEach(function(r,i){var y=YR(i),lb=r[0],cin=r[1],cood=r[2],pin=r[3],pood=r[4];
+      s+='<text x="'+(L-8)+'" y="'+(y+3)+'" font-size="9" text-anchor="end" fill="currentColor" opacity="0.9">'+lb+'</text>';
+      s+='<line x1="'+X(cood)+'" y1="'+(y-3.6)+'" x2="'+X(cin)+'" y2="'+(y-3.6)+'" stroke="'+CG_BLUE+'" stroke-width="1.3" opacity="0.45"/>';
+      s+='<circle cx="'+X(cin)+'" cy="'+(y-3.6)+'" r="2.9" fill="#faf9f4" stroke="'+CG_BLUE+'" data-tip="'+lb+' · CG seen '+cin.toFixed(3)+'"/>';
+      s+='<circle cx="'+X(cood)+'" cy="'+(y-3.6)+'" r="3.6" fill="'+CG_BLUE+'" data-tip="'+lb+' · CG unseen '+cood.toFixed(3)+'"/>';
+      s+='<line x1="'+X(pood)+'" y1="'+(y+3.6)+'" x2="'+X(pin)+'" y2="'+(y+3.6)+'" stroke="'+CG_RED+'" stroke-width="1.3" opacity="0.4"/>';
+      s+='<circle cx="'+X(pin)+'" cy="'+(y+3.6)+'" r="2.9" fill="#faf9f4" stroke="'+CG_RED+'" data-tip="'+lb+' · probe seen '+pin.toFixed(3)+'"/>';
+      s+='<circle cx="'+X(pood)+'" cy="'+(y+3.6)+'" r="3.6" fill="'+CG_RED+'" data-tip="'+lb+' · probe unseen '+pood.toFixed(3)+'"/>';});
+    cgEl("cgood-svg").innerHTML=s; cgWireTips(cgEl("cgood-svg"));
+    cgEl("cgood-out").innerHTML='<span style="color:'+CG_BLUE+';font-weight:600">&#9679; ConceptGate</span> &nbsp; '
+      +'<span style="color:'+CG_RED+';font-weight:600">&#9679; linear probe</span> &nbsp;·&nbsp; hollow = seen, solid = unseen; dashed = mean unseen.<br>'
+      +'mean over 14 categories: ConceptGate <b style="color:'+CG_BLUE+'">'+D.cgIn.toFixed(3)+'&#8594;'+D.cgOod.toFixed(3)+'</b> vs probe '
+      +D.prIn.toFixed(3)+'&#8594;'+D.prOod.toFixed(3)+' — generalization is partial, and ConceptGate’s drop is no larger than the probe’s.';
+  }
+  cgEl("cgood-model").addEventListener("change",draw); draw();
+}
+
 (function(){
-  function boot(){ [cgTrace,cgDepthFusion,cgDetect,cgSteer,cgCost,cgKillshot,cgEffN,cgEffDepth,cgEffSummary,cgScaleCost,cgScaleAuc].forEach(function(f){try{f();}catch(e){}}); }
+  function boot(){ [cgTrace,cgDepthFusion,cgDetect,cgSteer,cgCost,cgKillshot,cgEffN,cgEffDepth,cgEffSummary,cgScaleCost,cgScaleAuc,cgOOD].forEach(function(f){try{f();}catch(e){}}); }
   if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",boot);}else{boot();}
 })();
 </script>
