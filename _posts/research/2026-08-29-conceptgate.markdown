@@ -290,7 +290,9 @@ This paper contributes, in order of how much we trust them:
    discriminabilities add in quadrature) and on synthetic data (test error 16.1%→9.4%, <a class="sref" href="#41-depth-fusion-on-synthetic-data">§4.1</a>).
 2. **A calibrated, few-shot, dual-mode adapter.** One object learns a concept from ~10 examples,
    detects it with a calibrated fire/abstain/pass gate, and steers generation along the same
-   direction — with a clean parameter budget (<a class="sref" href="#54-what-it-actually-costs">§5.4</a>) and no training.
+   direction — a measured, monotonic dose-response
+   (<a class="sref" href="#46-steering-across-models">§4.6</a>) — with a clean parameter budget
+   (<a class="sref" href="#54-what-it-actually-costs">§5.4</a>) and no training.
 3. **Negative and null results.** We report where the method does *not* help: detection is a
    commodity that a linear SVM matches (<a class="sref" href="#43-detection-on-real-prompts-a-commodity">§4.3</a>); matched contrastive
    negatives *hurt* rather than help (<a class="sref" href="#44-matched-versus-broad-negatives-a-negative-result">§4.4</a>); the mixture model collapses to a
@@ -727,7 +729,7 @@ convenient coupling that keeps a multi-concept bank behaving like a single decis
 independent kilobytes, so a bank scales linearly and stays tiny, and concepts never interfere because
 each carries its own calibrated threshold. This bank — one shared truncated forward broadcast to the $K$
 concept directions, each of which both detects and steers — is drawn in
-<a class="sref" href="#figure-11">Figure 11</a>, and its cost as $K$ grows is measured in
+<a class="sref" href="#figure-12">Figure 12</a>, and its cost as $K$ grows is measured in
 <a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a>.
 
 ### 3.10 Steering: the write side
@@ -973,16 +975,45 @@ operating point, and it is the practical consequence of the truncated forward.
 
 ### 4.6 Steering across models
 
-The steering figure in <a class="sref" href="#310-steering-the-write-side">§3.10</a> also serves as an experiment. Sweeping the fraction on
-Qwen2.5-0.5B produces coherent, on-topic shifts — the "food" direction reliably pulls the continuation
-toward cooking and flavour, and "nature" toward sun, trees, and wildflowers — across roughly the
-4–12% band, degrading into repetition only at the extremes. GPT-2, given the identical procedure and
-the same fraction, shifts more weakly and breaks down sooner: the "food" direction does reach
-*"vegan and gluten-free recipes"* and *"meat and veggies,"* but only with more force applied and with
-rougher text. The generalization, which the evidence supports fairly directly, is that the base model
-bounds what the adapter can achieve: ConceptGate can only read and steer concepts that the frozen
-model has itself formed clearly, so a more capable model yields both cleaner detection
-(<a class="sref" href="#45-the-computeaccuracy-frontier">§4.5</a>) and cleaner steering from the same ten examples.
+Steering (<a class="sref" href="#310-steering-the-write-side">§3.10</a>) is the operation a detector
+cannot perform, and the part of the system that most needs measuring rather than illustrating. For each
+of three concepts — food, nature, technology — we generate a continuation of five neutral prompts at each
+value of the steering fraction (the magnitude of the added direction, as a fraction of the residual norm)
+and score every greedy generation three ways: the share of content words matching a concept keyword list
+(an *independent* measure of the semantic shift, not derived from the steering direction), the perplexity
+of the continuation under the base model (fluency), and the concept's own detector log-likelihood ratio on
+the generated text (the internal read of what the write produced). There is no baseline method to compare
+against — a linear probe or classifier cannot steer at all, and the mechanism itself is standard
+activation addition (<a class="sref" href="#22-activation-steering-and-circuit-breakers">§2.2</a>) — so
+the comparison is the unsteered point (fraction 0) and the two base models. The harness is
+[`scripts/eval_steering.py`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_steering.py).
+
+<figure id="figure-8" style="margin:2rem 0">
+<div id="cg-steer-dose" class="cg-widget" style="margin:0"></div>
+<figcaption><strong>Figure 8 (interactive).</strong> <em>Steering dose-response.</em> For one concept and
+base model, concept content (teal, left axis — the fraction of generated words matching a concept keyword
+list, an independent measure) and perplexity (amber, right axis — fluency) as the steering fraction sweeps
+from away (−) through no steering (0) to toward (+). Drag the fraction to read the actual generated text at
+each point. On Qwen2.5-0.5B content rises with the toward-fraction while perplexity stays flat over an
+effective window; on GPT-2 the shift is stronger but breaks into repetition and the model's own detector
+misses it. Toggle the base model and concept.</figcaption>
+</figure>
+
+Steering is a monotonic dose-response. On Qwen2.5-0.5B, raising the toward-fraction increases concept
+content smoothly — the food direction moves the continuation to homemade-salsa completions, the nature
+direction to sun-over-the-mountains ones — while perplexity stays flat through roughly $|\text{fraction}|
+\le 0.1$, giving an effective window in which content shifts and fluency holds. The concept's own detector
+tracks it (the food LLR rises from 646 to 1089 over the sweep, nature from −20 to +51), so on a capable
+model the read and the write agree.
+
+GPT-2 shows the same shape under the identical procedure, bounded by the weaker model. It shifts content
+even harder at the largest fractions — the nature direction reaches a 23% keyword rate against Qwen's 9% —
+but as degenerate repetition (*"the sun shone on the mountains, and the moon shone on the mountains…"*),
+and its own detector barely registers its own steered output (the nature LLR stays negative throughout).
+The write can outrun a weak read, but the fluency of the steered text is bounded by what the base model
+produces cleanly — the same ceiling that bounds detection
+(<a class="sref" href="#45-the-computeaccuracy-frontier">§4.5</a>): a more capable model steers more
+cleanly from the same ten examples.
 
 ### 4.7 A paraphrase-robustness null
 
@@ -1029,9 +1060,9 @@ Apple M4 under MPS**, averaged over three seeds. We report held-out test metrics
 and the full result tables ([`docs/evaluation.md`](https://github.com/NISH1001/conceptgate/blob/main/docs/evaluation.md))
 are in the repository; the figure and tables below replay their output.
 
-<figure id="figure-8" style="margin:2rem 0">
+<figure id="figure-9" style="margin:2rem 0">
 <div id="cg-eff-n" class="cg-widget" style="margin:0"></div>
-<figcaption><strong>Figure 8 (interactive).</strong> <em>Sample efficiency.</em> Held-out AUC as the few-shot
+<figcaption><strong>Figure 9 (interactive).</strong> <em>Sample efficiency.</em> Held-out AUC as the few-shot
 count <em>N</em> grows (4→32), with the same examples and test set for every method. ConceptGate (teal)
 reads a few mid-layer taps in closed form; the linear-probing baselines freeze the base model and fit a
 logistic (solid red) or linear-SVM (dashed red) head on its final layer. On gemma-2-2b ConceptGate leads
@@ -1039,19 +1070,19 @@ at the smallest N and the methods converge as N grows; on Qwen the trained probe
 the base model; hover any point for exact numbers.</figcaption>
 </figure>
 
-<figure id="figure-9" style="margin:2rem 0">
+<figure id="figure-10" style="margin:2rem 0">
 <div id="cg-eff-depth" class="cg-widget" style="margin:0"></div>
-<figcaption><strong>Figure 9 (interactive).</strong> <em>Accuracy versus network depth</em> (N=32). Held-out AUC against the
+<figcaption><strong>Figure 10 (interactive).</strong> <em>Accuracy versus network depth</em> (N=32). Held-out AUC against the
 fraction of the network a tap requires — i.e. how much of the forward pass has to run. Circles are single
 taps at increasing depth; squares are three- and five-tap fusions; the dashed red line is the full-model
 linear probe. ConceptGate reaches within a hundredth of the full-model probe at roughly a third of the
 network, and depth fusion adds little over the best single tap. (Weights loaded run higher than depth,
-because the embedding table is always loaded regardless of tap depth — that cost is Figure 10.)</figcaption>
+because the embedding table is always loaded regardless of tap depth — that cost is Figure 11.)</figcaption>
 </figure>
 
-<figure id="figure-10" style="margin:2rem 0">
+<figure id="figure-11" style="margin:2rem 0">
 <div id="cg-eff-summary" class="cg-widget" style="margin:0"></div>
-<figcaption><strong>Figure 10.</strong> <em>Compute and memory, both base models.</em> For each base model the
+<figcaption><strong>Figure 11.</strong> <em>Compute and memory, both base models.</em> For each base model the
 bars give ConceptGate's per-prompt forward wall-time (compute, solid) and weights loaded (memory, hatched)
 as a fraction of the full-model linear probe (the red line = the probe = 100%); each configuration's AUC is
 labeled beneath. ConceptGate is at an early single tap; the probe reads the whole model. Across both models
@@ -1147,7 +1178,7 @@ and the raw results
 tabulated in [`docs/evaluation.md`](https://github.com/NISH1001/conceptgate/blob/main/docs/evaluation.md))
 are in the repository.
 
-<figure id="figure-11">
+<figure id="figure-12">
 <svg viewBox="0 0 720 252" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ConceptGate concept bank and read-write duality" font-family="ui-sans-serif,system-ui,sans-serif">
   <defs><marker id="bkar" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0L6,3L0,6Z" fill="#9aa"/></marker></defs>
   <text x="360" y="14" text-anchor="middle" font-size="12" fill="currentColor">one truncated forward — computed once, read by every concept</text>
@@ -1193,19 +1224,19 @@ are in the repository.
   <text x="524" y="178" text-anchor="middle" font-size="16" fill="#bbb">&#8943;</text>
   <text x="360" y="234" text-anchor="middle" font-size="11" fill="currentColor">each concept = one closed-form direction <tspan font-style="italic">w</tspan><tspan baseline-shift="super" font-size="8">k</tspan> (~ms, ~kB); the same direction reads (detect) and writes (steer)</text>
 </svg>
-<figcaption><strong>Figure 11.</strong> <em>The concept bank and the read/write duality.</em> A single
+<figcaption><strong>Figure 12.</strong> <em>The concept bank and the read/write duality.</em> A single
 truncated forward — the frozen model run only up to the deepest tap, never the layers above — produces one
 set of tapped activations <em>a</em> that every concept reads. Each concept is a single direction
 <em>w<sup>k</sup></em>, fitted in closed form (milliseconds, kilobytes) and added to the bank without
 touching the others. The <em>same</em> <em>w<sup>k</sup></em> serves twice: as a detector (project
 <em>a</em> onto it and threshold) and as a steering vector (add ±α·<em>w<sup>k</sup></em> back into the
 stream). So one forward serves all <em>K</em> concepts, adding a concept is one closed-form fit, and
-detection and steering share the learned state — the cost behaviour Figures 12–13 measure.</figcaption>
+detection and steering share the learned state — the cost behaviour Figures 13–14 measure.</figcaption>
 </figure>
 
-<figure id="figure-12" style="margin:2rem 0">
+<figure id="figure-13" style="margin:2rem 0">
 <div id="cg-scale-cost" class="cg-widget" style="margin:0"></div>
-<figcaption><strong>Figure 12 (interactive).</strong> <em>The cost of a K-concept bank.</em> Build
+<figcaption><strong>Figure 13 (interactive).</strong> <em>The cost of a K-concept bank.</em> Build
 wall-time, per-prompt inference, or learned parameters (toggle the axis) as the bank grows from one
 concept to fourteen, on a log scale. ConceptGate (teal) and a linear-probe bank (red) reuse one forward
 pass and add each concept in closed form or a single trained head; LoRA (amber, dashed) fine-tunes an
@@ -1217,9 +1248,9 @@ negligible beside the resident model. Measured on an Apple M4 under MPS; toggle 
 point.</figcaption>
 </figure>
 
-<figure id="figure-13" style="margin:2rem 0">
+<figure id="figure-14" style="margin:2rem 0">
 <div id="cg-scale-auc" class="cg-widget" style="margin:0"></div>
-<figcaption><strong>Figure 13 (interactive).</strong> <em>Detection across the whole taxonomy.</em>
+<figcaption><strong>Figure 14 (interactive).</strong> <em>Detection across the whole taxonomy.</em>
 Held-out AUC for each of the fourteen BeaverTails harm categories, from N=32 examples per class. Each row
 pairs ConceptGate (teal) with the full-model linear probe (red); the amber ✕ marks the three categories
 where a LoRA adapter was trained for comparison. Dashed lines are the per-method means. The training-free
@@ -1302,9 +1333,9 @@ over three seeds for both base models, reusing the activations of
 [`--ood`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_detection.py); results:
 [`eval_ood_results.json`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_ood_results.json).
 
-<figure id="figure-14" style="margin:2rem 0">
+<figure id="figure-15" style="margin:2rem 0">
 <div id="cg-ood" class="cg-widget" style="margin:0"></div>
-<figcaption><strong>Figure 14 (interactive).</strong> <em>Generalization to an unseen category.</em>
+<figcaption><strong>Figure 15 (interactive).</strong> <em>Generalization to an unseen category.</em>
 Each row is one held-out BeaverTails category, with ConceptGate (teal) and the full-model linear probe
 (red) each shown as a pair: a hollow marker at the in-distribution AUC (the category was in training) and
 a solid marker at the held-out AUC (the direction was trained on the other thirteen). The connecting line
@@ -1370,7 +1401,10 @@ The most consequential finding is structural rather than numerical. A text class
 exceed ConceptGate at detection while being simpler to deploy, so if detection were the objective there
 would be little reason to prefer an internal method. The reason to operate inside the residual stream
 is the operation a classifier cannot perform: using the same learned direction to write — to steer
-generation toward or away from the concept, conditionally and interpretably, from ten examples. The
+generation toward or away from the concept, conditionally and interpretably, from ten examples. Steering
+is a measured, monotonic dose-response with an effective window in which content shifts while fluency
+holds (<a class="sref" href="#46-steering-across-models">§4.6</a>), bounded like everything else by the
+base model. The
 efficient detection machinery (depth fusion, the truncated forward, calibration) is therefore best
 understood as making the inexpensive half of a read-and-write adapter as capable as possible, so that
 the write half is available at little additional cost.
@@ -1473,7 +1507,9 @@ milliseconds and kilobytes where per-concept fine-tuning takes minutes, so the e
 the number of concepts rather than eroding. What is worth retaining from the reading is therefore its
 efficiency and how it amortizes, more than the depth fusion, which helps only on synthetic data. The writing is what justifies operating inside the residual
 stream rather than on the text: a few-shot, training-free steering control that shares its direction with
-the detector and is bounded by the competence of the base model. The interactive figures are included so
+the detector, measured as a monotonic dose-response with a coherent operating window
+(<a class="sref" href="#46-steering-across-models">§4.6</a>) and bounded by the competence of the base
+model. The interactive figures are included so
 that these claims can be examined directly against the underlying model runs rather than taken on
 assertion; the points at which the method is effective and the points at which it fails are both
 visible in them.
@@ -2136,8 +2172,71 @@ function cgOOD(){
   cgEl("cgood-model").addEventListener("change",draw); draw();
 }
 
+// ---- Steering dose-response: concept content (lexicon) + fluency (perplexity) vs the steering fraction ----
+// STEERDOSE[model][concept] = {frac, lex(%), ppl, llr, ex[]}. Measured by scripts/eval_steering.py.
+var STEERDOSE={
+ "Qwen-0.5B":{
+  "food":{frac:[-0.16, -0.1, -0.06, -0.03, 0.0, 0.03, 0.06, 0.1, 0.16],lex:[1.7, 0.0, 0.6, 2.4, 0.6, 0.6, 0.6, 5.4, 6.5],ppl:[6.4, 5.0, 3.7, 5.8, 4.5, 4.5, 4.8, 5.1, 6.7],llr:[460, 536, 491, 509, 646, 711, 855, 967, 1089],ex:["I got home. The only thing that made me feel sad was that I had to go to work.  A) yesterday B) tomorrow C) ","I got home from work. The house was quiet, and I had a good chance to catch up on my reading. I decided to r","I got to see my friend's birthday party. The party was held at a local park, and it was filled with lots of ","I got to see my friend's wedding. It was a beautiful, romantic event with lots of flowers and pretty decorat","I got to see my friend's family. It was a nice surprise, and it made me feel happy. A. surprised B. excited ","I got to see my daughter, who is 10 years old, at the zoo. She had a great time and it made me feel good abo","I got to see my son's first ever performance at the 2017 New York City Ballet. It was a very special experie","I got to see the kids at the park. The kids are so much fun and they make you smile. They love to play with ","you get to make your own food. I love making homemade salsa, and this is a great way to use up some of the v"]},
+  "nature":{frac:[-0.16, -0.1, -0.06, -0.03, 0.0, 0.03, 0.06, 0.1, 0.16],lex:[0.0, 0.0, 0.5, 0.0, 0.0, 3.5, 2.9, 8.2, 8.7],ppl:[5.8, 6.5, 6.2, 4.3, 4.5, 4.1, 3.9, 4.9, 5.0],llr:[-40, -34, 0, 10, -20, -4, 17, 42, 51],ex:["I got a new job offer. It's been 10 days since I received it, and I'm still not sure if I should accept it o","I got to go to work. The worst part is when I get home and it's already 10:30 PM.  I'm a full-time student a","I got to see my friend's birthday party. It was a surprise, and it was a great surprise. The party was held ","I got to see my friend's wedding. It was a beautiful, romantic event that made me feel like I had been invit","I got to see my friend's family. It was a nice surprise, and it made me feel happy. A. surprised B. excited ","I got to see the sun rise over the mountains. The view from the top of the mountain is breathtaking, and it'","I got to see the sun rise over the mountains. The view from the top of the mountain is breathtaking, and it'","I saw a group of people in the park. The sun was shining and the birds were singing. It was peaceful, like n","I saw a group of people playing with a giant boulder. The sun was shining and the air was crisp, and it was "]},
+  "technology":{frac:[-0.16, -0.1, -0.06, -0.03, 0.0, 0.03, 0.06, 0.1, 0.16],lex:[0.0, 0.8, 0.0, 0.6, 1.4, 0.5, 1.6, 1.2, 3.0],ppl:[9.3, 6.1, 5.6, 4.2, 4.5, 5.4, 5.4, 6.8, 7.5],llr:[17, 46, 47, 43, 49, 62, 56, 90, 90],ex:["I got home. It's a Sunday, and it's my mother's birthday. A. get B. gets C. getting D. to get  Answer: C  ( ","I got home from work. It was a beautiful Sunday morning, and I had been looking forward to it all week. I ha","I got to see my friend's wedding. It was a beautiful, romantic event with lots of people and lots of fun act","I got to see my friend's wedding. It was a beautiful, romantic event with lots of flowers and pretty decorat","I got to see my friend's family. It was a nice surprise, and it made me feel happy. A. surprised B. excited ","I got to see the new movie \"The Last Jedi\" at the Hollywood Fringe Festival. It's a very good film, and it h","I got to see the new 3D movie \"The Dark Knight Rises\" at the New York City Comic Con. The movie is a very we","I got to see the new 3D technology in action. The first time I saw it, I thought it was a bit too much for m","I could see my own brain working. It’s a bit like being able to see through your own body, and it’s amazing "]},
+  },
+ "gpt2":{
+  "food":{frac:[-0.16, -0.1, -0.06, -0.03, 0.0, 0.03, 0.06, 0.1, 0.16],lex:[1.9, 0.7, 0.7, 0.0, 0.0, 0.7, 5.0, 6.1, 17.7],ppl:[6.4, 6.1, 4.9, 4.2, 3.4, 4.3, 5.8, 5.5, 6.6],llr:[-4, -2, 0, -4, 2, 4, 3, 7, 6],ex:["the FBI said it would not release any information about the investigation.  The FBI said it will not release","the FBI announced that it had arrested a man who had been in custody for more than a year.  The FBI said it ","I got to the office and I was like, 'Oh my God, I'm so sorry.' I was like, 'I'm sorry, I'm sorry.' I was lik","I got to the airport and I was told that I had to go to the airport and I was told that I had to go to the a","I got to the airport and I was greeted by a guy who was a little older than me. He was a guy who was a littl","I got to the kitchen and I was like, \"Oh my God, I'm so happy!\" I was like, \"Oh my God, I'm so happy!\" I was","I was able to get my hands on some of the best vegan food I've ever had. I love the taste of the vegan chees","I was able to eat a little bit of the meat and veggies. I also used a little bit of the cheese and a little ","you could use a little bit of the spice of the day. I used a little bit of the day.  I used a little bit of "]},
+  "nature":{frac:[-0.16, -0.1, -0.06, -0.03, 0.0, 0.03, 0.06, 0.1, 0.16],lex:[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.9, 9.1, 23.0],ppl:[4.0, 5.6, 4.4, 4.4, 3.4, 5.3, 5.1, 4.5, 2.9],llr:[-82, -130, -115, -98, -41, -47, -37, -14, -15],ex:["he said he will be back.  \"I'm going to be back,\" he said.  \"I'm going to be back,\" he said.  \"I'm going to","I got back to work. I'm going to be back in the office for a couple of weeks. I'm going to be back in the of","I got home from work and I was like, \"Oh my God, I'm so excited to be here.\" I was like, \"Oh my God, I'm so ","I got home and I was like, \"Oh my God, I'm so excited to be here.\" I was like, \"Oh my God, I'm so excited to","I got to the airport and I was greeted by a guy who was a little older than me. He was a guy who was a littl","I was able to get my hands on a few of the new features. I was able to get a few of the new features, but I ","I saw the sun rise over the horizon. I was so happy to see the sun rise over the horizon. I was so happy to ","the sun was shining through the trees and the trees were covered with the leaves of the trees. The sun was s","the sun shone on the mountains, and the moon shone on the mountains, and the moon shone on the mountains, an"]},
+  "technology":{frac:[-0.16, -0.1, -0.06, -0.03, 0.0, 0.03, 0.06, 0.1, 0.16],lex:[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.3, 6.8, 11.6],ppl:[5.2, 5.0, 3.8, 3.7, 3.4, 5.5, 5.4, 6.9, 7.8],llr:[11, 4, 8, 9, 11, 17, 16, 14, 17],ex:["the mayor said he was going to be in the mayor's office.  \"I'm going to be in the mayor's office,\" said Mayo","I got home and I was like, 'I'm going to be here for a while.' I was like, 'I'm going to be here for a while","I got home and I was like, 'Oh my God, I'm so sorry.' I was like, 'I'm so sorry.' I was like, 'I'm so sorry.","I got home and I was like, \"Oh my God, I'm so sorry.\" I was like, \"I'm so sorry.\" I was like, \"I'm so sorry.","I got to the airport and I was greeted by a guy who was a little older than me. He was a guy who was a littl","I was able to get my hands on a few of the new features. I was able to get a few of the new features, but I ","I was able to get my hands on a new version of the game. I was able to play it on my own, and I was able to ","I could see the screen and the screen was very clear. I could see the screen and the screen was very clear. ","you could see the screen on the screen, and you could see the screen on the screen.  The best part of the da"]},
+  },
+};
+var STEER_PROMPT0="The best part of the day was when";
+function cgSteerDose(){
+  var host=cgEl("cg-steer-dose"); if(!host) return;
+  var models=Object.keys(STEERDOSE), concepts=Object.keys(STEERDOSE[models[0]]);
+  host.innerHTML='<p class="cg-eyebrow">figure · interactive · greedy · Apple M4 / MPS</p><h4>Steering dose-response</h4>'
+    +'<div class="cg-ctrls">'
+    +'<div class="cg-ctrl"><label>base model</label><select id="csd-model">'+models.map(function(m){return '<option value="'+m+'">'+m+'</option>';}).join('')+'</select></div>'
+    +'<div class="cg-ctrl"><label>concept</label><select id="csd-concept">'+concepts.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join('')+'</select></div>'
+    +'<div class="cg-ctrl" style="min-width:12rem;flex:1"><label>steering fraction <span class="cg-val" id="csd-fval"></span></label><input type="range" id="csd-frac" min="0" max="8" step="1" value="7"></div>'
+    +'</div>'
+    +'<svg id="csd-svg" viewBox="0 0 480 232" style="width:100%;max-width:480px"></svg>'
+    +'<div class="cg-out" id="csd-ex" style="margin:.55rem 0;font-size:.86rem"></div><div class="cg-readout" id="csd-out"></div>';
+  function draw(){
+    var m=cgEl("csd-model").value, cn=cgEl("csd-concept").value, D=STEERDOSE[m][cn], frac=D.frac, fi=+cgEl("csd-frac").value;
+    var W=480,H=232,L=44,R=46,T=18,B=42,pw=W-L-R,ph=H-T-B,n=frac.length;
+    function X(i){return L+i/(n-1)*pw;}
+    var lexMax=Math.max(12, Math.ceil(Math.max.apply(null,D.lex)/5)*5+2);
+    var pmin=Math.floor(Math.min.apply(null,D.ppl))-1, pmax=Math.ceil(Math.max.apply(null,D.ppl))+1;
+    function YL(v){return T+(1-v/lexMax)*ph;}
+    function YP(v){return T+(1-(v-pmin)/(pmax-pmin))*ph;}
+    var base=frac.indexOf(0);
+    var s='<line x1="'+L+'" y1="'+T+'" x2="'+L+'" y2="'+(H-B)+'" stroke="'+CG_BLUE+'" opacity="0.55"/>'
+      +'<line x1="'+(W-R)+'" y1="'+T+'" x2="'+(W-R)+'" y2="'+(H-B)+'" stroke="'+CG_AMB+'" opacity="0.55"/>'
+      +'<line x1="'+L+'" y1="'+(H-B)+'" x2="'+(W-R)+'" y2="'+(H-B)+'" stroke="'+CG_GRID+'"/>';
+    for(var t=0;t<=lexMax;t+=(lexMax<=14?4:10)){var yy=YL(t);s+='<text x="'+(L-5)+'" y="'+(yy+3)+'" font-size="8.5" text-anchor="end" fill="'+CG_BLUE+'">'+t+'%</text>';}
+    for(var pv=pmin;pv<=pmax;pv+=Math.max(1,Math.round((pmax-pmin)/4))){var yr=YP(pv);s+='<text x="'+(W-R+5)+'" y="'+(yr+3)+'" font-size="8.5" text-anchor="start" fill="'+CG_AMB+'">'+pv+'</text>';}
+    frac.forEach(function(f,i){if(i%2===0||i===fi)s+='<text x="'+X(i)+'" y="'+(H-B+13)+'" font-size="8" text-anchor="middle" fill="currentColor" opacity="0.8">'+(f>0?'+':'')+f+'</text>';});
+    s+='<line x1="'+X(base)+'" y1="'+T+'" x2="'+X(base)+'" y2="'+(H-B)+'" stroke="'+CG_GRID+'" stroke-dasharray="2 2"/>';
+    s+='<text x="'+X(base)+'" y="'+(T-5)+'" font-size="8" text-anchor="middle" fill="currentColor" opacity="0.55">no steer</text>';
+    s+='<rect x="'+(X(fi)-2)+'" y="'+T+'" width="4" height="'+ph+'" fill="#000" opacity="0.07"/>';
+    s+='<text x="'+X(0)+'" y="'+(T+7)+'" font-size="8" fill="currentColor" opacity="0.5">← away</text><text x="'+X(n-1)+'" y="'+(T+7)+'" font-size="8" text-anchor="end" fill="currentColor" opacity="0.5">toward →</text>';
+    s+='<polyline points="'+D.lex.map(function(v,i){return X(i)+','+YL(v);}).join(' ')+'" fill="none" stroke="'+CG_BLUE+'" stroke-width="2.3"/>';
+    D.lex.forEach(function(v,i){s+='<circle cx="'+X(i)+'" cy="'+YL(v)+'" r="'+(i===fi?4.2:2.6)+'" fill="'+CG_BLUE+'" data-tip="frac '+frac[i]+' · content '+v+'%"/>';});
+    s+='<polyline points="'+D.ppl.map(function(v,i){return X(i)+','+YP(v);}).join(' ')+'" fill="none" stroke="'+CG_AMB+'" stroke-width="2" stroke-dasharray="5 3"/>';
+    D.ppl.forEach(function(v,i){s+='<circle cx="'+X(i)+'" cy="'+YP(v)+'" r="'+(i===fi?4.2:2.6)+'" fill="'+CG_AMB+'" data-tip="frac '+frac[i]+' · perplexity '+v+'"/>';});
+    s+='<text x="14" y="'+(T+ph/2)+'" font-size="9.5" text-anchor="middle" fill="'+CG_BLUE+'" font-weight="700" transform="rotate(-90 14 '+(T+ph/2)+')">concept content</text>';
+    s+='<text x="'+(W-14)+'" y="'+(T+ph/2)+'" font-size="9.5" text-anchor="middle" fill="'+CG_AMB+'" font-weight="700" transform="rotate(90 '+(W-14)+' '+(T+ph/2)+')">perplexity</text>';
+    s+='<text x="'+(L+pw/2)+'" y="'+(H-3)+'" font-size="9.5" text-anchor="middle" fill="currentColor" opacity="0.9" font-weight="700">steering fraction (magnitude ÷ residual norm)</text>';
+    cgEl("csd-svg").innerHTML=s; cgWireTips(cgEl("csd-svg"));
+    var f=frac[fi];
+    cgEl("csd-fval").textContent=(f>0?'+':'')+f+(f>0?' · toward':f<0?' · away':' · none');
+    cgEl("csd-ex").innerHTML='<span style="opacity:.55">'+STEER_PROMPT0+'</span> <b>'+cgEsc(D.ex[fi])+'…</b>';
+    cgEl("csd-out").innerHTML='<span style="color:'+CG_BLUE+';font-weight:600">—— concept content</span> (lexicon, independent) &nbsp; '
+      +'<span style="color:'+CG_AMB+';font-weight:600">– – perplexity</span> (fluency)<br>at this fraction: content <b style="color:'+CG_BLUE+'">'+D.lex[fi]+'%</b> · perplexity <b style="color:'+CG_AMB+'">'+D.ppl[fi]+'</b> · detector LLR <b>'+(D.llr[fi]>0?'+':'')+D.llr[fi]+'</b>';
+  }
+  ["csd-model","csd-concept","csd-frac"].forEach(function(id){cgEl(id).addEventListener("input",draw);cgEl(id).addEventListener("change",draw);});
+  draw();
+}
+
 (function(){
-  function boot(){ [cgTrace,cgDepthFusion,cgDetect,cgSteer,cgCost,cgKillshot,cgEffN,cgEffDepth,cgEffSummary,cgScaleCost,cgScaleAuc,cgOOD].forEach(function(f){try{f();}catch(e){}}); }
+  function boot(){ [cgTrace,cgDepthFusion,cgDetect,cgSteer,cgCost,cgKillshot,cgEffN,cgEffDepth,cgEffSummary,cgScaleCost,cgScaleAuc,cgOOD,cgSteerDose].forEach(function(f){try{f();}catch(e){}}); }
   if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",boot);}else{boot();}
 })();
 </script>
