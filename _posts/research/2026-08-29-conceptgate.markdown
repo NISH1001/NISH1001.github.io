@@ -923,7 +923,11 @@ side of the harmful cluster along the discriminative axis (benign at $-2$ and $+
 No single threshold on any linear score can carve out "the middle," so the `fisher` gate is stuck
 near chance (38.8% error, AUC 0.60); the mixture, seeing $\mathbf{s}$ near a benign profile on each
 side and a harmful profile between, recovers it (7.1% error, AUC 0.98; the Bayes floor is 5.8%). That
-is the case for mixtures, and <a class="sref" href="#figure-6">Figure 6</a> shows its geometry.
+is the case for mixtures, and <a class="sref" href="#figure-6">Figure 6</a> shows its geometry. One
+honest caveat on the construction: with the benign clusters symmetric about the harmful one the two class
+*means coincide*, so the diff-of-means (or logistic) direction the pipeline actually fits would be null
+here. This hard case is built directly in score space to illustrate the mixture's expressiveness; it is
+not a configuration ConceptGate's own direction-finding would produce.
 
 <figure id="figure-6" style="margin:2rem 0">
 <div id="cg-killshot" class="cg-widget" style="margin:0"></div>
@@ -939,9 +943,11 @@ The case *against* them, at least in the regime we care about, is that on
 real GPT-2 activations with 12+12 prompts, **BIC selects $J=1$ for both classes** — an extra
 full-covariance profile over five layers costs ~21 parameters, whose rent (~52 nats) twelve samples
 cannot pay — and the mixture gate collapses exactly onto the single-Gaussian gate (rank agreement
-0.986). In short, the mixture is the more general model but remains inactive in this regime: whether
-real concept classes are multimodal enough to justify additional components is a question that requires
-substantially more than ten labelled examples, and on the readily-labelled concepts examined here the
+0.986). This is less "the data answering one-or-many" than an identifiability limit: at twelve samples a
+five-dimensional full-covariance component is already near-singular, so the $J=2$ fit is ill-conditioned
+and the selection is effectively decided by sample size. The mixture is the more general model but remains
+inactive in this regime: whether real concept classes are multimodal enough to justify additional
+components is a question that requires substantially more than ten labelled examples, and on the readily-labelled concepts examined here the
 selection criterion returns a single component per class.
 
 ### 4.3 Detection on real prompts: a commodity
@@ -1320,13 +1326,13 @@ marker.</figcaption>
 **The bank grows cheaply.** Adding a concept to ConceptGate is a closed-form fit — 6 ms on
 Qwen2.5-0.5B, 11 ms on gemma-2-2b — against a LoRA training run of 17 s and 126 s, three to four orders
 of magnitude more. Two memory costs matter separately. The **per-concept artifact** — what must be
-stored to add a concept — is 2.7–6.9 thousand numbers for ConceptGate: a few times the probe's single
-final-layer head, because ConceptGate keeps a direction at each of its three taps, but both are
-kilobyte-scale against LoRA's half-to-1.6 million. The **model itself** — the hundreds of millions of
+stored to add a concept — is 11–28 thousand numbers for ConceptGate: the detection and steering
+directions plus per-dimension standardization at each of its three taps, about an order of magnitude more
+than the probe's single final-layer head, but both kilobyte-scale against LoRA's half-to-1.6 million. The **model itself** — the hundreds of millions of
 weights that must be resident and run for every prompt — is where that is repaid: ConceptGate loads and
 runs only up to its deepest tap, never the layers above it, so a single truncated forward serves the
 *whole* bank at a per-prompt cost that is **constant in $K$ and at or below the probe's full-model
-forward**, whereas $K$ LoRA adapters need $K$ forwards. The few extra kilobytes ConceptGate stores are
+forward**, whereas $K$ LoRA adapters need $K$ forwards. The extra kilobytes ConceptGate stores are
 immaterial next to the part of the network it skips. Against fine-tuning the gap compounds with every
 concept: building the full fourteen-category bank takes about 8 seconds on Qwen and 46 on gemma, against
 LoRA's 3.9 and 29 minutes — 30× and 38×.
@@ -1337,7 +1343,7 @@ LoRA's 3.9 and 29 minutes — 30× and 38×.
 |---|---|---|---|
 | learn — Qwen-0.5B | 6 ms | 2 ms | 16.7 s |
 | learn — gemma-2-2b | 11 ms | 2 ms | 125.8 s |
-| parameters | 2.7 – 6.9 K | 0.9 – 2.3 K | 0.54 – 1.6 M |
+| parameters | 11 – 28 K | 0.9 – 2.3 K | 0.54 – 1.6 M |
 | training | none (closed form) | head only | back-propagation |
 | inference over all K | one shared forward | one shared forward | one forward *each* |
 | mean AUC / 14 cats (Qwen / gemma) | 0.832 / 0.881 | 0.855 / 0.874 | — |
@@ -2060,7 +2066,7 @@ function cgEffSummary(){
 var CG_AMB="#d98a2b";
 var CGSCALE={
  "Qwen2.5-0.5B":{nfit:32,safe:256,taps:"12/17/20",
-   cg_pc:2688,pr_pc:897,lora_pc:542464,
+   cg_pc:10752,pr_pc:897,lora_pc:542464,
    fwd_cg:11.08,fwd_pr:12.45,fit_cg:6.14,fit_pr:1.63,train_lora:16721.8,read_cg:1.23,head_pr:0.59,
    meanCG:0.832,meanPR:0.855,
    cats:[["animal abuse",0.918,0.941,0.817],["child abuse",0.919,0.932,0.617],
@@ -2071,7 +2077,7 @@ var CGSCALE={
      ["self-harm",0.910,0.919,null],["sexual content",0.832,0.908,null],
      ["terrorism",0.843,0.893,null],["violence",0.825,0.831,null]]},
  "gemma-2-2b":{nfit:32,safe:256,taps:"13/18/22",
-   cg_pc:6912,pr_pc:2305,lora_pc:1602048,
+   cg_pc:27648,pr_pc:2305,lora_pc:1602048,
    fwd_cg:65.08,fwd_pr:66.95,fit_cg:11.23,fit_pr:2.49,train_lora:125768.6,read_cg:3.79,head_pr:1.50,
    meanCG:0.881,meanPR:0.874,
    cats:[["animal abuse",0.940,0.942,0.837],["child abuse",0.957,0.955,0.879],
@@ -2131,7 +2137,7 @@ function cgScaleCost(){
     var cg14=C.cg[7].v, pr14=C.pr[7].v, lo14=C.lora[7].v, r=lo14/cg14;
     var note={build:'ConceptGate and the probe reuse one forward and add a concept cheaply, so build stays flat in K; LoRA retrains per concept.',
       infer:'One truncated forward scores the whole bank — ConceptGate is constant in K and at or below the probe; LoRA needs a forward per adapter.',
-      memory:'Per-concept artifact only: ConceptGate keeps a direction at each of its 3 taps (a few× the probe’s head), both kilobytes. The resident model dominates memory, and ConceptGate loads only up to its taps.'}[metric];
+      memory:'Per-concept artifact only: ConceptGate keeps a detection + steering direction and standardization at each of its 3 taps (~4md, about 10× the probe’s head), both kilobytes. The resident model dominates memory, and ConceptGate loads only up to its taps.'}[metric];
     cgEl("cgsc-out").innerHTML='<span style="color:'+CG_BLUE+';font-weight:600">—— ConceptGate</span> &nbsp; '
       +'<span style="color:'+CG_RED+';font-weight:600">—— linear probe</span> &nbsp; '
       +'<span style="color:'+CG_AMB+';font-weight:600">– – LoRA</span><br>'
