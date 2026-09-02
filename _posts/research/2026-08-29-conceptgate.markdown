@@ -136,14 +136,18 @@ single-best-layer baseline under a matched-filter analysis and on synthetic data
 9.4%), but the advantage does not transfer to real models, where one layer already carries the concept.
 (iii) Modelling each class as a Gaussian mixture recovers configurations no single linear threshold
 separates, but model selection reduces the mixture to one component per class at ten-shot sizes.
-(iv) Matched contrastive negatives reduce rather than improve accuracy, and generalization to unseen harm
-categories is only partial. (v) The one capability that distinguishes an internal adapter from a text
+(iv) Matched contrastive negatives reduce rather than improve accuracy; generalization to unseen harm
+categories is only partial; and steering with the concept bank's own harm-category directions leaves
+refusal unchanged, so the bank's entries supply a write direction without a demonstrated behavioural
+effect for those concepts. (v) The one capability that distinguishes an internal adapter from a text
 classifier is **steering** — writing a direction fit from the same few-shot examples back into the residual stream — which we
 measure as a monotonic dose-response bounded by the competence of the base model. (vi) The write rule
 itself is standard activation addition and needs none of the detection machinery; what the read side
-contributes is deciding *when* to write, and conditioning the write on the calibrated gate beats applying
-it to every prompt on both axes at once — 8.3 against 2.1 points of added jailbreak refusal, while leaving
-90% rather than 4% of benign generation byte-identical. Every mechanism used
+contributes is deciding *when* to write. Conditioning the write on the calibrated gate adds 8.3 points of
+jailbreak refusal, where writing on every prompt adds $2.1\pm3.0$ — no detectable effect — and it leaves
+90% of benign generation byte-identical against 4%. That collateral advantage is contingent on benign
+traffic resembling the gate's ten fitting examples: on out-of-register benign prompts the same gate fires
+on 92%, which would leave only about a tenth of that traffic untouched. Every mechanism used
 here is drawn from prior work; the contribution is the specific few-shot, dual-mode read-and-write
 composition, the training-free amortization of a concept bank against fine-tuning, and an empirical
 characterization of where it helps and where it does not. A reference implementation is available at
@@ -309,10 +313,13 @@ This paper contributes, in order of how much each distinguishes ConceptGate from
    <a class="sref" href="#310-steering-the-write-side">§3.10</a>).
 2. **Gate-conditioned steering — the one operation only the composition can do.** The write rule is
    standard activation addition and needs no detection machinery; what the read side adds is deciding
-   *when* to write. Conditioning the write on the calibrated gate beats writing on every prompt on both
-   axes simultaneously — more jailbreak suppression (+8.3 versus +2.1 points) and far less collateral
-   (90% versus 4% of benign generation left byte-identical)
-   (<a class="sref" href="#410-gate-conditioned-steering-what-the-gate-is-for">§4.10</a>).
+   *when* to write. Conditioning the write on the calibrated gate adds $8.3\pm1.5$ points of jailbreak
+   refusal where writing on every prompt adds $2.1\pm3.0$, an interval covering zero, and it leaves 90%
+   of benign generation byte-identical against 4%
+   (<a class="sref" href="#410-gate-conditioned-steering-what-the-gate-is-for">§4.10</a>). The collateral
+   half of that is **contingent on the benign distribution**: the same gate fires on 92% of *out-of-register*
+   benign prompts, which would erase most of the 90%-versus-4% advantage. The suppression half, and the
+   finding that blanket writing is the worse policy, do not depend on it.
 3. **Training-free amortization across a concept bank.** Adding a concept is a closed-form fit in
    milliseconds and kilobytes with no gradient run, so hosting a fourteen-way safety taxonomy costs a
    fraction of per-concept LoRA fine-tuning and needs no retraining to extend
@@ -651,18 +658,22 @@ One analogy makes the object concrete. Picture the tapped layers as a row of mic
 a hall that the model's computation travels down; each microphone is tuned to a single concept and
 reports how strongly it registers there, so the spectrogram is the pattern of those readings across
 the hall. The design keeps all $m$ readings rather than the single loudest one, because a concept is
-usually audible at several depths and combining independent readings is more reliable than trusting
-any one microphone — a claim the next two subsections make precise.
+usually audible at several depths and combining independent readings should be more reliable than
+trusting any one microphone. The next two subsections make that argument precise — and
+<a class="sref" href="#481-learning-a-single-concept">§4.8.1</a> then shows it does not hold on real
+models, because the microphones are not independent.
 
 Stated in signal-processing terms, the concept's presence is a signal that the network carries along
 its **depth** axis; the spectrogram is that signal sampled at the tapped layers, and reducing it to a
 decision is a filtering problem. This is the view that motivates the choice of combiner in
 <a class="sref" href="#35-the-depth-bandpass-filter">§3.5</a>: rather than pick a single layer by hand,
 the method learns a **matched filter over depth** — a bandpass filter that weights each layer by how
-cleanly it carries the concept — which is the classical, and provably optimal, way to combine several
-noisy measurements of the same signal. We use this framing only as intuition; the contribution is the
-measured effect of the fusion (<a class="sref" href="#41-depth-fusion-on-synthetic-data">§4.1</a>), not
-the metaphor.
+cleanly it carries the concept — which is the classical way to combine several noisy measurements of the
+same signal, and provably optimal *when their noise is independent*. That proviso is the whole story:
+it holds on the synthetic problem of <a class="sref" href="#41-depth-fusion-on-synthetic-data">§4.1</a>
+and fails on real taps
+(<a class="sref" href="#481-learning-a-single-concept">§4.8.1</a>). We use this framing only as
+intuition; what matters is the measured effect of the fusion, which is nil.
 
 Each layer's individual contribution is summarized by its **discriminability** $d'$ (per layer
 $\ell$), the standardized gap between the two class means of $s_\ell$:
@@ -715,10 +726,13 @@ combined detector clears a margin no single layer reaches — driving test error
 seeded synthetic problem.</figcaption>
 </figure>
 
-One caveat is important: the quadrature gain assumes *independent* per-layer noise.
-Adjacent layers are correlated, so the real gain is smaller than three independent layers would
-suggest — which is precisely why `fisher`, using $\Sigma_{\mathbf s}^{-1}$, is the safe default over
-the naive `diag`.
+To restate the caveat above in the terms of the filter family: the quadrature gain assumes *independent*
+per-layer noise, and adjacent layers are correlated, so the real gain is smaller than three independent
+layers would suggest. Accounting for the correlation is what `fisher` does that `diag` does not, but on
+real prompts that correction is not enough to make the fusion worth anything: a probe on the same
+concatenated taps matches or beats `fisher`
+(<a class="sref" href="#481-learning-a-single-concept">§4.8.1</a>), so neither filter is recommended
+here over reading a single well-chosen layer.
 
 ### 3.7 Class-conditional mixtures and BIC
 
@@ -1119,7 +1133,8 @@ the comparison is the unsteered point (fraction 0) and the two base models. The 
 <div id="cg-steer-dose" class="cg-widget" style="margin:0"></div>
 <figcaption><strong>Figure 8 (interactive).</strong> <em>Steering dose-response.</em> For one concept and
 base model, concept content (teal, left axis — the fraction of generated words matching a concept keyword
-list, an independent measure) and perplexity (amber, right axis — fluency) as the steering fraction sweeps
+list, independent of the steering direction though not of the concept's framing — see
+<a class="sref" href="#46-steering-across-models">§4.6</a>) and perplexity (amber, right axis — fluency) as the steering fraction sweeps
 from away (−) through no steering (0) to toward (+). Drag the fraction to read the actual generated text at
 each point. On Qwen2.5-0.5B content rises with the toward-fraction while perplexity stays flat over an
 effective window; on GPT-2 the shift is stronger but breaks into repetition and the model's own detector
@@ -1254,7 +1269,11 @@ as a fraction of the full-model linear probe (the red line = the probe = 100%); 
 labeled beneath. ConceptGate is at an early single tap; the red line is the **full-model** probe. The bars
 near the halfway mark are the cost of the truncated forward — which a depth-matched probe on the same taps
 achieves *identically* (<a class="sref" href="#481-learning-a-single-concept">§4.8.1</a>) — so they measure
-how early the concept is readable, not a saving specific to ConceptGate. LoRA, which back-propagates through the model to train adapters, enters
+how early the concept is readable, not a saving specific to ConceptGate. Read the compute bar as
+indicative only: it is a wall-clock ratio, and although ratios proved far more stable than absolute
+timings, the single-tap ratio still moved by several points between runs, which is why
+<a class="sref" href="#481-learning-a-single-concept">§4.8.1</a>'s tables report depth and weights — exact
+properties of the truncation — instead. The hatched memory bar is exact. LoRA, which back-propagates through the model to train adapters, enters
 the comparison in <a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a>,
 where the cost is measured across a whole taxonomy of concepts rather than one.</figcaption>
 </figure>
@@ -1492,12 +1511,22 @@ per-concept or monolithic fine-tuning cannot: constant inference, closed-form ex
 concept, and no retraining to change the taxonomy. That is a genuine result, and it is honest that a
 detect-only probe bank shares it. Over such a probe bank ConceptGate's cost is at worst a tie — a
 truncated forward is never more than the probe's full one, and its extra per-concept kilobytes are
-negligible — while it adds one thing the probe cannot: a *second*, steering use of the same $K$ concepts (a related raw direction per concept),
-steering (<a class="sref" href="#46-steering-across-models">§4.6</a>), so the one object that gates
-fourteen harms can also bend generation away from them. A taxonomy-scale bank that is cheap to build and
-extend, competitive with a trained probe on every category, far ahead of few-shot fine-tuning, and
-steerable from the same few-shot data is what distinguishes ConceptGate from both a detect-only
-probe bank and a retrained guardrail.
+negligible — while it adds one thing the probe cannot: a *second*, write-side use of the same $K$ concepts,
+a related raw direction per concept that can be added back into the stream
+(<a class="sref" href="#46-steering-across-models">§4.6</a>).
+
+It would be convenient to conclude that the one object gating fourteen harms can therefore bend
+generation away from them, and we tested exactly that on five of the fourteen. It does **not**
+(<a class="sref" href="#the-same-experiment-on-the-concept-bank-a-negative-result">§4.10</a>): the
+directions gate, and gating still confines the intervention, but steering away from a harm category does
+not make this model decline the request. So what the bank adds over a detect-only probe bank is a write
+*direction* per concept at no extra fitting cost — a real property of the construction, and the write is
+demonstrated to change behaviour for topical concepts
+(<a class="sref" href="#46-steering-across-models">§4.6</a>) and for jailbreak framing
+(<a class="sref" href="#410-gate-conditioned-steering-what-the-gate-is-for">§4.10</a>), but not for these
+harm categories. A taxonomy-scale bank that is cheap to build and extend, competitive with a trained probe
+on every category, and far ahead of few-shot fine-tuning is what stands; the steerability of *these*
+entries is a claim the measurement does not support.
 
 ### 4.9 Out-of-distribution generalization
 
@@ -1553,13 +1582,22 @@ direction and partly as category-specific structure that a held-out estimate doe
 ConceptGate is at least as robust to this shift as the full-model probe, and on one model it is
 measurably more so. Because every category is scored by both methods, the two can be compared pairwise
 across the fourteen held-out categories rather than through an aggregate. On Qwen2.5-0.5B ConceptGate's
-held-out AUC exceeds the probe's in **13 of 14** categories, by $0.037 \pm 0.032$ (sign test,
-$p=0.002$), and its degradation is smaller by $0.057 \pm 0.044$ — a consistent advantage rather than a
-tie. On gemma-2-2b the two are genuinely indistinguishable: ConceptGate is ahead in 7 of 14 categories
-($p=1.0$), by $0.007 \pm 0.028$. The mid-layer tapped direction is therefore no less transferable than a
-final-layer one, and on the smaller model somewhat more so. We report the paired test rather than a
-seed-level standard deviation because the per-category results are what the harness records; the
-comparison is paired on the same categories and the same examples, with only the scoring method varying. The absolute level nonetheless indicates that a single few-shot direction is only
+held-out AUC exceeds the probe's in **13 of 14** categories, by $0.037 \pm 0.032$, and its degradation is
+smaller by $0.057 \pm 0.044$ — a consistent advantage rather than a tie. On gemma-2-2b the two are
+indistinguishable: ConceptGate is ahead in 7 of 14 categories, by $0.007 \pm 0.028$. The mid-layer tapped
+direction is therefore no less transferable than a final-layer one, and on the smaller model somewhat
+more so.
+
+We deliberately do not attach a $p$-value to the 13-of-14 count. A sign test would treat the categories
+as independent trials, and they are not: the leave-one-out design gives every category an estimation set
+overlapping every other's, and
+<a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a> finds that what presents as fourteen
+concepts is closer to one harmfulness direction with category-specific variation. The effective number of
+independent trials is therefore smaller than fourteen and any nominal $p$ would be anticonservative. "Ahead
+on 13 of 14, behind on 1" is the finding, and it does not need a significance claim to be legible. We
+report the paired comparison rather than a seed-level standard deviation because the per-category results
+are what the harness records; the comparison is paired on the same categories and the same examples, with
+only the scoring method varying. The absolute level nonetheless indicates that a single few-shot direction is only
 a partial detector for categories outside its estimation set, and is better estimated from a diverse set
 of categories than from any one alone.
 
@@ -1580,10 +1618,18 @@ We measure it with three arms on Qwen2.5-0.5B, taps 8/12/16, over 32 held-out ja
 benign prompts. A jailbreak concept is fit from eight hand-written override framings against eight benign
 requests, resampled over three seeds, and the arms are: **no steer**; **always steer** away from the
 concept at $-0.08$ of the residual norm on every prompt; and **gate-conditioned steer**, the same write
-applied only when the gate fires. Jailbreak suppression is the share of continuations containing an
-explicit refusal; collateral damage on the benign set is measured two ways, as perplexity and as the
-share of benign continuations left *byte-identical* to the unsteered baseline. The second is the blunter
-and more informative measure: it asks how much benign generation the intervention disturbed at all.
+applied only when the gate fires.
+
+Two things about the measures, both of which bound every number in this subsection. Jailbreak suppression
+is the share of continuations containing an **explicit refusal**, matched by a fixed lexicon of decline
+phrases. That is a proxy, and a conservative one in a specific way: a continuation that becomes less
+harmful without ever declining does not count, so these figures track the *guardrail* behaviour rather
+than harmfulness itself. Collateral damage on the benign set is measured as perplexity and as the share
+of benign continuations left *byte-identical* to the unsteered baseline. The byte-identical measure is
+blunt but informative — it asks how much benign generation the intervention disturbed at all — and, as
+becomes important below, under greedy decoding it is very nearly the benign false-positive rate
+restated, since a prompt the gate passes is generated exactly as the baseline would generate it.
+Perplexity is the collateral measure doing work independent of the firing rate.
 
 <figure id="figure-16" style="margin:2rem 0">
 <svg viewBox="0 0 720 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Gate-conditioned steering versus always steering" font-family="ui-sans-serif,system-ui,sans-serif">
@@ -1690,7 +1736,16 @@ construction, but a demonstrated behavioural control exists in this paper only f
 of <a class="sref" href="#46-steering-across-models">§4.6</a> and the jailbreak framing above. Two
 caveats bound the null rather than excuse it: refusal is scored by an explicit-decline lexicon, so a
 reduction in harmful *content* that stops short of refusing would not register, and we tested one
-magnitude on one 0.5B model. Both would be worth closing before treating the null as general. The harness
+magnitude on one 0.5B model.
+
+A third caveat matters more than either, and it limits how much weight this null can bear: **each cell
+rests on twelve prompts.** Every number in the table above is therefore quantized to steps of 8.3
+percentage points — the entries are literally 0, 1, 2, 3, and 5 refusals out of 12 — and the headline
+"16.7 → 11.7 → 16.7" is a mean over five categories of counts that differ by one or two prompts. A design
+this small could not have detected a moderate effect even if one existed, so this is properly a *failure
+to detect* rather than evidence of absence. What it does establish, because it does not depend on
+resolving small differences, is the direction of the two policy comparisons: gating confines the write
+where blanket steering does not, and blanket steering does not help. The harness
 is [`scripts/eval_gate.py`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_gate.py).
 
 ## 5. Discussion
@@ -1738,18 +1793,21 @@ to write*. That is the one operation in the composition that no probe, no classi
 guard can perform — a classifier can identify a jailbreak but cannot alter the generation; CAA can alter
 the generation but cannot choose which prompts deserve it — and
 <a class="sref" href="#410-gate-conditioned-steering-what-the-gate-is-for">§4.10</a> measures it:
-conditioning the same write on the gate suppresses more jailbreaks (+8.3 points against +2.1) while
-leaving 90% of benign generation byte-identical rather than 4%. The efficient detection path (the
+conditioning the same write on the gate adds $8.3\pm1.5$ points of jailbreak refusal where writing on
+every prompt adds $2.1\pm3.0$, an interval covering zero, and it confines the intervention instead of
+rewriting benign generation wholesale. How large that second advantage is depends on how far the benign
+traffic sits from the gate's ten examples — measured at 90%-versus-4% on in-register prompts and
+substantially less off it — but the ordering of the two write policies does not depend on the
+distribution. The efficient detection path (the
 truncated forward, calibration) matters for what it always mattered for — running the read cheaply enough
 to keep in the serving loop — and the gate is what converts that read into a targeted write.
 
 ### 5.3 The cost argument and its limits
 
-The compute–accuracy trade-off is a real engineering result — on 262 held-out prompts a jailbreak
-concept reaches AUC $0.968\pm0.01$ from a tap at 29% of Qwen2.5-0.5B's depth — under a third of a full
-forward pass in wall-clock, measured at 28% and 30% on two separate runs — against $0.982\pm0.00$ for a
-probe on the complete model
-(<a class="sref" href="#481-learning-a-single-concept">§4.8.1</a>) — but two qualifications bound it. First, the truncated-forward saving is
+The compute–accuracy trade-off is a real engineering result. On 262 held-out prompts a jailbreak concept
+reaches AUC $0.970\pm0.011$ from a single tap at 46% of Qwen2.5-0.5B's depth, loading 61% of its weights,
+against $0.982\pm0.004$ for a probe on the complete model
+(<a class="sref" href="#481-learning-a-single-concept">§4.8.1</a>). Two qualifications bound it. First, the truncated-forward saving is
 available to any internal probe, including the SVM baseline; it is a property of latent-space methods
 in general rather than an advantage specific to ConceptGate. The sharper and better-measured version of
 the cost claim is at the *bank* level
@@ -1831,7 +1889,17 @@ The third cluster is about **the few-shot regime and generation quality**, which
 edges where the method frays. Everything downstream depends on the diversity of the ~10 prompts per
 side: a narrow or accidentally-correlated prompt set produces a direction that separates the training
 examples and little else, so results should always be reported with variance across seeds and prompt
-sets, which we have done only partially. On the write side, steering hard enough to reliably change
+sets, which we have done only partially. We can put a number on that hazard rather than leaving it
+abstract, and it is a large one. The jailbreak gate of
+<a class="sref" href="#410-gate-conditioned-steering-what-the-gate-is-for">§4.10</a>, fit from eight short
+override framings against eight short benign requests, fires on 10% of benign prompts in that same
+register and on **92%** of real benign prompts drawn from a different one — a ninefold swing in the false-positive
+rate from the prompt distribution alone, with the concept and the threshold unchanged. Fit the same
+concept from the dataset's long persona templates instead and it fires on 0% of short framed attacks. A
+ten-example concept is therefore best understood as calibrated to a *register* as much as to a meaning,
+and any deployment claim has to be made against the traffic the gate will actually see. This bears
+hardest on the write side, because a false fire there rewrites the output rather than merely raising a
+flag. On the write side, steering hard enough to reliably change
 the topic also degrades fluency, and generated text drifts out of the clean-prompt distribution as it
 grows — degenerate repetition alone can nudge a benign continuation across the gate — so a deployed
 system must tune its operating point against false-refusal and output quality, not against recall in
@@ -1854,11 +1922,15 @@ cosine 0.45–0.79), measured as a monotonic dose-response with a coherent opera
 model. But the write rule alone is activation addition, which needs none of this machinery, so the claim
 has to be put more precisely still: what the composition uniquely provides is the *conditional* write —
 using a calibrated read to decide when to steer. Measured against blanket steering, gating suppresses
-more of what it targets while leaving benign generation almost entirely alone
-(<a class="sref" href="#410-gate-conditioned-steering-what-the-gate-is-for">§4.10</a>), and that
-conjunction of a cheap read with a targeted write is the whole reason to assemble the parts this way.
-Its reach is bounded by the same thing that bounds the read: a gate whose ten examples do not match the
-prompts it will see is worse than no gate at all. The interactive figures are included so
+more of what it targets, while blanket steering does not measurably suppress anything, and it disturbs
+far less of the benign traffic it passes over
+(<a class="sref" href="#410-gate-conditioned-steering-what-the-gate-is-for">§4.10</a>). That conjunction
+of a cheap read with a targeted write is the reason to assemble the parts this way. Its reach is bounded
+by the same thing that bounds the read, and the bound is not a hypothetical: the collateral advantage is
+measured on benign prompts drawn from the register the gate's ten examples came from, and the same gate
+fires on 92% of benign prompts from a different register, which would take most of that advantage away. A
+gate whose examples do not match the prompts it will see is worse than no gate, and on the write side it
+is worse than on the read side, because a false fire rewrites the answer instead of flagging it. The interactive figures are included so
 that these claims can be examined directly against the underlying model runs rather than taken on
 assertion; the points at which the method is effective and the points at which it fails are both
 visible in them.
