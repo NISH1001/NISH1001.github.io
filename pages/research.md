@@ -56,7 +56,7 @@ Publications, talks, posters, and academic work in AI, ML, and NLP.
 
 ### INDUS-SDE [KDD 2026]
 
-**N. Pantha**, S. Awale, V. Kuruvanthodi, S. KC, M. Ramasubramanian, C. Davis, B. Praveen, E. Foshee, B. Bhattacharjee, K. Bugbee, R. Ramachandran, "INDUS-SDE: A Language Model for Scientific Content Curation and Discovery," in *Proc. 32nd ACM SIGKDD Conference on Knowledge Discovery and Data Mining (KDD '26), V.2*, AI for Sciences Track, pp. 11762–11773, Jeju Island, Republic of Korea, Aug. 2026. [[DOI](https://doi.org/10.1145/3770855.3818847)]
+**N. Pantha**, S. Awale, V. Kuruvanthodi, S. KC, M. Ramasubramanian, C. Davis, B. Praveen, E. Foshee, B. Bhattacharjee, K. Bugbee, R. Ramachandran, "INDUS-SDE: A Language Model for Scientific Content Curation and Discovery," in *Proc. 32nd ACM SIGKDD Conference on Knowledge Discovery and Data Mining (KDD '26), V.2*, AI for Sciences Track, pp. 11762–11773, Jeju Island, Republic of Korea, Aug. 2026. [[DOI](https://doi.org/10.1145/3770855.3818847)] [[Blog](https://science.data.nasa.gov/blog/indus-sde-language-model)]
 
 A small encoder language model for scientific content curation and discovery, designed for sparse contexts where scientific terminology is rare but carries most of the signal. Deployed in NASA's Science Discovery Engine pipeline.
 
@@ -130,9 +130,11 @@ P. Koirala, M. Chapagain, **N. Pantha**, N. B. Adhikari, "Effects of Auto Tuning
 
 ### Context & Harness Engineering: Lessons from AKD [May 2026]
 
-**Location:** Huntsville, AL — [2nd ESA-NASA International Workshop on AI Foundation Models for Earth Observation](https://nikal.eventsair.com/2nd-esa-nasa-workshop-on-ai-foundation-model-for-earth-observation-eo/)
+**Location:** Huntsville, AL — [2nd ESA-NASA Workshop on AI Foundation Model for Earth Observation](https://nikal.eventsair.com/2nd-esa-nasa-workshop-on-ai-foundation-model-for-earth-observation-eo/)
 
 On what it actually takes to engineer context and harnesses for agentic systems, drawn from building [Accelerated Knowledge Discovery (AKD)](https://github.com/NASA-IMPACT/akd-core) at NASA-IMPACT. Delivered in the *"Building a GeoAI Agent: A Hands-On Tutorial on Agentic Foundation Models for Earth Observation"* session, which I co-organized and taught.
+
+**Coverage:** [UAH ESSC News](https://www.uah.edu/essc/essc-news/20444-uah-lab-for-applied-science-researchers-engage-in-international-ai-workshop)
 
 ---
 
@@ -210,7 +212,7 @@ This is somewhat agnostic talk about how we can render a code clean. It was give
 
 ### GeoGuard [ESA-NASA Workshop 2026]
 
-**N. Pantha**, R. Sahoo, S. Thapa, M. Ramasubramanian, R. Ramachandran, "GeoGuard: An Agentic Guardrails and Validation Framework for Geospatial AI," *2nd ESA-NASA International Workshop on AI Foundation Models for Earth Observation* (poster), Huntsville, AL, May 2026. [[Workshop](https://nikal.eventsair.com/2nd-esa-nasa-workshop-on-ai-foundation-model-for-earth-observation-eo/)]
+**N. Pantha**, R. Sahoo, S. Thapa, M. Ramasubramanian, R. Ramachandran, "GeoGuard: An Agentic Guardrails and Validation Framework for Geospatial AI," *2nd ESA-NASA Workshop on AI Foundation Model for Earth Observation* (poster), Huntsville, AL, May 2026. [[Workshop](https://nikal.eventsair.com/2nd-esa-nasa-workshop-on-ai-foundation-model-for-earth-observation-eo/)] [[Coverage](https://www.uah.edu/essc/essc-news/20444-uah-lab-for-applied-science-researchers-engage-in-international-ai-workshop)]
 
 An agentic verification system that checks the outputs of GeoAI systems.
 
@@ -218,13 +220,13 @@ An agentic verification system that checks the outputs of GeoAI systems.
 
 ### GeoUI Intent Protocol [ESA-NASA Workshop 2026]
 
-S. Thapa, **N. Pantha**, G. Panthee, R. Sahoo, M. Ramasubramanian, I. Gurung, R. Ramachandran, "GeoUI Intent Protocol: A Protocol Between AI Agents and Geospatial Visualization Tools," *2nd ESA-NASA International Workshop on AI Foundation Models for Earth Observation* (poster), Huntsville, AL, May 2026. [[NTRS](https://ntrs.nasa.gov/citations/20260006181)]
+S. Thapa, **N. Pantha**, G. Panthee, R. Sahoo, M. Ramasubramanian, I. Gurung, R. Ramachandran, "GeoUI Intent Protocol: A Protocol Between AI Agents and Geospatial Visualization Tools," *2nd ESA-NASA Workshop on AI Foundation Model for Earth Observation* (poster), Huntsville, AL, May 2026. [[NTRS](https://ntrs.nasa.gov/citations/20260006181)]
 
 ---
 
 ### AKD Labs [ESA-NASA Workshop 2026]
 
-G. Panthee, **N. Pantha**, S. Thapa, S. Awale, S. KC, P. Krishnappa, M. Ramasubramanian, R. Ramachandran, "AKD Labs: An End-to-End Platform for Designing, Building, Debugging, and Benchmarking AI Agents," *2nd ESA-NASA International Workshop on AI Foundation Models for Earth Observation* (poster), Huntsville, AL, May 2026. [[Workshop](https://nikal.eventsair.com/2nd-esa-nasa-workshop-on-ai-foundation-model-for-earth-observation-eo/)]
+G. Panthee, **N. Pantha**, S. Thapa, S. Awale, S. KC, P. Krishnappa, M. Ramasubramanian, R. Ramachandran, "AKD Labs: An End-to-End Platform for Designing, Building, Debugging, and Benchmarking AI Agents," *2nd ESA-NASA Workshop on AI Foundation Model for Earth Observation* (poster), Huntsville, AL, May 2026. [[Workshop](https://nikal.eventsair.com/2nd-esa-nasa-workshop-on-ai-foundation-model-for-earth-observation-eo/)]
 
 ---
 
@@ -271,6 +273,22 @@ A. Acharya, I. Gurung, A. Bhusal, C. E. Phillips, C. Davis, M. Ramasubramanian, 
 ---
 
 ## Technical articles & media
+
+---
+
+### INDUS-SDE on the NASA Science Data Blog [2026]
+
+NASA IMPACT AI Team, "INDUS-SDE: A Language Model for Scientific Content Curation and Discovery," NASA Science Data Blog, Sep. 2026. [[Article](https://science.data.nasa.gov/blog/indus-sde-language-model)]
+
+Coverage of INDUS-SDE and its deployment in the Science Discovery Engine pipeline.
+
+---
+
+### UAH Researchers at the ESA-NASA AI Workshop [2026]
+
+"UAH Lab for Applied Science Researchers Engage in International AI Workshop," UAH Earth System Science Center News, Aug. 2026. [[Article](https://www.uah.edu/essc/essc-news/20444-uah-lab-for-applied-science-researchers-engage-in-international-ai-workshop)]
+
+Coverage of the 2nd ESA-NASA Workshop on AI Foundation Model for Earth Observation, featuring my poster work on evaluation and benchmarking for geospatial foundation models.
 
 ---
 
