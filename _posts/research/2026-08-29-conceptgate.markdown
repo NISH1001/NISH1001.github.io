@@ -144,10 +144,13 @@ classifier is **steering** — writing a direction fit from the same few-shot ex
 measure as a monotonic dose-response bounded by the competence of the base model. (vi) The write rule
 itself is standard activation addition and needs none of the detection machinery; what the read side
 contributes is deciding *when* to write. Conditioning the write on the calibrated gate adds 8.3 points of
-jailbreak refusal, where writing on every prompt adds $2.1\pm3.0$ — no detectable effect — and it leaves
-90% of benign generation byte-identical against 4%. That collateral advantage is contingent on benign
-traffic resembling the gate's ten fitting examples: on out-of-register benign prompts the same gate fires
-on 92%, which would leave only about a tenth of that traffic untouched. Every mechanism used
+jailbreak refusal, where writing on every prompt adds $2.1\pm2.9$ — no detectable effect — and writing to a
+*random* subset of the same size adds 1.0, so the gain is selection rather than dosage. Writing where the
+concept is absent turns out to be worse than not writing at all, costing 6.2 points, and blanket
+steering's flat result is that loss cancelling the gain. Gating also leaves 90% of benign generation
+byte-identical against 4%, though that collateral advantage is contingent on benign traffic resembling the
+gate's ten fitting examples: on out-of-register benign prompts the same gate fires on 92%, which would
+leave only about a tenth of that traffic untouched. Every mechanism used
 here is drawn from prior work; the contribution is the specific few-shot, dual-mode read-and-write
 composition, the training-free amortization of a concept bank against fine-tuning, and an empirical
 characterization of where it helps and where it does not. A reference implementation is available at
@@ -314,12 +317,15 @@ This paper contributes, in order of how much each distinguishes ConceptGate from
 2. **Gate-conditioned steering — the one operation only the composition can do.** The write rule is
    standard activation addition and needs no detection machinery; what the read side adds is deciding
    *when* to write. Conditioning the write on the calibrated gate adds $8.3\pm1.5$ points of jailbreak
-   refusal where writing on every prompt adds $2.1\pm3.0$, an interval covering zero, and it leaves 90%
-   of benign generation byte-identical against 4%
-   (<a class="sref" href="#410-gate-conditioned-steering-what-the-gate-is-for">§4.10</a>). The collateral
-   half of that is **contingent on the benign distribution**: the same gate fires on 92% of *out-of-register*
-   benign prompts, which would erase most of the 90%-versus-4% advantage. The suppression half, and the
-   finding that blanket writing is the worse policy, do not depend on it.
+   refusal where writing on every prompt adds $2.1\pm2.9$, an interval covering zero, and a *random*
+   subset of the same size adds $1.0\pm3.9$ — so the gain is **selection, not dosage**. The reason is that
+   writing a concept direction into prompts where the concept is absent *suppresses* refusals the model
+   would otherwise have produced ($-6.2\pm2.6$ measured directly), which makes the gate load-bearing
+   rather than merely economical
+   (<a class="sref" href="#410-gate-conditioned-steering-what-the-gate-is-for">§4.10</a>). Gating also
+   leaves 90% of benign generation byte-identical against 4%, but that collateral half is **contingent on
+   the benign distribution** — the same gate fires on 92% of *out-of-register* benign prompts, which would
+   erase most of it. The suppression half does not depend on it.
 3. **Training-free amortization across a concept bank.** Adding a concept is a closed-form fit in
    milliseconds and kilobytes with no gradient run, so hosting a fourteen-way safety taxonomy costs a
    fraction of per-concept LoRA fine-tuning and needs no retraining to extend
@@ -1614,11 +1620,20 @@ system that no probe, no classifier, and no external guard can perform: a classi
 prompt is a jailbreak, but it cannot then alter the generation, and CAA can alter the generation but
 cannot decide which prompts deserve it.
 
-We measure it with three arms on Qwen2.5-0.5B, taps 8/12/16, over 32 held-out jailbreak prompts and 32
-benign prompts. A jailbreak concept is fit from eight hand-written override framings against eight benign
-requests, resampled over three seeds, and the arms are: **no steer**; **always steer** away from the
-concept at $-0.08$ of the residual norm on every prompt; and **gate-conditioned steer**, the same write
-applied only when the gate fires.
+We measure it on Qwen2.5-0.5B, taps 8/12/16, over 32 held-out jailbreak prompts and 32 benign prompts. A
+jailbreak concept is fit from eight hand-written override framings against eight benign requests,
+resampled over three seeds. The number that makes the rest of this subsection readable is the gate's
+firing rate: it fires on **54.2%** of the held-out jailbreak prompts and 10.4% of the benign ones. So the
+gated arm writes to about half the attacks, and any comparison against writing to *all* of them confounds
+two different things — *which* prompts receive the write, and *how many* do.
+
+Five arms separate them. **No steer** is the baseline. **Always steer** applies the write at $-0.08$ of
+the residual norm to every prompt. **Gate-conditioned steer** applies the identical write only when the
+gate fires. **Random steer** applies it to a randomly chosen subset of exactly the same size as the gate's
+fired set — the arm that isolates selection from dosage, since it matches the gated arm on how many
+prompts are written and differs only in which. **Anti-gate steer** applies it to precisely the complement,
+the prompts where the concept does *not* register, which turns the suspicion that blanket steering harms
+those prompts into a direct measurement.
 
 Two things about the measures, both of which bound every number in this subsection. Jailbreak suppression
 is the share of continuations containing an **explicit refusal**, matched by a fixed lexicon of decline
@@ -1632,56 +1647,105 @@ restated, since a prompt the gate passes is generated exactly as the baseline wo
 Perplexity is the collateral measure doing work independent of the firing rate.
 
 <figure id="figure-16" style="margin:2rem 0">
-<svg viewBox="0 0 720 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Gate-conditioned steering versus always steering" font-family="ui-sans-serif,system-ui,sans-serif">
+<svg viewBox="0 0 720 268" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Five write policies: change in jailbreak refusal and benign generation left untouched" font-family="ui-sans-serif,system-ui,sans-serif">
   <g font-size="11" fill="currentColor">
-    <text x="120" y="16" text-anchor="middle" font-weight="600">jailbreak refusal (higher = better)</text>
-    <text x="480" y="16" text-anchor="middle" font-weight="600">benign generation left untouched (higher = better)</text>
+    <text x="252" y="15" text-anchor="middle" font-weight="600">change in jailbreak refusal (pts)</text>
+    <text x="572" y="15" text-anchor="middle" font-weight="600">benign generation left untouched</text>
   </g>
-  <!-- panel A axis -->
-  <line x1="150" y1="34" x2="150" y2="196" stroke="#d8d5c8"/>
-  <g font-size="10" fill="#889" text-anchor="end">
-    <text x="146" y="58">no steer</text><text x="146" y="110">always steer</text><text x="146" y="162">gated steer</text>
+  <!-- row labels -->
+  <g font-size="10" fill="currentColor" text-anchor="end">
+    <text x="146" y="52">always <tspan fill="#889">(writes 100%)</tspan></text>
+    <text x="146" y="88">gated <tspan fill="#889">(writes 54%)</tspan></text>
+    <text x="146" y="124">random 54% <tspan fill="#889">(same dose)</tspan></text>
+    <text x="146" y="160">anti-gate <tspan fill="#889">(writes 46%)</tspan></text>
   </g>
-  <!-- panel A bars: scale 0-70% over 150..320 px -->
-  <rect x="150" y="42" width="114" height="24" rx="3" fill="#bcc7c5"/><text x="272" y="59" font-size="10.5" fill="currentColor">46.9%</text>
-  <rect x="150" y="94" width="119" height="24" rx="3" fill="#C2402F" opacity="0.75"/><text x="277" y="111" font-size="10.5" fill="currentColor">49.0 ±3.0%</text>
-  <rect x="150" y="146" width="134" height="24" rx="3" fill="#26A99D"/><text x="292" y="163" font-size="10.5" fill="currentColor">55.2 ±1.5%</text>
-  <!-- panel B axis -->
-  <line x1="510" y1="34" x2="510" y2="196" stroke="#d8d5c8"/>
-  <!-- panel B bars: scale 0-100% over 510..690 px -->
-  <rect x="510" y="42" width="180" height="24" rx="3" fill="#bcc7c5"/><text x="600" y="59" font-size="10.5" text-anchor="middle" fill="#fff">100%</text>
-  <rect x="510" y="94" width="8" height="24" rx="2" fill="#C2402F" opacity="0.75"/><text x="526" y="111" font-size="10.5" fill="currentColor">4.2 ±1.5%</text>
-  <rect x="510" y="146" width="161" height="24" rx="3" fill="#26A99D"/><text x="595" y="163" font-size="10.5" text-anchor="middle" fill="#fff">89.6 ±9.0%</text>
-  <g font-size="10" fill="#889">
-    <text x="150" y="212">0</text><text x="320" y="212" text-anchor="end">70%</text>
-    <text x="510" y="212">0</text><text x="690" y="212" text-anchor="end">100%</text>
-  </g>
-  <text x="360" y="238" text-anchor="middle" font-size="11" fill="currentColor">gating the write beats applying it everywhere on <tspan font-style="italic">both</tspan> axes — more suppression, almost no collateral</text>
+  <!-- panel A: zero line at x=252, 7px per point -->
+  <line x1="252" y1="30" x2="252" y2="176" stroke="#8a8a8a" stroke-width="1.2"/>
+  <text x="252" y="192" font-size="9.5" fill="#889" text-anchor="middle">0</text>
+  <text x="182" y="192" font-size="9.5" fill="#889" text-anchor="middle">−10</text>
+  <text x="322" y="192" font-size="9.5" fill="#889" text-anchor="middle">+10</text>
+  <!-- always +2.1 -->
+  <rect x="252" y="40" width="15" height="18" rx="2" fill="#C2402F" opacity="0.75"/>
+  <line x1="247" y1="49" x2="287" y2="49" stroke="#7a2c21"/><line x1="247" y1="45" x2="247" y2="53" stroke="#7a2c21"/><line x1="287" y1="45" x2="287" y2="53" stroke="#7a2c21"/>
+  <text x="296" y="53" font-size="10" fill="currentColor">+2.1 ±2.9</text>
+  <!-- gate +8.3 -->
+  <rect x="252" y="76" width="58" height="18" rx="2" fill="#26A99D"/>
+  <line x1="299" y1="85" x2="321" y2="85" stroke="#12655e"/><line x1="299" y1="81" x2="299" y2="89" stroke="#12655e"/><line x1="321" y1="81" x2="321" y2="89" stroke="#12655e"/>
+  <text x="330" y="89" font-size="10" fill="currentColor" font-weight="600">+8.3 ±1.5</text>
+  <!-- random +1.0 -->
+  <rect x="252" y="112" width="7" height="18" rx="2" fill="#d98a2b" opacity="0.85"/>
+  <line x1="232" y1="121" x2="286" y2="121" stroke="#8a5715"/><line x1="232" y1="117" x2="232" y2="125" stroke="#8a5715"/><line x1="286" y1="117" x2="286" y2="125" stroke="#8a5715"/>
+  <text x="296" y="125" font-size="10" fill="currentColor">+1.0 ±3.9</text>
+  <!-- antigate -6.2 -->
+  <rect x="209" y="148" width="43" height="18" rx="2" fill="#8a8a8a" opacity="0.8"/>
+  <line x1="191" y1="157" x2="227" y2="157" stroke="#555"/><line x1="191" y1="153" x2="191" y2="161" stroke="#555"/><line x1="227" y1="153" x2="227" y2="161" stroke="#555"/>
+  <text x="176" y="161" font-size="10" fill="currentColor" text-anchor="end">−6.2 ±2.6</text>
+  <!-- panel B: 0..100% over 470..670 -->
+  <line x1="470" y1="30" x2="470" y2="176" stroke="#d8d5c8"/>
+  <rect x="470" y="40" width="8" height="18" rx="2" fill="#C2402F" opacity="0.75"/><text x="486" y="53" font-size="10" fill="currentColor">4.2%</text>
+  <rect x="470" y="76" width="179" height="18" rx="2" fill="#26A99D"/><text x="559" y="89" font-size="10" fill="#fff" text-anchor="middle" font-weight="600">89.6%</text>
+  <rect x="470" y="112" width="179" height="18" rx="2" fill="#d98a2b" opacity="0.85"/><text x="559" y="125" font-size="10" fill="#fff" text-anchor="middle">89.6%</text>
+  <rect x="470" y="148" width="29" height="18" rx="2" fill="#8a8a8a" opacity="0.8"/><text x="507" y="161" font-size="10" fill="currentColor">14.6%</text>
+  <g font-size="9.5" fill="#889"><text x="470" y="192" text-anchor="middle">0</text><text x="670" y="192" text-anchor="end">100%</text></g>
+  <line x1="12" y1="206" x2="708" y2="206" stroke="#e6e3da"/>
+  <text x="360" y="224" text-anchor="middle" font-size="11" fill="currentColor">a random subset of the <tspan font-style="italic">same size</tspan> gains nothing (+1.0), so the gain is <tspan font-weight="600">selection</tspan>, not dosage</text>
+  <text x="360" y="244" text-anchor="middle" font-size="11" fill="currentColor">and writing where the concept does <tspan font-style="italic">not</tspan> register actively suppresses refusals (−6.2)</text>
+  <text x="360" y="261" text-anchor="middle" font-size="10" fill="#889">baseline refusal 46.9%; differences are 2–3 prompts out of 32, mean ± sd over three few-shot resamples</text>
 </svg>
-<figcaption><strong>Figure 16.</strong> <em>Gate-conditioned steering versus blanket steering.</em>
-Qwen2.5-0.5B, taps 8/12/16, steering fraction $-0.08$, 32 jailbreak and 32 benign prompts, mean ± sd over
-three few-shot resamples. Steering away from the concept on <em>every</em> prompt (red) buys 2.1 points of
-jailbreak refusal while rewriting 96% of benign continuations. Applying the identical write only when the
-gate fires (teal) buys 8.3 points while leaving 90% of benign continuations byte-identical to the
-unsteered baseline. Benign perplexity moves 1.98 → 2.17 under blanket steering and 1.98 → 2.03 under
-gating.</figcaption>
+<figcaption><strong>Figure 16.</strong> <em>Five write policies, differing only in which prompts receive an
+identical write.</em> Qwen2.5-0.5B, taps 8/12/16, steering fraction $-0.08$, 32 jailbreak and 32 benign
+prompts, mean ± sd over three few-shot resamples, each arm paired against the no-steer baseline by seed.
+Left: change in jailbreak refusal. Right: share of benign continuations left byte-identical to the
+unsteered baseline. The <em>random 54%</em> arm is matched to the gated arm on how many prompts are
+written and differs only in which, and it gains nothing — so the gated arm's advantage is selection
+rather than dosage. The <em>anti-gate</em> arm writes to exactly the prompts the gate passes and
+<em>reduces</em> refusal, which is why blanket steering nets so little: it is the sum of a real gain on
+the prompts where the concept registers and a real loss everywhere else. Error bars are ± one standard
+deviation across the three resamples and overlap substantially; the arms are separated by two to three
+prompts out of thirty-two.</figcaption>
 </figure>
 
-The gate wins on both axes at once, which is more than we expected: not a trade of suppression against
-collateral, but more suppression *and* less collateral. Blanket steering gains $2.1\pm3.0$ points of
-refusal (46.9% → 49.0%) and leaves only $4.2\pm1.5\%$ of benign continuations untouched, pushing benign
-perplexity from 1.98 to 2.17. Gated steering gains $8.3\pm1.5$ points (46.9% → 55.2%) and leaves
-$89.6\pm9.0\%$ of benign continuations byte-identical, with perplexity at 2.03. Neither arm produced any
-benign over-refusal. The reason blanket steering does worse on the suppression axis is instructive: it
-applies the write to every prompt including the ones where the concept does not register, and pushing
-those activations along a direction the model does not associate with the input perturbs the generation
-without steering it anywhere useful. Confining the write to the prompts where the concept actually
-registers is what makes it effective. The gate is thus not merely a way to *limit* the intervention; it is
-part of what makes the intervention work.
+Gating wins on both axes at once, which is more than we expected: not a trade of suppression against
+collateral, but more suppression *and* less collateral. Against a baseline of 46.9%, gated steering adds
+$8.3\pm1.5$ points of refusal while blanket steering adds $2.1\pm2.9$ — an interval covering zero, so
+writing on every prompt has no effect on refusal we can detect. On the benign side gated steering leaves
+$89.6\pm9.0\%$ of continuations byte-identical against blanket steering's $4.2\pm1.5\%$, with perplexity
+at 2.03 against 2.17. Neither arm produced any benign over-refusal.
 
-Two limits bound this result, both worth stating plainly. First, the effect sizes are small and the
-absolute refusal rate is modest — 55% is not a guardrail, and this is a 0.5B model steered at a single
-magnitude on 32 prompts. The result establishes that gating the write dominates blanket writing, not that
+The two control arms turn that from an observation into a mechanism. **The gain is selection, not
+dosage:** a random subset of exactly the gate's size adds $1.0\pm3.9$ points against the gate's
+$8.3\pm1.5$, and paired by seed the gate leads the random arm by $7.3\pm5.3$ points, with the difference
+non-negative in all three resamples. Writing to half the prompts is worth nothing in itself; writing to
+*that* half is worth something. **And writing where the concept does not register is actively harmful:**
+the anti-gate arm, which writes to precisely the prompts the gate passes, *reduces* refusal by
+$6.2\pm2.6$ points, negative in all three resamples.
+
+Those two numbers account for everything else. Writing to a prompt where the concept registers is worth
+about $+15$ points on that prompt ($8.3$ spread over the 54% that fire); writing to one where it does not
+is worth about $-13$ ($-6.2$ spread over the 46% that do not). Blanket steering does both, and
+$0.542\times15.3 + 0.458\times(-13.5) = +2.1$ — exactly what the blanket arm measures. The random arm
+writes to the same two populations in proportion and predicts $+1.1$ against a measured $+1.0$. A single
+additive account with two parameters, fitted from the gated and anti-gate arms, reproduces the other two
+without adjustment, which is some evidence that the per-prompt effects really are additive and that we
+are not looking at a saturation artifact.
+
+So the finding is sharper than "gating helps and blanket steering doesn't." It is that **writing a
+concept direction into prompts where that concept is absent suppresses refusals the model would otherwise
+have produced** — the intervention is not merely wasted off-target, it is harmful off-target, and blanket
+steering's flat result is a real gain and a real loss cancelling. That is what makes the gate load-bearing
+rather than decorative: it is not only limiting the intervention's cost, it is keeping the intervention
+away from the prompts where it does damage. The bank result below corroborates the same effect
+independently, where blanket steering drops mean refusal from 16.7% to 11.7%.
+
+Two limits bound this result, both worth stating plainly. First, the effect sizes are small in absolute
+terms and the measurement is coarse. Thirty-two prompts means one prompt is 3.1 points, so the gated
+arm's $+8.3$ is 2.7 prompts and the anti-gate arm's $-6.2$ is 2.0; the standard deviations are across
+three few-shot resamples, not across prompts, and the error bars in the figure overlap. What carries the
+result is not any single interval but that the ordering repeats in every resample and that four arms fit
+one two-parameter account. A decisive version of this experiment wants hundreds of prompts and several
+magnitudes, and we would not want the mechanism claim leaned on harder than three seeds of thirty-two can
+bear. The absolute level is modest too — 55% refusal is not a guardrail, on a 0.5B model at a single
+magnitude. The result establishes that gating the write dominates blanket writing, and why, not that
 gated steering is a deployable defense. Second, the gate's usefulness depends entirely on its concept
 being fit on examples that match the prompts it will see. Fitting the same concept from the dataset's long
 persona templates instead of short override framings produces a gate that fires on **0.0%** of these short
@@ -1794,11 +1858,14 @@ guard can perform — a classifier can identify a jailbreak but cannot alter the
 the generation but cannot choose which prompts deserve it — and
 <a class="sref" href="#410-gate-conditioned-steering-what-the-gate-is-for">§4.10</a> measures it:
 conditioning the same write on the gate adds $8.3\pm1.5$ points of jailbreak refusal where writing on
-every prompt adds $2.1\pm3.0$, an interval covering zero, and it confines the intervention instead of
-rewriting benign generation wholesale. How large that second advantage is depends on how far the benign
-traffic sits from the gate's ten examples — measured at 90%-versus-4% on in-register prompts and
-substantially less off it — but the ordering of the two write policies does not depend on the
-distribution. The efficient detection path (the
+every prompt adds $2.1\pm2.9$, an interval covering zero, and where a random subset of the same size adds
+$1.0\pm3.9$ — the gain is in *which* prompts are written, not how many. What makes the read side
+load-bearing rather than merely economical is the reason for that gap: writing the direction into prompts
+where the concept is absent *reduces* refusal by $6.2\pm2.6$ points, so the gate is keeping the
+intervention away from prompts where it does harm, not just saving work. Gating also confines the
+intervention instead of rewriting benign generation wholesale, though how large that second advantage is
+depends on how far the benign traffic sits from the gate's ten examples — 90%-versus-4% on in-register
+prompts and substantially less off it. The efficient detection path (the
 truncated forward, calibration) matters for what it always mattered for — running the read cheaply enough
 to keep in the serving loop — and the gate is what converts that read into a targeted write.
 
