@@ -150,7 +150,7 @@ a random subset of the same size does the same, and the gate fires on 97% of att
 On a continuous first-token outcome the few-shot direction moves refusal about three times as much as a random
 direction of the same norm, in the same sign whether or not the gate fired — a refusal lever, already known.
 What the gate still confines is benign collateral (82% of benign generation untouched against 0%), which CAST
-already reports. The earlier result is retracted here with the mechanism of the error. Every mechanism used
+already reports. The earlier result is retracted here with the mechanism of the error. (vii) Asking a different question of the same harness does yield one finding we could not locate in prior work: on attack prompts with headroom, **how much** a steering write moves a given prompt is linearly decodable from that prompt's activations before generation (Spearman $+0.81$ out-of-fold, against $+0.51$ for the concept read itself), along a direction roughly $85°$ from the concept direction and from the model's baseline refusal disposition. One model, one concept, one magnitude (<a class="sref" href="#411-predicting-steerability-from-the-prompt">§4.11</a>). Every mechanism used
 here is drawn from prior work; the contribution is the specific few-shot, dual-mode read-and-write
 composition, the training-free amortization of a concept bank against fine-tuning, and an empirical
 characterization of where it helps and where it does not. A reference implementation is available at
@@ -306,9 +306,18 @@ the residual stream rather than on the text, and it recurs throughout the analys
 
 ### 1.4 Contributions
 
-This paper contributes, in order of how much each distinguishes ConceptGate from a plain probe:
+This paper contributes, in order of how much each distinguishes ConceptGate from a plain probe. The order
+changed substantially between versions, and the first item is the only one we would now defend as new:
 
-1. **Steering — the read/write duality, measured.** The one operation a detector or classifier cannot
+1. **Per-prompt steerability is predictable, and not from the concept.** On attack prompts where the model
+   has room to move, the *magnitude* of a steering write's effect on refusal is linearly decodable from the
+   prompt's mid-layer activations before generation — Spearman $+0.81 \pm 0.03$ out-of-fold, $+0.79$ with
+   folds grouped by harmful request, $+0.88$ transferring across prompt families — against $+0.51 \pm 0.11$
+   for the few-shot concept read the gate already computes. The decoding direction sits about $85°$ from
+   both the concept direction and a direction predicting the model's unsteered disposition, and the signal
+   survives projecting both out. Two literature searches did not find this (<a class="sref" href="#411-predicting-steerability-from-the-prompt">§4.11</a>). It is one model, one
+   concept, one magnitude.
+2. **Steering — the read/write duality, measured.** The one operation a detector or classifier cannot
    perform: a direction fit from the *same ten examples* as the detector — related to it but not identical
    (per-tap cosine 0.45–0.83 depending on model, concept, and detection mode;
    <a class="sref" href="#310-steering-the-write-side">§3.10</a>) — is written back into the residual
@@ -316,7 +325,7 @@ This paper contributes, in order of how much each distinguishes ConceptGate from
    from the concept, a graded dose-response with a coherent operating window, bounded by the base model
    (<a class="sref" href="#46-steering-across-models">§4.6</a>,
    <a class="sref" href="#310-steering-the-write-side">§3.10</a>).
-2. **Controls for conditional steering, and a retraction.** Conditioning a steering vector on an
+3. **Controls for conditional steering, and a retraction.** Conditioning a steering vector on an
    activation-read detector is prior work (CAST, DSAS). We add the three controls those papers do not run — a
    size-matched random arm, the detector's complement, and a sign flip — plus a random-direction floor on a
    continuous outcome, and report what they show when run with the model's chat template: the few-shot jailbreak
@@ -325,18 +334,18 @@ This paper contributes, in order of how much each distinguishes ConceptGate from
    attacks and so selects nothing; the collateral confinement that remains (82% of benign generation untouched) is
    CAST's result. An earlier version of this paper reported the opposite sign because the template was omitted
    (<a class="sref" href="#410-gate-conditioned-steering-a-retraction-and-what-the-corrected-runs-show">§4.10</a>).
-3. **Training-free amortization across a concept bank.** Adding a concept is a closed-form fit in
+4. **Training-free amortization across a concept bank.** Adding a concept is a closed-form fit in
    milliseconds and kilobytes with no gradient run, so hosting a fourteen-way safety taxonomy costs a
    fraction of per-concept LoRA fine-tuning and needs no retraining to extend
    (<a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a>). This amortization is shared with a
    linear-probe bank; what ConceptGate adds is that each entry also supplies a steering direction at no
    extra fitting cost — though for these harm categories the write is a measured *null* on behaviour
    (<a class="sref" href="#the-same-arms-on-the-concept-bank-corrected">§4.10</a>).
-4. **A calibrated, few-shot, dual-mode adapter.** One object learns a concept from ~10 examples, detects
+5. **A calibrated, few-shot, dual-mode adapter.** One object learns a concept from ~10 examples, detects
    it with a calibrated fire/abstain/pass gate, and steers along a closely related direction, with a small,
    well-characterized parameter budget (<a class="sref" href="#54-what-it-actually-costs">§5.4</a>) and no
    training.
-5. **Negative and honest results, reported as prominently as the positives.** Detection is a commodity a
+6. **Negative and honest results, reported as prominently as the positives.** Detection is a commodity a
    linear SVM matches (<a class="sref" href="#43-detection-on-real-prompts-a-commodity">§4.3</a>) and a
    *depth-matched* probe matches at the same compute
    (<a class="sref" href="#481-learning-a-single-concept">§4.8.1</a>), so single-concept efficiency is the
@@ -352,7 +361,7 @@ This paper contributes, in order of how much each distinguishes ConceptGate from
    category is only partial (<a class="sref" href="#49-out-of-distribution-generalization">§4.9</a>); and
    steering away from the bank's own harm-category directions lowers refusal (80% → 65%) rather than raising
    it, the same reversal as the jailbreak concept (<a class="sref" href="#410-gate-conditioned-steering-a-retraction-and-what-the-corrected-runs-show">§4.10</a>).
-6. **Reproducible interactive figures.** The figures below reproduce the underlying model runs, so the
+7. **Reproducible interactive figures.** The figures below reproduce the underlying model runs, so the
    mechanism can be examined directly rather than only described.
 
 One caveat applies throughout: **no individual mechanism here is new.** Probes,
@@ -1779,6 +1788,440 @@ did not survive. The harness is
 [`scripts/eval_gate.py`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_gate.py); the
 withdrawn numbers remain in the repository's history.
 
+### 4.11 Predicting steerability from the prompt
+
+Everything above is either a negative or someone else's result. This section is the one place where the
+harness produced a finding we could not locate in the literature, and it came from asking a different
+question than the paper was built around. The retracted experiment asked *when should we write?* and
+answered it with the concept read. The corrected data says the concept read cannot answer it, because it
+fires on almost every attack. So we asked instead: **how much will a write move this particular prompt,
+and is that predictable before generating anything?**
+
+**Design.** The test set of <a class="sref" href="#411-predicting-steerability-from-the-prompt">§4.10</a> is useless for this — a model refusing 94% of
+attacks has no room to move — so we built one with headroom: 120 held-out jailbreak templates from the
+dataset's test split, each with one of twelve plain harmful requests appended; the 32 short framed attacks;
+the twelve bare requests alone; and 48 real benign prompts. 164 attacks in total, of which 15% lean toward
+compliance unsteered, and the three prompt families differ in baseline disposition (mean refusal logit
++1.22 for templates, +2.88 for the short framings, +1.96 for bare requests). For each prompt we record
+the unsteered first-token refusal logit and the same quantity under four writes: $\pm\alpha$ along the
+concept's raw direction, and $\pm\alpha$ along a random unit direction of the same norm. Five forward
+passes per prompt, no generation. The **lever** is the sign-reversible half of the response,
+$\tfrac{1}{2}\left(\Delta_{-\alpha} - \Delta_{+\alpha}\right)$ — how much this prompt's refusal
+swings when the write flips sign. Three concept resamples; the prompt set is fixed across them, so the
+spread below is sensitivity to the eight fitting examples, not to the prompts.
+
+**The concept read predicts the lever, moderately.** Spearman between the gate's LLR and the per-prompt
+lever is $+0.51 \pm 0.11$ across all attacks. But most of that comes from the three prompt families
+sitting at different places on both axes; within the 120 templates alone it falls to $+0.40 \pm 0.18$, and
+in one resample to $+0.15$. The concept read carries real information about steerability and is a weak
+instrument for it.
+
+**A direction fit to the outcome predicts it much better.** Ridge regression from the same tapped
+activations onto the lever reaches Spearman $+0.81 \pm 0.03$ under 5-fold cross-validation. That is not
+leakage from repeated harmful requests: grouping the folds by request gives $+0.79 \pm 0.02$, and within
+the 120 templates alone, grouped by request, $+0.70 \pm 0.07$ against the concept read's $+0.40$ on the
+same rows. Nor is it memorizing a prompt family: fit on the templates and tested on the short framings and
+bare requests it reaches $+0.88 \pm 0.02$, and the reverse direction $+0.72 \pm 0.03$.
+
+<figure id="figure-16" style="margin:2rem 0">
+<svg viewBox="0 0 720 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Per-prompt steerability predicted by the concept read versus by a direction fit to the outcome" font-family="ui-sans-serif,system-ui,sans-serif">
+<text x="206" y="20" text-anchor="middle" font-size="11" font-weight="600" fill="currentColor">the concept read (gate LLR)</text>
+<text x="554" y="20" text-anchor="middle" font-size="11" font-weight="600" fill="currentColor">a direction fit to the outcome (held out)</text>
+<text x="206" y="35" text-anchor="middle" font-size="10" fill="#889">Spearman +0.51 ± 0.11</text>
+<text x="554" y="35" text-anchor="middle" font-size="10" fill="#889">Spearman +0.81 ± 0.03, 5-fold CV</text>
+<line x1="76" y1="170" x2="336" y2="170" stroke="#d8d5c8"/><line x1="76" y1="170" x2="76" y2="50" stroke="#d8d5c8"/>
+<text x="206" y="187" text-anchor="middle" font-size="9.5" fill="#889">signed log₁₀ gate LLR</text>
+<circle cx="114.7" cy="115.8" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="131.6" cy="76.0" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="117.4" cy="110.3" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="122.0" cy="105.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="114.9" cy="77.3" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="272.2" cy="91.3" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="120.8" cy="137.0" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="291.2" cy="69.2" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="122.7" cy="111.1" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="123.9" cy="119.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="126.7" cy="117.3" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="141.3" cy="107.0" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="119.8" cy="91.4" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="300.2" cy="71.1" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="158.2" cy="99.9" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="110.8" cy="100.9" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="113.2" cy="80.1" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="135.1" cy="106.1" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="132.6" cy="97.5" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="161.7" cy="73.3" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="118.3" cy="117.3" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="114.9" cy="124.9" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="308.7" cy="86.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="215.1" cy="103.5" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="128.2" cy="96.3" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="150.1" cy="77.8" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="131.3" cy="86.1" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="175.8" cy="93.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="112.9" cy="85.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="107.9" cy="103.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="119.4" cy="114.3" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="306.8" cy="85.5" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="110.6" cy="132.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="104.7" cy="144.3" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="120.3" cy="124.8" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="119.4" cy="131.9" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="123.9" cy="110.9" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="136.8" cy="95.2" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="134.9" cy="103.2" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="118.9" cy="127.3" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="103.6" cy="71.0" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="129.8" cy="87.1" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="122.1" cy="114.0" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="298.1" cy="74.0" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="124.3" cy="127.1" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="107.9" cy="109.4" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="171.7" cy="82.4" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="285.2" cy="87.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="111.3" cy="113.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="152.4" cy="56.5" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="144.1" cy="109.3" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="142.0" cy="98.5" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="112.7" cy="82.0" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="123.9" cy="95.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="118.0" cy="86.4" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="181.8" cy="83.1" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="109.9" cy="113.8" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="126.8" cy="88.8" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="137.9" cy="110.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="160.1" cy="90.5" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="106.9" cy="106.9" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="149.5" cy="76.5" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="114.9" cy="132.9" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="123.6" cy="109.5" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="106.9" cy="93.8" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="119.2" cy="122.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="123.1" cy="126.1" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="300.4" cy="66.4" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="108.3" cy="144.3" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="111.9" cy="129.9" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="296.3" cy="84.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="116.8" cy="105.4" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="112.3" cy="107.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="148.6" cy="77.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="126.8" cy="60.8" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="117.1" cy="85.9" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="110.8" cy="96.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="115.0" cy="119.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="120.0" cy="112.2" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="304.7" cy="92.4" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="105.9" cy="127.8" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="117.0" cy="120.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="126.8" cy="111.9" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="136.6" cy="103.4" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="120.2" cy="110.1" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="138.8" cy="83.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="133.3" cy="124.8" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="114.3" cy="138.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="110.4" cy="95.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="113.1" cy="102.0" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="132.3" cy="118.2" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="261.5" cy="85.9" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="120.1" cy="131.0" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="112.2" cy="148.8" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="115.5" cy="145.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="120.1" cy="125.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="131.8" cy="121.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="131.0" cy="97.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="123.3" cy="121.4" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="158.9" cy="106.5" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="158.8" cy="89.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="146.4" cy="104.8" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="102.9" cy="155.3" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="299.4" cy="95.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="102.7" cy="111.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="102.2" cy="133.5" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="145.4" cy="132.2" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="119.8" cy="120.0" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="128.1" cy="116.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="128.0" cy="78.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="120.9" cy="108.2" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="142.7" cy="73.9" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="116.5" cy="97.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="130.5" cy="102.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="110.1" cy="162.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="302.1" cy="85.4" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="107.4" cy="164.2" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="113.8" cy="104.4" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="136.8" cy="116.9" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="119.7" cy="96.5" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="99.5" cy="103.4" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="121.8" cy="99.6" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="114.2" cy="100.7" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="231.9" cy="67.4" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="124.1" cy="89.9" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="105.6" cy="92.0" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="114.7" cy="94.0" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="109.0" cy="113.5" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="104.8" cy="119.1" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="108.9" cy="110.2" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="215.1" cy="80.3" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="105.9" cy="107.1" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="108.8" cy="98.1" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="109.6" cy="105.1" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="273.1" cy="85.1" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="95.5" cy="142.1" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="103.2" cy="126.8" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="98.7" cy="99.6" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="95.6" cy="131.8" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="124.6" cy="102.2" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="102.8" cy="105.2" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="100.9" cy="129.8" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="103.6" cy="103.1" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="105.9" cy="128.1" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="321.2" cy="81.3" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="95.3" cy="117.7" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="106.1" cy="107.8" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="105.2" cy="116.3" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="124.2" cy="86.6" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="108.0" cy="113.2" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="108.2" cy="118.5" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="106.2" cy="101.9" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="93.8" cy="129.0" r="2.1" fill="#d98a2b" opacity="0.55"/>
+<circle cx="121.7" cy="75.2" r="2.1" fill="#d98a2b" opacity="0.55"/>
+<circle cx="97.3" cy="124.9" r="2.1" fill="#d98a2b" opacity="0.55"/>
+<circle cx="92.8" cy="139.5" r="2.1" fill="#d98a2b" opacity="0.55"/>
+<circle cx="97.5" cy="97.5" r="2.1" fill="#d98a2b" opacity="0.55"/>
+<circle cx="90.2" cy="125.0" r="2.1" fill="#d98a2b" opacity="0.55"/>
+<circle cx="91.0" cy="133.3" r="2.1" fill="#d98a2b" opacity="0.55"/>
+<circle cx="156.9" cy="78.7" r="2.1" fill="#d98a2b" opacity="0.55"/>
+<circle cx="91.0" cy="144.6" r="2.1" fill="#d98a2b" opacity="0.55"/>
+<circle cx="90.7" cy="146.9" r="2.1" fill="#d98a2b" opacity="0.55"/>
+<circle cx="96.7" cy="139.9" r="2.1" fill="#d98a2b" opacity="0.55"/>
+<circle cx="95.3" cy="129.9" r="2.1" fill="#d98a2b" opacity="0.55"/>
+<line x1="424" y1="170" x2="684" y2="170" stroke="#d8d5c8"/><line x1="424" y1="170" x2="424" y2="50" stroke="#d8d5c8"/>
+<text x="554" y="187" text-anchor="middle" font-size="9.5" fill="#889">predicted lever</text>
+<circle cx="571.6" cy="115.8" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="624.2" cy="76.0" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="561.7" cy="110.3" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="579.4" cy="105.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="637.5" cy="77.3" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="598.0" cy="91.3" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="493.8" cy="137.0" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="628.9" cy="69.2" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="539.6" cy="111.1" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="539.1" cy="119.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="536.5" cy="117.3" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="562.4" cy="107.0" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="607.7" cy="91.4" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="663.1" cy="71.1" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="580.0" cy="99.9" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="544.3" cy="100.9" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="629.7" cy="80.1" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="583.1" cy="106.1" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="566.3" cy="97.5" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="649.6" cy="73.3" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="527.7" cy="117.3" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="557.0" cy="124.9" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="609.6" cy="86.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="549.3" cy="103.5" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="579.8" cy="96.3" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="655.4" cy="77.8" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="605.2" cy="86.1" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="614.4" cy="93.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="614.3" cy="85.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="524.1" cy="103.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="530.5" cy="114.3" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="631.7" cy="85.5" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="523.6" cy="132.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="510.0" cy="144.3" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="520.3" cy="124.8" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="543.7" cy="131.9" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="538.4" cy="110.9" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="620.2" cy="95.2" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="586.3" cy="103.2" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="567.6" cy="127.3" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="606.2" cy="71.0" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="602.8" cy="87.1" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="543.4" cy="114.0" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="626.5" cy="74.0" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="517.1" cy="127.1" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="525.6" cy="109.4" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="629.2" cy="82.4" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="617.1" cy="87.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="546.3" cy="113.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="655.1" cy="56.5" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="604.6" cy="109.3" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="607.3" cy="98.5" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="614.9" cy="82.0" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="581.5" cy="95.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="627.2" cy="86.4" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="597.1" cy="83.1" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="526.0" cy="113.8" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="578.6" cy="88.8" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="574.5" cy="110.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="603.5" cy="90.5" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="557.9" cy="106.9" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="597.7" cy="76.5" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="521.7" cy="132.9" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="558.3" cy="109.5" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="601.2" cy="93.8" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="527.1" cy="122.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="491.0" cy="126.1" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="647.8" cy="66.4" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="438.0" cy="144.3" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="497.1" cy="129.9" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="593.0" cy="84.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="541.9" cy="105.4" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="566.8" cy="107.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="664.8" cy="77.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="548.4" cy="60.8" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="569.2" cy="85.9" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="585.2" cy="96.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="548.1" cy="119.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="484.8" cy="112.2" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="620.0" cy="92.4" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="513.9" cy="127.8" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="525.9" cy="120.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="542.7" cy="111.9" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="587.9" cy="103.4" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="493.0" cy="110.1" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="638.5" cy="83.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="542.6" cy="124.8" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="498.5" cy="138.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="649.8" cy="95.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="517.9" cy="102.0" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="543.3" cy="118.2" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="638.8" cy="85.9" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="566.4" cy="131.0" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="515.3" cy="148.8" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="492.1" cy="145.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="544.5" cy="125.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="576.7" cy="121.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="611.2" cy="97.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="494.6" cy="121.4" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="550.5" cy="106.5" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="560.0" cy="89.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="603.6" cy="104.8" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="482.5" cy="155.3" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="628.3" cy="95.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="491.9" cy="111.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="529.1" cy="133.5" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="560.3" cy="132.2" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="529.6" cy="120.0" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="544.6" cy="116.6" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="619.8" cy="78.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="580.4" cy="108.2" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="609.0" cy="73.9" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="631.0" cy="97.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="633.2" cy="102.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="511.1" cy="162.7" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="642.5" cy="85.4" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="486.0" cy="164.2" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="556.2" cy="104.4" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="569.7" cy="116.9" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="553.3" cy="96.5" r="2.1" fill="#26A99D" opacity="0.55"/>
+<circle cx="538.2" cy="103.4" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="551.5" cy="99.6" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="561.4" cy="100.7" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="664.8" cy="67.4" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="597.2" cy="89.9" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="576.0" cy="92.0" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="609.7" cy="94.0" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="535.1" cy="113.5" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="577.2" cy="119.1" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="585.3" cy="110.2" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="636.5" cy="80.3" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="573.9" cy="107.1" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="569.8" cy="98.1" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="617.7" cy="105.1" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="604.4" cy="85.1" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="463.7" cy="142.1" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="575.5" cy="126.8" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="567.2" cy="99.6" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="494.5" cy="131.8" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="564.8" cy="102.2" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="564.4" cy="105.2" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="527.0" cy="129.8" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="555.2" cy="103.1" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="515.7" cy="128.1" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="657.6" cy="81.3" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="525.2" cy="117.7" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="555.9" cy="107.8" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="564.5" cy="116.3" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="613.2" cy="86.6" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="557.6" cy="113.2" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="514.3" cy="118.5" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="583.8" cy="101.9" r="2.1" fill="#C2402F" opacity="0.55"/>
+<circle cx="509.1" cy="129.0" r="2.1" fill="#d98a2b" opacity="0.55"/>
+<circle cx="636.0" cy="75.2" r="2.1" fill="#d98a2b" opacity="0.55"/>
+<circle cx="522.0" cy="124.9" r="2.1" fill="#d98a2b" opacity="0.55"/>
+<circle cx="496.6" cy="139.5" r="2.1" fill="#d98a2b" opacity="0.55"/>
+<circle cx="628.0" cy="97.5" r="2.1" fill="#d98a2b" opacity="0.55"/>
+<circle cx="513.1" cy="125.0" r="2.1" fill="#d98a2b" opacity="0.55"/>
+<circle cx="484.6" cy="133.3" r="2.1" fill="#d98a2b" opacity="0.55"/>
+<circle cx="620.6" cy="78.7" r="2.1" fill="#d98a2b" opacity="0.55"/>
+<circle cx="444.3" cy="144.6" r="2.1" fill="#d98a2b" opacity="0.55"/>
+<circle cx="482.1" cy="146.9" r="2.1" fill="#d98a2b" opacity="0.55"/>
+<circle cx="495.2" cy="139.9" r="2.1" fill="#d98a2b" opacity="0.55"/>
+<circle cx="506.7" cy="129.9" r="2.1" fill="#d98a2b" opacity="0.55"/>
+<text x="70" y="75" text-anchor="end" font-size="9" fill="#889">0</text>
+<text x="70" y="102" text-anchor="end" font-size="9" fill="#889">−1</text>
+<text x="70" y="129" text-anchor="end" font-size="9" fill="#889">−2</text>
+<text x="70" y="157" text-anchor="end" font-size="9" fill="#889">−3</text>
+<text x="30" y="110" font-size="9.5" fill="#889" text-anchor="middle" transform="rotate(-90 30 110)">refusal-logit swing</text>
+<g font-size="9.5"><circle cx="358" cy="58" r="3" fill="#26A99D"/><text x="367" y="61" fill="#889">template</text><circle cx="358" cy="73" r="3" fill="#C2402F"/><text x="367" y="76" fill="#889">short</text><circle cx="358" cy="88" r="3" fill="#d98a2b"/><text x="367" y="91" fill="#889">request</text></g>
+<line x1="12" y1="196" x2="708" y2="196" stroke="#e6e3da"/>
+<text x="360" y="215" text-anchor="middle" font-size="11" fill="currentColor">the outcome direction sits <tspan font-weight="600">85°</tspan> from the concept direction (mean |cos| 0.09, chance 0.033)</text>
+<text x="360" y="233" text-anchor="middle" font-size="10" fill="#889">+0.81 survives projecting out both it and a refusal-readiness direction · 164 attacks, Qwen2.5-0.5B, one resample shown</text>
+</svg>
+<figcaption><strong>Figure 16.</strong> <em>Per-prompt steerability, predicted two ways.</em> Each point is
+one attack prompt; the vertical axis is its measured lever — how far the first-token refusal logit swings
+when the write flips sign. Left: against the few-shot concept read the gate already computes. Right:
+against a ridge direction fit to the lever itself and evaluated out-of-fold. Same prompts, same
+activations, same forward passes; the only difference is what the direction was fit to. Colour marks the
+prompt family, and the right panel shows the three families falling on one line rather than three clusters.
+</figcaption>
+</figure>
+
+**And it is not the concept direction.** In raw activation space the outcome direction's mean absolute
+cosine with the concept's steering direction is $0.09$, against a chance floor of $1/\sqrt{d} = 0.033$ —
+about $2.8\times$ chance, and roughly $85°$ apart. It is also not a *refusal-readiness* direction: a ridge
+fit to the **unsteered** logit predicts that quantity well ($+0.86 \pm 0.01$ out-of-fold), which says the
+model's baseline disposition is itself linearly decodable, but that direction sits at $|\cos| = 0.07$ from
+the outcome direction. Projecting **both** of them out of the activations and refitting still gives
+$+0.81 \pm 0.04$. Whatever predicts how far a prompt will move is carried somewhere other than the concept
+direction or the disposition direction.
+
+**Four confounds, checked.** The lever is not the residual norm (Spearman $+0.20 \pm 0.08$ to the lever;
+dividing the lever by the norm leaves the prediction at $+0.81 \pm 0.03$). It is not baseline refusal
+($-0.01 \pm 0.03$; residualizing the lever against norm and baseline together leaves $+0.79 \pm 0.04$). It
+is not distance to the decision boundary, which would make the lever largest where the model is least
+committed — $|$baseline$|$ against $|$lever$|$ is $-0.01 \pm 0.03$. And the write is doing something
+specific to the concept: its lever averages $1.28 \pm 0.02$ against $0.51 \pm 0.20$ for a random direction
+of the same norm, so roughly $2.5\times$ the perturbation floor.
+
+**What we think this is, and what it is not.** The honest statement is narrow: *on this model, for this
+concept and this magnitude, how much a steering write will move a prompt's refusal is linearly decodable
+from the prompt's own mid-layer activations before generation, better than the concept read decodes it,
+and along a direction nearly orthogonal to both the concept direction and the model's refusal
+disposition.* Two independent literature searches did not find this. The closest work predicts where
+steering vectors succeed at the aggregate or layer level, for a single sign, without a gate <span class="cite" data-ref="Billa (2026). Predicting Where Steering Vectors Succeed. arXiv:2604.15557."><a href="#ref-billa">[22]</a></span>;
+predicts steering success from *post-steering* decoding states with a gradient-boosted model over 1.4M
+generations <span class="cite" data-ref="When is Your LLM Steerable? arXiv:2606.11599."><a href="#ref-asteer">[25]</a></span>; or relates dataset-level separability to anti-steerability without going
+per-input <span class="cite" data-ref="Braun, et al. (2025). Generalisation and reliability of steering vectors. arXiv:2505.22637."><a href="#ref-braun">[26]</a></span>. That the concept direction moves refusal at all is Arditi et al. <span class="cite" data-ref="Arditi, A., et al. (2024). Refusal in Language Models Is Mediated by a Single Direction. NeurIPS 2024. arXiv:2406.11717."><a href="#ref-arditi">[17]</a></span>, and
+that arbitrary directions move it in proportion to their refusal alignment is known <span class="cite" data-ref="Analysing the Safety Pitfalls of Steering Vectors. arXiv:2603.24543."><a href="#ref-pitfalls">[19]</a></span>. The new part
+is that the *per-prompt magnitude* is predictable, and predictable from somewhere else.
+
+We would not want this leaned on hard. It is one 0.5B model, one concept, one magnitude, 164 attack
+prompts, and three resamples that share those prompts. The predictor is a ridge in 2,688 dimensions fit on
+164 points — grouped cross-validation and cross-family transfer are what make us believe it is not
+overfitting, not the raw cross-validated number. The labels are not free: obtaining them costs two forward
+passes per prompt, so this is a cheaply-labelled predictor rather than a zero-shot one. And it is
+correlational: we can say how far a prompt will move, not why. Our own estimate that some version of this
+is already published somewhere we did not reach is roughly one in three. What would settle it is the
+obvious scaling — several magnitudes, several concepts, 2B and 7B models, and a held-out *model* rather
+than a held-out fold. The harness is
+[`scripts/eval_gate.py --steerability`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_gate.py)
+and every number here is produced by
+[`scripts/analyze_steerability.py`](https://github.com/NISH1001/conceptgate/blob/main/scripts/analyze_steerability.py).
+
 ## 5. Discussion
 
 ### 5.1 What is contributed
@@ -2008,6 +2451,8 @@ visible in them.
 22. <a id="ref-billa"></a>Billa (2026). *Predicting Where Steering Vectors Succeed.* arXiv:2604.15557.
 23. <a id="ref-paving"></a>*Residual Paving: Diagnosing the Routing Bottleneck in Selective Refusal Editing.* (2026). arXiv:2605.20262.
 24. <a id="ref-lad"></a>*Latent Adversarial Detection.* (2026). arXiv:2604.28129.
+25. <a id="ref-asteer"></a>*When is Your LLM Steerable?* (2026). arXiv:2606.11599.
+26. <a id="ref-braun"></a>Braun, et al. (2025). *Generalisation and reliability of steering vectors.* arXiv:2505.22637.
 </div>
 
 ## Citation
