@@ -142,14 +142,15 @@ categories is only partial; and gated steering with the concept bank's own harm-
 refusal unchanged (blanket steering lowers it), so the bank's entries supply a write direction without a demonstrated behavioural
 effect for those concepts. (v) The one capability that distinguishes an internal adapter from a text
 classifier is **steering** — writing a direction fit from the same few-shot examples back into the residual stream — which we
-measure as a monotonic dose-response bounded by the competence of the base model. (vi) The write rule
-itself is standard activation addition and needs none of the detection machinery; what the read side
-contributes is deciding *when* to write, and that decision is load-bearing. Gating the write adds 8.3
-points of jailbreak refusal where writing on every prompt adds none and a random subset of the same size
-adds none. Flipping the write's sign shows why: the concept direction is a directional lever exactly on the
-prompts where the gate registers the concept, and perturbation that degrades safety in *either* direction
-everywhere else. Gating also leaves 90% of benign generation untouched against 4%, contingent on benign
-traffic resembling the gate's ten examples — off-register, the same gate fires on 92%. Every mechanism used
+measure as a graded dose-response bounded by the competence of the base model. (vi) The write rule itself is standard activation addition, and conditioning it on an activation-read
+detector is prior work. An earlier version of this report claimed a gate-conditioned steering gain; those
+experiments ran the instruct model without its chat template, and with the template the result reverses: the
+model refuses 94% of attacks unsteered, steering *away* from the jailbreak concept lowers refusal by 22 points,
+a random subset of the same size does the same, and the gate fires on 97% of attacks, so it selects nothing.
+On a continuous first-token outcome the few-shot direction moves refusal about three times as much as a random
+direction of the same norm, in the same sign whether or not the gate fired — a refusal lever, already known.
+What the gate still confines is benign collateral (82% of benign generation untouched against 0%), which CAST
+already reports. The earlier result is retracted here with the mechanism of the error. Every mechanism used
 here is drawn from prior work; the contribution is the specific few-shot, dual-mode read-and-write
 composition, the training-free amortization of a concept bank against fine-tuning, and an empirical
 characterization of where it helps and where it does not. A reference implementation is available at
@@ -158,13 +159,15 @@ characterization of where it helps and where it does not. A reference implementa
 
 <div class="small-note" markdown="1">
 **Note on the figures.** The interactive figures replay real runs computed offline — GPT-2 and
-Qwen2.5-0.5B on CPU, plus gemma-2-2b (on an Apple M4 GPU) for the efficiency, multi-concept,
+Qwen2.5-0.5B on CPU for the original detection figures, with the steering and gate experiments and every
+gemma-2-2b run on an Apple M4 GPU — the latter for the efficiency, multi-concept,
 generalization, and read/write-cosine figures — the steering dose-response itself is measured on GPT-2 and Qwen only; the model outputs, activations, and log-likelihood ratios shown are the measured
 values, and the controls recompute only inexpensive derived quantities (the fused discriminability,
 the decision threshold, the location of the cost knee) rather than executing a model in the browser.
 The small models were chosen so the core results reproduce cheaply; the qualitative findings
 are expected to transfer to larger models, but the specific numbers should not be treated as
-calibrated large-model benchmarks. The interactive figures use a three-tap configuration (blocks 4/6/8
+calibrated large-model benchmarks. The steering and gate experiments format prompts with the model's chat template; the detection
+benchmarks read the raw prompt. The interactive figures use a three-tap configuration (blocks 4/6/8
 on GPT-2) with eight examples per class; the mixture and parameter-count discussions cite the original
 five-tap, twelve-per-class runs, so tap and prompt counts differ between the two. References were
 checked against their primary sources; readers are nonetheless encouraged to verify them independently.
@@ -290,7 +293,7 @@ theory, by a **matched filter** over depth rather than by a hand-picked layer. T
 in <a class="sref" href="#34-the-concept-spectrogram">§3.4</a> and justified by a matched-filter
 argument in <a class="sref" href="#36-the-quadrature-argument-for-depth-fusion">§3.6</a>. We flag at
 the outset that the expectation is **not borne out**. The argument needs the per-layer noise to be
-independent; the fusion recovers exactly the predicted gain on synthetic data built to satisfy that
+independent; the fusion recovers the predicted gain on synthetic data built to satisfy that
 assumption (<a class="sref" href="#41-depth-fusion-on-synthetic-data">§4.1</a>), and on real models the
 tapped layers are correlated enough that a linear probe on the same concatenated taps matches or beats
 the fusion (<a class="sref" href="#481-learning-a-single-concept">§4.8.1</a>). Depth fusion is reported
@@ -310,29 +313,25 @@ This paper contributes, in order of how much each distinguishes ConceptGate from
    (per-tap cosine 0.45–0.83 depending on model, concept, and detection mode;
    <a class="sref" href="#310-steering-the-write-side">§3.10</a>) — is written back into the residual
    stream to steer generation toward or away
-   from the concept, a monotonic dose-response with a coherent operating window, bounded by the base model
+   from the concept, a graded dose-response with a coherent operating window, bounded by the base model
    (<a class="sref" href="#46-steering-across-models">§4.6</a>,
    <a class="sref" href="#310-steering-the-write-side">§3.10</a>).
-2. **Gate-conditioned steering — the one operation only the composition can do.** The write rule is
-   standard activation addition and needs no detection machinery; what the read side adds is deciding
-   *when* to write. Conditioning the write on the calibrated gate adds $8.3\pm1.5$ points of jailbreak
-   refusal where writing on every prompt adds $2.1\pm2.9$, an interval covering zero, and a *random*
-   subset of the same size adds $1.0\pm3.9$ — so the gain is **selection, not dosage**. The reason is that
-   writing a concept direction into prompts where the concept is absent *suppresses* refusals the model
-   would otherwise have produced ($-6.2\pm2.6$ measured directly) — and a sign-flipped write shows the
-   direction is a genuine lever only where the gate fires and perturbation everywhere else — which makes
-   the gate load-bearing rather than merely economical
-   (<a class="sref" href="#410-gate-conditioned-steering-what-the-gate-is-for">§4.10</a>). Gating also
-   leaves 90% of benign generation byte-identical against 4%, but that collateral half is **contingent on
-   the benign distribution** — the same gate fires on 92% of *out-of-register* benign prompts, which would
-   erase most of it. The suppression half does not depend on it.
+2. **Controls for conditional steering, and a retraction.** Conditioning a steering vector on an
+   activation-read detector is prior work (CAST, DSAS). We add the three controls those papers do not run — a
+   size-matched random arm, the detector's complement, and a sign flip — plus a random-direction floor on a
+   continuous outcome, and report what they show when run with the model's chat template: the few-shot jailbreak
+   direction is a refusal lever in the *unsafe* direction (steering away lowers refusal by 22 points), about three
+   times a random direction of the same norm and the same sign wherever it is written; the gate fires on 97% of
+   attacks and so selects nothing; the collateral confinement that remains (82% of benign generation untouched) is
+   CAST's result. An earlier version of this paper reported the opposite sign because the template was omitted
+   (<a class="sref" href="#410-gate-conditioned-steering-a-retraction-and-what-the-corrected-runs-show">§4.10</a>).
 3. **Training-free amortization across a concept bank.** Adding a concept is a closed-form fit in
    milliseconds and kilobytes with no gradient run, so hosting a fourteen-way safety taxonomy costs a
    fraction of per-concept LoRA fine-tuning and needs no retraining to extend
    (<a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a>). This amortization is shared with a
    linear-probe bank; what ConceptGate adds is that each entry also supplies a steering direction at no
    extra fitting cost — though for these harm categories the write is a measured *null* on behaviour
-   (<a class="sref" href="#the-same-experiment-on-the-concept-bank-a-negative-result">§4.10</a>).
+   (<a class="sref" href="#the-same-arms-on-the-concept-bank-corrected">§4.10</a>).
 4. **A calibrated, few-shot, dual-mode adapter.** One object learns a concept from ~10 examples, detects
    it with a calibrated fire/abstain/pass gate, and steers along a closely related direction, with a small,
    well-characterized parameter budget (<a class="sref" href="#54-what-it-actually-costs">§5.4</a>) and no
@@ -351,9 +350,8 @@ This paper contributes, in order of how much each distinguishes ConceptGate from
    a predicted paraphrase-robustness effect does not appear
    (<a class="sref" href="#47-a-paraphrase-robustness-null">§4.7</a>); generalization to an unseen harm
    category is only partial (<a class="sref" href="#49-out-of-distribution-generalization">§4.9</a>); and
-   steering with the bank's own harm-category directions is a null on behaviour — the write direction
-   comes free, but it does not make the model decline
-   (<a class="sref" href="#the-same-experiment-on-the-concept-bank-a-negative-result">§4.10</a>).
+   steering away from the bank's own harm-category directions lowers refusal (80% → 65%) rather than raising
+   it, the same reversal as the jailbreak concept (<a class="sref" href="#410-gate-conditioned-steering-a-retraction-and-what-the-corrected-runs-show">§4.10</a>).
 6. **Reproducible interactive figures.** The figures below reproduce the underlying model runs, so the
    mechanism can be examined directly rather than only described.
 
@@ -440,8 +438,19 @@ power — a single linear nudge is weaker than a trained reroute. Our contributi
 the steering rule but its *packaging*: the write side of a detector fit from the same data, dialed
 as a fraction of the residual norm so the same setting transfers across models
 (<a class="sref" href="#310-steering-the-write-side">§3.10</a>), and gated so that the write is applied only when the
-concept registers — a gate that, as <a class="sref" href="#410-gate-conditioned-steering-what-the-gate-is-for">§4.10</a>
-measures, is calibrated to the register of its ten examples as much as to their meaning.
+concept registers — a gate that, as <a class="sref" href="#410-gate-conditioned-steering-a-retraction-and-what-the-corrected-runs-show">§4.10</a>
+measures, is calibrated to the register of its eight examples as much as to their meaning.
+
+Gating a steering vector on a condition read from the activations is itself established, and we did not
+know this when the first version of this report was written. **Conditional Activation Steering** (CAST)
+<span class="cite" data-ref="Lee, B. W., et al. (2024). Programming Refusal with Conditional Activation Steering. ICLR 2025. arXiv:2409.05907."><a href="#ref-cast">[15]</a></span> switches a refusal vector on a "condition vector" — a direction plus a threshold read from the
+prompt's activations, chosen by grid search over several thousand prompts — and reports that conditioning
+removes most of the benign over-refusal that unconditional steering causes, across seven models. DSAS
+<span class="cite" data-ref="Dynamic Steering with Activation-Space Gating (DSAS). arXiv:2512.03661."><a href="#ref-dsas">[16]</a></span> fits a per-layer logistic gate from a few dozen examples and lets it modulate the write
+continuously, on the same Qwen and gemma families used here. So the *mechanism* of
+<a class="sref" href="#410-gate-conditioned-steering-a-retraction-and-what-the-corrected-runs-show">§4.10</a> is not new; what
+that section can add is the set of controls around it — a size-matched random arm, the detector's
+complement, and a sign flip — and whatever those controls turn out to say.
 
 ### 2.3 Density-based detection and out-of-distribution scoring
 
@@ -807,7 +816,7 @@ max-LLR rule that decides *whether* to act also decides *along which concept* to
 convenient coupling that keeps a multi-concept bank behaving like a single decision. Each concept is
 independent kilobytes, so a bank scales linearly and stays tiny. Per-concept thresholds keep the
 directions independent, but they do **not** compose into a calibrated bank: the false-positive rate is
-the union over the $K$ concepts, so a per-concept $z=3$ ($\approx 0.1\%$ FPR) OR-ed over $K=14$ gives a
+the union over the $K$ concepts, so a per-concept $z=3$ ($\approx 0 — independent in storage and threshold, that is; statistically the fourteen harm directions are far from independent (<a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a>).1\%$ FPR) OR-ed over $K=14$ gives a
 bank-level FPR near $1.4\%$ — the operating point has to be set against the whole bank, not one concept
 at a time. This bank — one shared truncated forward broadcast to the $K$
 concept directions, each with a detection direction and a related raw direction available for steering — is drawn in
@@ -849,7 +858,7 @@ exactly what makes it the better detector and the worse proxy for the steering v
 
 Both halves of these numbers matter, and quoting either alone misleads. Two random unit vectors in
 $\mathbb{R}^d$ have cosine of order $1/\sqrt d$ — $0.036$, $0.033$, and $0.021$ at these widths — so even
-every value sits between roughly $13\sigma$ and $36\sigma$ above chance (the multiple depends on $d$ as well as on the cosine): the read and write
+every value sits between roughly $13\sigma$ and $40\sigma$ above chance (the multiple depends on $d$ as well as on the cosine): the read and write
 directions are unmistakably related, never coincidentally aligned. But $0.45$ is also $63°$ and $0.83$ is
 $34°$, so none of them is close to identity either. A reader should take neither "the same direction used
 twice" nor "two unrelated directions" from this. What the read and write sides genuinely share is the
@@ -1045,7 +1054,7 @@ paragraph reports.</figcaption>
 The case *against* them, at least in the regime we care about, is that on
 real GPT-2 activations with 12+12 prompts, **BIC selects $J=1$ for both classes** — an extra
 full-covariance profile over five layers costs ~21 parameters, whose rent (~52 nats) twelve samples
-cannot pay — and the mixture gate collapses exactly onto the single-Gaussian gate (rank agreement
+cannot pay — and the mixture gate collapses onto the single-Gaussian gate (rank agreement
 0.986, scored on held-out prompts). This is less "the data answering one-or-many" than an identifiability limit: at twelve samples a
 five-dimensional full-covariance component is already near-singular, so the $J=2$ fit is ill-conditioned
 and the selection is effectively decided by sample size. The mixture is the more general model but remains
@@ -1151,11 +1160,11 @@ effective window; on GPT-2 the shift is stronger but breaks into repetition and 
 misses it. Toggle the base model and concept.</figcaption>
 </figure>
 
-Steering is a monotonic dose-response. On Qwen2.5-0.5B, raising the toward-fraction increases concept
+Steering is a graded dose-response. On Qwen2.5-0.5B, raising the toward-fraction increases concept
 content smoothly — the food direction moves the continuation to homemade-salsa completions, the nature
 direction to sun-over-the-mountains ones — while perplexity stays flat through roughly $|\text{fraction}|
 \le 0.1$, giving an effective window in which content shifts and fluency holds. The concept's own detector
-tracks the shift ordinally (the food LLR climbs monotonically over the sweep, nature from below zero to
+tracks the shift ordinally (the food LLR rises over the sweep, with one reversal between adjacent steps, nature from below zero to
 above), so on a capable model the read and the write agree — though these LLR *magnitudes* are not
 calibrated probabilities: the Gaussian density is badly misspecified for generated text far from the
 few-shot fitting set, which is why the independent lexicon is the primary signal here.
@@ -1302,7 +1311,7 @@ reproduced to three decimal places on an independent re-run. Cost is reported as
 of loaded weights rather than in milliseconds, because both are exact properties of the truncation while
 wall-clock is not: the same configurations timed on the same machine under different load gave forward
 times differing by up to a factor of two, though the *ratios* to a full forward were stable to a few
-points (a single early tap runs at roughly 30–48% of a full forward, three taps at roughly 62–69%).
+points (a single early tap runs at roughly 30–48% of a full forward, three taps at roughly 60–69%).
 
 <div class="cg-mono" markdown="1">
 
@@ -1371,7 +1380,7 @@ combination of <a class="sref" href="#39-combining-k-concepts">§3.9</a>). Becau
 share their fitting data (<a class="sref" href="#310-steering-the-write-side">§3.10</a>), each entry in the
 bank also carries a write direction at no extra cost. That is a direction, not a demonstrated control:
 for these harm categories the write leaves refusal unchanged
-(<a class="sref" href="#the-same-experiment-on-the-concept-bank-a-negative-result">§4.10</a>).
+(<a class="sref" href="#the-same-arms-on-the-concept-bank-corrected">§4.10</a>).
 
 **Setup.** The concepts are the fourteen harm categories of BeaverTails
 <span class="cite" data-ref="Ji, J., et al. (2023). BeaverTails: Towards Improved Safety Alignment of LLM via a Human-Preference Dataset. NeurIPS 2023 Datasets and Benchmarks. arXiv:2307.04657."><a href="#ref-beavertails">[14]</a></span>
@@ -1489,7 +1498,7 @@ runs only up to its deepest tap, never the layers above it, so a single truncate
 *whole* bank at a per-prompt cost that is **constant in $K$ and at or below the probe's full-model
 forward**, whereas $K$ LoRA adapters need $K$ forwards. The extra kilobytes ConceptGate stores are
 immaterial next to the part of the network it skips. Against fine-tuning the gap compounds with every
-concept: building the full fourteen-category bank takes about 8 seconds on Qwen and 46 on gemma, against
+concept: building the full fourteen-category bank takes about 8 seconds on Qwen and 46 on gemma for a 256-prompt shared benign pool, against
 LoRA's 3.9 and 29 minutes — 30× and 38×.
 
 <div class="cg-mono" markdown="1">
@@ -1502,6 +1511,7 @@ LoRA's 3.9 and 29 minutes — 30× and 38×.
 | training | none (closed form) | head only | back-propagation |
 | inference over all K | one shared forward | one shared forward | one forward *each* |
 | mean AUC / 14 cats (Qwen / gemma) | 0.832 / 0.881 | 0.855 / 0.874 | — |
+| same, probe heads moved to ConceptGate's taps (identical cost) | — | 0.840 / 0.880 | — |
 
 </div>
 
@@ -1512,7 +1522,7 @@ seed noise at three seeds). Few-shot LoRA is both
 the slowest to train and the weakest to read: on the three categories where it was run it reaches mean
 AUC 0.685 on Qwen and 0.814 on gemma, against ConceptGate's 0.889 and 0.913 on those same three — a
 randomly-initialized head simply does not have enough signal in $2N$ examples. Harm content is read best
-deeper than jailbreak framing, at 50–85% depth rather than a quarter, which is why the taps here sit
+deeper than jailbreak framing, at 50–85% depth rather than the ~45% that suffices for jailbreak framing, which is why the taps here sit
 lower than in <a class="sref" href="#481-learning-a-single-concept">§4.8.1</a>; where a
 category emerges late (sexual content on Qwen) a mid-depth read gives up some AUC, and where the base
 model forms the abstraction cleanly (most categories on gemma-2-2b) the closed-form direction is as good
@@ -1522,7 +1532,14 @@ The multi-concept setting is where the training-free design matters. A
 *latent bank* — ConceptGate, or equally a linear-probe bank — amortizes across a taxonomy in a way that
 per-concept or monolithic fine-tuning cannot: constant inference, closed-form extension, kilobytes per
 concept, and no retraining to change the taxonomy. That is a genuine result, and it is honest that a
-detect-only probe bank shares it. Over such a probe bank ConceptGate's cost is at worst a tie — a
+detect-only probe bank shares it. The comparison in the table also handed the probe a depth advantage —
+its heads sit on the final layer, while ConceptGate ran 91% of the backbone — so we refit the same
+logistic heads on ConceptGate's own taps from the cached activations, at identical cost
+([`scripts/eval_probe_tap_bank.py`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_probe_tap_bank.py),
+reproducing the stored numbers to four decimals first). They score 0.840 on Qwen and 0.880 on gemma
+against ConceptGate's 0.832 and 0.881: a tie on gemma, ahead on 8 of 14 categories, and a slight probe
+edge on Qwen, ahead on 10 of 14 — exactly what
+<a class="sref" href="#481-learning-a-single-concept">§4.8.1</a> predicted. Over such a probe bank ConceptGate's cost is at worst a tie — a
 truncated forward is never more than the probe's full one, and its extra per-concept kilobytes are
 negligible — while it adds one thing the probe cannot: a *second*, write-side use of the same $K$ concepts,
 a related raw direction per concept that can be added back into the stream
@@ -1530,13 +1547,13 @@ a related raw direction per concept that can be added back into the stream
 
 It would be convenient to conclude that the one object gating fourteen harms can therefore bend
 generation away from them, and we tested exactly that on five of the fourteen. It does **not**
-(<a class="sref" href="#the-same-experiment-on-the-concept-bank-a-negative-result">§4.10</a>): the
+(<a class="sref" href="#the-same-arms-on-the-concept-bank-corrected">§4.10</a>): the
 directions gate, and gating still confines the intervention, but steering away from a harm category does
 not make this model decline the request. So what the bank adds over a detect-only probe bank is a write
 *direction* per concept at no extra fitting cost — a real property of the construction, and the write is
 demonstrated to change behaviour for topical concepts
 (<a class="sref" href="#46-steering-across-models">§4.6</a>) and for jailbreak framing
-(<a class="sref" href="#410-gate-conditioned-steering-what-the-gate-is-for">§4.10</a>), but not for these
+(<a class="sref" href="#410-gate-conditioned-steering-a-retraction-and-what-the-corrected-runs-show">§4.10</a>), but not for these
 harm categories. A taxonomy-scale bank that is cheap to build and extend, competitive with a trained probe
 on every category, and far ahead of few-shot fine-tuning is what stands; the steerability of *these*
 entries is a claim the measurement does not support.
@@ -1595,7 +1612,7 @@ direction and partly as category-specific structure that a held-out estimate doe
 ConceptGate is at least as robust to this shift as the full-model probe, and on one model it is
 measurably more so. Because every category is scored by both methods, the two can be compared pairwise
 across the fourteen held-out categories rather than through an aggregate. On Qwen2.5-0.5B ConceptGate's
-held-out AUC exceeds the probe's in **13 of 14** categories, by $0.037 \pm 0.032$, and its degradation is
+held-out AUC exceeds the probe's in **13 of 14** categories, by $0.037 \pm 0.032$ (sample standard deviation across the fourteen categories), and its degradation is
 smaller by $0.057 \pm 0.044$ — a consistent advantage rather than a tie. On gemma-2-2b the two are
 indistinguishable: ConceptGate is ahead in 7 of 14 categories, by $0.007 \pm 0.028$. The mid-layer tapped
 direction is therefore no less transferable than a final-layer one, and on the smaller model somewhat
@@ -1614,292 +1631,153 @@ only the scoring method varying. The absolute level nonetheless indicates that a
 a partial detector for categories outside its estimation set, and is better estimated from a diverse set
 of categories than from any one alone.
 
-### 4.10 Gate-conditioned steering: what the gate is for
+### 4.10 Gate-conditioned steering: a retraction, and what the corrected runs show
 
-Every experiment above measures either the read side or the write side. Neither measures the thing that
-joins them. The steering rule of <a class="sref" href="#310-steering-the-write-side">§3.10</a> is
-activation addition: it needs a direction and a magnitude, and it needs none of the spectrogram, the
-depth filter, or the calibrated threshold. Strip ConceptGate down to that and you have CAA with a
-fraction-of-norm knob. What the detection machinery contributes to the write side is therefore not the
-direction — it is the *decision of when to write*. That is `Steer(when=Trigger.FIRE)`, workflow 4 of
-<a class="sref" href="#313-the-lifecycle-and-library">§3.13</a>, and it is the one operation in this
-system that no probe, no classifier, and no external guard can perform: a classifier can tell you a
-prompt is a jailbreak, but it cannot then alter the generation, and CAA can alter the generation but
-cannot decide which prompts deserve it.
+This section replaces one that reported a positive result. The earlier version claimed that steering
+*away* from a few-shot jailbreak direction raised refusal by 8.3 points when the write was conditioned on
+the gate, against 2.1 when applied to every prompt, and that a sign-flipped write showed the direction to
+be a lever where the concept registered and perturbation elsewhere. Those experiments ran
+Qwen2.5-0.5B-**Instruct** on the bare prompt string, without its chat template. An instruct model given
+the bare string is being used as a raw completer, and its "refusal" in that regime is not the behaviour it
+was tuned to produce. When prompts are formatted as a user turn followed by the generation prompt — how the
+model is meant to be used — the baseline changes, the gate's behaviour changes, and **the sign of the effect
+reverses**. The earlier numbers are withdrawn. We keep the experimental design, because the design was
+right; we report what it measures when run correctly; and we state the mechanism of the error, because the
+same omission is easy to make.
 
-We measure it on Qwen2.5-0.5B, taps 8/12/16, over 32 held-out jailbreak prompts and 32 benign prompts. A
-jailbreak concept is fit from eight hand-written override framings against eight benign requests,
-resampled over three seeds. The number that makes the rest of this subsection readable is the gate's
-firing rate: it fires on **54.2%** of the held-out jailbreak prompts and 10.4% of the benign ones. So the
-gated arm writes to about half the attacks, and any comparison against writing to *all* of them confounds
-two different things — *which* prompts receive the write, and *how many* do.
+**What the operation is, and whose it is.** The steering rule of
+<a class="sref" href="#310-steering-the-write-side">§3.10</a> is activation addition. Conditioning it on a
+detector read from the activations is not ours: CAST <span class="cite" data-ref="Lee, B. W., et al. (2024). Programming Refusal with Conditional Activation Steering. ICLR 2025. arXiv:2409.05907."><a href="#ref-cast">[15]</a></span> switches a refusal vector on a "condition
+vector" and reports the resulting reduction in benign over-refusal across seven models; DSAS <span class="cite" data-ref="Dynamic Steering with Activation-Space Gating (DSAS). arXiv:2512.03661."><a href="#ref-dsas">[16]</a></span> fits a
+per-layer logistic gate from a few dozen examples and lets it modulate the write. What this section adds is
+three controls neither paper runs — a random subset of the same size as the gated set (selection against
+dosage), the detector's complement (what the write does where the concept does not register), and a sign
+flip — and what they show.
 
-Five arms separate them. **No steer** is the baseline. **Always steer** applies the write at $-0.08$ of
-the residual norm to every prompt. **Gate-conditioned steer** applies the identical write only when the
-gate fires. **Random steer** applies it to a randomly chosen subset of exactly the size of the gate's fired set,
-drawn separately within the attacks and within the benign prompts — the arm that isolates selection
-from dosage, since it matches the gated arm on how many prompts of each kind are written and differs
-only in which. **Anti-gate steer** applies it to precisely the complement,
-the prompts where the concept does *not* register, which turns the suspicion that blanket steering harms
-those prompts into a direct measurement.
-
-Two things about the measures, both of which bound every number in this subsection. Jailbreak suppression
-is the share of continuations containing an **explicit refusal**, matched by a fixed lexicon of decline
-phrases. That is a proxy, and a conservative one in a specific way: a continuation that becomes less
-harmful without ever declining does not count, so these figures track the *guardrail* behaviour rather
-than harmfulness itself. Collateral damage on the benign set is measured as perplexity and as the share
-of benign continuations left *byte-identical* to the unsteered baseline. The byte-identical measure is
-blunt but informative — it asks how much benign generation the intervention disturbed at all — and, as
-becomes important below, under greedy decoding it is very nearly the benign false-positive rate
-restated, since a prompt the gate passes is generated exactly as the baseline would generate it.
-Perplexity is the collateral measure doing work independent of the firing rate.
-
-<figure id="figure-16" style="margin:2rem 0">
-<svg viewBox="0 0 720 268" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Five write policies: change in jailbreak refusal and benign generation left untouched" font-family="ui-sans-serif,system-ui,sans-serif">
-  <g font-size="11" fill="currentColor">
-    <text x="252" y="15" text-anchor="middle" font-weight="600">change in jailbreak refusal (pts)</text>
-    <text x="572" y="15" text-anchor="middle" font-weight="600">benign generation left untouched</text>
-  </g>
-  <!-- row labels -->
-  <g font-size="10" fill="currentColor" text-anchor="end">
-    <text x="146" y="52">always <tspan fill="#889">(writes all)</tspan></text>
-    <text x="146" y="88">gated <tspan fill="#889">(54% of attacks)</tspan></text>
-    <text x="146" y="124">random <tspan fill="#889">(same dose per set)</tspan></text>
-    <text x="146" y="160">anti-gate <tspan fill="#889">(complement)</tspan></text>
-  </g>
-  <!-- panel A: zero line at x=252, 7px per point -->
-  <line x1="252" y1="30" x2="252" y2="176" stroke="#8a8a8a" stroke-width="1.2"/>
-  <text x="252" y="192" font-size="9.5" fill="#889" text-anchor="middle">0</text>
-  <text x="182" y="192" font-size="9.5" fill="#889" text-anchor="middle">−10</text>
-  <text x="322" y="192" font-size="9.5" fill="#889" text-anchor="middle">+10</text>
-  <!-- always +2.1 -->
-  <rect x="252" y="40" width="15" height="18" rx="2" fill="#C2402F" opacity="0.75"/>
-  <line x1="247" y1="49" x2="287" y2="49" stroke="#7a2c21"/><line x1="247" y1="45" x2="247" y2="53" stroke="#7a2c21"/><line x1="287" y1="45" x2="287" y2="53" stroke="#7a2c21"/>
-  <text x="296" y="53" font-size="10" fill="currentColor">+2.1 ±2.9</text>
-  <!-- gate +8.3 -->
-  <rect x="252" y="76" width="58" height="18" rx="2" fill="#26A99D"/>
-  <line x1="299" y1="85" x2="321" y2="85" stroke="#12655e"/><line x1="299" y1="81" x2="299" y2="89" stroke="#12655e"/><line x1="321" y1="81" x2="321" y2="89" stroke="#12655e"/>
-  <text x="330" y="89" font-size="10" fill="currentColor" font-weight="600">+8.3 ±1.5</text>
-  <!-- random +1.0 -->
-  <rect x="252" y="112" width="7" height="18" rx="2" fill="#d98a2b" opacity="0.85"/>
-  <line x1="232" y1="121" x2="286" y2="121" stroke="#8a5715"/><line x1="232" y1="117" x2="232" y2="125" stroke="#8a5715"/><line x1="286" y1="117" x2="286" y2="125" stroke="#8a5715"/>
-  <text x="296" y="125" font-size="10" fill="currentColor">+1.0 ±3.9</text>
-  <!-- antigate -6.2 -->
-  <rect x="209" y="148" width="43" height="18" rx="2" fill="#8a8a8a" opacity="0.8"/>
-  <line x1="191" y1="157" x2="227" y2="157" stroke="#555"/><line x1="191" y1="153" x2="191" y2="161" stroke="#555"/><line x1="227" y1="153" x2="227" y2="161" stroke="#555"/>
-  <text x="258" y="161" font-size="10" fill="currentColor">−6.2 ±2.6</text>
-  <!-- panel B: 0..100% over 470..670 -->
-  <line x1="470" y1="30" x2="470" y2="176" stroke="#d8d5c8"/>
-  <rect x="470" y="40" width="8" height="18" rx="2" fill="#C2402F" opacity="0.75"/><text x="486" y="53" font-size="10" fill="currentColor">4.2%</text>
-  <rect x="470" y="76" width="179" height="18" rx="2" fill="#26A99D"/><text x="559" y="89" font-size="10" fill="#fff" text-anchor="middle" font-weight="600">89.6%</text>
-  <rect x="470" y="112" width="179" height="18" rx="2" fill="#d98a2b" opacity="0.85"/><text x="559" y="125" font-size="10" fill="#fff" text-anchor="middle">89.6%</text>
-  <rect x="470" y="148" width="29" height="18" rx="2" fill="#8a8a8a" opacity="0.8"/><text x="507" y="161" font-size="10" fill="currentColor">14.6%</text>
-  <g font-size="9.5" fill="#889"><text x="470" y="192" text-anchor="middle">0</text><text x="670" y="192" text-anchor="end">100%</text></g>
-  <line x1="12" y1="206" x2="708" y2="206" stroke="#e6e3da"/>
-  <text x="360" y="224" text-anchor="middle" font-size="11" fill="currentColor">a random subset of the <tspan font-style="italic">same size</tspan> gains nothing (+1.0), so the gain is <tspan font-weight="600">selection</tspan>, not dosage</text>
-  <text x="360" y="244" text-anchor="middle" font-size="11" fill="currentColor">and writing where the concept does <tspan font-style="italic">not</tspan> register actively suppresses refusals (−6.2)</text>
-  <text x="360" y="261" text-anchor="middle" font-size="10" fill="#889">baseline refusal 46.9%; differences are 2–3 prompts out of 32, mean ± sd over three few-shot resamples</text>
-</svg>
-<figcaption><strong>Figure 16.</strong> <em>Five write policies, differing only in which prompts receive an
-identical write.</em> Qwen2.5-0.5B, taps 8/12/16, steering fraction $-0.08$, 32 jailbreak and 32 benign
-prompts, mean ± sd over three few-shot resamples, each arm paired against the no-steer baseline by seed.
-Left: change in jailbreak refusal. Right: share of benign continuations left byte-identical to the
-unsteered baseline. The <em>random</em> arm is matched to the gated arm on how many prompts are
-written — separately on each set, 54% of the attacks and 10% of the benign prompts, which is why its
-benign bar equals the gated arm's — and differs only in which, and it gains nothing — so the gated arm's advantage is selection
-rather than dosage. The <em>anti-gate</em> arm writes to exactly the prompts the gate passes and
-<em>reduces</em> refusal, which is why blanket steering nets so little: it is the sum of a real gain on
-the prompts where the concept registers and a real loss everywhere else. Error bars are ± one standard
-deviation across the three resamples and overlap substantially; the arms are separated by two to three
-prompts out of thirty-two.</figcaption>
-</figure>
-
-Gating wins on both axes at once, which is more than we expected: not a trade of suppression against
-collateral, but more suppression *and* less collateral. Against a baseline of 46.9%, gated steering adds
-$8.3\pm1.5$ points of refusal while blanket steering adds $2.1\pm2.9$ — an interval covering zero, so
-writing on every prompt has no effect on refusal we can detect. On the benign side gated steering leaves
-$89.6\pm9.0\%$ of continuations byte-identical against blanket steering's $4.2\pm1.5\%$, with perplexity
-at 2.03 against 2.17. Neither arm produced any benign over-refusal.
-
-The two control arms turn that from an observation into a mechanism. **The gain is selection, not
-dosage:** a random subset of exactly the gate's size adds $1.0\pm3.9$ points against the gate's
-$8.3\pm1.5$, and paired by seed the gate leads the random arm by $7.3\pm5.3$ points, with the difference
-non-negative in all three resamples. Writing to half the prompts is worth nothing in itself; writing to
-*that* half is worth something. **And writing where the concept does not register is actively harmful:**
-the anti-gate arm, which writes to precisely the prompts the gate passes, *reduces* refusal by
-$6.2\pm2.6$ points, negative in all three resamples.
-
-Those two numbers organize the rest, with one caution about how much they prove. Writing to a prompt
-where the concept registers is worth about $+15$ points on that prompt ($8.3$ spread over the 54% that
-fire); writing to one where it does not is worth about $-13$ ($-6.2$ spread over the 46% that do not).
-Blanket steering does both, and $0.542\times15.3 + 0.458\times(-13.5) = +2.1$ matches the blanket arm —
-but that match is arithmetic, not evidence. The fired and passed prompts partition the set and each prompt
-is generated independently, so the blanket total equals the gated plus anti-gate totals less the baseline
-as an identity, and it does so to the decimal in every seed. The one genuine check is the random arm,
-which mixes the two populations in a different ratio: the same two numbers predict $+1.1$ and it measured
-$+1.0$. That is *consistent with* the additive account; with a standard deviation of 3.9 points, agreement
-to a tenth of a point is luck rather than precision.
-
-So the finding is sharper than "gating helps and blanket steering doesn't." It is that **writing a
-concept direction into prompts where that concept is absent suppresses refusals the model would otherwise
-have produced** — the intervention is not merely wasted off-target, it is harmful off-target, and blanket
-steering's flat result is a real gain and a real loss cancelling. That is what makes the gate load-bearing
-rather than decorative: it is not only limiting the intervention's cost, it is keeping the intervention
-away from the prompts where it does damage. The bank experiment below shows the same shape — blanket
-steering drops mean refusal from 16.7% to 11.7% — though without an anti-gate arm there, that is
-consistent with off-target harm rather than a second measurement of it.
-
-#### Is the off-target loss directional, or just perturbation?
-
-The $-6.2$ on passed prompts admits two readings, and they matter differently. Under a **perturbation**
-account the concept direction simply means nothing on a prompt where the concept is absent, so displacing
-the residual stream along it is noise that degrades the model's safety behaviour whichever way it is
-pushed. Under a **directional** account the write is doing on passed prompts exactly what it does on fired
-ones — moving the representation toward "benign" — and on an attack the gate already reads as benign that
-pushes it further toward compliance: the write is not failing, it is succeeding in the direction we do not
-want. The accounts make opposite predictions for a write of the opposite sign. Perturbation predicts that
-$+\alpha$ hurts too. The directional account predicts that $+\alpha$ on passed prompts *helps*, and that
-$+\alpha$ on fired prompts hurts. So we ran the two sign-flipped arms as well.
-
-<figure id="figure-17" style="margin:2rem 0">
-<svg viewBox="0 0 760 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sign-flipped writes: change in refusal by whether the gate fires and by write direction" font-family="ui-sans-serif,system-ui,sans-serif">
-  <g font-size="11" fill="currentColor" text-anchor="middle" font-weight="600">
-    <text x="310" y="28">write −α (away from concept)</text>
-    <text x="610" y="28">write +α (toward concept)</text>
-  </g>
-  <text x="460" y="44" text-anchor="middle" font-size="10" fill="#889">change in jailbreak refusal vs no-steer, pts (6 px per point)</text>
-  <!-- row labels with the verdict as a sub-label -->
-  <g text-anchor="end">
-    <text x="150" y="94" font-size="10.5" fill="currentColor">gate <tspan font-weight="600">fires</tspan> <tspan fill="#889">(54%)</tspan></text>
-    <text x="150" y="108" font-size="9.5" fill="#889">sign flips → <tspan fill="#1c7d74" font-weight="600">a lever</tspan></text>
-    <text x="150" y="167" font-size="10.5" fill="currentColor">gate <tspan font-weight="600">passes</tspan> <tspan fill="#889">(46%)</tspan></text>
-    <text x="150" y="181" font-size="9.5" fill="#889">both signs hurt → <tspan fill="#555" font-weight="600">perturbation</tspan></text>
-  </g>
-  <g stroke="#8a8a8a" stroke-width="1.1"><line x1="310" y1="62" x2="310" y2="200"/><line x1="610" y1="62" x2="610" y2="200"/></g>
-  <line x1="20" y1="132" x2="740" y2="132" stroke="#e6e3da"/>
-  <!-- fired, -a: +8.3 (bar right of zero, label right of error bar) -->
-  <rect x="310" y="87" width="50" height="20" rx="2" fill="#26A99D"/>
-  <line x1="351" y1="97" x2="369" y2="97" stroke="#12655e"/><line x1="351" y1="93" x2="351" y2="101" stroke="#12655e"/><line x1="369" y1="93" x2="369" y2="101" stroke="#12655e"/>
-  <text x="376" y="101" font-size="10.5" fill="currentColor" font-weight="600">+8.3 ±1.5</text>
-  <!-- passed, -a: -6.2 (bar left of zero, label left of error bar) -->
-  <rect x="273" y="160" width="37" height="20" rx="2" fill="#8a8a8a" opacity="0.8"/>
-  <line x1="257" y1="170" x2="289" y2="170" stroke="#555"/><line x1="257" y1="166" x2="257" y2="174" stroke="#555"/><line x1="289" y1="166" x2="289" y2="174" stroke="#555"/>
-  <text x="250" y="174" font-size="10.5" fill="currentColor" text-anchor="end">−6.2 ±2.6</text>
-  <!-- fired, +a: -11.5 (bar left of zero; the empty right side takes the label) -->
-  <rect x="541" y="87" width="69" height="20" rx="2" fill="#C2402F" opacity="0.8"/>
-  <line x1="509" y1="97" x2="573" y2="97" stroke="#7a2c21"/><line x1="509" y1="93" x2="509" y2="101" stroke="#7a2c21"/><line x1="573" y1="93" x2="573" y2="101" stroke="#7a2c21"/>
-  <text x="618" y="101" font-size="10.5" fill="currentColor" font-weight="600">−11.5 ±5.3</text>
-  <!-- passed, +a: -12.5 -->
-  <rect x="535" y="160" width="75" height="20" rx="2" fill="#8a8a8a" opacity="0.8"/>
-  <line x1="509" y1="170" x2="561" y2="170" stroke="#555"/><line x1="509" y1="166" x2="509" y2="174" stroke="#555"/><line x1="561" y1="166" x2="561" y2="174" stroke="#555"/>
-  <text x="618" y="174" font-size="10.5" fill="currentColor">−12.5 ±4.4</text>
-  <text x="460" y="226" text-anchor="middle" font-size="10" fill="#889">every cell keeps its sign in all three resamples · 32 jailbreak prompts, mean ± sd over three few-shot resamples</text>
-</svg>
-<figcaption><strong>Figure 17.</strong> <em>The write is a lever where the gate fires and noise where it
-passes.</em> The same $\pm0.08$ write applied to the two populations the gate separates, in both
-directions. Top row: on prompts where the concept registers, steering away adds 8.3 points of refusal and
-steering toward removes 11.5 — the direction is causally connected to the behaviour. Bottom row: on prompts
-where the concept does not register, both directions reduce refusal — the direction is not meaningful
-there, and displacing the residual stream along it is perturbation. The sign-flipped arms carry the widest
-intervals in the paper (sd 5.3 and 4.4 across resamples), so the sizes on the right are loosely determined;
-the signs are not.</figcaption>
-</figure>
-
-Every cell keeps its sign in all three resamples, and the pattern is a hybrid neither account predicted
-alone. On the prompts where the gate **fires**, the write is a directional lever: away from the concept
-adds 8.3 points of refusal, toward it removes 11.5. On the prompts the gate **passes**, the write is
-perturbation: both signs reduce refusal, by 6.2 and 12.5. The concept direction is therefore causally
-connected to refusal exactly where the gate says the concept is present, and is noise everywhere else. That
-is as clean a statement of what the gate is doing as we could have asked for: it is not declining to waste
-the write, it is locating the prompts on which the write is *interpretable at all*.
-
-Two consequences follow. The first is the mechanism behind the random arm: half the prompts written at
-random are half noise, which is why matching the gate's dose without its selection buys nothing. The
-second concerns deployment, and it is a lesson about *ungated* steering rather than about the gate.
-Blanket safety steering — the write applied to every prompt, which is how activation steering is normally
-used — degrades safety on every prompt where the concept is not registered, in either direction. A gated
-system leaves those prompts exactly as the base model would have generated them, so a gate that misses an
-attack does not assist it; it merely fails to help. The sign-flipped arms were also the most damaging to
-fluency, which is consistent with the perturbation reading: writing $+\alpha$ onto the benign prompts the
-gate passes raised their perplexity to 2.47, against 2.12 for $-\alpha$ and 1.98 unsteered. The
-sign-flipped arms carry the widest intervals in this section (standard deviations of 5.3 and 4.4 points
-across resamples, against 1.5 for the gated arm), so the *sizes* in the right-hand column are loosely
-determined; the signs are not.
-
-Two limits bound this result, both worth stating plainly. First, the effect sizes are small in absolute
-terms and the measurement is coarse. Thirty-two prompts means one prompt is 3.1 points, so the gated
-arm's $+8.3$ is 2.7 prompts and the anti-gate arm's $-6.2$ is 2.0; the standard deviations are across
-three few-shot resamples, not across prompts, and the error bars in the figure overlap. What carries the
-result is not any single interval but that the ordering repeats in every resample and that four arms fit
-one two-parameter account. A decisive version of this experiment wants hundreds of prompts and several
-magnitudes, and we would not want the mechanism claim leaned on harder than three seeds of thirty-two can
-bear. The absolute level is modest too — 55% refusal is not a guardrail, on a 0.5B model at a single
-magnitude. The result establishes that gating the write dominates blanket writing, and why, not that
-gated steering is a deployable defense. Second, the gate's usefulness depends entirely on its concept
-being fit on examples that match the prompts it will see. Fitting the same concept from the dataset's long
-persona templates instead of short override framings produces a gate that fires on **0.0%** of these short
-framed requests across all three seeds (0 of 32 in each) — it has learned prompt length and register, not jailbreak intent —
-and the same short-framing-fitted concept fires on 91.7% of *real* out-of-register benign prompts (27, 30, and 31 of 32 across the three resamples), which
-would be a catastrophic false-positive rate in deployment. The gate is a sharp instrument only inside the
-distribution its ten examples came from, and
-<a class="sref" href="#49-out-of-distribution-generalization">§4.9</a>'s partial-generalization finding
-applies here with more force, because a false fire now rewrites the output rather than merely raising a
-flag.
-
-#### The same experiment on the concept bank: a negative result
-
-The bank of <a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a> has only ever been measured
-as a *detector*, while the contribution claim is that each of its entries also steers. That deserves a
-direct test, so we ran the no-steer, blanket, and gated arms on five BeaverTails harm categories, fitting each
-direction from 32 harmful prompts of the category against the shared benign pool and evaluating on twelve
-held-out prompts of that category. On the behavioural axis the result is a **null**.
+**Design.** Qwen2.5-0.5B-Instruct, taps 8/12/16, prompts formatted with the chat template for both reading
+and generation. A jailbreak concept is fit in logistic mode from eight hand-written override framings
+against eight short benign requests, resampled over three seeds, calibrated at $z=2$. Test prompts: 32
+held-out framed attacks, 32 benign requests in the same register, and 32 real benign prompts from the
+jailbreak dataset's held-out split, used only to measure out-of-register firing. The write is $\alpha=0.08$
+of the residual norm. Arms: **no steer**; **always** ($-\alpha$ everywhere); **gated** ($-\alpha$ where the
+gate fires); **random** ($-\alpha$ on a random subset matched, separately within attacks and within benign
+prompts, to the gate's fired count); **anti-gate** ($-\alpha$ on exactly the prompts the gate passes); and
+the two **sign-flipped** arms, $+\alpha$ on the fired and on the passed prompts. Refusal is the share of
+continuations matching an explicit-decline lexicon — it counts declining, not harmlessness. Collateral is
+perplexity and the share of benign continuations left byte-identical to the unsteered baseline, which
+under greedy decoding is close to one minus the benign firing rate. Every "±" is the population standard
+deviation over the three resamples.
 
 <div class="cg-mono" markdown="1">
 
-| BeaverTails category | gate fires: harmful / benign | refusal: none → always → gate | benign untouched: always / gate |
-|---|---|---|---|
-| violence, incitement | 50% / 8% | 8.3 → 0.0 → 8.3 | 0% / 92% |
-| drug abuse, weapons | 58% / 25% | 0.0 → 0.0 → 0.0 | 0% / 75% |
-| financial & property crime | 67% / 25% | 25.0 → 0.0 → 16.7 | 0% / 75% |
-| privacy violation | 92% / 33% | 8.3 → 25.0 → 25.0 | 0% / 67% |
-| hate speech | 58% / 42% | 41.7 → 33.3 → 33.3 | 0% / 58% |
-| **mean** | **65% / 27%** | **16.7 → 11.7 → 16.7** | **0% / 73%** |
+| arm (chat template on) | writes | jailbreak refusal | Δ vs no-steer | benign untouched | benign ppl |
+|---|---|---|---|---|---|
+| no steer | 0% | **93.8%** | — | 100% | 1.94 |
+| always, $-\alpha$ | 100% | 71.9% | **−21.9 ± 5.1** | 0% | 2.02 |
+| gated, $-\alpha$ | 97% | 75.0% | **−18.8 ± 4.4** | 82% | 1.91 |
+| random same size, $-\alpha$ | 97% | 71.9% | −21.9 ± 5.1 | 82% | 1.94 |
+| anti-gate, $-\alpha$ | 3% | 90.6% | −3.1 ± 2.6 | 18% | 2.04 |
+| gated, $+\alpha$ (toward) | 97% | 96.9% | +3.1 ± 0.0 | 82% | 1.98 |
+| anti-gate, $+\alpha$ (toward) | 3% | 93.8% | +0.0 | 18% | 2.09 |
 
 </div>
 
-Two of the three findings replicate and one fails. Gating still confines the intervention — it leaves
-73% of benign generation byte-identical where blanket steering leaves none — and blanket steering is
-again the worse of the two write policies, here actively *reducing* mean refusal from 16.7% to 11.7%.
-But gating no longer *improves* anything: refusal is unchanged at 16.7%. Steering away from a harm
-category does not make this model decline the request.
+Four things follow, and none of them is the old result.
 
-We think the contrast with the jailbreak concept is the substantive finding rather than a defect of the
-setup. "Jailbreak framing" is a concept about the *intent and register of the request*, and it sits close
-to the behaviour the model was safety-tuned to produce, so pushing along it moves the model toward
-refusing. "Violence" or "privacy violation" is a concept about the *topic of the content*; steering away
-from it changes what the continuation is about, not whether the model complies. These directions also
-gate far less cleanly (65% against 27% firing, versus 54% against 10% for the jailbreak concept), which
-is the same partial-generalization limit
-<a class="sref" href="#49-out-of-distribution-generalization">§4.9</a> measures, and a gate this leaky
-cannot target a write precisely even when the write works.
+**The instruct model already refuses.** Formatted correctly it declines 30 of the 32 attacks unsteered.
+That is two prompts of headroom, and it means a refusal *rate* cannot resolve any question about raising
+refusal on this test set. In the raw-completer regime the baseline was 46.9%, which is where the earlier
+version's room to move came from.
 
-The honest reading of "each bank entry also steers" is therefore narrower than the phrase suggests: each
-entry supplies a usable write *direction* at no extra fitting cost, and that is a real property of the
-construction, but a demonstrated behavioural control exists in this paper only for the topical concepts
-of <a class="sref" href="#46-steering-across-models">§4.6</a> and the jailbreak framing above. Two
-caveats bound the null rather than excuse it: refusal is scored by an explicit-decline lexicon, so a
-reduction in harmful *content* that stops short of refusing would not register, and we tested one
-magnitude on one 0.5B model.
+**The "safety write" is a jailbreak.** Steering *away* from the jailbreak concept — the write the earlier
+version reported as raising refusal — lowers it by 22 points, from 93.8% to 71.9%, in every resample. The
+direction is a strong lever, in the unsafe direction: removing the concept's signal from the residual
+stream makes the model comply with requests it would otherwise have refused. Writing *toward* the concept
+does the opposite — at the ceiling on attacks (+3.1) and visibly on benign prompts, where it induces
+refusal of harmless requests (7.3% over-refusal when written to the benign prompts the gate passes, from
+0%). Read as a pair, this is the single refusal-mediating direction of Arditi et al. <span class="cite" data-ref="Arditi, A., et al. (2024). Refusal in Language Models Is Mediated by a Single Direction. NeurIPS 2024. arXiv:2406.11717."><a href="#ref-arditi">[17]</a></span>, recovered
+from eight hand-written framings with no training, and pointed the wrong way by the earlier version of this
+paper.
 
-A third caveat matters more than either, and it limits how much weight this null can bear: **each cell
-rests on twelve prompts.** Every number in the table above is therefore quantized to steps of 8.3
-percentage points — the entries are literally between 0 and 5 refusals out of 12 — and the headline
-"16.7 → 11.7 → 16.7" is a mean over five categories of counts that differ by one or two prompts. A design
-this small could not have detected a moderate effect even if one existed, so this is properly a *failure
-to detect* rather than evidence of absence. What it does establish, because it does not depend on
-resolving small differences, is the direction of the two policy comparisons: gating confines the write
-where blanket steering does not, and blanket steering does not help. The harness
-is [`scripts/eval_gate.py`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_gate.py).
+**The gate selects nothing on attacks.** With the template on, the gate fires on $96.9 \pm 2.6\%$ of the
+framed attacks — up from 54% without it — so the gated, random, and always arms write to nearly the same
+prompts, and their results agree to within a resample. The random arm, which in the earlier version was the
+evidence that "the gain is selection," now has nothing to separate. The anti-gate arm writes to three
+percent of attacks and does correspondingly little. What the gate still does is confine the *benign*
+collateral: it leaves 82% of benign generation byte-identical where blanket steering leaves none, because
+it fires on $17.7 \pm 6.4\%$ of in-register benign prompts. That is CAST's collateral result <span class="cite" data-ref="Lee, B. W., et al. (2024). Programming Refusal with Conditional Activation Steering. ICLR 2025. arXiv:2409.05907."><a href="#ref-cast">[15]</a></span>, not
+ours.
+
+**The gate is calibrated to a register.** On real benign prompts from a different register it fires on
+$95.8 \pm 2.9\%$ — 30 or 31 of 32 in every resample — so off-register it would rewrite nearly everything.
+The converse experiment, fitting the concept from the dataset's long persona templates instead of short
+framings, now fires on 77% of the short attacks and 34% of the short benign prompts (0% of both without
+the template). The same failure is documented for CAST's own detector, reported to refuse essentially every
+mathematics prompt while passing in-distribution benign ones <span class="cite" data-ref="AlphaSteer. arXiv:2506.07022."><a href="#ref-alphasteer">[20]</a></span>, and for activation probes generally
+<span class="cite" data-ref="Latent Adversarial Detection. arXiv:2604.28129."><a href="#ref-lad">[24]</a></span>.
+
+#### A continuous outcome: the direction against a random direction of the same norm
+
+A rate at a ceiling cannot say whether the write is doing anything specific, so we replaced it with a
+continuous outcome that needs no generation: at the first generated position, the log-mass the model puts
+on refusal-opening tokens ("I", "Sorry", "As", "Unfortunately", "No") minus the log-mass on
+compliance-opening tokens ("Sure", "Here", "To", "Certainly", "Yes", …), one forward pass per arm. Arms:
+no write; $\pm\alpha$ along the concept's raw direction; and $\pm\alpha$ along a **random unit direction of
+the same norm**, fixed per resample — the perturbation floor the earlier design never had. Same 32 attacks
+and 32 benign prompts, three resamples, so 96 prompt-evaluations per cell.
+
+<div class="cg-mono" markdown="1">
+
+| change in first-token refusal logit | baseline | concept $-\alpha$ | concept $+\alpha$ | lever (½ difference) | random $-\alpha$ | random $+\alpha$ | lever |
+|---|---|---|---|---|---|---|---|
+| attacks the gate fires on (n=93) | +2.94 | −1.63 | +0.89 | **−1.26** | −0.56 | +0.28 | −0.42 |
+| benign prompts (n=96) | −2.21 | −0.77 | +1.21 | **−0.99** | −0.21 | +0.33 | −0.27 |
+
+</div>
+
+The concept direction is a directional lever with the same sign everywhere: away from the concept lowers
+the refusal logit, toward it raises it, on attacks and on benign prompts alike. Its lever component is
+about **three times** that of a random direction of the same norm — 1.26 against 0.45 on attacks, and
+larger on 91% of individual prompts; 1.01 against 0.36 on benign prompts, larger on 76%. That is clearly
+above the floor and not vastly above it. The sign-independent (perturbation) component is small for both
+(−0.37 concept, −0.14 random on attacks). And there is no lever-versus-perturbation split by gate status:
+the three attacks the gate passed moved as much as the ninety-three it fired on (indicative only, at
+$n=3$). The random direction is not inert either — a matched-norm random write moves the refusal logit by a
+third as much, which is the observation of Rogue Scalpel <span class="cite" data-ref="The Rogue Scalpel: Activation Steering Compromises LLM Safety. arXiv:2509.22067."><a href="#ref-rogue">[18]</a></span> in continuous form.
+
+So the corrected finding is smaller and older than the retracted one: a few-shot direction from eight
+framings is a genuine refusal lever, about three times a random direction, pointing the same way whether
+or not the gate fired. That is consistent with refusal riding a single direction <span class="cite" data-ref="Arditi, A., et al. (2024). Refusal in Language Models Is Mediated by a Single Direction. NeurIPS 2024. arXiv:2406.11717."><a href="#ref-arditi">[17]</a></span> and with
+arbitrary steering vectors moving refusal in proportion to their alignment with it <span class="cite" data-ref="Analysing the Safety Pitfalls of Steering Vectors. arXiv:2603.24543."><a href="#ref-pitfalls">[19]</a></span>. Nothing in it
+is new.
+
+**Why the earlier result looked real.** It had five arms, a sign flip, consistent signs across three
+resamples, and it survived three rounds of review and two independent audits of the paper. The consistency
+was real — within the wrong regime. Without the template the model's first-token distribution on an attack
+is a completion distribution, not a chat response, and the lexicon was scoring completion-style text; the
+sign that "refusal" took under the lexicon in that regime was the reverse of the sign under the chat regime.
+Nothing in the arms could have caught it, because every arm was in the same wrong regime. What caught it
+was an independent agent reading the *code* rather than the paper, and noticing that `apply_chat_template`
+was never called. Audit the code path that produced the numbers, not only the numbers.
+
+#### The same arms on the concept bank, corrected
+
+The earlier version reported that steering with five BeaverTails harm-category directions left refusal
+unchanged. Corrected, the picture matches the above. Baseline refusal on the sixty held-out harmful prompts
+is 80.0%; blanket $-\alpha$ along each category's direction lowers it to 65.0%; gated $-\alpha$ to 68.3%.
+The category gates fire on 42–100% of the *safe* prompts, so gated and blanket are nearly the same policy,
+and the gate leaves 33% of safe generation untouched against 3%. The harm-topic directions are weaker
+levers than the framing direction — 15 points against 22 — consistent with harmfulness and refusal being
+encoded along different directions <span class="cite" data-ref="Zhao, J., et al. (2025). LLMs Encode Harmfulness and Refusal Separately. arXiv:2507.11878."><a href="#ref-harmref">[21]</a></span>. Twelve prompts per category quantizes each cell to 8.3-point
+steps, so the category-level numbers are indicative; the direction of the effect is not in doubt.
+
+**Limits.** Thirty-two prompts, three resamples, one 0.5B model, one magnitude, a refusal lexicon for the
+rate and a hand-chosen token set for the logit. What survives — a 22-point refusal lever in the unsafe
+direction from eight framings, three times a random direction, and a gate that fires on nearly everything —
+does not depend on fine differences. Everything that depended on fine differences in the earlier version
+did not survive. The harness is
+[`scripts/eval_gate.py`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_gate.py); the
+withdrawn numbers remain in the repository's history.
 
 ## 5. Discussion
 
@@ -1910,10 +1788,10 @@ saving is the truncated forward, which a depth-matched probe shares
 (<a class="sref" href="#481-learning-a-single-concept">§4.8.1</a>); depth fusion does not transfer beyond
 synthetic data; and the mixture is inactive at few-shot sizes. What remains is narrow but real. The most
 distinctive part is the **conditional write**: a direction fit from the same few-shot data as the detector
-is written back to steer generation — a measured, monotonic dose-response bounded by the base model
+is written back to steer generation — a measured, graded dose-response bounded by the base model
 (<a class="sref" href="#46-steering-across-models">§4.6</a>) — and, more sharply, written back *only when
 the gate fires*, which beats writing on every prompt both in effect and in collateral
-(<a class="sref" href="#410-gate-conditioned-steering-what-the-gate-is-for">§4.10</a>). The write rule
+(<a class="sref" href="#410-gate-conditioned-steering-a-retraction-and-what-the-corrected-runs-show">§4.10</a>). The write rule
 alone is activation addition and needs none of the read machinery; the conditioning is the part no
 classifier or probe can supply. The second is **amortization**: as a training-free bank the adapter
 extends to a fourteen-way taxonomy in milliseconds and kilobytes and scores all of it in one forward,
@@ -1921,7 +1799,7 @@ where per-concept LoRA fine-tuning costs a training run each; this beats *fine-t
 linear-probe bank shares it — what ConceptGate adds is a steering direction per entry at no extra fitting
 cost, whose behavioural effect on those harm categories we measure and find null
 (<a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a>,
-<a class="sref" href="#the-same-experiment-on-the-concept-bank-a-negative-result">§4.10</a>). The third is the composition and its
+<a class="sref" href="#the-same-arms-on-the-concept-bank-corrected">§4.10</a>). The third is the composition and its
 honest account: a single few-shot, calibrated, training-free module that both reads and writes a concept
 at a small, well-characterized cost, each part measured against a fair baseline including where it fails —
 detection is a commodity a probe matches, and generalization to an unseen category is only partial
@@ -1929,35 +1807,24 @@ detection is a commodity a probe matches, and generalization to an unseen catego
 that its detector outperforms the alternatives — it does not — but that it assembles a read-and-write
 adapter whose write side a classifier cannot match, and reports each part against a fair comparison.
 
-### 5.2 Detection is a commodity; steering is the distinguishing capability
+### 5.2 Detection is a commodity; steering is prior art; what the corrected write shows
 
-The most consequential finding is structural rather than numerical. A text classifier can match or
-exceed ConceptGate at detection while being simpler to deploy, so if detection were the objective there
-would be little reason to prefer an internal method. The reason to operate inside the residual stream
-is the operation a classifier cannot perform: using a closely related direction, fit from the same data, to write — to steer
-generation toward or away from the concept, conditionally and interpretably, from ten examples. Steering
-is a measured, monotonic dose-response with an effective window in which content shifts while fluency
-holds (<a class="sref" href="#46-steering-across-models">§4.6</a>), bounded like everything else by the
-base model. The
-detection machinery should not be understood as subsidizing the write side, because the write side needs
-none of it: activation addition wants a direction and a magnitude, not a spectrogram, a depth filter, or a
-calibrated threshold. What the read side actually contributes to the write side is the decision of *when
-to write*. That is the one operation in the composition that no probe, no classifier, and no external
-guard can perform — a classifier can identify a jailbreak but cannot alter the generation; CAA can alter
-the generation but cannot choose which prompts deserve it — and
-<a class="sref" href="#410-gate-conditioned-steering-what-the-gate-is-for">§4.10</a> measures it:
-conditioning the same write on the gate adds $8.3\pm1.5$ points of jailbreak refusal where writing on
-every prompt adds $2.1\pm2.9$, an interval covering zero, and where a random subset of the same size adds
-$1.0\pm3.9$ — the gain is in *which* prompts are written, not how many. What makes the read side
-load-bearing rather than merely economical is the reason for that gap: writing the direction into prompts
-where the concept is absent *reduces* refusal by $6.2\pm2.6$ points — in either direction of the write,
-so it is perturbation rather than a lever there — and the gate is keeping the intervention away from
-prompts where it does harm, not just saving work. Gating also confines the
-intervention instead of rewriting benign generation wholesale, though how large that second advantage is
-depends on how far the benign traffic sits from the gate's ten examples — 90%-versus-4% on in-register
-prompts and substantially less off it. The efficient detection path (the
-truncated forward, calibration) matters for what it always mattered for — running the read cheaply enough
-to keep in the serving loop — and the gate is what converts that read into a targeted write.
+The structural finding stands: a text classifier can match or exceed ConceptGate at detection while being
+simpler to deploy, so if detection were the objective there would be little reason to prefer an internal
+method. What the earlier version of this section said next — that the read side's contribution is deciding
+*when* to write, and that gating the write beats writing everywhere on both suppression and collateral — is
+withdrawn. Conditioning a write on an activation detector is CAST and DSAS <span class="cite" data-ref="Lee, B. W., et al. (2024). Programming Refusal with Conditional Activation Steering. ICLR 2025. arXiv:2409.05907."><a href="#ref-cast">[15]</a></span><span class="cite" data-ref="Dynamic Steering with Activation-Space Gating (DSAS). arXiv:2512.03661."><a href="#ref-dsas">[16]</a></span>; when our own
+experiment is run with the model's chat template the gate fires on 97% of attacks and selects nothing, and
+the "suppression" the earlier version measured was the reverse of what the write does to a correctly
+formatted instruct model (<a class="sref" href="#410-gate-conditioned-steering-a-retraction-and-what-the-corrected-runs-show">§4.10</a>).
+
+What the corrected write shows is smaller and older: a direction fit from eight hand-written framings, added
+at 8% of the residual norm, moves the instruct model's refusal by about 22 points, in either direction
+depending on sign, about three times as much as a random direction of the same norm. That is the refusal
+direction of Arditi et al. <span class="cite" data-ref="Arditi, A., et al. (2024). Refusal in Language Models Is Mediated by a Single Direction. NeurIPS 2024. arXiv:2406.11717."><a href="#ref-arditi">[17]</a></span> obtained few-shot and training-free — a lever an operator could point
+either way, and a jailbreak if pointed away. The gate's remaining function is the one CAST reports —
+confining the write to prompts where the detector fires, which spares benign generation — bounded by a
+false-positive rate that moves from 18% to 96% with the prompt register.
 
 ### 5.3 The cost argument and its limits
 
@@ -1974,7 +1841,7 @@ fine-tuning pays seconds-to-minutes and a fresh forward per concept — but that
 with a linear-probe bank, so what remains specific to ConceptGate is not the reading cost but that each
 entry comes with a write direction fit from the same data — a measured behavioural control for jailbreak
 framing and topical concepts, a null for the harm categories
-(<a class="sref" href="#410-gate-conditioned-steering-what-the-gate-is-for">§4.10</a>). Second, the memory-minimal load mode is
+(<a class="sref" href="#410-gate-conditioned-steering-a-retraction-and-what-the-corrected-runs-show">§4.10</a>). Second, the memory-minimal load mode is
 detection-only, and detection is the commodity half of the system, whereas the distinguishing
 capability, steering, requires the full network. The cost argument therefore applies to the guardrail
 rather than to the steerer. The defensible claim is that a read-and-write adapter can be added to a
@@ -2007,6 +1874,33 @@ the model-touching parts — the tap reader, the steering hooks, and the `Concep
 while the framework-specific code remains small enough to re-derive, which is appropriate for a method
 whose value rests on being inexpensive and transparent.
 
+### 5.5 What remains, and what would be new
+
+After seven rounds of review, two independent audits of the paper, and one audit of the code, here is the
+inventory. **Prior work:** conditional activation steering <span class="cite" data-ref="Lee, B. W., et al. (2024). Programming Refusal with Conditional Activation Steering. ICLR 2025. arXiv:2409.05907."><a href="#ref-cast">[15]</a></span><span class="cite" data-ref="Dynamic Steering with Activation-Space Gating (DSAS). arXiv:2512.03661."><a href="#ref-dsas">[16]</a></span>; the collateral advantage of
+conditioning (CAST, Table 3); refusal riding a single direction <span class="cite" data-ref="Arditi, A., et al. (2024). Refusal in Language Models Is Mediated by a Single Direction. NeurIPS 2024. arXiv:2406.11717."><a href="#ref-arditi">[17]</a></span>; unrelated writes eroding refusal
+<span class="cite" data-ref="The Rogue Scalpel: Activation Steering Compromises LLM Safety. arXiv:2509.22067."><a href="#ref-rogue">[18]</a></span><span class="cite" data-ref="Analysing the Safety Pitfalls of Steering Vectors. arXiv:2603.24543."><a href="#ref-pitfalls">[19]</a></span>; a condition detector's false-positive rate collapsing off-distribution <span class="cite" data-ref="AlphaSteer. arXiv:2506.07022."><a href="#ref-alphasteer">[20]</a></span><span class="cite" data-ref="Latent Adversarial Detection. arXiv:2604.28129."><a href="#ref-lad">[24]</a></span>;
+harmfulness and refusal as distinct directions <span class="cite" data-ref="Zhao, J., et al. (2025). LLMs Encode Harmfulness and Refusal Separately. arXiv:2507.11878."><a href="#ref-harmref">[21]</a></span>. **Retracted or reassigned in this paper:** detection
+accuracy, single-concept efficiency, depth fusion, bank amortization, the read/write identity, and the
+gate-conditioned steering gain. **Left standing:** a set of negative results we believe are useful, a working
+tool, the three controls of <a class="sref" href="#410-gate-conditioned-steering-a-retraction-and-what-the-corrected-runs-show">§4.10</a> — which are the right controls even though, run correctly, they show the
+gate selecting nothing here — and one clean, unoriginal measurement: a few-shot direction moves refusal
+about three times as much as a random direction of the same norm.
+
+One question remains open that we could not find answered. **Can a few-shot read of a concept predict, per
+prompt and before any generation, how much a steering write along that concept will move the model?** The
+closest prior work predicts where steering fails at the aggregate level, for one sign, without a gate
+<span class="cite" data-ref="Billa (2026). Predicting Where Steering Vectors Succeed. arXiv:2604.15557."><a href="#ref-billa">[22]</a></span>. The test set above cannot ask it — the model already refuses 94% of those attacks — so we are
+running it on attacks that succeed: real jailbreak templates from the held-out split with a harmful request
+appended, the continuous first-token outcome, $\pm\alpha$ along the concept and along a random direction, and
+a second gate fit directly to the steering *outcome*, to compare with the concept gate. That run is in
+progress as this version is published; its result will be added here, and if it is a null it will say so.
+
+Two lessons from the post-mortem are worth more than any result above. Audit the code path, not only the
+numbers: seven reviews of the paper missed an omission that one read of the code found. And when a binary
+outcome sits at a ceiling, stop reporting it: the corrected experiment was uninterpretable on a refusal rate
+and only the continuous outcome could carry it.
+
 ## 6. Limitations and threats to validity
 
 The most important limitation, which should be read before any other, is **adversarial fragility**.
@@ -2025,7 +1919,7 @@ direction, but steering is not a filter, so the two serve different purposes.
 
 The second group of limitations concerns **the evidence being small and in-distribution**. We evaluate
 primarily on GPT-2 and Qwen2.5-0.5B, small enough that the core results reproduce on a single CPU, and
-add gemma-2-2b for the multi-concept, generalization, and read/write-cosine results (§4.8–4.9, §3.10) — the steering dose-response of §4.6 and the gate experiment of §4.10 are GPT-2 and Qwen only — which we run
+add gemma-2-2b for the multi-concept, generalization, and read/write-cosine results (§4.8–4.9, §3.10) — the steering dose-response of §4.6 is GPT-2 and Qwen only and the gate experiment of §4.10 is Qwen only — which we run
 on an Apple M4 GPU (MPS). That choice bounds how
 far the numbers extend. The qualitative findings — detection is a commodity, and the cost trade-off is real and
 model-dependent — hold on all three models we tested (the base model bounding steering quality is measured
@@ -2048,17 +1942,13 @@ The third cluster is about **the few-shot regime and generation quality**, which
 edges where the method frays. Everything downstream depends on the diversity of the ~10 prompts per
 side: a narrow or accidentally-correlated prompt set produces a direction that separates the training
 examples and little else, so results should always be reported with variance across seeds and prompt
-sets, which we have done only partially. We can put a number on that hazard rather than leaving it
-abstract, and it is a large one. The jailbreak gate of
-<a class="sref" href="#410-gate-conditioned-steering-what-the-gate-is-for">§4.10</a>, fit from eight short
-override framings against eight short benign requests, fires on 10% of benign prompts in that same
-register and on **92%** of real benign prompts drawn from a different one — a ninefold swing in the false-positive
-rate from the prompt distribution alone, with the concept and the threshold unchanged. Fit the same
-concept from the dataset's long persona templates instead and it fires on 0% of short framed attacks. A
-ten-example concept is therefore best understood as calibrated to a *register* as much as to a meaning,
-and any deployment claim has to be made against the traffic the gate will actually see. This bears
-hardest on the write side, because a false fire there rewrites the output rather than merely raising a
-flag. On the write side, steering hard enough to reliably change
+sets, which we have done only partially. We can put a number on that hazard, and it is a large one. The jailbreak gate of <a class="sref" href="#410-gate-conditioned-steering-a-retraction-and-what-the-corrected-runs-show">§4.10</a>, fit from eight
+short override framings against eight short benign requests and run with the chat template, fires on 18% of benign
+prompts in that same register and on **96%** of real benign prompts drawn from a different one (30 or 31 of 32 in
+every resample) — with the concept and the threshold unchanged. A ten-example concept is therefore calibrated to a
+*register* as much as to a meaning, and any deployment claim has to be made against the traffic the gate will
+actually see. The same failure is documented for CAST's condition detector <span class="cite" data-ref="AlphaSteer. arXiv:2506.07022."><a href="#ref-alphasteer">[20]</a></span> and for activation probes
+generally <span class="cite" data-ref="Latent Adversarial Detection. arXiv:2604.28129."><a href="#ref-lad">[24]</a></span>. On the write side a false fire rewrites the output rather than merely raising a flag. On the write side, steering hard enough to reliably change
 the topic also degrades fluency, and generated text drifts out of the clean-prompt distribution as it
 grows — degenerate repetition alone can nudge a benign continuation across the gate — so a deployed
 system must tune its operating point against false-refusal and output quality, not against recall in
@@ -2076,20 +1966,17 @@ milliseconds and kilobytes, where per-concept fine-tuning needs a training run �
 with a probe bank but that fine-tuning does not have. The writing is what justifies operating inside the
 residual stream rather than on the text, and it is the part a classifier cannot reproduce: a few-shot,
 training-free steering control fit from the same data as the detector (and moderately aligned with it,
-cosine 0.45–0.83), measured as a monotonic dose-response with a coherent operating window
+cosine 0.45–0.83), measured as a graded dose-response with a coherent operating window
 (<a class="sref" href="#46-steering-across-models">§4.6</a>) and bounded by the competence of the base
 model. But the write rule alone is activation addition, which needs none of this machinery, so the claim
-has to be put more precisely still: what the composition uniquely provides is the *conditional* write —
-using a calibrated read to decide when to steer. Measured against blanket steering, gating suppresses
-more of what it targets, while blanket steering does not measurably suppress anything, and it disturbs
-far less of the benign traffic it passes over
-(<a class="sref" href="#410-gate-conditioned-steering-what-the-gate-is-for">§4.10</a>). That conjunction
-of a cheap read with a targeted write is the reason to assemble the parts this way. Its reach is bounded
-by the same thing that bounds the read, and the bound is not a hypothetical: the collateral advantage is
-measured on benign prompts drawn from the register the gate's ten examples came from, and the same gate
-fires on 92% of benign prompts from a different register, which would take most of that advantage away. A
-gate whose examples do not match the prompts it will see is worse than no gate, and on the write side it
-is worse than on the read side, because a false fire rewrites the answer instead of flagging it. The interactive figures are included so
+has to be put more precisely still, and more modestly than the earlier version of this paper put it.
+Conditioning the write on a read is prior work <span class="cite" data-ref="Lee, B. W., et al. (2024). Programming Refusal with Conditional Activation Steering. ICLR 2025. arXiv:2409.05907."><a href="#ref-cast">[15]</a></span><span class="cite" data-ref="Dynamic Steering with Activation-Space Gating (DSAS). arXiv:2512.03661."><a href="#ref-dsas">[16]</a></span>, and when our own version is run with the model's
+chat template the gate fires on 97% of attacks and selects nothing; the write itself is a 22-point refusal lever,
+three times a random direction of the same norm, pointed the wrong way in the earlier version (<a class="sref" href="#410-gate-conditioned-steering-a-retraction-and-what-the-corrected-runs-show">§4.10</a>). What the
+composition provides is the write direction at no fitting cost and the confinement of benign collateral — both of
+which exist elsewhere. What this paper provides that the others do not is the set of controls, the retraction with
+its mechanism, and a record of how a five-arm, sign-flipped, twice-audited result was entirely an artifact of one
+missing template call. The interactive figures are included so
 that these claims can be examined directly against the underlying model runs rather than taken on
 assertion; the points at which the method is effective and the points at which it fails are both
 visible in them.
@@ -2111,6 +1998,16 @@ visible in them.
 12. <a id="ref-adapters"></a>Houlsby, N., Giurgiu, A., Jastrzebski, S., Morrone, B., de Laroussilhe, Q., Gesmundo, A., Attariyan, M., & Gelly, S. (2019). *Parameter-Efficient Transfer Learning for NLP.* arXiv:1902.00751.
 13. <a id="ref-gliner"></a>Zaratiana, U., Tomeh, N., Holat, P., & Charnois, T. (2023). *GLiNER: Generalist Model for Named Entity Recognition using Bidirectional Transformer.* NAACL 2024. arXiv:2311.08526.
 14. <a id="ref-beavertails"></a>Ji, J., Liu, M., Dai, J., Pan, X., Zhang, C., Bian, C., Sun, R., Wang, Y., & Yang, Y. (2023). *BeaverTails: Towards Improved Safety Alignment of LLM via a Human-Preference Dataset.* NeurIPS 2023 Datasets and Benchmarks. arXiv:2307.04657.
+15. <a id="ref-cast"></a>Lee, B. W., et al. (2024). *Programming Refusal with Conditional Activation Steering.* ICLR 2025. arXiv:2409.05907.
+16. <a id="ref-dsas"></a>*Dynamic Steering with Activation-Space Gating (DSAS).* (2025). arXiv:2512.03661.
+17. <a id="ref-arditi"></a>Arditi, A., et al. (2024). *Refusal in Language Models Is Mediated by a Single Direction.* NeurIPS 2024. arXiv:2406.11717.
+18. <a id="ref-rogue"></a>*The Rogue Scalpel: Activation Steering Compromises LLM Safety.* (2025). arXiv:2509.22067.
+19. <a id="ref-pitfalls"></a>*Analysing the Safety Pitfalls of Steering Vectors.* (2026). arXiv:2603.24543.
+20. <a id="ref-alphasteer"></a>*AlphaSteer.* (2025). arXiv:2506.07022.
+21. <a id="ref-harmref"></a>Zhao, J., et al. (2025). *LLMs Encode Harmfulness and Refusal Separately.* arXiv:2507.11878.
+22. <a id="ref-billa"></a>Billa (2026). *Predicting Where Steering Vectors Succeed.* arXiv:2604.15557.
+23. <a id="ref-paving"></a>*Residual Paving: Diagnosing the Routing Bottleneck in Selective Refusal Editing.* (2026). arXiv:2605.20262.
+24. <a id="ref-lad"></a>*Latent Adversarial Detection.* (2026). arXiv:2604.28129.
 </div>
 
 ## Citation
