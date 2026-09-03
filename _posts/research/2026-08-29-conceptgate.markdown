@@ -304,7 +304,8 @@ changed substantially between versions, and the first item is the only one we wo
    folds grouped by harmful request, $+0.88$ transferring across prompt families — against $+0.51 \pm 0.11$
    for the few-shot concept read the gate already computes. The decoding direction sits about $85°$ from
    both the concept direction and a direction predicting the model's unsteered disposition, and the signal
-   survives projecting both out. Two literature searches did not find this (<a class="sref" href="#411-predicting-steerability-from-the-prompt">§4.11</a>). It is one model, one
+   survives projecting both out. A search of the activation-steering literature did not turn it up, though that
+   search had a stated blind spot (<a class="sref" href="#411-predicting-steerability-from-the-prompt">§4.11</a>). It is one model, one
    concept, one magnitude.
 2. **Steering — the read/write duality, measured.** The one operation a detector or classifier cannot
    perform: a direction fit from the *same ten examples* as the detector — related to it but not identical
@@ -1784,8 +1785,7 @@ arms. Anything that would have rested on such differences is not claimed here. T
 
 <a class="sref" href="#410-gate-conditioned-steering-and-a-formatting-confound">§4.10</a> asks *when* to write and finds the concept read cannot answer it: on formatted attacks the gate fires
 on almost all of them, so there is nothing to select. That suggests a different question, and it is the one
-place in this report where we could not locate the result in prior work: **how much will a write move this
-particular prompt, and is that predictable before generating anything?**
+place in this report where a search of the activation-steering literature did not turn up the result (see the <a class="sref" href="#a-note-on-the-scope-of-the-novelty-claim">scope note</a> below for what that search covered and what it did not): **how much will a write move this particular prompt, and is that predictable before generating anything?**
 
 **Design.** The test set of <a class="sref" href="#411-predicting-steerability-from-the-prompt">§4.10</a> is useless for this — a model refusing 94% of
 attacks has no room to move — so we built one with headroom: 120 held-out jailbreak templates from the
@@ -2191,7 +2191,7 @@ of the same norm, so roughly $2.5\times$ the perturbation floor.
 concept and this magnitude, how much a steering write will move a prompt's refusal is linearly decodable
 from the prompt's own mid-layer activations before generation, better than the concept read decodes it,
 and along a direction nearly orthogonal to both the concept direction and the model's refusal
-disposition.* Two independent literature searches did not find this. The closest work predicts where
+disposition.* Two searches of the steering literature did not find it, with the caveats in the <a class="sref" href="#a-note-on-the-scope-of-the-novelty-claim">scope note</a> below. The closest work we did reach predicts where
 steering vectors succeed at the aggregate or layer level, for a single sign, without a gate <span class="cite" data-ref="Billa (2026). Predicting Where Steering Vectors Succeed. arXiv:2604.15557."><a href="#ref-billa">[22]</a></span>;
 predicts steering success from *post-steering* decoding states with a gradient-boosted model over 1.4M
 generations <span class="cite" data-ref="When is Your LLM Steerable? arXiv:2606.11599."><a href="#ref-asteer">[25]</a></span>; or relates dataset-level separability to anti-steerability without going
@@ -2211,6 +2211,20 @@ than a held-out fold. The harness is
 [`scripts/eval_gate.py --steerability`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_gate.py)
 and every number here is produced by
 [`scripts/analyze_steerability.py`](https://github.com/NISH1001/conceptgate/blob/main/scripts/analyze_steerability.py).
+
+#### A note on the scope of the novelty claim
+
+"We could not find this" is worth stating precisely, because the claim above rests on it. What was searched:
+two web searches over arXiv on activation-steering vocabulary — conditional, selective, gated and adaptive
+steering, refusal directions, steering reliability and generalization — reading roughly thirty 2024–2026
+papers, mostly as abstracts and rendered HTML with some full-text extraction. What was **not** searched: no
+citation-graph traversal or proceedings indexes; no forward citations from the closest prior work; not the
+interpretability blog literature, where a good deal of steering work appears; and, most importantly, not
+the vocabulary a statistician would use for the same question. Predicting how much a fixed intervention
+will affect a particular item, from that item's covariates, is heterogeneous treatment effect estimation.
+If this result exists under that framing, or in the model-editing literature as per-input edit-efficacy
+prediction, our search would have missed it entirely. Treat the claim as "not found in the steering
+literature by a bounded search," which is weaker than "new."
 
 ## 5. Discussion
 
@@ -2322,7 +2336,7 @@ prompt predict, before any generation, how much a steering write will move the m
 than the concept read does. On 164 attack prompts with headroom, a direction fit to the outcome predicts
 the per-prompt lever at Spearman $+0.81 \pm 0.03$ out-of-fold, against $+0.51 \pm 0.11$ for the gate's own
 LLR, and it sits roughly $85°$ from the concept direction and from a direction that predicts the model's
-unsteered disposition (<a class="sref" href="#411-predicting-steerability-from-the-prompt">§4.11</a>). Two literature searches place the nearest prior work at the aggregate
+unsteered disposition (<a class="sref" href="#411-predicting-steerability-from-the-prompt">§4.11</a>). The searches we ran place the nearest work we reached at the aggregate
 level, for one sign, without a gate <span class="cite" data-ref="Billa (2026). Predicting Where Steering Vectors Succeed. arXiv:2604.15557."><a href="#ref-billa">[22]</a></span>, or predicting from post-steering states over 1.4M
 generations <span class="cite" data-ref="When is Your LLM Steerable? arXiv:2606.11599."><a href="#ref-asteer">[25]</a></span>. That is the one result in this paper we would defend as new, and it is one model,
 one concept, one magnitude, with an estimated one-in-three chance of already existing somewhere we did not
