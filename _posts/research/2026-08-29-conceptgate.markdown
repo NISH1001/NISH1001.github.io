@@ -142,7 +142,16 @@ categories is only partial; and gated steering with the concept bank's own harm-
 refusal unchanged (blanket steering lowers it), so the bank's entries supply a write direction without a demonstrated behavioural
 effect for those concepts. (v) The one capability that distinguishes an internal adapter from a text
 classifier is **steering** — writing a direction fit from the same few-shot examples back into the residual stream — which we
-measure as a graded dose-response bounded by the competence of the base model. (vi) The write rule itself is standard activation addition, and conditioning it on an activation-read detector is prior work. Measured with prompts formatted as the model expects, the composition adds nothing on the read side of that: the model refuses 94% of attacks unsteered, the gate fires on 97% of them and so selects nothing a size-matched random subset does not, and steering *away* from the jailbreak concept **lowers** refusal by 22 points — the few-shot direction is a refusal lever, about three times a random direction of the same norm, and which sign is a guardrail is the operator's choice. Whether prompts are formatted at all turns out to decide the sign of every effect in this experiment, which is a caveat for steering evaluations generally (<a class="sref" href="#410-gate-conditioned-steering-and-a-formatting-confound">§4.10</a>). (vii) A different question of the same harness is answerable: on attack prompts with headroom, **how much** a steering write moves a given prompt is decodable from that prompt's activations before generation ($\rho=+0.81$ out-of-fold against a permutation null of -0.00 ± 0.10), and eight labelled prompts reach +0.64. Most of that signal is already inside the concept direction — three linear projections onto it reach $+0.64$ where the gate's own calibrated read manages $+0.51$ — so the defensible statement is that the gate is a lossy readout of a dose it could have measured better, not that a new subspace was found. Predictability alone is not distinctive either: the same decoder recovers the unsteered logit at $+0.86$. One model, one concept, one magnitude, and a first-token proxy not yet validated per prompt against generated text (<a class="sref" href="#411-predicting-the-per-prompt-dose-of-a-write">§4.11</a>). Every mechanism used here is drawn from prior work, and so is the composition. What remains is (vii), an unusually thorough account of where a few-shot concept adapter does and does not work, and the finding that prompt formatting inverts the sign of a measured steering effect. A reference implementation is available at
+measure as a graded dose-response bounded by the competence of the base model. (vi) The write rule itself is standard activation addition, and conditioning it on an activation-read detector is prior work. Measured with prompts formatted as the model expects, the composition adds nothing on the read side of that: the model refuses 94% of attacks unsteered, the gate fires on 97% of them and so selects nothing a size-matched random subset does not, and steering *away* from the jailbreak concept **lowers** refusal by 22 points — the few-shot direction is a refusal lever, about three times a random direction of the same norm, and which sign is a guardrail is the operator's choice. Whether prompts are formatted at all turns out to decide the sign of every effect in this experiment, which is a caveat for steering evaluations generally (<a class="sref" href="#410-gate-conditioned-steering-and-a-formatting-confound">§4.10</a>). (vii) A different question — whether the size of a write's effect on a *particular* prompt is readable from
+that prompt beforehand — produced a strong-looking result on a first-token proxy ($\rho=+0.81$
+against a permutation null of -0.00 ± 0.10) that its own controls
+then cut down: most of the signal sits inside the concept direction the gate already computes
+($+0.64$ from three projections against the gate's
+$+0.51$), and validation against behaviour fails at the prompt level — two independent
+behavioural measures correlate with each other at -0.01, so there is
+nothing stable to validate against. The prompt-level claim is withdrawn; what is left is the aggregate lever,
+behaviourally confirmed at 64% → 35% → 79% generated
+refusal, and the methodological caution (<a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>). Every mechanism used here is drawn from prior work, and so is the composition. What remains is (vii), an unusually thorough account of where a few-shot concept adapter does and does not work, and the finding that prompt formatting inverts the sign of a measured steering effect. A reference implementation is available at
 [github.com/NISH1001/conceptgate](https://github.com/NISH1001/conceptgate).
 </div>
 
@@ -155,8 +164,7 @@ values, and the controls recompute only inexpensive derived quantities (the fuse
 the decision threshold, the location of the cost knee) rather than executing a model in the browser.
 The small models were chosen so the core results reproduce cheaply; the qualitative findings
 are expected to transfer to larger models, but the specific numbers should not be treated as
-calibrated large-model benchmarks. The steering and gate experiments format prompts with the model's chat template; the detection
-benchmarks read the raw prompt. The interactive figures use a three-tap configuration (blocks 4/6/8
+calibrated large-model benchmarks. The steering and gate experiments format prompts with the model's chat template; the detection benchmarks read the raw prompt. Weights load at each checkpoint's declared precision, which means bfloat16 for every instruct model here and float32 for GPT-2, which declares none. The interactive figures use a three-tap configuration (blocks 4/6/8
 on GPT-2) with eight examples per class; the mixture and parameter-count discussions cite the original
 five-tap, twelve-per-class runs, so tap and prompt counts differ between the two. References were
 checked against their primary sources; readers are nonetheless encouraged to verify them independently.
@@ -298,17 +306,15 @@ the residual stream rather than on the text, and it recurs throughout the analys
 This paper contributes, in order of how much each distinguishes ConceptGate from a plain probe. Only the
 first item is a positive result:
 
-1. **The per-prompt dose of a write is predictable, and the gate reads it inefficiently.** On attack prompts
-   where the model has room to move, *how much* a steering write shifts refusal is decodable from the
-   prompt's activations before generation ($\rho=+0.81$ out-of-fold against a permutation
-   null of -0.00 ± 0.10; $+0.79$ with folds grouped by harmful
-   request; $+0.88$ transferring across prompt families), and eight labelled prompts already reach
-   +0.64. Most of that signal lies inside the concept direction — three linear
-   projections onto it give $+0.64$ where the gate's own calibrated read
-   of the same activations manages $+0.51$ — so what is measured is a lossy gate rather than a
-   new subspace. A near-orthogonality reading of the same data failed its own self-consistency control and is
-   withdrawn (<a class="sref" href="#411-predicting-the-per-prompt-dose-of-a-write">§4.11</a>). One model, one concept, one magnitude, and the outcome is a first-token proxy not yet
-   validated per prompt against generated text.
+1. **Two methodological findings, both cheap to get wrong.** First, whether prompts are wrapped in an
+   instruct model's chat template **inverts the sign of a measured steering effect**: the same code, prompts,
+   concept and magnitude give opposite conclusions, and steering evaluations rarely state which regime they
+   used (<a class="sref" href="#410-gate-conditioned-steering-and-a-formatting-confound">§4.10</a>). Second, a first-token logit proxy for refusal — the standard way to avoid generating —
+   tracks group means faithfully while failing per prompt: it correlates with a teacher-forced continuation
+   measure at only +0.43 and with generated text at
+   +0.48, and those two behavioural measures agree with *each other* at
+   -0.01 (<a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>). Anyone building a cheap steering metric needs
+   both of these.
 2. **Steering — the read/write duality, measured.** The one operation a detector or classifier cannot
    perform: a direction fit from the *same ten examples* as the detector — related to it but not identical
    (per-tap cosine 0.45–0.83 depending on model, concept, and detection mode;
@@ -1776,47 +1782,53 @@ against 22 — consistent with harmfulness and refusal being encoded along diffe
 Twelve prompts per category quantizes each cell to 8.3-point steps, so the category-level numbers are
 indicative; the direction of the effect is not.
 
-**Limits.** Thirty-two prompts, three resamples, one 0.5B model, one magnitude, a refusal lexicon for the
-rate and a hand-chosen token set for the logit. The claims that survive coarse measurement — a 22-point
+**The lever, confirmed on generated text.** The 32 framed attacks are saturated, so the size of the effect
+is better measured on a set with headroom. On the 164 attacks of <a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a> — jailbreak templates carrying a real
+harmful request, plus short framings and bare requests — the refusal rate over 40 greedily generated tokens is
+**64% unsteered, 35% steering away from the concept, and
+79% steering toward it**. A single direction fit from eight hand-written framings, added at 8%
+of the residual norm, moves generated refusal across a 43-point range in whichever
+direction the operator chooses. A teacher-forced measure — the log-probability of canonical refusal
+continuations minus compliance ones — moves the same way
+(+1.08 → +0.88 → +1.12).
+This is the strongest behavioural statement in the report, and it is a restatement of Arditi et al. at eight
+examples rather than anything new.
+
+**Limits.** Thirty-two prompts for the arm table, three resamples, one 0.5B model, one magnitude, a refusal
+lexicon for the rate and a hand-chosen token set for the logit. The claims that survive coarse measurement — a 22-point
 refusal lever from eight framings, roughly three times a random direction, a gate that fires on nearly
 every attack, and a sign that depends on prompt formatting — do not rest on fine differences between
 arms. Anything that would have rested on such differences is not claimed here. The harness is
 [`scripts/eval_gate.py`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_gate.py).
 
-### 4.11 Predicting the per-prompt dose of a write
+### 4.11 What the per-prompt signal turns out to be
 
-<a class="sref" href="#410-gate-conditioned-steering-and-a-formatting-confound">§4.10</a> asks *when* to write and finds the concept read cannot answer it: on formatted attacks the gate
-fires on almost all of them, so there is nothing to select. A different question is answerable. A fixed
-write does not move every prompt equally; call the size of the swing that prompt's **dose**. Is the dose
-predictable from the prompt alone, before anything is generated?
+<a class="sref" href="#410-gate-conditioned-steering-and-a-formatting-confound">§4.10</a> shows a write that moves refusal by a wide margin in aggregate. A fixed write does not move every
+prompt equally, though, so it is natural to ask whether the size of the swing on a *particular* prompt — call
+it that prompt's **dose** — can be read off the prompt before anything is generated. This section reports an
+affirmative-looking answer, the controls that shrank it, and the validation that stopped it from being a
+claim about behaviour at all. It is included because the sequence is more useful than the result.
 
-**Design.** <a class="sref" href="#410-gate-conditioned-steering-and-a-formatting-confound">§4.10</a>'s test set cannot ask this — a model refusing 94% of attacks has no room to move — so
-we built one with headroom: 120 held-out jailbreak templates from the dataset's test split, each with one
-of twelve plain harmful requests appended; the 32 short framed attacks; the twelve bare requests; and 48
-real benign prompts. 164 attacks, of which 15% lean toward compliance unsteered. For each prompt we
-record the unsteered first-token refusal logit and the same quantity under four writes: $\pm\alpha$ along
-the concept's raw direction and $\pm\alpha$ along a random unit direction of the same norm. Five forwards
-per prompt, no generation. The **dose** is the sign-reversible half,
-$\tfrac{1}{2}(\Delta_{-\alpha} - \Delta_{+\alpha})$.
+**Design.** 120 held-out jailbreak templates from the dataset's test split, each with one of twelve plain
+harmful requests appended; the 32 short framed attacks; the twelve bare requests; and 48 real benign prompts.
+164 attacks, of which 15% lean toward compliance unsteered. Per prompt we record a first-token
+refusal-versus-compliance log-odds unsteered and under four writes — $\pm\alpha$ along the concept's raw
+direction and $\pm\alpha$ along a random unit direction of the same norm. Five forwards per prompt, no
+generation. The dose is the sign-reversible half, $\tfrac{1}{2}(\Delta_{-\alpha} - \Delta_{+\alpha})$.
 
-**It is predictable, well above a matched null.** Ridge regression from the tapped activations onto the
-dose reaches out-of-fold Spearman $\rho = +0.81$. The null that matters is the identical
-pipeline on a permuted target: -0.00 ± 0.10 over 300 draws
-(max +0.28), so the observed value sits about 8 standard deviations above
-it. Permuting only *within* prompt family, which removes family structure from the null, gives
-+0.04 and a similar margin. Grouping the cross-validation folds by harmful
-request leaves $\rho = +0.79$, and a direction fit on the 120 templates predicts the short and bare
-requests at $+0.88$.
+**On that outcome, the dose is strongly predictable.** A ridge from the tapped activations reaches
+out-of-fold Spearman $\rho = +0.81$, against a permutation null from the identical pipeline
+of -0.00 ± 0.10 over 300 draws — roughly
+8 standard deviations. Folds grouped by harmful request give $+0.79$; a direction fit
+on the templates predicts the short and bare requests at $+0.88$; eight labelled prompts already reach
++0.64.
 
-**But most of that is already inside the concept direction.** This is the result's real shape, and it
-took an adversarial pass to see it. Take the prompt's projection onto the concept's own steering
-direction at each of the three taps — three scalars, no fitting beyond a linear combination — and the
-dose is predicted at $\rho = +0.64$. The gate's calibrated
-likelihood-ratio read of those same activations manages only
-$+0.51$. So the honest decomposition is a nested ladder: the concept direction already
-carries most of the signal, the gate's own LLR is a **lossy readout** of it, and the full ridge adds
-strictly but modestly on top — fitting the ridge to what the projection leaves unexplained still gives
-$+0.61$.
+**Most of it was inside the concept direction, and the gate was reading it badly.** Three scalars — the
+prompt's projection onto the concept's own steering direction at each tap — predict the dose at
+$+0.64$, where the gate's calibrated likelihood-ratio read of the same
+activations manages $+0.51$. The full ridge adds strictly but modestly
+($+0.61$ on what the projection leaves). So the nested ladder, not a new
+subspace, is the honest shape of the measurement.
 
 <figure id="figure-16" style="margin:2rem 0">
 <svg viewBox="0 0 760 258" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three nested predictors of the per-prompt steering dose" font-family="ui-sans-serif,system-ui,sans-serif">
@@ -2333,91 +2345,99 @@ $+0.61$.
 <text x="380" y="218" text-anchor="middle" font-size="10.5" fill="currentColor">most of the signal is already inside the concept direction: 3 projections reach +0.64 of the ridge’s +0.81</text>
 <text x="380" y="234" text-anchor="middle" font-size="9.5" fill="#889">permutation null -0.00 ± 0.10 · but the same ridge decodes the unsteered logit at +0.86, so 0.81 sits below the generic ceiling</text>
 </svg>
-<figcaption><strong>Figure 16.</strong> <em>Three nested predictors of the same quantity.</em> Each point
-is one attack prompt; the vertical axis is its measured dose. Left: the gate's calibrated LLR, the score
-the system already computes. Middle: a linear read of the prompt's projection onto the concept's own
-steering direction at the three taps — three numbers. Right: a ridge on all 2,688 activation dimensions,
-evaluated out-of-fold. Same prompts, same activations, same forward passes throughout. The middle panel
-is the one that matters: most of what the ridge finds was available from the concept direction all along,
-and the gate's LLR was reading it inefficiently.</figcaption>
+<figcaption><strong>Figure 16.</strong> <em>Three nested predictors of the same quantity.</em> Each point is
+one attack prompt; the vertical axis is its measured dose on the first-token outcome. Left: the gate's
+calibrated LLR, the score the system already computes. Middle: a linear read of the prompt's projection onto
+the concept's own steering direction at the three taps — three numbers. Right: a ridge on all 2,688
+activation dimensions, out-of-fold. Same prompts, same activations, same forwards. The middle panel is the
+point: what the ridge finds was largely available from the concept direction, and the gate's LLR reads it
+inefficiently.</figcaption>
 </figure>
 
-**Two claims from an earlier analysis do not survive, and are withdrawn.** They are reported here because
-the controls that killed them are cheap and worth copying. First, we had measured the fitted direction's
-alignment with the concept direction at mean $|\cos| = 0.09$ against a
-$1/\sqrt{d} = 0.033$ chance floor and read it as near-orthogonality. The right reference is not chance
-but **how well the fitted direction agrees with itself**: refit it on disjoint halves of the same prompts
-and the two halves agree at only $|\cos| = 0.19$. The alignment with the
-concept direction is therefore about 47% of the measurable ceiling,
-not orthogonal — and at this sample size the statistic cannot resolve the question either way. Second,
-we had offered "projecting both the concept and a refusal-disposition direction out of the activations
-still gives $+0.81$" as evidence the signal lay elsewhere. That control has no power: projecting out
-**two random directions** gives $+0.81$, indistinguishable
-from doing nothing, because two directions out of 2,688 change nothing. Projecting out the *fitted*
-direction drops the prediction to $+0.09$, which is
-the only informative version of that test.
+**Two claims from an earlier analysis of this data did not survive their own controls.** We had measured the
+fitted direction's alignment with the concept direction at mean $|\cos| = 0.09$
+against a $1/\sqrt{d} = 0.033$ chance floor and read it as near-orthogonality — a separate effect-modifier
+direction. The right reference is not chance but how well the fitted direction agrees with *itself*: refit on
+disjoint halves of the same prompts and the halves agree at only
+$|\cos| = 0.19$, so the measured alignment is about
+47% of the resolvable ceiling and the statistic cannot settle the question
+at this sample size. We had also offered "projecting the concept and disposition directions out still gives
+$+0.81$" as evidence the signal lay elsewhere; that control has no power, since projecting out **two random**
+directions gives $+0.81$ — two dimensions out of 2,688 change
+nothing. Projecting out the *fitted* direction gives
+$+0.09$, which is the informative version. The
+Cylindrical Representation Hypothesis had in any case already argued the qualitative version of that geometry
+on theoretical grounds <span class="cite" data-ref="The Cylindrical Representation Hypothesis for Language Model Steering. arXiv:2605.01844."><a href="#ref-crh">[27]</a></span>.
 
-**And predictability alone is not distinctive.** Run the identical pipeline on other scalar properties of
-the same prompts: the unsteered refusal logit is decoded at
-$+0.86$, the sign-*independent* component of the response at
-$+0.86$, and the same component for a random direction at
-$+0.86$ — all at or above the dose's
-$+0.81$. Mid-layer activations linearly encode smooth functions of the prompt; that is
-the linear-representation result, not news. The number that does separate the concept write from noise is
-the *random direction's* dose, predicted at only
-$+0.44$, and the concept write's dose being roughly 2.5 times a
-matched-norm random write in magnitude.
+**And predictability on this outcome is not distinctive.** The identical pipeline decodes the *unsteered*
+refusal logit at $+0.86$ and the sign-*independent* component of the
+response at $+0.86$ — both above the dose's
+$+0.81$. Mid-layer activations linearly encode smooth functions of the prompt; that is the
+linear-representation result. What does separate the concept write from noise is that a matched-norm random
+direction's dose is predicted at only $+0.44$.
 
-**What is practically useful.** The predictor is cheap to fit. Held-out correlation by number of labelled
-prompts: +0.33 at 4, **+0.64 at 8**,
-+0.72 at 16, +0.78 at 32,
-+0.81 at 64. Eight labelled prompts — sixteen forward passes — already beat
-the eight-shot gate's own LLR on its own activations. If a system needs to know how hard to push a given
-prompt, that is the number to know.
+#### The outcome does not track behaviour per prompt
 
-**Limits, and one that matters more than the rest.** 98% of the doses
-share a sign, so this predicts *how much*, never *which way*; no claim about direction is licensed. The
-three concept resamples reuse one fixed prompt set and the activations are byte-identical across them, so
-the effective number of independent replicates is **one** and the spreads quoted above understate
-prompt-level uncertainty. One model, one magnitude, one concept. Most important, the outcome is a
-first-token logit basket — five refusal-opening token ids against thirteen compliance-opening ones — and
-while group means were checked against generated text, the *per-prompt ranking*, which is the entire
-claim, was not. Validating it against generated behaviour is the next experiment and the one that could
-still overturn this section.
+Everything above is measured on a first-token log-odds over two hand-chosen token baskets — five
+refusal-opening ids against thirteen compliance-opening ones. Group means were checked against generated
+text, but the per-prompt ranking, which is what the prediction result is about, was not. So we measured the
+same 164 prompts two further ways: a **teacher-forced continuation score**, the length-normalised
+log-probability of canonical refusal continuations minus compliance ones, which spans many tokens and does
+not depend on what was generated; and a **generated-refusal indicator** over 40 greedily decoded tokens.
 
-**Prior work.** The nearest result predicts whether an intervention will under- or over-steer from
-internal states, but requires running the steered pass and decoding several tokens, predicts a
-three-class label rather than a magnitude, uses features that are explicitly *alignments* with the
-steering vector, and does not compare against the concept detector's own score <span class="cite" data-ref="When is Your LLM Steerable? arXiv:2606.11599."><a href="#ref-asteer">[25]</a></span>. Others predict
-per-instance intervention properties from the prompt alone but target which *layer* to steer, from an
-external text encoder's embedding <span class="cite" data-ref="Where to Steer: Input-Dependent Layer Selection. arXiv:2604.03867."><a href="#ref-w2s">[31]</a></span><span class="cite" data-ref="Billa (2026). Predicting Where Steering Vectors Succeed. arXiv:2604.15557."><a href="#ref-billa">[22]</a></span>; apply this exact recipe — per-item slopes, ridge on
-unsteered representations, cross-validated Spearman — at the level of behaviour pairs or of SAE features
-rather than prompts, and report the prompt-level residual as the part that does *not* reproduce
-<span class="cite" data-ref="Forecasting Side Effects of Activation Steering. arXiv:2608.11227."><a href="#ref-forecast">[29]</a></span><span class="cite" data-ref="Pre-Intervention Prediction of SAE Steering Side Effects. arXiv:2606.08365."><a href="#ref-saese">[30]</a></span>; or build an input-dependent gain from a detector-shaped score without ever measuring
-how predictable the dose is <span class="cite" data-ref="CLAS: conditional linear activation steering. arXiv:2604.24693."><a href="#ref-clas">[28]</a></span>. On the geometry, the Cylindrical Representation Hypothesis argues
-on theoretical grounds that steering *sensitivity* is governed by structure normal to the concept axis
-<span class="cite" data-ref="The Cylindrical Representation Hypothesis for Language Model Steering. arXiv:2605.01844."><a href="#ref-crh">[27]</a></span> — which is the interpretation our withdrawn claim would have supported, and a reason to be glad
-the control caught it rather than a reader. The harness is
-[`scripts/eval_gate.py --steerability`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_gate.py);
-the headline numbers come from
-[`analyze_steerability.py`](https://github.com/NISH1001/conceptgate/blob/main/scripts/analyze_steerability.py)
-and every control above from
-[`steerability_controls.py`](https://github.com/NISH1001/conceptgate/blob/main/scripts/steerability_controls.py).
+<div class="cg-mono" markdown="1">
 
-#### A note on the scope of the novelty claim
+| Spearman, per prompt (n=164) | value |
+|---|---|
+| first-token dose vs teacher-forced continuation dose | **+0.43** |
+| first-token dose vs generated-refusal dose | **+0.48** |
+| teacher-forced continuation dose vs generated-refusal dose | **-0.01** |
 
-"We could not find this" is worth stating precisely, because what remains of the claim rests on it. Two
-searches were run: one over activation-steering vocabulary (conditional, selective, gated and adaptive
-steering; refusal directions; steering reliability), and one deliberately over the vocabulary a
-statistician would use, since predicting how much a fixed intervention affects a particular item from
-that item's covariates is heterogeneous treatment effect estimation. Together they covered roughly sixty
-2024–2026 arXiv papers plus two interpretability blogs. The causal-inference framing turned out to be a
-genuine vocabulary gap — no work appears to import it into steering — while the steering literature
-contains the near-misses catalogued above. Not searched: citation-graph traversal, proceedings indexes,
-non-arXiv venues, and blog coverage was rate-limited and rests partly on search snippets. Treat the claim
-as "not found by two bounded searches", which is weaker than "new". Our own estimate is roughly a one in
-six chance that the predictability result exists somewhere unread, and higher than that for the
-qualitative geometry story, which <span class="cite" data-ref="The Cylindrical Representation Hypothesis for Language Model Steering. arXiv:2605.01844."><a href="#ref-crh">[27]</a></span> already tells.
+</div>
+
+The first two fall below the 0.5 threshold we had set in advance, and within templates alone the first drops
+to +0.29. But the third row is the one that decides what can be
+said: **the two behavioural measures agree with each other at essentially zero.** That is not evidence that
+the per-prompt dose is unpredictable; it is evidence that at this sample size and with these instruments the
+per-prompt behavioural dose is not reliably measurable at all, so there is nothing stable for the first-token
+outcome to be validated against. Both measures agree strongly on the *aggregate* effect — the generated
+refusal rate moves 64% → 35% → 79% and the continuation
+score moves the same way — which is why <a class="sref" href="#410-gate-conditioned-steering-and-a-formatting-confound">§4.10</a>'s group-level conclusions stand while this section's
+prompt-level one does not.
+
+**What we therefore claim, and do not.** We claim that a statistic of the first-token distribution is
+predictable from the prompt's activations far above a matched null, that most of that predictability lives in
+the concept direction the system already computes, and that the calibrated gate is a lossy readout of it.
+We do **not** claim that per-prompt steerability of *behaviour* is predictable: that requires a per-prompt
+behavioural measure we do not have, and building one is the obvious next step — many more prompts, several
+magnitudes so each prompt's dose is a fitted slope rather than a two-point difference, and a judged or
+classifier-scored outcome instead of a token basket. Two further limits stand regardless: the three concept
+resamples reuse one fixed prompt set with byte-identical activations, so the effective number of independent
+replicates is **one**; and 98% of doses share a sign, so only magnitude
+is at issue, never direction.
+
+**Prior work.** The nearest result predicts whether an intervention will under- or over-steer from internal
+states, but requires running the steered pass and decoding several tokens, predicts a three-class label, and
+uses features that are explicitly alignments with the steering vector <span class="cite" data-ref="When is Your LLM Steerable? arXiv:2606.11599."><a href="#ref-asteer">[25]</a></span>. Others predict per-instance
+intervention properties from the prompt alone but target which *layer* to steer <span class="cite" data-ref="Billa (2026). Predicting Where Steering Vectors Succeed. arXiv:2604.15557."><a href="#ref-billa">[22]</a></span>. The methodological
+caution this section ends on — that a cheap first-token proxy can track group means while failing per prompt —
+is, as far as we can tell, not stated anywhere, and it is the part of this section we would most want a reader
+to take away. The harness is
+[`eval_gate.py --steerability`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_gate.py), the
+controls are
+[`steerability_controls.py`](https://github.com/NISH1001/conceptgate/blob/main/scripts/steerability_controls.py),
+and the validation is
+[`eval_behaviour_check.py`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_behaviour_check.py).
+
+#### A note on the scope of the novelty search
+
+Two searches were run: one over activation-steering vocabulary, one over the vocabulary a statistician would
+use, since predicting how much a fixed intervention affects a particular item from that item's covariates is
+heterogeneous treatment effect estimation. Together they covered roughly sixty 2024–2026 arXiv papers and two
+interpretability blogs. The causal-inference framing appears to be a genuine vocabulary gap in this
+literature; the steering literature contains the near-misses above. Not searched: citation-graph traversal,
+proceedings indexes, non-arXiv venues, and blog coverage was rate-limited. Given that the prompt-level claim
+is now withdrawn pending a better outcome measure, the question of its novelty is moot.
 
 ## 5. Discussion
 
@@ -2524,7 +2544,7 @@ useful, a working tool, the three controls of <a class="sref" href="#410-gate-co
 gate selecting nothing here — and one clean, unoriginal measurement: a few-shot direction moves refusal
 about three times as much as a random direction of the same norm.
 
-**Can a read of the prompt predict, before any generation, how much a steering write will move the model?** Yes. On 164 attack prompts with headroom the dose is decodable at $\rho=+0.81$ out-of-fold against a permutation null of -0.00 ± 0.10, and from eight labelled prompts at +0.64, where the gate's own calibrated read of those same activations reaches $+0.51$ and three linear projections onto the concept direction reach $+0.64$ (<a class="sref" href="#411-predicting-the-per-prompt-dose-of-a-write">§4.11</a>). What survives is a claim about the *readout*, not about a new subspace: a near-orthogonality result initially drawn from the same data failed its own self-consistency control and is withdrawn, and <span class="cite" data-ref="The Cylindrical Representation Hypothesis for Language Model Steering. arXiv:2605.01844."><a href="#ref-crh">[27]</a></span> had already argued the qualitative version. The searches we ran place the nearest work we reached at the aggregate
+**Can a read of the prompt predict, before any generation, how much a steering write will move the model?** Not answerable with what we have. The quantity is strongly predictable on a first-token proxy ($\rho=+0.81$ against a null of -0.00 ± 0.10), most of that lives in the concept direction the gate already computes ($+0.64$ from three projections against the gate's $+0.51$), and the proxy does not track behaviour per prompt — two behavioural measures correlate with each other at -0.01, leaving nothing stable to validate against (<a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>). A near-orthogonality result initially drawn from the same data failed its own self-consistency control and is withdrawn, and <span class="cite" data-ref="The Cylindrical Representation Hypothesis for Language Model Steering. arXiv:2605.01844."><a href="#ref-crh">[27]</a></span> had already argued the qualitative version. The searches we ran place the nearest work we reached at the aggregate
 level, for one sign, without a gate <span class="cite" data-ref="Billa (2026). Predicting Where Steering Vectors Succeed. arXiv:2604.15557."><a href="#ref-billa">[22]</a></span>, or predicting from post-steering states over 1.4M
 generations <span class="cite" data-ref="When is Your LLM Steerable? arXiv:2606.11599."><a href="#ref-asteer">[25]</a></span>. That is the one result in this paper we would defend as new, and it is one model,
 one concept, one magnitude, with an estimated one-in-three chance of already existing somewhere we did not
@@ -2619,19 +2639,16 @@ composition provides — a write direction at no fitting cost, and the confineme
 elsewhere. What this report adds is the controls that establish it, and the finding that prompt formatting
 inverts the sign of every effect in that experiment.
 
-One thing did survive being asked properly. The gate was built to decide whether a concept is present, and on
-correctly formatted attacks that question is almost always answered yes, which is why it cannot decide when to
-write. The question a write needs answered is how far a given prompt will move, and that is decodable from the
-same activations before generation — $\rho=+0.81$, or +0.64 from
-eight labelled prompts, where the gate's own calibrated read of those activations manages
-$+0.51$ and a linear read of three projections onto the concept direction manages
-$+0.64$ (<a class="sref" href="#411-predicting-the-per-prompt-dose-of-a-write">§4.11</a>). The concept direction was carrying the answer all along
-and the calibrated gate was reading it badly. That is a smaller claim than a new subspace — an orthogonality
-reading of the same data failed its own control — but it is measured, it is cheap, and it points somewhere
-specific: fit the gate to the dose, not to concept membership. The interactive figures are included so
-that these claims can be examined directly against the underlying model runs rather than taken on
-assertion; the points at which the method is effective and the points at which it fails are both
-visible in them.
+What does survive is smaller than a method and larger than nothing. The write is a real bidirectional
+lever on refusal — eight hand-written framings, added at 8% of the residual norm, move generated refusal from
+64% to 35% one way and 79% the other — which is Arditi et
+al.'s direction recovered few-shot rather than a contribution of ours. Alongside it sit a set of negative
+results that were expensive to get and are cheap to reuse, and two methodological findings that cost us the
+most and may be worth the most: prompt formatting decides the sign of a measured steering effect, and a
+first-token proxy for refusal can track group means while failing per prompt. The interactive figures are
+included so that these claims can be examined directly against the underlying model runs rather than taken on
+assertion; the points at which the method is effective and the points at which it fails are both visible in
+them.
 
 ## References
 
