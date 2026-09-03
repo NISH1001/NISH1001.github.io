@@ -80,6 +80,7 @@ a.sref:hover{color:var(--brand,#3aa99f)}
   padding:.35rem .55rem;border-radius:.3rem;box-shadow:0 6px 20px rgba(0,0,0,.28);
   opacity:0;transition:opacity .12s;white-space:nowrap;transform:translate(-50%,-115%)}
 .cg-tip.on{opacity:1}
+.cg-tip[hidden]{display:none}
 .cg-chips{display:flex;flex-wrap:wrap;gap:.35rem;margin:.2rem 0 .3rem}
 .cg-chip{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.71rem;
   padding:.28rem .55rem;border-radius:.4rem;border:1px solid var(--border,#ddd);
@@ -1023,7 +1024,7 @@ mechanism that does not transfer, not as a contribution.
 The mixture model is justified by a constructed **hard case**: place two benign clusters on either
 side of the harmful cluster along the discriminative axis (benign at $-2$ and $+2$, harmful at $0$).
 No single threshold on any linear score can carve out "the middle," so the `fisher` gate is stuck
-near chance (38.8% error, AUC 0.60); the mixture, seeing $\mathbf{s}$ near a benign profile on each
+near chance (38.8% error, AUC 0.60; synthetic data, 8,000 points per class, five seeds); the mixture, seeing $\mathbf{s}$ near a benign profile on each
 side and a harmful profile between, recovers it (7.1% error, AUC 0.98; the Bayes floor is 5.8%). That
 is the case for mixtures, and <a class="sref" href="#figure-6">Figure 6</a> shows its geometry. One
 honest caveat on the construction: with the benign clusters symmetric about the harmful one the two class
@@ -1045,7 +1046,7 @@ The case *against* them, at least in the regime we care about, is that on
 real GPT-2 activations with 12+12 prompts, **BIC selects $J=1$ for both classes** — an extra
 full-covariance profile over five layers costs ~21 parameters, whose rent (~52 nats) twelve samples
 cannot pay — and the mixture gate collapses exactly onto the single-Gaussian gate (rank agreement
-0.986). This is less "the data answering one-or-many" than an identifiability limit: at twelve samples a
+0.986; twelve prompts per class, scored on held-out prompts). This is less "the data answering one-or-many" than an identifiability limit: at twelve samples a
 five-dimensional full-covariance component is already near-singular, so the $J=2$ fit is ill-conditioned
 and the selection is effectively decided by sample size. The mixture is the more general model but remains
 inactive in this regime: whether real concept classes are multimodal enough to justify additional
@@ -2149,14 +2150,26 @@ function cgEl(id){return document.getElementById(id);}
 function cgEsc(s){return String(s).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
 var CG_RED="#C2402F", CG_BLUE="#26A99D", CG_GRID="#d8d5c8";
 var CG_TIP=null;
-function cgTipEl(){ if(!CG_TIP){CG_TIP=document.createElement('div');CG_TIP.className='cg-tip';document.body.appendChild(CG_TIP);} return CG_TIP; }
+function cgTipHide(){ if(CG_TIP){CG_TIP.classList.remove('on');CG_TIP.hidden=true;CG_TIP.textContent='';} }
+function cgTipEl(){
+  if(!CG_TIP){
+    CG_TIP=document.createElement('div');CG_TIP.className='cg-tip';
+    CG_TIP.setAttribute('role','tooltip');CG_TIP.setAttribute('aria-hidden','true');CG_TIP.hidden=true;
+    document.body.appendChild(CG_TIP);
+    // a widget that re-renders under the cursor destroys the hovered node, so mouseleave never fires;
+    // these keep a stale tip from surviving a redraw, a scroll, or the pointer leaving the page
+    document.addEventListener('scroll',cgTipHide,{passive:true});
+    document.documentElement.addEventListener('mouseleave',cgTipHide);
+  }
+  return CG_TIP;
+}
 function cgWireTips(svg){
-  if(!svg) return; var tip=cgTipEl();
+  if(!svg) return; var tip=cgTipEl(); cgTipHide();
   Array.prototype.forEach.call(svg.querySelectorAll('[data-tip]'),function(el){
     el.setAttribute('class',((el.getAttribute('class')||'')+' cg-hit').trim());
-    el.addEventListener('mouseenter',function(){tip.textContent=el.getAttribute('data-tip');tip.classList.add('on');});
+    el.addEventListener('mouseenter',function(){tip.textContent=el.getAttribute('data-tip');tip.hidden=false;tip.classList.add('on');});
     el.addEventListener('mousemove',function(e){tip.style.left=e.clientX+'px';tip.style.top=e.clientY+'px';});
-    el.addEventListener('mouseleave',function(){tip.classList.remove('on');});
+    el.addEventListener('mouseleave',cgTipHide);
   });
 }
 
@@ -2582,7 +2595,7 @@ function cgEffSummary(){
 var CG_AMB="#d98a2b";
 var CGSCALE={
  "Qwen2.5-0.5B":{nfit:32,safe:256,taps:"12/17/20",
-   cg_pc:10752,pr_pc:897,lora_pc:542464,
+   cg_pc:10755,pr_pc:897,lora_pc:542464,
    fwd_cg:11.08,fwd_pr:12.45,fit_cg:6.14,fit_pr:1.63,train_lora:16721.8,read_cg:1.23,head_pr:0.59,
    meanCG:0.832,meanPR:0.855,
    cats:[["animal abuse",0.918,0.941,0.817],["child abuse",0.919,0.932,0.617],
@@ -2593,7 +2606,7 @@ var CGSCALE={
      ["self-harm",0.910,0.919,null],["sexual content",0.832,0.908,null],
      ["terrorism",0.843,0.893,null],["violence",0.825,0.831,null]]},
  "gemma-2-2b":{nfit:32,safe:256,taps:"13/18/22",
-   cg_pc:27648,pr_pc:2305,lora_pc:1602048,
+   cg_pc:27651,pr_pc:2305,lora_pc:1602048,
    fwd_cg:65.08,fwd_pr:66.95,fit_cg:11.23,fit_pr:2.49,train_lora:125768.6,read_cg:3.79,head_pr:1.50,
    meanCG:0.881,meanPR:0.874,
    cats:[["animal abuse",0.940,0.942,0.837],["child abuse",0.957,0.955,0.879],
