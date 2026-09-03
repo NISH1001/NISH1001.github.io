@@ -1,10 +1,10 @@
 ---
 layout: post
-title:  "ConceptGate: Efficiently Learning and Steering Concepts in Language Models"
+title:  "ConceptGate: Learning and Steering Concepts in Language Models"
 date:   2026-08-29 09:00:00 +0545
 categories: research
 tags: research llm interpretability activation-steering guardrails probes representation-engineering few-shot
-subtitle: "A few-shot, training-free adapter that detects a concept from a frozen model's own layers and steers generation along a closely related direction, with interactive figures over real GPT-2 and Qwen2.5-0.5B runs."
+subtitle: "A few-shot, training-free adapter that detects a concept from a frozen model's own layers and steers generation along a closely related direction, with interactive figures over real GPT-2, Qwen2.5-0.5B and gemma-2-2b runs."
 comments: false
 published: true
 ---
@@ -142,18 +142,7 @@ categories is only partial; and gated steering with the concept bank's own harm-
 refusal unchanged (blanket steering lowers it), so the bank's entries supply a write direction without a demonstrated behavioural
 effect for those concepts. (v) The one capability that distinguishes an internal adapter from a text
 classifier is **steering** — writing a direction fit from the same few-shot examples back into the residual stream — which we
-measure as a graded dose-response bounded by the competence of the base model. (vi) The write rule itself is standard activation addition, and conditioning it on an activation-read
-detector is prior work. An earlier version of this report claimed a gate-conditioned steering gain; those
-experiments ran the instruct model without its chat template, and with the template the result reverses: the
-model refuses 94% of attacks unsteered, steering *away* from the jailbreak concept lowers refusal by 22 points,
-a random subset of the same size does the same, and the gate fires on 97% of attacks, so it selects nothing.
-On a continuous first-token outcome the few-shot direction moves refusal about three times as much as a random
-direction of the same norm, in the same sign whether or not the gate fired — a refusal lever, already known.
-What the gate still confines is benign collateral (82% of benign generation untouched against 0%), which CAST
-already reports. The earlier result is retracted here with the mechanism of the error. (vii) Asking a different question of the same harness does yield one finding we could not locate in prior work: on attack prompts with headroom, **how much** a steering write moves a given prompt is linearly decodable from that prompt's activations before generation (Spearman $+0.81$ out-of-fold, against $+0.51$ for the concept read itself), along a direction roughly $85°$ from the concept direction and from the model's baseline refusal disposition. One model, one concept, one magnitude (<a class="sref" href="#411-predicting-steerability-from-the-prompt">§4.11</a>). Every mechanism used
-here is drawn from prior work; the contribution is the specific few-shot, dual-mode read-and-write
-composition, the training-free amortization of a concept bank against fine-tuning, and an empirical
-characterization of where it helps and where it does not. A reference implementation is available at
+measure as a graded dose-response bounded by the competence of the base model. (vi) The write rule itself is standard activation addition, and conditioning it on an activation-read detector is prior work. An earlier version of this report claimed a gate-conditioned steering gain. Those experiments ran the instruct model without its chat template, and with the template the result **reverses**: the model refuses 94% of attacks unsteered, steering *away* from the jailbreak concept lowers refusal by 22 points, a size-matched random subset does the same, and the gate fires on 97% of attacks, so it selects nothing. On a continuous outcome the direction is a refusal lever about three times a random direction of the same norm — Arditi et al.'s direction, few-shot. That earlier result is retracted here with the mechanism of the error (<a class="sref" href="#410-gate-conditioned-steering-a-retraction-and-what-the-corrected-runs-show">§4.10</a>). (vii) Asking a different question of the same harness does yield one finding we could not locate in prior work: on attack prompts with headroom, **how much** a steering write moves a given prompt is linearly decodable from that prompt's activations before generation (Spearman $+0.81$ out-of-fold, against $+0.51$ for the concept read itself), along a direction roughly $85°$ from the concept direction and from the model's baseline refusal disposition. One model, one concept, one magnitude (<a class="sref" href="#411-predicting-steerability-from-the-prompt">§4.11</a>). Every mechanism used here is drawn from prior work and, we later found, so is the composition. What is left is (vii), an unusually thorough account of where a few-shot concept adapter does and does not work, and a post-mortem on how a five-arm, sign-flipped, twice-audited result turned out to be an artifact of one missing template call. A reference implementation is available at
 [github.com/NISH1001/conceptgate](https://github.com/NISH1001/conceptgate).
 </div>
 
@@ -2478,7 +2467,7 @@ visible in them.
 ```bibtex
 @techreport{nish2026conceptgate,
   author      = {Pantha, Nishan},
-  title       = {ConceptGate: Efficiently Learning and Steering Concepts in Language Models},
+  title       = {ConceptGate: Learning and Steering Concepts in Language Models},
   institution = {Bits and Paradoxes},
   type        = {Technical Report},
   year        = {2026},
@@ -2492,7 +2481,7 @@ visible in them.
 
 Plain text:
 
-> Pantha, N. (2026). *ConceptGate: Efficiently Learning and Steering Concepts in Language Models.*
+> Pantha, N. (2026). *ConceptGate: Learning and Steering Concepts in Language Models.*
 > Technical Report. <https://nishparadox.com/research/conceptgate/>
 
 ---
