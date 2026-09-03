@@ -1635,9 +1635,10 @@ two different things — *which* prompts receive the write, and *how many* do.
 
 Five arms separate them. **No steer** is the baseline. **Always steer** applies the write at $-0.08$ of
 the residual norm to every prompt. **Gate-conditioned steer** applies the identical write only when the
-gate fires. **Random steer** applies it to a randomly chosen subset of exactly the same size as the gate's
-fired set — the arm that isolates selection from dosage, since it matches the gated arm on how many
-prompts are written and differs only in which. **Anti-gate steer** applies it to precisely the complement,
+gate fires. **Random steer** applies it to a randomly chosen subset of exactly the size of the gate's fired set,
+drawn separately within the attacks and within the benign prompts — the arm that isolates selection
+from dosage, since it matches the gated arm on how many prompts of each kind are written and differs
+only in which. **Anti-gate steer** applies it to precisely the complement,
 the prompts where the concept does *not* register, which turns the suspicion that blanket steering harms
 those prompts into a direct measurement.
 
@@ -1660,10 +1661,10 @@ Perplexity is the collateral measure doing work independent of the firing rate.
   </g>
   <!-- row labels -->
   <g font-size="10" fill="currentColor" text-anchor="end">
-    <text x="146" y="52">always <tspan fill="#889">(writes 100%)</tspan></text>
-    <text x="146" y="88">gated <tspan fill="#889">(writes 54%)</tspan></text>
-    <text x="146" y="124">random 54% <tspan fill="#889">(same dose)</tspan></text>
-    <text x="146" y="160">anti-gate <tspan fill="#889">(writes 46%)</tspan></text>
+    <text x="146" y="52">always <tspan fill="#889">(writes all)</tspan></text>
+    <text x="146" y="88">gated <tspan fill="#889">(54% of attacks)</tspan></text>
+    <text x="146" y="124">random <tspan fill="#889">(same dose per set)</tspan></text>
+    <text x="146" y="160">anti-gate <tspan fill="#889">(complement)</tspan></text>
   </g>
   <!-- panel A: zero line at x=252, 7px per point -->
   <line x1="252" y1="30" x2="252" y2="176" stroke="#8a8a8a" stroke-width="1.2"/>
@@ -1685,7 +1686,7 @@ Perplexity is the collateral measure doing work independent of the firing rate.
   <!-- antigate -6.2 -->
   <rect x="209" y="148" width="43" height="18" rx="2" fill="#8a8a8a" opacity="0.8"/>
   <line x1="191" y1="157" x2="227" y2="157" stroke="#555"/><line x1="191" y1="153" x2="191" y2="161" stroke="#555"/><line x1="227" y1="153" x2="227" y2="161" stroke="#555"/>
-  <text x="176" y="161" font-size="10" fill="currentColor" text-anchor="end">−6.2 ±2.6</text>
+  <text x="258" y="161" font-size="10" fill="currentColor">−6.2 ±2.6</text>
   <!-- panel B: 0..100% over 470..670 -->
   <line x1="470" y1="30" x2="470" y2="176" stroke="#d8d5c8"/>
   <rect x="470" y="40" width="8" height="18" rx="2" fill="#C2402F" opacity="0.75"/><text x="486" y="53" font-size="10" fill="currentColor">4.2%</text>
@@ -1702,8 +1703,9 @@ Perplexity is the collateral measure doing work independent of the firing rate.
 identical write.</em> Qwen2.5-0.5B, taps 8/12/16, steering fraction $-0.08$, 32 jailbreak and 32 benign
 prompts, mean ± sd over three few-shot resamples, each arm paired against the no-steer baseline by seed.
 Left: change in jailbreak refusal. Right: share of benign continuations left byte-identical to the
-unsteered baseline. The <em>random 54%</em> arm is matched to the gated arm on how many prompts are
-written and differs only in which, and it gains nothing — so the gated arm's advantage is selection
+unsteered baseline. The <em>random</em> arm is matched to the gated arm on how many prompts are
+written — separately on each set, 54% of the attacks and 10% of the benign prompts, which is why its
+benign bar equals the gated arm's — and differs only in which, and it gains nothing — so the gated arm's advantage is selection
 rather than dosage. The <em>anti-gate</em> arm writes to exactly the prompts the gate passes and
 <em>reduces</em> refusal, which is why blanket steering nets so little: it is the sum of a real gain on
 the prompts where the concept registers and a real loss everywhere else. Error bars are ± one standard
@@ -1759,39 +1761,38 @@ $+\alpha$ hurts too. The directional account predicts that $+\alpha$ on passed p
 $+\alpha$ on fired prompts hurts. So we ran the two sign-flipped arms as well.
 
 <figure id="figure-17" style="margin:2rem 0">
-<svg viewBox="0 0 720 236" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sign-flipped writes: change in refusal by whether the gate fires and by write direction" font-family="ui-sans-serif,system-ui,sans-serif">
+<svg viewBox="0 0 760 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sign-flipped writes: change in refusal by whether the gate fires and by write direction" font-family="ui-sans-serif,system-ui,sans-serif">
   <g font-size="11" fill="currentColor" text-anchor="middle" font-weight="600">
-    <text x="300" y="30">write −α (away from concept)</text>
-    <text x="540" y="30">write +α (toward concept)</text>
+    <text x="310" y="28">write −α (away from concept)</text>
+    <text x="610" y="28">write +α (toward concept)</text>
   </g>
-  <text x="360" y="46" text-anchor="middle" font-size="10" fill="#889">change in jailbreak refusal vs no-steer, pts (8 px per point)</text>
-  <g font-size="10.5" fill="currentColor" text-anchor="end">
-    <text x="176" y="99">gate <tspan font-weight="600">fires</tspan> <tspan fill="#889">(54%)</tspan></text>
-    <text x="176" y="174">gate <tspan font-weight="600">passes</tspan> <tspan fill="#889">(46%)</tspan></text>
+  <text x="460" y="44" text-anchor="middle" font-size="10" fill="#889">change in jailbreak refusal vs no-steer, pts (6 px per point)</text>
+  <!-- row labels with the verdict as a sub-label -->
+  <g text-anchor="end">
+    <text x="150" y="94" font-size="10.5" fill="currentColor">gate <tspan font-weight="600">fires</tspan> <tspan fill="#889">(54%)</tspan></text>
+    <text x="150" y="108" font-size="9.5" fill="#889">sign flips → <tspan fill="#1c7d74" font-weight="600">a lever</tspan></text>
+    <text x="150" y="167" font-size="10.5" fill="currentColor">gate <tspan font-weight="600">passes</tspan> <tspan fill="#889">(46%)</tspan></text>
+    <text x="150" y="181" font-size="9.5" fill="#889">both signs hurt → <tspan fill="#555" font-weight="600">perturbation</tspan></text>
   </g>
-  <g stroke="#8a8a8a" stroke-width="1.1"><line x1="300" y1="70" x2="300" y2="196"/><line x1="540" y1="70" x2="540" y2="196"/></g>
-  <line x1="186" y1="132" x2="700" y2="132" stroke="#e6e3da"/>
-  <!-- fired, -a: +8.3 -->
-  <rect x="300" y="85" width="66" height="20" rx="2" fill="#26A99D"/>
-  <line x1="354" y1="95" x2="378" y2="95" stroke="#12655e"/><line x1="354" y1="91" x2="354" y2="99" stroke="#12655e"/><line x1="378" y1="91" x2="378" y2="99" stroke="#12655e"/>
-  <text x="384" y="99" font-size="10.5" fill="currentColor" font-weight="600">+8.3 ±1.5</text>
-  <!-- fired, +a: -11.5 -->
-  <rect x="448" y="85" width="92" height="20" rx="2" fill="#C2402F" opacity="0.8"/>
-  <line x1="406" y1="95" x2="490" y2="95" stroke="#7a2c21"/><line x1="406" y1="91" x2="406" y2="99" stroke="#7a2c21"/><line x1="490" y1="91" x2="490" y2="99" stroke="#7a2c21"/>
-  <text x="400" y="99" font-size="10.5" fill="currentColor" text-anchor="end" font-weight="600">−11.5 ±5.3</text>
-  <!-- passed, -a: -6.2 -->
-  <rect x="250" y="160" width="50" height="20" rx="2" fill="#8a8a8a" opacity="0.8"/>
-  <line x1="229" y1="170" x2="271" y2="170" stroke="#555"/><line x1="229" y1="166" x2="229" y2="174" stroke="#555"/><line x1="271" y1="166" x2="271" y2="174" stroke="#555"/>
-  <text x="223" y="174" font-size="10.5" fill="currentColor" text-anchor="end">−6.2 ±2.6</text>
+  <g stroke="#8a8a8a" stroke-width="1.1"><line x1="310" y1="62" x2="310" y2="200"/><line x1="610" y1="62" x2="610" y2="200"/></g>
+  <line x1="20" y1="132" x2="740" y2="132" stroke="#e6e3da"/>
+  <!-- fired, -a: +8.3 (bar right of zero, label right of error bar) -->
+  <rect x="310" y="87" width="50" height="20" rx="2" fill="#26A99D"/>
+  <line x1="351" y1="97" x2="369" y2="97" stroke="#12655e"/><line x1="351" y1="93" x2="351" y2="101" stroke="#12655e"/><line x1="369" y1="93" x2="369" y2="101" stroke="#12655e"/>
+  <text x="376" y="101" font-size="10.5" fill="currentColor" font-weight="600">+8.3 ±1.5</text>
+  <!-- passed, -a: -6.2 (bar left of zero, label left of error bar) -->
+  <rect x="273" y="160" width="37" height="20" rx="2" fill="#8a8a8a" opacity="0.8"/>
+  <line x1="257" y1="170" x2="289" y2="170" stroke="#555"/><line x1="257" y1="166" x2="257" y2="174" stroke="#555"/><line x1="289" y1="166" x2="289" y2="174" stroke="#555"/>
+  <text x="250" y="174" font-size="10.5" fill="currentColor" text-anchor="end">−6.2 ±2.6</text>
+  <!-- fired, +a: -11.5 (bar left of zero; the empty right side takes the label) -->
+  <rect x="541" y="87" width="69" height="20" rx="2" fill="#C2402F" opacity="0.8"/>
+  <line x1="509" y1="97" x2="573" y2="97" stroke="#7a2c21"/><line x1="509" y1="93" x2="509" y2="101" stroke="#7a2c21"/><line x1="573" y1="93" x2="573" y2="101" stroke="#7a2c21"/>
+  <text x="618" y="101" font-size="10.5" fill="currentColor" font-weight="600">−11.5 ±5.3</text>
   <!-- passed, +a: -12.5 -->
-  <rect x="440" y="160" width="100" height="20" rx="2" fill="#8a8a8a" opacity="0.8"/>
-  <line x1="405" y1="170" x2="475" y2="170" stroke="#555"/><line x1="405" y1="166" x2="405" y2="174" stroke="#555"/><line x1="475" y1="166" x2="475" y2="174" stroke="#555"/>
-  <text x="399" y="174" font-size="10.5" fill="currentColor" text-anchor="end">−12.5 ±4.4</text>
-  <g font-size="10.5" fill="currentColor">
-    <text x="560" y="99">→ flip the sign, flip the effect: <tspan font-weight="600">a lever</tspan></text>
-    <text x="560" y="174">→ both signs hurt: <tspan font-weight="600">perturbation</tspan></text>
-  </g>
-  <text x="360" y="222" text-anchor="middle" font-size="10" fill="#889">every cell keeps its sign in all three resamples · 32 jailbreak prompts, mean ± sd over three few-shot resamples</text>
+  <rect x="535" y="160" width="75" height="20" rx="2" fill="#8a8a8a" opacity="0.8"/>
+  <line x1="509" y1="170" x2="561" y2="170" stroke="#555"/><line x1="509" y1="166" x2="509" y2="174" stroke="#555"/><line x1="561" y1="166" x2="561" y2="174" stroke="#555"/>
+  <text x="618" y="174" font-size="10.5" fill="currentColor">−12.5 ±4.4</text>
+  <text x="460" y="226" text-anchor="middle" font-size="10" fill="#889">every cell keeps its sign in all three resamples · 32 jailbreak prompts, mean ± sd over three few-shot resamples</text>
 </svg>
 <figcaption><strong>Figure 17.</strong> <em>The write is a lever where the gate fires and noise where it
 passes.</em> The same $\pm0.08$ write applied to the two populations the gate separates, in both
