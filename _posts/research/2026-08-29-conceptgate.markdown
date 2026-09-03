@@ -2325,19 +2325,28 @@ conditioning (CAST, Table 3); refusal riding a single direction <span class="cit
 <span class="cite" data-ref="The Rogue Scalpel: Activation Steering Compromises LLM Safety. arXiv:2509.22067."><a href="#ref-rogue">[18]</a></span><span class="cite" data-ref="Analysing the Safety Pitfalls of Steering Vectors. arXiv:2603.24543."><a href="#ref-pitfalls">[19]</a></span>; a condition detector's false-positive rate collapsing off-distribution <span class="cite" data-ref="AlphaSteer. arXiv:2506.07022."><a href="#ref-alphasteer">[20]</a></span><span class="cite" data-ref="Latent Adversarial Detection. arXiv:2604.28129."><a href="#ref-lad">[24]</a></span>;
 harmfulness and refusal as distinct directions <span class="cite" data-ref="Zhao, J., et al. (2025). LLMs Encode Harmfulness and Refusal Separately. arXiv:2507.11878."><a href="#ref-harmref">[21]</a></span>. **Retracted or reassigned in this paper:** detection
 accuracy, single-concept efficiency, depth fusion, bank amortization, the read/write identity, and the
-gate-conditioned steering gain. **Left standing:** a set of negative results we believe are useful, a working
-tool, the three controls of <a class="sref" href="#410-gate-conditioned-steering-a-retraction-and-what-the-corrected-runs-show">§4.10</a> — which are the right controls even though, run correctly, they show the
+gate-conditioned steering gain. **Left standing:** the steerability-prediction result below, a set of negative results we believe are
+useful, a working tool, the three controls of <a class="sref" href="#410-gate-conditioned-steering-a-retraction-and-what-the-corrected-runs-show">§4.10</a> — which are the right controls even though, run correctly, they show the
 gate selecting nothing here — and one clean, unoriginal measurement: a few-shot direction moves refusal
 about three times as much as a random direction of the same norm.
 
-One question remains open that we could not find answered. **Can a few-shot read of a concept predict, per
-prompt and before any generation, how much a steering write along that concept will move the model?** The
-closest prior work predicts where steering fails at the aggregate level, for one sign, without a gate
-<span class="cite" data-ref="Billa (2026). Predicting Where Steering Vectors Succeed. arXiv:2604.15557."><a href="#ref-billa">[22]</a></span>. The test set above cannot ask it — the model already refuses 94% of those attacks — so we are
-running it on attacks that succeed: real jailbreak templates from the held-out split with a harmful request
-appended, the continuous first-token outcome, $\pm\alpha$ along the concept and along a random direction, and
-a second gate fit directly to the steering *outcome*, to compare with the concept gate. That run is in
-progress as this version is published; its result will be added here, and if it is a null it will say so.
+One question was open when this section was first written, and it now has an answer. **Can a read of the
+prompt predict, before any generation, how much a steering write will move the model?** Yes, and better
+than the concept read does. On 164 attack prompts with headroom, a direction fit to the outcome predicts
+the per-prompt lever at Spearman $+0.81 \pm 0.03$ out-of-fold, against $+0.51 \pm 0.11$ for the gate's own
+LLR, and it sits roughly $85°$ from the concept direction and from a direction that predicts the model's
+unsteered disposition (<a class="sref" href="#411-predicting-steerability-from-the-prompt">§4.11</a>). Two literature searches place the nearest prior work at the aggregate
+level, for one sign, without a gate <span class="cite" data-ref="Billa (2026). Predicting Where Steering Vectors Succeed. arXiv:2604.15557."><a href="#ref-billa">[22]</a></span>, or predicting from post-steering states over 1.4M
+generations <span class="cite" data-ref="When is Your LLM Steerable? arXiv:2606.11599."><a href="#ref-asteer">[25]</a></span>. That is the one result in this paper we would defend as new, and it is one model,
+one concept, one magnitude, with an estimated one-in-three chance of already existing somewhere we did not
+reach.
+
+It also reframes what the composition is good for. The gate was built to answer *is the concept present?*,
+and on correctly formatted attacks it answers yes almost always — which is precisely why it cannot decide
+when to write. The question a write needs answered is *how far will this prompt move?*, and that is a
+different direction in the same activations, reachable from the same taps, the same forward pass, and a few
+hundred cheaply-labelled prompts. If there is a next version of this system, that is what its gate should
+be fit to.
 
 Two lessons from the post-mortem are worth more than any result above. Audit the code path, not only the
 numbers: seven reviews of the paper missed an omission that one read of the code found. And when a binary
@@ -2419,7 +2428,16 @@ three times a random direction of the same norm, pointed the wrong way in the ea
 composition provides is the write direction at no fitting cost and the confinement of benign collateral — both of
 which exist elsewhere. What this paper provides that the others do not is the set of controls, the retraction with
 its mechanism, and a record of how a five-arm, sign-flipped, twice-audited result was entirely an artifact of one
-missing template call. The interactive figures are included so
+missing template call.
+
+One thing did survive being asked properly. The gate was built to decide whether a concept is present, and
+on correctly formatted attacks that question is almost always answered yes, which is why it cannot decide
+when to write. The question a write needs answered is how far a given prompt will move — and that turns out
+to be linearly decodable from the same activations, before generation, at $+0.81$ against the concept
+read's $+0.51$, along a direction some $85°$ away from the concept's own (<a class="sref" href="#411-predicting-steerability-from-the-prompt">§4.11</a>). A concept read tells you
+what a prompt *is*; something else in the same residual stream tells you what a write to it will *do*. That
+distinction is the one contribution here we would defend, it is small and singly-modelled, and it is the
+direction a next version of this work should be built around. The interactive figures are included so
 that these claims can be examined directly against the underlying model runs rather than taken on
 assertion; the points at which the method is effective and the points at which it fails are both
 visible in them.
