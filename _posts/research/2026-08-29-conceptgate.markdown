@@ -1046,7 +1046,7 @@ The case *against* them, at least in the regime we care about, is that on
 real GPT-2 activations with 12+12 prompts, **BIC selects $J=1$ for both classes** — an extra
 full-covariance profile over five layers costs ~21 parameters, whose rent (~52 nats) twelve samples
 cannot pay — and the mixture gate collapses exactly onto the single-Gaussian gate (rank agreement
-0.986; twelve prompts per class, scored on held-out prompts). This is less "the data answering one-or-many" than an identifiability limit: at twelve samples a
+0.986, scored on held-out prompts). This is less "the data answering one-or-many" than an identifiability limit: at twelve samples a
 five-dimensional full-covariance component is already near-singular, so the $J=2$ fit is ill-conditioned
 and the selection is effectively decided by sample size. The mixture is the more general model but remains
 inactive in this regime: whether real concept classes are multimodal enough to justify additional
