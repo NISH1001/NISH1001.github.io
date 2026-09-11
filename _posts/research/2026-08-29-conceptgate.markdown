@@ -73,7 +73,12 @@ a.sref:hover{color:var(--brand,#3aa99f)}
 .cg-probe .t{flex:1}
 .cg-ok{color:var(--cg-b);font-weight:700}
 .cg-no{color:var(--cg-a);font-weight:700}
-.cg-mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.82rem}
+.cg-mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.82rem;
+  overflow-x:auto;-webkit-overflow-scrolling:touch}
+/* wide tables scroll as a block; without this the browser squeezes the label column
+   to one word per line rather than overflowing */
+.cg-mono table{width:auto;min-width:100%}
+.cg-mono th,.cg-mono td{white-space:nowrap}
 .cg-widget svg .cg-hit{cursor:crosshair}
 .cg-tip{position:fixed;z-index:200;pointer-events:none;background:#242625;color:#f4f4f0;
   font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.45;
@@ -796,10 +801,11 @@ The attributed concept is the one whose direction is used if the action steers, 
 max-LLR rule that decides *whether* to act also decides *along which concept* to steer — a small but
 convenient coupling that keeps a multi-concept bank behaving like a single decision. Each concept is
 independent kilobytes, so a bank scales linearly and stays tiny. Per-concept thresholds keep the
-directions independent, but they do **not** compose into a calibrated bank: the false-positive rate is
-the union over the $K$ concepts, so a per-concept $z=3$ ($\approx 0 — independent in storage and threshold, that is; statistically the fourteen harm directions are far from independent (<a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a>).1\%$ FPR) OR-ed over $K=14$ gives a
-bank-level FPR near $1.4\%$ — the operating point has to be set against the whole bank, not one concept
-at a time. This bank — one shared truncated forward broadcast to the $K$
+directions independent in storage and threshold, but they do **not** compose into a calibrated bank:
+the false-positive rate is the union over the $K$ concepts, so a per-concept $z=3$ ($\approx 0.1\%$
+FPR) OR-ed over $K=14$ gives a bank-level FPR near $1.4\%$ — the operating point has to be set
+against the whole bank, not one concept at a time. That union is an upper bound: statistically the
+fourteen harm directions are far from independent (<a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a>). This bank — one shared truncated forward broadcast to the $K$
 concept directions, each with a detection direction and a related raw direction available for steering — is drawn in
 <a class="sref" href="#figure-12">Figure 12</a>, and its cost as $K$ grows is measured in
 <a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a>.
@@ -1691,12 +1697,16 @@ prompt-evaluations per cell.
 
 <div class="cg-mono" markdown="1">
 
-| change in first-token refusal logit | baseline | concept $-\alpha$ | concept $+\alpha$ | lever (½ difference) | random $-\alpha$ | random $+\alpha$ | lever |
+| prompt group | baseline level | concept $-\alpha$ | concept $+\alpha$ | concept lever | random $-\alpha$ | random $+\alpha$ | random lever |
 |---|---|---|---|---|---|---|---|
 | attacks the gate fires on (n=93) | +2.94 | −1.63 | +0.89 | **−1.26** | −0.56 | +0.28 | −0.42 |
 | benign prompts (n=96) | −2.21 | −0.77 | +1.21 | **−0.99** | −0.21 | +0.33 | −0.27 |
 
 </div>
+
+<p class="small-note">Baseline is the absolute first-token refusal logit; every other column is a
+change from it. Lever $=\tfrac12(\Delta_{-\alpha}-\Delta_{+\alpha})$, the sign-reversible half of the
+response.</p>
 
 The concept direction is a directional lever with the same sign everywhere: away from the concept lowers
 the refusal logit, toward it raises it, on attacks and benign prompts alike. Its lever component is about
