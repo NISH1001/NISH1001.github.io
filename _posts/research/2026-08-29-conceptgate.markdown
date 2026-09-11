@@ -1681,7 +1681,7 @@ rewrite nearly everything it saw. Fitting the same concept from the dataset's lo
 instead of short framings inverts the failure: it then fires on 77% of the short attacks and 34% of the
 short benign prompts. The same collapse is documented for CAST's own condition detector, reported to
 refuse essentially every mathematics prompt while passing in-distribution benign ones <span class="cite" data-ref="AlphaSteer. arXiv:2506.07022."><a href="#ref-alphasteer">[20]</a></span>, and for
-activation probes generally <span class="cite" data-ref="Latent Adversarial Detection. arXiv:2604.28129."><a href="#ref-lad">[24]</a></span>.
+activation probes generally <span class="cite" data-ref="Latent Adversarial Detection. arXiv:2604.28129."><a href="#ref-lad">[23]</a></span>.
 
 #### The chat template decides the sign of the measured effect
 
@@ -2339,7 +2339,7 @@ directions gives $+0.81$ — two dimensions out of 2,688 change
 nothing. Projecting out the *fitted* direction gives
 $+0.09$, which is the informative version. The
 Cylindrical Representation Hypothesis had in any case already argued the qualitative version of that geometry
-on theoretical grounds <span class="cite" data-ref="The Cylindrical Representation Hypothesis for Language Model Steering. arXiv:2605.01844."><a href="#ref-crh">[27]</a></span>.
+on theoretical grounds <span class="cite" data-ref="The Cylindrical Representation Hypothesis for Language Model Steering. arXiv:2605.01844."><a href="#ref-crh">[25]</a></span>.
 
 **And predictability on this outcome is not distinctive.** The identical pipeline decodes the *unsteered*
 refusal logit at $+0.86$ and the sign-*independent* component of the
@@ -2427,7 +2427,7 @@ is at issue, never direction.
 
 **Prior work.** The nearest result predicts whether an intervention will under- or over-steer from internal
 states, but requires running the steered pass and decoding several tokens, predicts a three-class label, and
-uses features that are explicitly alignments with the steering vector <span class="cite" data-ref="When is Your LLM Steerable? arXiv:2606.11599."><a href="#ref-asteer">[25]</a></span>. Others predict per-instance
+uses features that are explicitly alignments with the steering vector <span class="cite" data-ref="When is Your LLM Steerable? arXiv:2606.11599."><a href="#ref-asteer">[24]</a></span>. Others predict per-instance
 intervention properties from the prompt alone but target which *layer* to steer <span class="cite" data-ref="Billa (2026). Predicting Where Steering Vectors Succeed. arXiv:2604.15557."><a href="#ref-billa">[22]</a></span>. The methodological
 caution this section ends on — that a cheap first-token proxy can track group means while failing per prompt —
 is, as far as we can tell, not stated anywhere, and it is the part of this section we would most want a reader
@@ -2597,7 +2597,7 @@ prompts in that same register and on **96%** of real benign prompts drawn from a
 every resample) — with the concept and the threshold unchanged. A ten-example concept is therefore calibrated to a
 *register* as much as to a meaning, and any deployment claim has to be made against the traffic the gate will
 actually see. The same failure is documented for CAST's condition detector <span class="cite" data-ref="AlphaSteer. arXiv:2506.07022."><a href="#ref-alphasteer">[20]</a></span> and for activation probes
-generally <span class="cite" data-ref="Latent Adversarial Detection. arXiv:2604.28129."><a href="#ref-lad">[24]</a></span>. On the write side a false fire rewrites the output rather than merely raising a flag. On the write side, steering hard enough to reliably change
+generally <span class="cite" data-ref="Latent Adversarial Detection. arXiv:2604.28129."><a href="#ref-lad">[23]</a></span>. On the write side a false fire rewrites the output rather than merely raising a flag. On the write side, steering hard enough to reliably change
 the topic also degrades fluency, and generated text drifts out of the clean-prompt distribution as it
 grows — degenerate repetition alone can nudge a benign continuation across the gate — so a deployed
 system must tune its operating point against false-refusal and output quality, not against recall in
