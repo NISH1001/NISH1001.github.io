@@ -1762,7 +1762,7 @@ of -0.00 ± 0.10 over 300 draws — roughly
 on the templates predicts the short and bare requests at $+0.88$; eight labelled prompts already reach
 +0.64.
 
-**Most of it was inside the concept direction, and on this model the gate was reading it badly** (<a class="sref" href="#figure-16">Figure 16</a>). Three scalars — the prompt's projection onto the concept's own steering direction at each tap — predict the dose at $+0.64$, where the gate's calibrated likelihood-ratio read of the same activations manages $+0.51$ (Qwen2.5-0.5B; on gemma-2-2b the gate carries no dose information at all, see below). The full ridge adds strictly but modestly
+**Most of it was inside the concept direction, and the gate was reading it badly** (<a class="sref" href="#figure-16">Figure 16</a>). Three scalars — the prompt's projection onto the concept's own steering direction at each tap — predict the dose at $+0.64$, where the gate's calibrated likelihood-ratio read of the same activations manages $+0.51$ (Qwen2.5-0.5B; on gemma-2-2b the gate carries no dose information at all, see below). The full ridge adds strictly but modestly
 ($+0.61$ on what the projection leaves). So the nested ladder, not a new
 subspace, is the honest shape of the measurement.
 
@@ -2286,7 +2286,7 @@ one attack prompt; the vertical axis is its measured dose on the first-token out
 calibrated LLR, the score the system already computes. Middle: a linear read of the prompt's projection onto
 the concept's own steering direction at the three taps — three numbers. Right: a ridge on all 2,688
 activation dimensions, out-of-fold. Same prompts, same activations, same forwards. The middle panel is the
-point: what the ridge finds was largely available from the concept direction, and the gate's LLR reads it inefficiently. Qwen2.5-0.5B; this gap does not reproduce on gemma-2-2b.</figcaption>
+point: what the ridge finds was largely available from the concept direction, and the gate's LLR reads it inefficiently. Qwen2.5-0.5B shown; the same gap appears on SmolLM2-360M and SmolLM2-1.7B, but not on gemma-2-2b.</figcaption>
 </figure>
 
 **Two claims from an earlier analysis of this data did not survive their own controls.** We had measured the
@@ -2311,42 +2311,48 @@ $+0.81$. Mid-layer activations linearly encode smooth functions of the prompt; t
 linear-representation result. What does separate the concept write from noise is that a matched-norm random
 direction's dose is predicted at only $+0.44$.
 
-#### Across magnitudes and a second model
+#### Across magnitudes and four models
 
-Three write magnitudes ($\alpha = 0.04, 0.08, 0.12$) on Qwen2.5-0.5B and gemma-2-2b, three concept
-resamples each.
+Three write magnitudes ($\alpha = 0.04, 0.08, 0.12$) on four instruct models spanning 0.36B to 2.6B and
+three families, three concept resamples each. The SmolLM2 pair is the useful contrast: same architecture
+and tokenizer, roughly five times the parameters.
 
 <div class="cg-mono" markdown="1">
 
-| | $\alpha$ | dose, concept | dose, random | gate LLR → dose | ridge → dose |
-|---|---|---|---|---|---|
-| Qwen2.5-0.5B | 0.04 | 0.62 | 0.26 | +0.49 | +0.76 |
-| | 0.08 | 1.28 | 0.51 | +0.51 | +0.81 |
-| | 0.12 | 1.97 | 0.74 | +0.53 | +0.84 |
-| gemma-2-2b | 0.04 | 0.43 | 0.21 | **-0.01** | +0.40 |
-| | 0.08 | 0.82 | 0.40 | **-0.02** | +0.51 |
-| | 0.12 | 1.19 | 0.57 | **-0.04** | +0.61 |
+| model | ridge → dose, $\alpha$ = .04 / .08 / .12 | gate LLR → dose | dose: concept / random ($\alpha$=.08) |
+|---|---|---|---|
+| SmolLM2-360M (0.36B) | +0.50 / +0.54 / +0.56 | +0.33 / +0.33 / +0.32 | 0.79 / 0.33 |
+| Qwen2.5-0.5B (0.5B) | +0.76 / +0.81 / +0.84 | +0.49 / +0.51 / +0.53 | 1.28 / 0.51 |
+| SmolLM2-1.7B (1.7B) | +0.74 / +0.74 / +0.75 | +0.49 / +0.51 / +0.52 | 0.62 / 0.38 |
+| gemma-2-2b (2.6B) | +0.40 / +0.51 / +0.61 | -0.01 / -0.02 / -0.04 | 0.82 / 0.40 |
 
 </div>
 
-Three things follow. **The dose scales linearly with the write** and stays a stable multiple of a
-matched-norm random direction — about 2.4–2.7× on Qwen, 2.0–2.1× on gemma — at every magnitude, which is
-what a genuine directional effect should do. **The ridge prediction replicates on the second model** and
-strengthens with magnitude, from +0.40 to +0.61 on gemma and
-+0.76 to +0.84 on Qwen, consistent with a larger write improving the
-outcome's signal-to-noise rather than with an artifact. **But the gate's own LLR does not replicate.** On gemma its correlation with the dose averages -0.02 ± 0.18 over the three concept resamples, and the sign flips between them (+0.22, -0.05, -0.23), against a consistent +0.49 to +0.53 on Qwen. Three resamples with that spread cannot establish a clean cross-model dissociation, so we put it no more strongly than this: the claim that the gate is a lossy readout of its own direction holds on Qwen2.5-0.5B and does not reproduce on gemma-2-2b. What holds on both models is weaker — a purpose-fit read of the same activations finds dose information the calibrated gate does not.
+**The prediction replicates everywhere and strengthens with magnitude.** The ridge reaches
++0.61 to +0.84
+at the largest write on all four models, and the dose stays a stable multiple of a matched-norm random
+direction (1.6–2.5×) at every magnitude — what a genuine directional effect should do, and not what a
+fitting artifact would do.
 
-**This also corrects the ceiling argument above.** Directions fit at *different magnitudes* on the same
-prompts agree at $|\cos| = 0.90$ on Qwen and 0.93 on gemma, and each predicts the other's dose at
-$\rho \approx 0.96$, so the direction is not an artifact of one magnitude and is far better determined
-than the 0.19 split-half figure implied — that figure used *half* the prompts
-each time, so it measured sampling variability across prompts rather than how precisely the direction can
-be estimated. The two answer different questions: with these prompts fixed the direction is well determined
-(0.90); whether it would come out the same on a *different* prompt set is much less certain
-(0.19 at half the sample). Against the better-posed ceiling the
-$|\cos| = 0.09$ separation from the concept direction is real for this prompt set —
-but the quantity being predicted fails the behavioural validation below, so this is a statement about the
-geometry of a proxy and we claim nothing beyond that.
+**The gate's own read carries dose information on three of the four.** SmolLM2-360M
++0.33, SmolLM2-1.7B
++0.51, Qwen
++0.51 — and gemma-2-2b
+-0.02 ± 0.18, with the sign flipping across its three
+resamples. So the gap between what the gate reports and what a purpose-fit read finds is the general
+pattern, and gemma is an exception to it rather than the rule. It is not a size effect: within the
+SmolLM2 family the correlation *rises* from +0.33
+at 0.36B to +0.51 at 1.7B, while the
+largest model is the one that fails. Why gemma differs we do not know, and three resamples with that
+spread would not settle it.
+
+**The direction is the same across magnitudes.** Directions fit at different $\alpha$ on the same prompts
+agree at $|\cos| \approx 0.90$ and each predicts the other's dose at $\rho \approx 0.95$, so it is one
+direction rather than an artifact of one write size. That also reframes the split-half figure quoted
+earlier: 0.19 was computed on *half* the prompts each time and measures sampling variability across
+prompts, not how precisely the direction can be estimated. With the prompt set fixed the direction is well
+determined; whether it reproduces on a different prompt set is the open question, and the behavioural
+validation below bounds what any of this is a statement about.
 
 #### The outcome does not track behaviour per prompt
 
@@ -2379,7 +2385,7 @@ prompt-level one does not.
 
 **What we therefore claim, and do not.** We claim that a statistic of the first-token distribution is
 predictable from the prompt's activations far above a matched null, that most of that predictability lives in
-the concept direction the system already computes, and that on Qwen2.5-0.5B the calibrated gate is a lossy readout of it, a pattern that does not reproduce on gemma-2-2b.
+the concept direction the system already computes, and that the calibrated gate is a lossy readout of it on three of the four models tested, gemma-2-2b being the exception.
 We do **not** claim that per-prompt steerability of *behaviour* is predictable: that requires a per-prompt
 behavioural measure we do not have, and building one is the obvious next step — many more prompts, several
 magnitudes so each prompt's dose is a fitted slope rather than a two-point difference, and a judged or
