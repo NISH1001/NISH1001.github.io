@@ -145,7 +145,7 @@ separates, but model selection reduces the mixture to one component per class at
 (iv) Matched contrastive negatives reduce rather than improve accuracy; generalization to unseen harm
 categories is only partial; and steering with the concept bank's own harm-category directions lowers refusal rather than raising it (80% unsteered, 68% gated, 65% blanket), so those entries supply a write direction pointing opposite to a guardrail. (v) The one capability that distinguishes an internal adapter from a text
 classifier is **steering** — writing a direction fit from the same few-shot examples back into the residual stream — which we
-measure as a graded dose-response bounded by the competence of the base model. (vi) The write rule itself is standard activation addition, and conditioning it on an activation-read detector is prior work. Measured with prompts formatted as the model expects, the composition adds nothing on the read side of that: the model refuses 94% of attacks unsteered, the gate fires on 97% of them and so selects nothing a size-matched random subset does not, and steering *away* from the jailbreak concept **lowers** refusal by 22 points — the few-shot direction is a refusal lever, roughly 2.0–2.5× a matched-norm random direction, and which sign is a guardrail is the operator's choice. Whether prompts are formatted at all turns out to decide the sign of every effect in this experiment, which is a caveat for steering evaluations generally (<a class="sref" href="#410-gate-conditioned-steering">§4.10</a>). (vii) A different question — whether the size of a write's effect on a *particular* prompt is readable from
+measure as a graded dose-response bounded by the competence of the base model. (vi) The write rule itself is standard activation addition, and conditioning it on an activation-read detector is prior work. Measured with prompts formatted as the model expects, the composition adds nothing on the read side of that: the model refuses 94% of attacks unsteered, the gate fires on 97% of them and so selects nothing a size-matched random subset does not, and steering *away* from the jailbreak concept **lowers** refusal by 22 points — the few-shot direction is a refusal lever, roughly 1.6–2.7× a matched-norm random direction, and which sign is a guardrail is the operator's choice. Whether prompts are formatted at all turns out to decide the sign of every effect in this experiment, which is a caveat for steering evaluations generally (<a class="sref" href="#410-gate-conditioned-steering">§4.10</a>). (vii) A different question — whether the size of a write's effect on a *particular* prompt is readable from
 that prompt beforehand — produced a strong-looking result on a first-token proxy ($\rho=+0.81$
 against a permutation null of -0.00 ± 0.10) that its own controls
 then cut down: most of the signal sits inside the concept direction the gate already computes
@@ -323,8 +323,8 @@ This paper evaluates each component of ConceptGate against a fair baseline and r
 2. **A measured, bidirectional write on a frozen model.** A direction fit from eight hand-written
    examples, added at 8% of the residual norm, moves refusal on generated text from
    64% unsteered to 35% steering away from the concept and
-   79% steering toward it — roughly 2.0–2.5× a matched-norm random direction, at every
-   magnitude tested and on both models (<a class="sref" href="#410-gate-conditioned-steering">§4.10</a>, <a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>). This is the refusal direction of Arditi et al.
+   79% steering toward it — roughly 1.6–2.7× a matched-norm random direction, at every
+   magnitude tested and on all four models (<a class="sref" href="#410-gate-conditioned-steering">§4.10</a>, <a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>). This is the refusal direction of Arditi et al.
    recovered few-shot and training-free rather than a mechanism of ours, and which sign counts as a
    guardrail is the operator's choice.
 3. **The fragility that bounds it.** The same eight-example gate fires on 18% of benign prompts in the
@@ -827,8 +827,11 @@ mode of <a class="sref" href="#43-detection-on-real-prompts-a-commodity">§4.3</
 covariance-awareness). The quantity we measure is the cosine between the detection direction mapped back
 into raw space — $w_\ell$ divided elementwise by the per-feature scale $\sigma_\ell$, then renormalized —
 and the raw steering direction $w^{\text{raw}}_\ell$. It is **not a single number**: it depends on the
-detection mode, on the concept, and on the model, so we report the sweep rather than one figure. Averaged
-over three taps and four concepts:
+detection mode, on the concept, and on the model, so we report the sweep rather than one figure. It is a
+geometric property of two fitted directions, and we measure it on raw prompts with no chat template — the
+same regime as the detection benchmark, and unlike the steering experiments of
+<a class="sref" href="#410-gate-conditioned-steering">§4.10</a> onward, which format prompts as the model
+expects. Averaged over three taps and four concepts:
 
 | mean \|cos\| (read vs write) | GPT-2 ($d$=768) | Qwen2.5-0.5B ($d$=896) | gemma-2-2b ($d$=2304) |
 |---|---|---|---|
@@ -1690,7 +1693,11 @@ activation probes generally <span class="cite" data-ref="Latent Adversarial Dete
 A rate at a ceiling cannot say whether the write does anything *specific*, so we replaced it with a
 continuous outcome needing no generation: at the first generated position, the log-mass on
 refusal-opening tokens ("I", "Sorry", "As", "Unfortunately", "No") minus the log-mass on
-compliance-opening tokens ("Sure", "Here", "To", "Certainly", "Yes", …), one forward pass per arm. Arms:
+compliance-opening tokens ("Sure", "Here", "To", "Certainly", "Yes", …), one forward pass per arm. This
+is the refusal–affirmation logit gap of Li and Liu <span class="cite" data-ref="Logit-Gap Steering: A Forward-Pass Diagnostic for Alignment Robustness. arXiv:2506.24056."><a href="#ref-logitgap">[26]</a></span>, who introduced it as a per-prompt
+safety margin and showed that alignment widens it on 97.5–99.8% of toxic prompts across three model
+families; we sum over small token baskets where they take the top token of each, and we use it to score a
+write rather than to search for a suffix that closes it. Arms:
 no write; $\pm\alpha$ along the concept's raw direction; and $\pm\alpha$ along a **random unit direction
 of the same norm**, fixed per resample — a perturbation floor. Same prompts, three resamples, 96
 prompt-evaluations per cell.
@@ -2341,8 +2348,9 @@ and tokenizer, roughly five times the parameters.
 **The prediction replicates everywhere and strengthens with magnitude.** The ridge reaches
 +0.61 to +0.84
 at the largest write on all four models, and the dose stays a stable multiple of a matched-norm random
-direction (1.6–2.5×) at every magnitude — what a genuine directional effect should do, and not what a
-fitting artifact would do.
+direction (1.6–2.7×) at every magnitude — what a genuine directional effect should do, and not what a
+fitting artifact would do. That range is the ratio of seed-averaged doses; the per-seed ratio is far
+noisier (1.4–6.3), because the random direction's own dose varies about threefold across seeds.
 
 **The gate's own read carries dose information on three of the four.** SmolLM2-360M
 +0.33, SmolLM2-1.7B
@@ -2367,7 +2375,9 @@ validation below bounds what any of this is a statement about.
 #### The outcome does not track behaviour per prompt
 
 Everything above is measured on a first-token log-odds over two hand-chosen token baskets — five
-refusal-opening ids against thirteen compliance-opening ones. Group means were checked against generated
+refusal-opening ids against thirteen compliance-opening ones. That the gap itself is a meaningful
+per-prompt margin is established elsewhere <span class="cite" data-ref="Logit-Gap Steering: A Forward-Pass Diagnostic for Alignment Robustness. arXiv:2506.24056."><a href="#ref-logitgap">[26]</a></span>; what is at issue here is narrower, whether its
+*response to a write* ranks prompts the way behaviour does. Group means were checked against generated
 text, but the per-prompt ranking, which is what the prediction result is about, was not. So we measured the
 same 164 prompts two further ways: a **teacher-forced continuation score**, the length-normalised
 log-probability of canonical refusal continuations minus compliance ones, which spans many tokens and does
@@ -2595,7 +2605,7 @@ fires on almost every attack and selects nothing a size-matched random subset do
 What the measurements do support is narrower and, we think, still worth having. The write is a real
 bidirectional lever on a frozen model: eight hand-written examples move generated refusal from
 64% to 35% in one direction and 79% in the other,
-scaling cleanly with magnitude and holding a stable multiple of a random direction on both models tested.
+scaling cleanly with magnitude and holding a stable multiple of a random direction on all four models tested.
 It is also fragile in a specific, measurable way — the same gate's false-positive rate moves from 18% to
 96% with the register of the traffic it sees — which is the kind of thing a deployment claim has to be
 made against. A further question, whether the size of that write's effect on a *particular* prompt can be
@@ -2635,6 +2645,7 @@ fails are both visible in them.
 23. <a id="ref-lad"></a>*Latent Adversarial Detection.* (2026). arXiv:2604.28129.
 24. <a id="ref-asteer"></a>*When is Your LLM Steerable?* (2026). arXiv:2606.11599.
 25. <a id="ref-crh"></a>*The Cylindrical Representation Hypothesis for Language Model Steering.* (2026). arXiv:2605.01844.
+26. <a id="ref-logitgap"></a>Li, T.-L., & Liu, H. (2025). *Logit-Gap Steering: A Forward-Pass Diagnostic for Alignment Robustness.* arXiv:2506.24056.
 </div>
 
 ## Citation
