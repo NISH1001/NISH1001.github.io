@@ -1394,7 +1394,7 @@ tabulated in [`docs/evaluation.md`](https://github.com/NISH1001/conceptgate/blob
 are in the repository.
 
 <figure id="figure-12">
-<svg viewBox="0 0 720 252" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ConceptGate concept bank and read-write duality" font-family="ui-sans-serif,system-ui,sans-serif">
+<svg viewBox="0 0 720 256" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ConceptGate concept bank and read-write duality" font-family="ui-sans-serif,system-ui,sans-serif">
   <defs><marker id="bkar" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0L6,3L0,6Z" fill="#9aa"/></marker></defs>
   <text x="360" y="14" text-anchor="middle" font-size="12" fill="currentColor">one truncated forward — computed once, read by every concept</text>
   <rect x="12" y="24" width="696" height="48" rx="8" fill="none" stroke="#9aa" stroke-width="1.2"/>
@@ -1437,7 +1437,8 @@ are in the repository.
     <text x="560" y="200" font-size="10.5" fill="#8cc5bf">steer &#160; + &#945;&#183;w<tspan baseline-shift="super" font-size="7">K</tspan><tspan baseline-shift="sub" font-size="7">raw</tspan></text>
   </g>
   <text x="524" y="178" text-anchor="middle" font-size="16" fill="#bbb">&#8943;</text>
-  <text x="360" y="234" text-anchor="middle" font-size="11" fill="currentColor">each concept = one closed-form fit (~ms, ~kB) giving <tspan font-style="italic">two</tspan> directions: w<tspan baseline-shift="sub" font-size="8">det</tspan> reads standardized z, w<tspan baseline-shift="sub" font-size="8">raw</tspan> writes the raw stream (cosine 0.45–0.83)</text>
+  <text x="360" y="228" text-anchor="middle" font-size="11" fill="currentColor">each concept = one closed-form fit (~ms, ~kB) giving <tspan font-style="italic">two</tspan> directions:</text>
+  <text x="360" y="244" text-anchor="middle" font-size="11" fill="currentColor">w<tspan baseline-shift="sub" font-size="8">det</tspan> reads standardized z, w<tspan baseline-shift="sub" font-size="8">raw</tspan> writes the raw stream (cosine 0.45–0.83)</text>
 </svg>
 <figcaption><strong>Figure 12.</strong> <em>The concept bank and the read/write duality.</em> A single
 truncated forward — the frozen model run only up to the deepest tap, never the layers above — produces one
