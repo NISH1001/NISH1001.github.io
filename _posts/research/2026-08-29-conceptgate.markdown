@@ -142,7 +142,9 @@ of any latent probe rather than of ConceptGate. (ii) Combining evidence across d
 single-best-layer baseline under a matched-filter analysis and on synthetic data (test error 16.1% to
 9.4%), but the advantage does not transfer to real models, where one layer already carries the concept.
 (iii) Modelling each class as a Gaussian mixture recovers configurations no single linear threshold
-separates, but model selection reduces the mixture to one component per class at ten-shot sizes.
+separates, but model selection reduces the mixture to one component per class at ten-shot sizes and keeps
+doing so up to sixty-four examples per class; where a second component is eventually selected it adds at
+most 0.007 held-out AUC.
 (iv) Matched contrastive negatives reduce rather than improve accuracy; generalization to unseen harm
 categories is only partial; and steering with the concept bank's own harm-category directions lowers refusal rather than raising it (80% unsteered, 68% gated, 65% blanket), so those entries supply a write direction pointing opposite to a guardrail. (v) The one capability that distinguishes an internal adapter from a text
 classifier is **steering** — writing a direction fit from the same few-shot examples back into the residual stream — which we
@@ -316,7 +318,7 @@ This paper evaluates each component of ConceptGate against a fair baseline and r
    shared with a probe bank, which ties or edges it at matched depth
    (<a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a>). Matched contrastive negatives hurt
    (<a class="sref" href="#44-matched-versus-broad-negatives-a-negative-result">§4.4</a>); the mixture
-   collapses to one Gaussian at ten-shot sizes
+   collapses to one Gaussian at ten-shot sizes, and to sixty-four examples per class
    (<a class="sref" href="#42-mixture-densities-a-constructed-hard-case-and-a-few-shot-collapse">§4.2</a>);
    a predicted paraphrase-robustness effect does not appear
    (<a class="sref" href="#47-a-paraphrase-robustness-null">§4.7</a>); generalization to an unseen harm
@@ -1049,9 +1051,44 @@ cannot pay — and the mixture gate collapses onto the single-Gaussian gate (ran
 0.986, scored on held-out prompts). This is less "the data answering one-or-many" than an identifiability limit: at twelve samples a
 five-dimensional full-covariance component is already near-singular, so the $J=2$ fit is ill-conditioned
 and the selection is effectively decided by sample size. The mixture is the more general model but remains
-inactive in this regime: whether real concept classes are multimodal enough to justify additional
-components is a question that requires substantially more than ten labelled examples, and on the readily-labelled concepts examined here the
-selection criterion returns a single component per class.
+inactive in this regime, and the natural question is where the boundary actually sits — the rent grows
+only as $\ln N$ while the evidence for a second component grows as $N$, so "few-shot" cannot be the whole
+account.
+
+We measured it on the same data and taps the detection benchmark uses (jackhhao jailbreak against benign,
+three taps at 33/50/67% depth, directions fit exactly as the pipeline fits them, three seeds), asking BIC
+for $J$ at each fitting size and scoring the resulting gate on the official held-out split:
+
+<div class="cg-mono" markdown="1">
+
+| $N$ per class | 12 | 32 | 64 | 128 | 256 |
+|---|---|---|---|---|---|
+| Qwen2.5-0.5B, diff-of-means | 1 / 1 | 1 / 1 | 1 / 1 | 1 / **2** | **2** / **2** |
+| Qwen2.5-0.5B, logistic | 1 / 1 | 1 / 1 | 1 / 1 | **2** / **2** | **2** / **2** |
+| gemma-2-2b, diff-of-means | 1 / 1 | 1 / 1 | 1 / 1 | 1 / 1 | **2** / **2** |
+| gemma-2-2b, logistic | 1 / 1 | 1 / 1 | **2** / 1 | **2** / **2** | **2** / **2** |
+| best held-out AUC gained | 0.000 | 0.000 | +0.001 | +0.006 | +0.007 |
+
+</div>
+
+<p class="small-note">Components selected for the positive / negative class, median over three seeds.
+The last row is the largest held-out AUC difference between the BIC-selected gate and the same gate
+forced to one component per class, over both models and both detection modes.</p>
+
+Two things follow, and they cut against each other. The collapse is not an artifact of twelve samples:
+BIC keeps returning one component per class up to **64 examples per class** on both models in
+diff-of-means mode, sample sizes at which a three-dimensional full-covariance component is perfectly
+well conditioned. So the identifiability reading above is too narrow — the criterion goes on declining
+the second component well past the point where it could fit one. And where the second component *is*
+eventually selected, it buys **essentially nothing**: held-out AUC is unchanged to three decimals in
+logistic mode on Qwen at every size, and the largest gain anywhere in the sweep is +0.007. Whatever
+structure BIC eventually finds is not structure this decision needed, which is the same verdict
+<a class="sref" href="#43-detection-on-real-prompts-a-commodity">§4.3</a> reaches from the other side when
+an RBF kernel loses to a linear one on these activations. The mixture remains the more general model, and
+the constructed case above shows that generality is not vacuous; on the concepts examined here it is
+inactive at the sizes the system runs at and inert at the sizes where it activates. What this sweep does
+*not* establish is that the classes are genuinely bimodal — a component selected at $N=256$ could be
+fitting a small cluster of outlying prompts, and we did not measure the fitted component weights.
 
 ### 4.3 Detection on real prompts: a commodity
 
