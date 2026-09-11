@@ -4,10 +4,11 @@
 <head>
     <meta content="width=device-width, initial-scale=1" name="viewport" />
     <meta content="{{ site.title | default: site.heading }}" property="og:site_name" />
-    <meta content="{{ site.description | default: 'A Jekyll Garden site' }}" property="og:description">
+    <meta content="{{ page.subtitle | default: site.description | default: 'A Jekyll Garden site' }}" property="og:description">
     <meta content="{{ site.url }}/about/" property="article:author">
-    {%- if site.og_image -%}
-    <meta property="og:image" content="{{ site.baseurl }}{{ site.og_image }}">
+    {%- if page.image or site.og_image -%}
+    <meta property="og:image" content="{{ site.url }}{{ site.baseurl }}/{{ page.image | default: site.og_image }}">
+    <meta name="twitter:card" content="summary_large_image">
     {%- endif -%}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

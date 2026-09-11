@@ -5,6 +5,7 @@ date:   2026-08-29 09:00:00 +0545
 categories: research
 tags: research llm interpretability activation-steering guardrails probes representation-engineering few-shot
 subtitle: "A few-shot, training-free adapter that detects a concept from a frozen model's own layers and steers generation along a closely related direction, with interactive figures over real GPT-2, Qwen2.5-0.5B and gemma-2-2b runs."
+image: img/conceptgate-card.png
 comments: false
 published: true
 ---
