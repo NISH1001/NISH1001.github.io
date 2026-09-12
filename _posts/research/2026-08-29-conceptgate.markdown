@@ -334,9 +334,11 @@ This paper evaluates each component of ConceptGate against a fair baseline and r
    register it was fitted on and **96%** on benign prompts from another — a ninefold swing in false
    positives from the prompt distribution alone, with concept and threshold unchanged (<a class="sref" href="#410-gate-conditioned-steering">§4.10</a>). On the
    write side a false fire rewrites the answer rather than raising a flag.
-4. **A caution about cheap outcome measures.** A first-token refusal proxy — the standard way to score a
-   steering intervention without generating — tracks group means faithfully while failing at the prompt
-   level, so a metric can look well-behaved in aggregate and carry little per-prompt signal (<a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>).
+4. **A caution about unvalidated outcome measures.** We reported that a first-token refusal proxy carried
+   little per-prompt signal, on the strength of two behavioural instruments that disagreed with each other.
+   Neither had been checked for reliability. Sampled properly they agree at +0.88, and the proxy tracks them
+   at +0.61 — the null was the measurement's, not the model's. An outcome measure whose own reliability is
+   never established can manufacture a null as easily as a result (<a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>).
 5. **A calibrated, few-shot, dual-mode adapter, and an honest account of it.** One object learns a concept
    from ~10 examples in milliseconds and kilobytes, detects it with a calibrated fire/abstain/pass gate,
    and supplies a write direction, with a small well-characterized parameter budget
@@ -2435,20 +2437,43 @@ not depend on what was generated; and a **generated-refusal indicator** over 40 
 The first two fall below the 0.5 threshold we had set in advance, and within templates alone the first drops
 to +0.29. But the third row is the one that decides what can be
 said: **the two behavioural measures agree with each other at essentially zero.** That is not evidence that
-the per-prompt dose is unpredictable; it is evidence that at this sample size and with these instruments the
-per-prompt behavioural dose is not reliably measurable at all, so there is nothing stable for the first-token
-outcome to be validated against. Both measures agree strongly on the *aggregate* effect — the generated
-refusal rate moves 64% → 35% → 79% and the continuation
-score moves the same way — which is why <a class="sref" href="#410-gate-conditioned-steering">§4.10</a>'s group-level conclusions stand while this section's
-prompt-level one does not.
+the per-prompt dose is unpredictable; it is evidence that **these instruments** could not measure it. Neither
+was ever shown to be reliable: the generated lever is one greedy sample per arm scored by a lexicon, a
+three-valued variable per prompt, and the teacher-forced lever compares three canned refusals against three
+canned compliances. Two instruments of unknown reliability disagreeing tells you about the instruments.
+
+Replacing them with a sampled one settles it. Drawing $K=16$ continuations per arm at $T=0.7$ and scoring
+each with both the lexicon and an off-the-shelf rejection classifier, the per-prompt dose on
+Qwen2.5-0.5B is reliable — split-half $+0.66$ (lexicon) and $+0.70$ (classifier), Spearman–Brown
+$+0.80$/$+0.82$ at $K{=}16$, and the two instruments now agree with each other at $+0.88$ rather than at
+zero. Against that target the first-token proxy of this section reaches $+0.61$ per prompt, and a ridge on
+the same three tapped activations reaches $+0.58$ out of fold (folds grouped by harmful request) against a
+permutation null of $-0.015 \pm 0.089$ from the identical pipeline, $z=6.7$; the three concept projections
+alone reach $+0.51$, and the calibrated gate's own LLR $-0.30$. Predicting the *unsteered* refusal rate
+instead reaches $+0.81$, but that rate correlates with the dose at $+0.03$, so the dose is not a restatement
+of which prompts refuse anyway.
+
+**This is one model.** Repeating the measurement on gemma-2-2b at the same magnitude, the instrument is
+sound (split-half of the unsteered rate $+0.92$) but the effect is not: attack refusal moves
+$0.46 / 0.51 / 0.53$ across the three arms against Qwen's $0.30 / 0.54 / 0.64$, mean $\lvert D\rvert$ is
+$0.07$ against $0.17$, and only 38% of doses are positive. The dose's split-half falls to $+0.53$, below the
+$0.6$ we had fixed in advance, and prediction on that unreliable target reaches only $+0.20$ at $z=2.2$. So
+the claim below is Qwen-specific, and whether it survives a second model is open. The greedy measures did agree strongly on the
+*aggregate* effect all along — the generated refusal rate moves 64% → 35% → 79% and the
+continuation score moves the same way — so
+<a class="sref" href="#410-gate-conditioned-steering">§4.10</a>'s group-level conclusions never depended on
+any of this.
 
 **What we therefore claim, and do not.** We claim that a statistic of the first-token distribution is
 predictable from the prompt's activations far above a matched null, that most of that predictability lives in
 the concept direction the system already computes, and that the calibrated gate is a lossy readout of it on three of the four models tested, gemma-2-2b being the exception.
-We do **not** claim that per-prompt steerability of *behaviour* is predictable: that requires a per-prompt
-behavioural measure we do not have, and building one is the obvious next step — many more prompts, several
-magnitudes so each prompt's dose is a fitted slope rather than a two-point difference, and a judged or
-classifier-scored outcome instead of a token basket. Two further limits stand regardless: the three concept
+We claim, on one model, that per-prompt steerability of *behaviour* is measurable once the instrument is
+sampled rather than greedy, and predictable from the prompt's activations above a permutation null. We do
+**not** claim that this generalizes: it failed to reproduce on the second model tested. What would settle it is a second magnitude, so
+each prompt's dose is a fitted slope rather than a two-point difference, and more base models — the gemma
+result shows that a magnitude which moves one model appreciably can sit at the sampling-noise floor on
+another, and at that floor nothing is predictable because nothing reliable is being measured. Two further
+limits stand regardless: the three concept
 resamples reuse one fixed prompt set with byte-identical activations, so the effective number of independent
 replicates is **one**; and 98% of doses share a sign, so only magnitude
 is at issue, never direction.
@@ -2456,10 +2481,11 @@ is at issue, never direction.
 **Prior work.** The nearest result predicts whether an intervention will under- or over-steer from internal
 states, but requires running the steered pass and decoding several tokens, predicts a three-class label, and
 uses features that are explicitly alignments with the steering vector <span class="cite" data-ref="When is Your LLM Steerable? arXiv:2606.11599."><a href="#ref-asteer">[24]</a></span>. Others predict per-instance
-intervention properties from the prompt alone but target which *layer* to steer <span class="cite" data-ref="Billa (2026). Predicting Where Steering Vectors Succeed. arXiv:2604.15557."><a href="#ref-billa">[22]</a></span>. The methodological
-caution this section ends on — that a cheap first-token proxy can track group means while failing per prompt —
-is, as far as we can tell, not stated anywhere, and it is the part of this section we would most want a reader
-to take away. The harness is
+intervention properties from the prompt alone but target which *layer* to steer <span class="cite" data-ref="Billa (2026). Predicting Where Steering Vectors Succeed. arXiv:2604.15557."><a href="#ref-billa">[22]</a></span>. The methodological caution this section ends on is the part we would most want a
+reader to take away, and it is not the one we first drew. A cheap first-token proxy turned out to track the
+sampled behavioural dose per prompt at $+0.61$; what failed was the *instrument we validated it against* — a
+single greedy generation scored by a word list. An outcome measure whose own reliability is never checked
+can manufacture a null as easily as a result, and we published one before checking. The harness is
 [`eval_gate.py --steerability`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_gate.py), the
 controls are
 [`steerability_controls.py`](https://github.com/NISH1001/conceptgate/blob/main/scripts/steerability_controls.py),
@@ -2483,7 +2509,7 @@ bidirectional lever on a frozen model's refusal behaviour, moving generated refu
 direction across three magnitudes and two models. The same object is fragile in a way worth knowing
 before anyone deploys one: its false-positive rate moves from 18% to 96% with the register of the benign
 traffic. Around those sit a set of negative results that were expensive to obtain and are cheap to reuse,
-and one caution about measurement: a cheap first-token proxy can track group means while carrying little per-prompt signal.
+and one caution about measurement: an outcome instrument whose reliability is never checked can manufacture a null as easily as a result.
 The contribution is the measurement and its honesty, not the machinery.
 
 ### 5.2 Detection is a commodity; steering is prior art; what the corrected write shows
@@ -2648,10 +2674,11 @@ scaling cleanly with magnitude and holding a stable multiple of a random directi
 It is also fragile in a specific, measurable way — the same gate's false-positive rate moves from 18% to
 96% with the register of the traffic it sees — which is the kind of thing a deployment claim has to be
 made against. A further question, whether the size of that write's effect on a *particular* prompt can be
-read from the prompt beforehand, is predictable on a cheap proxy and not yet answerable about behaviour
-(<a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>); saying so is more useful than the affirmative we could have written from the proxy alone.
+read from the prompt beforehand, is answerable on one of the two models we tried it on, and sits at the
+sampling-noise floor on the other
+(<a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>); saying which is more useful than the general affirmative the proxy alone would have licensed.
 
-One lesson generalizes past this system. A binary or first-token outcome near its ceiling cannot resolve an intervention in either direction, however consistent it looks across seeds, and a proxy that tracks group means need not track individual prompts at all. The interactive
+One lesson generalizes past this system. A binary or first-token outcome near its ceiling cannot resolve an intervention in either direction, however consistent it looks across seeds; and before concluding that a per-prompt signal is absent, measure whether the instrument you are judging it by can see one at all. The interactive
 figures are included so that these claims can be examined directly against the underlying model runs
 rather than taken on assertion; the points at which the method is effective and the points at which it
 fails are both visible in them.
