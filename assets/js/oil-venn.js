@@ -305,7 +305,6 @@
         gx += G.glyphSize + G.glyphGap;
       });
       g.appendChild(s('text', { x: left + glyphsWidth(oil), y: item.y, text: labelText(oil) }));
-      g.appendChild(s('circle', { 'class': 'dot', cx: item.x, cy: item.y - 5, r: 5 }));
       g.addEventListener('click', function () { selectOil(oil.id); });
       g.addEventListener('keydown', function (ev) {
         if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); selectOil(oil.id); }
@@ -314,7 +313,7 @@
       svg.appendChild(g);
     });
 
-    // Compact list, for narrow screens
+    // Compact list, shown under the diagram on narrow screens
     var REGION_NAMES = {
       'vata': 'Vata only', 'pitta': 'Pitta only', 'kapha': 'Kapha only',
       'vata+kapha': 'Vata and kapha', 'vata+pitta': 'Vata and pitta', 'pitta+kapha': 'Pitta and kapha', 'vata+pitta+kapha': 'All three'
@@ -337,7 +336,8 @@
     var panel = h('div', { 'class': 'oilv-panel', 'aria-live': 'polite' });
 
     container.appendChild(controls);
-    container.appendChild(svg);
+    container.appendChild(h('div', { 'class': 'oilv-scroll' }, [svg]));
+    container.appendChild(h('p', { 'class': 'oilv-scrollhint', text: 'Scroll sideways for the whole diagram.' }));
     container.appendChild(list);
     container.appendChild(panel);
 

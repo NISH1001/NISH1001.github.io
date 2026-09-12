@@ -46,7 +46,9 @@
 .oilv-glyph { width: .62em; height: .62em; fill: currentColor; opacity: .8; flex: none; }
 
 /* Diagram */
+.oilv-scroll { overflow: auto; }
 .oilv-venn { display: block; width: 100%; height: auto; font-family: var(--font, inherit); overflow: visible; }
+.oilv-scrollhint { display: none; }
 .oilv-circle { fill-opacity: var(--oilv-fill); stroke-width: 1.5; stroke-opacity: .85; }
 .oilv-circle.c-vata { fill: var(--oilv-vata); stroke: var(--oilv-vata); }
 .oilv-circle.c-pitta { fill: var(--oilv-pitta); stroke: var(--oilv-pitta); }
@@ -68,7 +70,6 @@
 .oilv-oil.is-selected text { font-weight: 600; }
 .oilv-oil.is-dim { opacity: .2; }
 .oilv-oil.is-dim:hover { opacity: .55; }
-.oilv-oil .dot { display: none; fill: var(--oilv-ink); }
 
 /* Detail panel */
 .oilv-panel { margin-top: .5rem; padding-top: .75rem; border-top: 1px solid var(--oilv-line); color: var(--oilv-muted); min-height: 4.2rem; }
@@ -104,15 +105,10 @@
 .oilv .oilv-item.is-selected { background: var(--oilv-ink); color: var(--oilv-surface); border-color: transparent; }
 
 @media (max-width: 600px) {
-  .oilv-oil text,
-  .oilv-oil .glyph,
-  .oilv-oil .hit { display: none; }
-  .oilv-oil .dot { display: block; r: 9; }
-  .oilv-oil.is-dim { opacity: .15; }
+  .oilv-venn { min-width: 680px; }
+  .oilv-scrollhint { display: block; margin: .3rem 0 0; font-size: .8rem; color: var(--oilv-muted); }
   .oilv-list { display: block; }
   .oilv-rowlabel { width: 100%; }
-  .oilv-title { font-size: 28px; }
-  .oilv-sub { font-size: 16px; }
 }
 
 @media (prefers-reduced-motion: no-preference) {
