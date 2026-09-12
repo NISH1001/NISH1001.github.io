@@ -1,0 +1,35 @@
+<script>
+// Section permalinks: a small link after each heading inside .content. Hovering the heading
+// shows it; clicking jumps there and copies the section's full URL to the clipboard.
+// Posts that already add their own a.hanchor (some research posts) are left alone.
+document.addEventListener('DOMContentLoaded', function () {
+  var content = document.querySelector('.content');
+  if (!content) return;
+  var heads = content.querySelectorAll('h2[id], h3[id], h4[id]');
+  Array.prototype.forEach.call(heads, function (h) {
+    if (h.querySelector('a.hanchor')) return;
+    var a = document.createElement('a');
+    a.className = 'hanchor';
+    a.href = '#' + h.id;
+    a.title = 'Copy link to this section';
+    a.setAttribute('aria-label', 'Copy link to this section');
+    a.textContent = '#';
+    a.addEventListener('click', function () {
+      var url = location.href.split('#')[0] + '#' + h.id;
+      if (!navigator.clipboard || !navigator.clipboard.writeText) return;
+      navigator.clipboard.writeText(url).then(function () { note(h, a, 'Copied'); }, function () {});
+    });
+    h.appendChild(a);
+  });
+  function note(h, a, text) {
+    var old = h.querySelector('.hanchor-note');
+    if (old) old.remove();
+    var n = document.createElement('span');
+    n.className = 'hanchor-note';
+    n.setAttribute('role', 'status');
+    n.textContent = text;
+    a.insertAdjacentElement('afterend', n);
+    setTimeout(function () { n.remove(); }, 1400);
+  }
+});
+</script>

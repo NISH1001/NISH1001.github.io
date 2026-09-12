@@ -1191,3 +1191,26 @@ li a[href^="http://"]:after, li a[href^="https://"]:after {
   font-size: var(--scale-sm);
   text-decoration: none;
 }
+
+/* Section permalinks (added by _includes/heading-anchors.html) */
+.content h2, .content h3, .content h4 { scroll-margin-top: 1.5rem; }
+a.hanchor {
+  margin-left: .45rem;
+  text-decoration: none;
+  border: 0;
+  font-weight: 400;
+  font-size: .72em;
+  color: var(--brand);
+  opacity: 0;
+  transition: opacity .12s;
+}
+.content h2:hover a.hanchor,
+.content h3:hover a.hanchor,
+.content h4:hover a.hanchor,
+a.hanchor:focus-visible { opacity: .75; }
+a.hanchor:hover { opacity: 1; }
+@media (hover: none) { a.hanchor { opacity: .4; } }
+.hanchor-note { margin-left: .4rem; font-size: .7em; font-weight: 400; color: var(--text); }
+.content h2:target,
+.content h3:target,
+.content h4:target { background: rgba(58, 169, 159, .12); box-shadow: 0 0 0 .3rem rgba(58, 169, 159, .12); }
