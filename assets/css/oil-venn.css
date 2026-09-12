@@ -1,0 +1,122 @@
+/* Ayurvedic oils diagram (assets/js/oil-venn.js). Scoped under .oilv and reads the
+   site's theme variables, so it follows the light/dark toggle. */
+.oilv {
+  --oilv-vata: #6e5fbf;
+  --oilv-pitta: #d4552b;
+  --oilv-kapha: #2a8f63;
+  --oilv-ink: var(--title, #343331);
+  --oilv-muted: var(--text, #6f6e69);
+  --oilv-line: var(--border, #e6e4d9);
+  --oilv-surface: var(--bg, #fffcf0);
+  --oilv-fill: .13;
+  margin: 2rem 0;
+  font-size: .92rem;
+  line-height: 1.5;
+}
+[data-theme="dark"] .oilv {
+  --oilv-vata: #957ada;
+  --oilv-pitta: #e06b34;
+  --oilv-kapha: #1fa878;
+  --oilv-fill: .17;
+}
+
+/* Controls */
+.oilv-controls { display: flex; flex-direction: column; gap: .5rem; margin-bottom: .9rem; }
+.oilv-row { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; }
+.oilv-rowlabel { color: var(--oilv-muted); width: 4.6rem; font-size: .85rem; }
+.oilv .oilv-toggle,
+.oilv .oilv-clear,
+.oilv .oilv-item {
+  font: inherit; font-size: .85rem; line-height: 1.2; color: var(--oilv-ink);
+  background: transparent; border: 1px solid var(--oilv-line); border-radius: 999px;
+  padding: .32rem .8rem; cursor: pointer; display: inline-flex; align-items: center; gap: .4rem;
+}
+.oilv .oilv-toggle:hover,
+.oilv .oilv-item:hover,
+.oilv .oilv-clear:hover { border-color: var(--oilv-ink); }
+.oilv .oilv-toggle[aria-pressed="true"] { color: #fff; border-color: transparent; background: var(--oilv-ink); }
+.oilv .oilv-toggle[data-dosha="vata"][aria-pressed="true"] { background: var(--oilv-vata); }
+.oilv .oilv-toggle[data-dosha="pitta"][aria-pressed="true"] { background: var(--oilv-pitta); }
+.oilv .oilv-toggle[data-dosha="kapha"][aria-pressed="true"] { background: var(--oilv-kapha); }
+.oilv .oilv-toggle[data-practice][aria-pressed="true"] { background: var(--oilv-ink); color: var(--oilv-surface); }
+.oilv .oilv-clear { border-style: dashed; color: var(--oilv-muted); margin-left: auto; }
+.oilv [hidden] { display: none !important; }
+.oilv button:focus-visible,
+.oilv [tabindex]:focus-visible { outline: 2px solid var(--brand, #3aa99f); outline-offset: 2px; }
+.oilv-glyph { width: .62em; height: .62em; fill: currentColor; opacity: .8; flex: none; }
+
+/* Diagram */
+.oilv-venn { display: block; width: 100%; height: auto; font-family: var(--font, inherit); overflow: visible; }
+.oilv-circle { fill-opacity: var(--oilv-fill); stroke-width: 1.5; stroke-opacity: .85; }
+.oilv-circle.c-vata { fill: var(--oilv-vata); stroke: var(--oilv-vata); }
+.oilv-circle.c-pitta { fill: var(--oilv-pitta); stroke: var(--oilv-pitta); }
+.oilv-circle.c-kapha { fill: var(--oilv-kapha); stroke: var(--oilv-kapha); }
+.oilv-circle.is-lit { fill-opacity: calc(var(--oilv-fill) * 1.9); stroke-width: 2.5; stroke-opacity: 1; }
+.oilv-circle.is-off { fill-opacity: .03; stroke-opacity: .3; }
+.oilv-title { font-size: 20px; font-weight: 600; }
+.oilv-title.t-vata { fill: var(--oilv-vata); }
+.oilv-title.t-pitta { fill: var(--oilv-pitta); }
+.oilv-title.t-kapha { fill: var(--oilv-kapha); }
+.oilv-sub { font-size: 11.5px; fill: var(--oilv-muted); }
+.oilv-oil { cursor: pointer; outline: none; }
+.oilv-oil text { fill: var(--oilv-ink); font-size: 14.5px; }
+.oilv-oil .glyph { fill: var(--oilv-ink); opacity: .72; }
+.oilv-oil .hit { fill: var(--oilv-ink); fill-opacity: 0; }
+.oilv-oil:hover .hit,
+.oilv-oil:focus-visible .hit { fill-opacity: .07; }
+.oilv-oil.is-selected .hit { fill-opacity: .13; }
+.oilv-oil.is-selected text { font-weight: 600; }
+.oilv-oil.is-dim { opacity: .2; }
+.oilv-oil.is-dim:hover { opacity: .55; }
+.oilv-oil .dot { display: none; fill: var(--oilv-ink); }
+
+/* Detail panel */
+.oilv-panel { margin-top: .5rem; padding-top: .75rem; border-top: 1px solid var(--oilv-line); color: var(--oilv-muted); min-height: 4.2rem; }
+.oilv .oilv-panel p { margin: 0 0 .3rem; }
+.oilv .oilv-panel h4 { margin: 0 0 .2rem; font-size: 1rem; font-weight: 600; color: var(--oilv-ink); }
+.oilv-use { color: var(--oilv-ink); }
+.oilv .oilv-tags { display: flex; flex-wrap: wrap; gap: .35rem .6rem; margin: .4rem 0 .5rem; }
+.oilv-chip { display: inline-flex; align-items: center; gap: .3rem; font-size: .8rem; color: var(--oilv-ink); }
+.oilv-chip.d-vata::before,
+.oilv-chip.d-pitta::before,
+.oilv-chip.d-kapha::before { content: ""; width: .6em; height: .6em; border-radius: 50%; background: var(--oilv-vata); }
+.oilv-chip.d-pitta::before { background: var(--oilv-pitta); }
+.oilv-chip.d-kapha::before { background: var(--oilv-kapha); }
+.oilv .oilv-notes { margin: .3rem 0 0; padding-left: 1.1rem; }
+.oilv .oilv-notes li { margin: 0 0 .15rem; }
+.oilv-notes b,
+.oilv-dosha b { font-weight: 600; color: var(--oilv-ink); }
+.oilv-dosha b.d-vata { color: var(--oilv-vata); }
+.oilv-dosha b.d-pitta { color: var(--oilv-pitta); }
+.oilv-dosha b.d-kapha { color: var(--oilv-kapha); }
+.oilv-added,
+.oilv-hint,
+.oilv-summary { font-size: .85rem; }
+.oilv figcaption { font-size: .82rem; color: var(--oilv-muted); margin-top: .7rem; line-height: 1.5; }
+
+/* Compact list, shown instead of in-circle labels on narrow screens */
+.oilv-list { display: none; }
+.oilv-group { margin: .6rem 0; }
+.oilv-groupname { font-size: .8rem; color: var(--oilv-muted); margin-bottom: .3rem; }
+.oilv-groupitems { display: flex; flex-wrap: wrap; gap: .35rem; }
+.oilv .oilv-item { padding: .25rem .6rem; font-size: .82rem; }
+.oilv .oilv-item.is-dim { opacity: .35; }
+.oilv .oilv-item.is-selected { background: var(--oilv-ink); color: var(--oilv-surface); border-color: transparent; }
+
+@media (max-width: 600px) {
+  .oilv-oil text,
+  .oilv-oil .glyph,
+  .oilv-oil .hit { display: none; }
+  .oilv-oil .dot { display: block; r: 9; }
+  .oilv-oil.is-dim { opacity: .15; }
+  .oilv-list { display: block; }
+  .oilv-rowlabel { width: 100%; }
+  .oilv-title { font-size: 28px; }
+  .oilv-sub { font-size: 16px; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .oilv-oil,
+  .oilv-circle,
+  .oilv-oil .hit { transition: opacity .18s ease, fill-opacity .18s ease, stroke-opacity .18s ease; }
+}

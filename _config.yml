@@ -129,6 +129,7 @@ exclude:
   - package.json
   - README.md
   - CLAUDE.md
+  - test
 
 # jekyll-tidy runs htmlbeautifier over generated non-HTML too. feed.xml embeds every
 # post's full HTML in CDATA, which the beautifier cannot parse -- it raises and aborts
