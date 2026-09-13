@@ -2453,12 +2453,70 @@ alone reach $+0.51$, and the calibrated gate's own LLR $-0.30$. Predicting the *
 instead reaches $+0.81$, but that rate correlates with the dose at $+0.03$, so the dose is not a restatement
 of which prompts refuse anyway.
 
+**What it is not.** Three confounds could each have produced this number without any steerability being
+decoded, and two of them are tested against a high bar, because the taps decode the confound itself *easily*
+— had the dose secretly been one of them, the correlation would have been higher, not lower. It is not
+**prompt length**: the taps predict token count at $+0.90$, yet length correlates with the dose at
+$-0.12$ and the length-residualised dose is still predicted at $+0.57$. It is not **prompt family**: the taps
+separate jailbreak templates from short attacks at $+0.77$, yet the dose is predicted *within* templates alone
+($+0.52$) and within short and bare requests alone ($+0.63$). And it is not **refusal disposition**, as above.
+Nor is it an artefact of our analysis choices: all three scorers give the same verdict (grouped CV
+$+0.54$/$+0.58$/$+0.60$, $z$ between $6.0$ and $6.5$, their out-of-fold predictions agreeing at $+0.87$), and
+the ridge penalty may vary a thousandfold for a swing of $+0.58$ to $+0.63$.
+
+**Used as a gate, the prediction selects where writing works.** This is the operational form of the result and
+the reason it matters for the system rather than only for the measurement. Ranking held-out attacks by
+predicted dose and writing only to the top fraction — predictions taken out of fold — against a
+size-matched random subset drawn 500 times at each operating point:
+
+<div class="cg-mono" markdown="1">
+
+| coverage | refusal gained per write | size-matched random | $P(\text{random} \ge \text{gate})$ | benign prompts written |
+|---|---|---|---|---|
+| 10% | **+0.242** | +0.099 | 0.002 | 2% |
+| 25% | **+0.216** | +0.096 | 0.000 | 10% |
+| 50% | **+0.143** | +0.098 | 0.008 | 23% |
+| 75% | +0.129 | +0.097 | 0.000 | 52% |
+| 90% | +0.108 | +0.097 | 0.014 | 85% |
+
+</div>
+
+The gate beats its null at every operating point, and the gain per write climbs monotonically as coverage
+tightens while the random baseline stays flat. That monotonicity is the substance: a lucky split would win at
+one threshold, whereas a real ranking of prompts by responsiveness keeps improving as you keep only its top.
+The contrast with the concept gate is the point of the whole exercise — asked *is the concept present?*, it
+writes to 154 of the 164 attacks and to **every** benign prompt in the set, gaining $+0.090$ per write; asked
+*will the write move this prompt?*, the same activations give $+0.143$ at half the writes and a tenth of the
+benign collateral. The read that answers the second question is the one a steering system should be gated on,
+and this system was not built that way.
+
 **This is one model.** Repeating the measurement on gemma-2-2b at the same magnitude, the instrument is
 sound (split-half of the unsteered rate $+0.92$) but the effect is not: attack refusal moves
 $0.46 / 0.51 / 0.53$ across the three arms against Qwen's $0.30 / 0.54 / 0.64$, mean $\lvert D\rvert$ is
 $0.07$ against $0.17$, and only 38% of doses are positive. The dose's split-half falls to $+0.53$, below the
-$0.6$ we had fixed in advance, and prediction on that unreliable target reaches only $+0.20$ at $z=2.2$. So
-the claim below is Qwen-specific, and whether it survives a second model is open. The greedy measures did agree strongly on the
+$0.6$ we had fixed in advance, and prediction on that unreliable target reaches only $+0.20$ at $z=2.2$.
+
+**Doubling the samples settles it, and not in our favour.** Because the reliability bar had failed, the
+pre-registered response was to re-sample the same prompts with the same concept fit and merge to $K=32$.
+Attenuation theory makes a sharp prediction here: a *more* reliable target should make a real but noisy
+correlation **clearer**. The $K{=}16$ value of $+0.20$ implies a true correlation of $0.24$, which at
+$K{=}32$'s reliability should surface as $+0.215$. It fell instead to
+$+0.078$, $z=0.9$ — no effect. A signal masked by measurement noise sharpens when
+you measure better; noise does not. The supporting pattern agrees: cross-family transfer collapsed from
+$+0.12/+0.09$ to $+0.03/-0.02$, and the fitted direction's split-half self-consistency fell to
+$0.04$–$0.05$. There is no direction there to find. So the honest verdict on gemma-2-2b is not
+"underpowered" but **no detectable per-prompt dose signal**, at a magnitude which barely moves it.
+
+One methodological point generalises beyond this paper, and we got it right only because we wrote the
+prediction down first. **A split-half reliability gate is not comparable across sample sizes.** At $K{=}32$ it
+compares two 16-sample halves, so it measures the reliability of a 16-sample estimate — a quantity the
+$K{=}16$ run had *already* measured via Spearman–Brown. gemma duly "passed" the reliability bar at $K{=}32$
+($0.69$) having failed it at $K{=}16$ ($0.53$), purely because the statistic got easier; we predicted the
+value to three decimals in advance ($0.694$ predicted, $0.692$ observed) for exactly this reason. Anyone
+gating a decision on measurement reliability should compare Spearman–Brown-corrected full-sample figures, or
+split-halves at matched half-size, never the raw statistic across different $K$.
+
+The greedy measures did agree strongly on the
 *aggregate* effect all along — the generated refusal rate moves 64% → 35% → 79% and the
 continuation score moves the same way — so
 <a class="sref" href="#410-gate-conditioned-steering">§4.10</a>'s group-level conclusions never depended on
@@ -2469,7 +2527,8 @@ predictable from the prompt's activations far above a matched null, that most of
 the concept direction the system already computes, and that the calibrated gate is a lossy readout of it on three of the four models tested, gemma-2-2b being the exception.
 We claim, on one model, that per-prompt steerability of *behaviour* is measurable once the instrument is
 sampled rather than greedy, and predictable from the prompt's activations above a permutation null. We do
-**not** claim that this generalizes: it failed to reproduce on the second model tested. What would settle it is a second magnitude, so
+**not** claim that this generalizes: it **did not** reproduce on the second model tested, decisively rather
+than marginally. What would settle it is a second magnitude, so
 each prompt's dose is a fitted slope rather than a two-point difference, and more base models — the gemma
 result shows that a magnitude which moves one model appreciably can sit at the sampling-noise floor on
 another, and at that floor nothing is predictable because nothing reliable is being measured. Two further
@@ -2481,7 +2540,16 @@ is at issue, never direction.
 **Prior work.** The nearest result predicts whether an intervention will under- or over-steer from internal
 states, but requires running the steered pass and decoding several tokens, predicts a three-class label, and
 uses features that are explicitly alignments with the steering vector <span class="cite" data-ref="When is Your LLM Steerable? arXiv:2606.11599."><a href="#ref-asteer">[24]</a></span>. Others predict per-instance
-intervention properties from the prompt alone but target which *layer* to steer <span class="cite" data-ref="Billa (2026). Predicting Where Steering Vectors Succeed. arXiv:2604.15557."><a href="#ref-billa">[22]</a></span>. The methodological caution this section ends on is the part we would most want a
+intervention properties from the prompt alone but target which *layer* to steer <span class="cite" data-ref="Billa (2026). Predicting Where Steering Vectors Succeed. arXiv:2604.15557."><a href="#ref-billa">[22]</a></span>. A recent
+result does forecast steering outcomes from *unsteered* representations, but predicts which other behaviours
+an intervention will disturb, across a taxonomy of behaviours, rather than how far a given prompt will move
+<span class="cite" data-ref="Forecasting Side Effects of Activation Steering. arXiv:2608.11227."><a href="#ref-sideeffects">[27]</a></span>.
+We should also be clear about what is ours in the *measure* itself: the first-token refusal-minus-compliance
+statistic this section is built on is a basket-sum variant of the refusal–affirmation logit gap, which was
+introduced as a per-prompt safety margin and validated across thirteen models
+<span class="cite" data-ref="Li, T.-L., & Liu, H. (2025). Logit-Gap Steering: A Forward-Pass Diagnostic for Alignment Robustness. arXiv:2506.24056."><a href="#ref-logitgap">[26]</a></span>.
+The instrument is theirs; the question we ask of it — whether a prompt's *response* to a write is predictable
+before the write — is the part we could not find in the literature. The methodological caution this section ends on is the part we would most want a
 reader to take away, and it is not the one we first drew. A cheap first-token proxy turned out to track the
 sampled behavioural dose per prompt at $+0.61$; what failed was the *instrument we validated it against* — a
 single greedy generation scored by a word list. An outcome measure whose own reliability is never checked
@@ -2491,6 +2559,14 @@ controls are
 [`steerability_controls.py`](https://github.com/NISH1001/conceptgate/blob/main/scripts/steerability_controls.py),
 and the validation is
 [`eval_behaviour_check.py`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_behaviour_check.py).
+The sampled behavioural instrument, its slice driver and its analysis are
+[`eval_behaviour_dose.py`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_behaviour_dose.py),
+[`run_behaviour_dose.sh`](https://github.com/NISH1001/conceptgate/blob/main/scripts/run_behaviour_dose.sh) and
+[`analyze_behaviour_dose.py`](https://github.com/NISH1001/conceptgate/blob/main/scripts/analyze_behaviour_dose.py);
+every sampled continuation is stored with the results, so each number above reproduces without regenerating.
+The read itself ships in the library as an opt-in `OutcomeHead`, fitted by `cg.learn_outcome(...)` and used as
+`Steer(when=Both(Trigger.FIRE, Predicted("dose", τ)))` — labelled, in its documentation, with exactly the
+one-model evidence reported here.
 
 ## 5. Discussion
 
@@ -2589,19 +2665,36 @@ depth fusion, bank amortization, and any gain from conditioning the write on the
 
 **Measured here and standing:** the bidirectional write and its magnitude scaling; the register
 fragility; the negative results listed in
-<a class="sref" href="#14-contributions">§1.4</a>; and the caution about cheap outcome measures.
+<a class="sref" href="#14-contributions">§1.4</a>; the caution about cheap outcome measures; and — on one
+model — that per-prompt steerability is measurable and predictable before generation, which is the only
+claim here we believe to be new.
 
-**Open, and not answerable with the instruments we have.** Whether the *size* of a write's effect on a
-particular prompt can be read from that prompt beforehand. The quantity is strongly predictable on a
-first-token proxy — $\rho=+0.81$ on Qwen2.5-0.5B and +0.61
-on gemma-2-2b at the largest magnitude, against a permutation null of -0.00 ±
-0.10 — and most of that predictability sits inside the concept direction the system
-already computes. But the proxy does not track behaviour per prompt, and the two behavioural measures we
-built to check it correlate with each other at -0.01, so there is
-currently nothing stable to validate against (<a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>). Answering it needs a per-prompt behavioural
-outcome: many more prompts, several magnitudes so each prompt's response is a fitted slope rather than a
-two-point difference, and a judged or classifier-scored outcome instead of a token basket. That is the
-experiment we would run next, and until it exists the question stays open rather than answered either way.
+**Answered, on one model, with an instrument we had to build first.** Whether the *size* of a write's effect
+on a particular prompt can be read from that prompt beforehand. We previously listed this as unanswerable,
+because the two behavioural measures built to check it agreed with each other at
+-0.01. That was a fact about those measures, not about the
+quantity: neither had ever been checked for reliability, and one of them took three distinct values per
+prompt. Sampling the outcome instead — sixteen continuations per arm, scored by two independent instruments —
+makes the per-prompt dose reliable ($+0.66$/$+0.70$ split-half, the two scorers agreeing at $+0.88$), and on
+Qwen2.5-0.5B it is then predictable from the prompt's activations at $+0.58$ out of fold against a
+permutation null of $-0.015 \pm 0.089$, $z=6.7$. It is not prompt length, not prompt family, not refusal
+disposition, and not an artefact of the scorer or the ridge penalty; used as a gate it beats size-matched
+random selection at every operating point
+(<a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>). This is the one result in
+this report we would defend as new, and the read now ships in the library as an opt-in feature carrying
+exactly that one-model evidence.
+
+**Still open: whether it is a fact about language models or a fact about Qwen.** It did not reproduce on
+gemma-2-2b, and the reason is specific rather than mysterious. At the magnitude we used, the write moves that
+model's refusal from $0.46$ to $0.53$ where it moves Qwen's from $0.30$ to $0.64$; with almost no per-prompt
+variance in the outcome there is nothing for a predictor to find, and doubling the sample count made the
+apparent correlation *fall* rather than rise, which is how noise behaves and attenuated signal does not. The
+concept direction is no less special on gemma — it outperforms a matched random direction by the same
+$1.5$–$1.8\times$ on both models — its effect is simply smaller. So the experiment that would settle the
+question is a sweep over write *magnitude* on each model, so that every model is measured where its write
+actually bites and each prompt's response becomes a fitted slope rather than a two-point difference. Until
+that exists, the honest summary is: measurable and predictable on one model, absent on a second where the
+intervention barely acts, and untested everywhere else.
 
 
 ## 6. Limitations and threats to validity
@@ -2712,6 +2805,7 @@ fails are both visible in them.
 24. <a id="ref-asteer"></a>*When is Your LLM Steerable?* (2026). arXiv:2606.11599.
 25. <a id="ref-crh"></a>*The Cylindrical Representation Hypothesis for Language Model Steering.* (2026). arXiv:2605.01844.
 26. <a id="ref-logitgap"></a>Li, T.-L., & Liu, H. (2025). *Logit-Gap Steering: A Forward-Pass Diagnostic for Alignment Robustness.* arXiv:2506.24056.
+27. <a id="ref-sideeffects"></a>*Forecasting Side Effects of Activation Steering.* (2026). arXiv:2608.11227.
 </div>
 
 ## Citation
