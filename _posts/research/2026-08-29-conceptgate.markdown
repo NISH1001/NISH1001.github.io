@@ -148,14 +148,23 @@ most 0.007 held-out AUC.
 (iv) Matched contrastive negatives reduce rather than improve accuracy; generalization to unseen harm
 categories is only partial; and steering with the concept bank's own harm-category directions lowers refusal rather than raising it (80% unsteered, 68% gated, 65% blanket), so those entries supply a write direction pointing opposite to a guardrail. (v) The one capability that distinguishes an internal adapter from a text
 classifier is **steering** — writing a direction fit from the same few-shot examples back into the residual stream — which we
-measure as a graded dose-response bounded by the competence of the base model. (vi) The write rule itself is standard activation addition, and conditioning it on an activation-read detector is prior work. Measured with prompts formatted as the model expects, the composition adds nothing on the read side of that: the model refuses 94% of attacks unsteered, the gate fires on 97% of them and so selects nothing a size-matched random subset does not, and steering *away* from the jailbreak concept **lowers** refusal by 22 points — the few-shot direction is a refusal lever, roughly 1.6–2.7× a matched-norm random direction, and which sign is a guardrail is the operator's choice. Whether prompts are formatted at all turns out to decide the sign of every effect in this experiment, which is a caveat for steering evaluations generally (<a class="sref" href="#410-gate-conditioned-steering">§4.10</a>). (vii) A different question — whether the size of a write's effect on a *particular* prompt is readable from
+measure as a graded dose-response bounded by the competence of the base model. (vi) The write rule itself is standard activation addition, and conditioning it on an activation-read detector is prior work. Measured with prompts formatted as the model expects, the composition adds nothing on the read side of that: the model refuses 94% of attacks unsteered, the gate fires on 97% of them and so selects nothing a size-matched random subset does not, and steering *away* from the jailbreak concept **lowers** refusal by 22 points — the few-shot direction is a refusal lever — about three times a matched-norm random direction on this first-token measure — and which sign is a guardrail is the operator's choice. Whether prompts are formatted at all turns out to decide the sign of every effect in this experiment, which is a caveat for steering evaluations generally (<a class="sref" href="#410-gate-conditioned-steering">§4.10</a>). (vii) A different question — whether the size of a write's effect on a *particular* prompt is readable from
 that prompt beforehand — produced a strong-looking result on a first-token proxy ($\rho=+0.81$
 against a permutation null of -0.00 ± 0.10) that its own controls
 then cut down: most of the signal sits inside the concept direction the gate already computes
 ($+0.64$ from three projections against the gate's
 $+0.51$), and validation against behaviour fails at the prompt level — two independent
-behavioural measures correlate with each other at -0.01, so there is
-nothing stable to validate against. The prompt-level claim is withdrawn; what is left is the aggregate lever, behaviourally confirmed at 64% → 35% → 79% generated refusal, and a caution about cheap outcome measures (<a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>). Every mechanism used here is drawn from prior work, and so is the composition. What remains is an unusually thorough account of where a few-shot concept adapter does and does not work, a bidirectional write measured on generated text, and two cautions for anyone evaluating a steering intervention. A reference implementation is available at
+behavioural measures correlate with each other at -0.01 — which we first
+read as a null. It was not. Neither of those measures had ever had its own reliability checked, and one took
+three distinct values per prompt. Sampling the outcome instead (sixteen continuations per arm, two
+independent scorers) makes the per-prompt dose reliable — split-half $+0.66$/$+0.70$, the scorers agreeing at
+$+0.88$ — and on Qwen2.5-0.5B it is then **predictable from the unsteered prompt** at grouped
+$\rho=+0.58$ against a permutation null of $-0.015 \pm 0.089$, $z=6.7$. The gate the system already computes
+reads that same quantity at only $|0.30|$, and with the *wrong sign*. Used as a steering trigger, predicted
+dose beats a size-matched random subset at every coverage from 10% to 90%, lifting the refusal gained per
+write from $+0.108$ to $+0.242$ while writing 10–23% of benign prompts where the concept gate writes to all
+of them. It does **not** replicate on gemma-2-2b, where the same write barely moves refusal at all
+(<a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>). Every mechanism used here is drawn from prior work, and so is the composition. What remains is an unusually thorough account of where a few-shot concept adapter does and does not work, a bidirectional write measured on generated text, one candidate-novel positive finding — that per-prompt steerability is measurable and predictable before generation, on one of the two models tested — and three cautions for anyone evaluating a steering intervention. A reference implementation is available at
 [github.com/NISH1001/conceptgate](https://github.com/NISH1001/conceptgate).
 </div>
 
@@ -326,12 +335,16 @@ This paper evaluates each component of ConceptGate against a fair baseline and r
 2. **A measured, bidirectional write on a frozen model.** A direction fit from eight hand-written
    examples, added at 8% of the residual norm, moves refusal on generated text from
    64% unsteered to 35% steering away from the concept and
-   79% steering toward it — roughly 1.6–2.7× a matched-norm random direction, at every
-   magnitude tested and on all four models (<a class="sref" href="#410-gate-conditioned-steering">§4.10</a>, <a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>). This is the refusal direction of Arditi et al.
+   79% steering toward it (Qwen2.5-0.5B, one magnitude, greedy decoding;
+   <a class="sref" href="#410-gate-conditioned-steering">§4.10</a>). It stays a stable multiple of a
+   matched-norm random direction, though the multiple depends on which instrument is doing the measuring:
+   ≈3× on the first-token lever, 1.6–2.7× on the first-token dose across four models and three magnitudes,
+   and 1.5–1.8× on sampled behaviour on both models measured that way
+   (<a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>). This is the refusal direction of Arditi et al.
    recovered few-shot and training-free rather than a mechanism of ours, and which sign counts as a
    guardrail is the operator's choice.
 3. **The fragility that bounds it.** The same eight-example gate fires on 18% of benign prompts in the
-   register it was fitted on and **96%** on benign prompts from another — a ninefold swing in false
+   register it was fitted on and **96%** on benign prompts from another — a fivefold swing in false
    positives from the prompt distribution alone, with concept and threshold unchanged (<a class="sref" href="#410-gate-conditioned-steering">§4.10</a>). On the
    write side a false fire rewrites the answer rather than raising a flag.
 4. **A caution about unvalidated outcome measures.** We reported that a first-token refusal proxy carried
@@ -339,17 +352,32 @@ This paper evaluates each component of ConceptGate against a fair baseline and r
    Neither had been checked for reliability. Sampled properly they agree at +0.88, and the proxy tracks them
    at +0.61 — the null was the measurement's, not the model's. An outcome measure whose own reliability is
    never established can manufacture a null as easily as a result (<a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>).
-5. **A calibrated, few-shot, dual-mode adapter, and an honest account of it.** One object learns a concept
+5. **One candidate-novel positive result: a prompt's steerability is readable before you steer it.** With
+   that sampled instrument in hand, how far a fixed write moves a *particular* prompt is predictable from
+   that prompt's unsteered tap activations, before anything is generated — grouped
+   $\rho=+0.58$ against a permutation null of $-0.015 \pm 0.089$, $z=6.7$. The
+   gate the system already computes reads the same quantity at only $|0.30|$, and with the *wrong sign*:
+   the more confident the concept read, the less the write moves that prompt. Three raw projections onto
+   the concept direction reach $+0.51$, so the information was inside ConceptGate's own directions and the
+   calibrated gate was discarding it. As a steering trigger it beats a size-matched random subset at every
+   coverage from 10% to 90%, and writes 10–23% of benign prompts where the concept gate writes to 100%.
+   It does **not** replicate on gemma-2-2b, where the same write barely moves refusal, so this is one model
+   of two (<a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>).
+6. **A calibrated, few-shot, dual-mode adapter, and an honest account of it.** One object learns a concept
    from ~10 examples in milliseconds and kilobytes, detects it with a calibrated fire/abstain/pass gate,
+   optionally carries a third read fit to a measured outcome (opt-in, and the only part that needs labels),
    and supplies a write direction, with a small well-characterized parameter budget
    (<a class="sref" href="#54-what-it-actually-costs">§5.4</a>) and no training.
-6. **Reproducible interactive figures.** The figures below replay the underlying model runs, so the
+7. **Reproducible interactive figures.** The figures below replay the underlying model runs, so the
    mechanism can be examined directly rather than only described.
 
-One caveat applies throughout: **no individual mechanism here is new.** Probes,
+One caveat applies throughout: **no individual detection or steering mechanism here is new.** Probes,
 diff-of-means directions, activation steering, Gaussian/mixture density scoring, circuit-breaker
 reroute, and forward-hook truncation are all established. The contribution is their specific
-composition and the empirical measurement of it.
+composition and the empirical measurement of it — with one exception, arrived at late and empirically: a
+trigger fit to the write's *measured per-prompt effect* rather than to concept membership
+(<a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>), which we could not place
+in prior work.
 
 ## 2. Related work
 
@@ -371,13 +399,17 @@ central limitation (it can only read text, never write activations) is the negat
 what ConceptGate is *for*. The fifth thread is about **cost**: early-exit and conditional computation
 (<a class="sref" href="#25-early-exit-and-conditional-compute">§2.5</a>) is where our truncated forward and the compute–accuracy frontier come from.
 
-The element that ties these borrowings into one system — and the only part specific to this work — is
-the pair of design commitments stated in the introduction: read the concept
+The element that ties these borrowings into one system — and the part specific to this work — is
+the set of design commitments stated in the introduction. Two are architectural: read the concept
 *across depth* rather than at a single chosen layer, and fit the detector and the steerer *from one set
 of examples* so they act in the two directions of information flow — closely related directions rather
 than one shared vector (per-tap cosine 0.45–0.83,
 <a class="sref" href="#310-steering-the-write-side">§3.10</a>) — so that a frozen model can be turned into
-a few-shot, calibrated, read-and-write concept adapter without any training. We close the section
+a few-shot, calibrated, read-and-write concept adapter without any training. A third commitment arrived
+late and empirically, once the first two had been measured and found wanting: fit a further read not to
+concept membership at all but to the *measured effect of the write itself*, and trigger on that
+(<a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>). That is the one of the
+three we could not place in prior work. We close the section
 (<a class="sref" href="#26-positioning">§2.6</a>) by making that positioning explicit, including the adversarial caveat that bounds
 the whole class of method.
 
@@ -503,7 +535,9 @@ free, so it is table stakes for latent-space methods rather than an advantage ov
 Every subsection above names a component ConceptGate *uses*, and the plumbing beneath them — reading
 and writing activations through forward hooks, running a partial forward — is commodity engineering,
 not method. The one-paragraph stance we keep in view for the rest of the paper is therefore
-deliberately modest: ConceptGate introduces **no new mechanism**. It is a specific composition —
+deliberately modest: ConceptGate introduces **no new detection or steering mechanism** — its one
+mechanical addition, a trigger fit to the write's measured per-prompt effect, was found late and is
+reported in <a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>. Otherwise it is a specific composition —
 few-shot, calibrated, multi-tap, and *dual-mode* (read and write) over a frozen model's own middle
 layers, with the write conditioned on the read — and its worth is an empirical question, settled by the
 map in
@@ -902,7 +936,11 @@ executes the returned decision. Three actions ship:
   `Abort`'s post-hoc marker.
 
 When each acts is a shared `Trigger`: `FIRE` (only on a confident firing), `FIRE_OR_UNSURE` (also on
-an abstain, fail-closed), or `ALWAYS` (unconditionally — the topic-steering case). A single `run`
+an abstain, fail-closed), or `ALWAYS` (unconditionally — the topic-steering case). Two further triggers
+compose with these and came out of <a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>:
+`Predicted(name, τ)` fires on the prediction of an outcome head rather than on concept membership, and
+`Both(a, b)` fires only when two triggers agree — so *present **and** predicted to move* is expressible.
+That path is opt-in, needs labels at fit time, and carries the one-model evidence of §4.11. A single `run`
 method is the driver: it takes the cheap input verdict, asks the action, and executes — halting,
 steering the generation, or seeding and continuing. Detection-only use needs no action at all; it is
 the pure measurement primitive that `run` is built on.
@@ -920,7 +958,7 @@ model as the concept allows.
 
 ### 3.13 The lifecycle and library
 
-Everything above is exposed as five small operations, and it is worth walking them in order both
+Everything above is exposed as six small operations, and it is worth walking them in order both
 because the ordering *is* the method and because it is how the reference implementation is actually
 used. The whole surface is: **load** a model and choose where to tap, **learn** a concept from
 examples, **calibrate** its operating point, **check** a prompt (pure detection), and **run** a prompt
@@ -941,6 +979,7 @@ freely, and neither affects the learned concept.
 ```python
 from conceptgate import ConceptGate, LoadMode
 from conceptgate.actions import Abort, Steer, Emit, Trigger
+from conceptgate import Both, Predicted
 
 # FULL: can detect AND generate (needed for steering / emit)
 cg = ConceptGate.from_pretrained("Qwen/Qwen2.5-0.5B-Instruct", layers=[8, 12, 16])
@@ -987,6 +1026,12 @@ cg.run(prompt, action=Steer(concept="food", fraction=0.06, when=Trigger.ALWAYS))
 
 # workflow 4 -- conditional steering: steer AWAY only when the concept is detected
 cg.run(prompt, action=Steer(concept="jailbreak", fraction=-0.06, when=Trigger.FIRE))
+
+# workflow 5 -- outcome-gated steering: write only where the write is predicted to move the prompt.
+# `measured_dose[i]` is an effect you measured for prompts[i]; labels are needed here and nowhere else.
+cg.learn_outcome("dose", prompts, measured_dose)
+cg.run(prompt, action=Steer(concept="jailbreak", fraction=-0.08,
+                            when=Both(Trigger.FIRE, Predicted("dose", 0.15))))
 ```
 
 The division of labour is worth stating plainly, because it is the whole memory-efficiency argument in
@@ -1001,14 +1046,16 @@ free on the way through.
 
 ## 4. Experiments and results
 
-We evaluate on GPT-2 (12 blocks), Qwen2.5-0.5B-Instruct (24 blocks), and gemma-2-2b-it (26 blocks) —
+We evaluate on GPT-2 (12 blocks), Qwen2.5-0.5B-Instruct (24 blocks), and gemma-2-2b-it (26 blocks),
+joined in <a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>'s first-token
+sweep by SmolLM2-360M-Instruct and SmolLM2-1.7B-Instruct —
 all small enough to run and re-run on a laptop, which is the point, since the whole method is meant to
 be cheap. The subsections follow the method's own order: the reading path first
 (<a class="sref" href="#41-depth-fusion-on-synthetic-data">§4.1</a>–<a class="sref" href="#45-the-computeaccuracy-frontier">§4.5</a>),
 then the write side (<a class="sref" href="#46-steering-across-models">§4.6</a>), then cost
 (<a class="sref" href="#48-an-efficiency-evaluation-of-conceptgate">§4.8</a>). That is deliberately
 *not* the order of the contributions — the one capability we defend as specific to the method is
-steering, which appears sixth. The negative results are not buried.
+steering, which appears sixth; the one result we defend as *new* is the per-prompt dose prediction of <a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>, which appears last. The negative results are not buried.
 
 ### 4.1 Depth fusion on synthetic data
 
@@ -1758,8 +1805,8 @@ response.</p>
 
 The concept direction is a directional lever with the same sign everywhere: away from the concept lowers
 the refusal logit, toward it raises it, on attacks and benign prompts alike. Its lever component is about
-**three times** that of a random direction of the same norm — 1.26 against 0.45 on attacks, larger on 91%
-of individual prompts; 1.01 against 0.36 on benign prompts, larger on 76%. That is clearly above the
+**three times** that of a random direction of the same norm — 1.26 against 0.42 on attacks, larger on 91%
+of individual prompts; 0.99 against 0.27 on benign prompts, larger on 76%. That is clearly above the
 floor and not vastly above it. The sign-independent component is small for both (−0.37 concept, −0.14
 random on attacks), and there is no lever-versus-perturbation split by gate status: the three attacks the
 gate passed moved as much as the ninety-three it fired on, though at $n=3$ that is indicative only. The
@@ -1784,11 +1831,11 @@ is better measured on a set with headroom. On the 164 attacks of <a class="sref"
 harmful request, plus short framings and bare requests — the refusal rate over 40 greedily generated tokens is
 **64% unsteered, 35% steering away from the concept, and
 79% steering toward it**. A single direction fit from eight hand-written framings, added at 8%
-of the residual norm, moves generated refusal across a 43-point range in whichever
+of the residual norm, moves generated refusal across a 43-point range (78.7% → 35.4%) in whichever
 direction the operator chooses. A teacher-forced measure — the log-probability of canonical refusal
 continuations minus compliance ones — moves the same way
 (+1.08 → +0.88 → +1.12).
-This is the strongest behavioural statement in the report, and it is a restatement of Arditi et al. at eight
+This is the strongest *aggregate* behavioural statement in the report; <a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a> measures the same write prompt by prompt with a sampled instrument, and it is a restatement of Arditi et al. at eight
 examples rather than anything new.
 
 **Limits.** Thirty-two prompts for the arm table, three resamples, one 0.5B model, one magnitude, a refusal
@@ -1803,8 +1850,9 @@ arms. Anything that would have rested on such differences is not claimed here. T
 <a class="sref" href="#410-gate-conditioned-steering">§4.10</a> shows a write that moves refusal by a wide margin in aggregate. A fixed write does not move every
 prompt equally, though, so it is natural to ask whether the size of the swing on a *particular* prompt — call
 it that prompt's **dose** — can be read off the prompt before anything is generated. This section reports an
-affirmative-looking answer, the controls that shrank it, and the validation that stopped it from being a
-claim about behaviour at all. It is included because the sequence is more useful than the result.
+affirmative-looking answer on a cheap proxy, the controls that shrank it, a behavioural validation that
+appeared to destroy it, and a properly sampled instrument that restored it on one model and refuted it on a
+second. The sequence is at least as useful as the result.
 
 **Design.** 120 held-out jailbreak templates from the dataset's test split, each with one of twelve plain
 harmful requests appended; the 32 short framed attacks; the twelve bare requests; and 48 real benign prompts.
@@ -2344,7 +2392,7 @@ one attack prompt; the vertical axis is its measured dose on the first-token out
 calibrated LLR, the score the system already computes. Middle: a linear read of the prompt's projection onto
 the concept's own steering direction at the three taps — three numbers. Right: a ridge on all 2,688
 activation dimensions, out-of-fold. Same prompts, same activations, same forwards. The middle panel is the
-point: what the ridge finds was largely available from the concept direction, and the gate's LLR reads it inefficiently. Qwen2.5-0.5B shown; the same gap appears on SmolLM2-360M and SmolLM2-1.7B, but not on gemma-2-2b.</figcaption>
+point: what the ridge finds was largely available from the concept direction, and the gate's LLR reads it inefficiently — and, on the behavioural target of <a class="sref" href="#figure-17">Figure 17</a>, with the opposite sign. Qwen2.5-0.5B shown; the same gap appears on SmolLM2-360M and SmolLM2-1.7B, but not on gemma-2-2b.</figcaption>
 </figure>
 
 **Two claims from an earlier analysis of this data did not survive their own controls.** We had measured the
@@ -2411,9 +2459,9 @@ direction rather than an artifact of one write size. That also reframes the spli
 earlier: 0.19 was computed on *half* the prompts each time and measures sampling variability across
 prompts, not how precisely the direction can be estimated. With the prompt set fixed the direction is well
 determined; whether it reproduces on a different prompt set is the open question, and the behavioural
-validation below bounds what any of this is a statement about.
+validation below bounds — and, on one model, confirms — what any of this is a statement about.
 
-#### The outcome does not track behaviour per prompt
+#### Judging the outcome against behaviour: the ruler, not the signal
 
 Everything above is measured on a first-token log-odds over two hand-chosen token baskets — five
 refusal-opening ids against thirteen compliance-opening ones. That the gap itself is a meaningful
@@ -2492,7 +2540,8 @@ and this system was not built that way.
 
 **This is one model.** Repeating the measurement on gemma-2-2b at the same magnitude, the instrument is
 sound (split-half of the unsteered rate $+0.92$) but the effect is not: attack refusal moves
-$0.46 / 0.51 / 0.53$ across the three arms against Qwen's $0.30 / 0.54 / 0.64$, mean $\lvert D\rvert$ is
+$0.46 / 0.51 / 0.53$ across the three arms against Qwen's $0.35 / 0.56 / 0.65$ on the same
+scorer, mean $\lvert D\rvert$ is
 $0.07$ against $0.17$, and only 38% of doses are positive. The dose's split-half falls to $+0.53$, below the
 $0.6$ we had fixed in advance, and prediction on that unreliable target reaches only $+0.20$ at $z=2.2$.
 
@@ -2741,7 +2790,7 @@ dose against the dose predicted from its unsteered activations by a ridge on the
 folds grouped by harmful request. The gate the system already computes reaches only
 $-0.30$ on the same target, and with the opposite sign. <strong>Middle:</strong>
 ranking attacks by predicted dose and writing only to the top fraction, against a size-matched random subset
-drawn 400 times at each point. The gain per write rises as coverage tightens while the random baseline stays
+drawn 500 times at each point. The gain per write rises as coverage tightens while the random baseline stays
 flat — a lucky split would beat the null at one threshold; a real ranking improves as you keep only its top.
 <strong>Right:</strong> why this does not replicate on a second model. The same write at the same magnitude
 moves gemma-2-2b's refusal across the three arms far less than Qwen's, so there is almost no per-prompt
@@ -2820,16 +2869,36 @@ direction across three magnitudes and two models. The same object is fragile in 
 before anyone deploys one: its false-positive rate moves from 18% to 96% with the register of the benign
 traffic. Around those sit a set of negative results that were expensive to obtain and are cheap to reuse,
 and one caution about measurement: an outcome instrument whose reliability is never checked can manufacture a null as easily as a result.
-The contribution is the measurement and its honesty, not the machinery.
+
+One positive result sits apart from these, and it is the only thing here we would defend as new. Asked not
+*is the concept present?* but *how far will a write move this prompt?*, the same three tapped activations
+answer at grouped $\rho=+0.58$ against a permutation null, $z=6.7$ — while the system's own calibrated gate
+manages $|0.30|$ on that target and with the opposite sign. It is operationally useful rather than merely
+statistical: ranking prompts by predicted dose and writing only to the top beats a size-matched random
+subset at every coverage, at a fraction of the benign collateral. It holds on one model and is absent on the
+second, where the write barely moves the model at all
+(<a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>).
+
+The contribution is mostly the measurement and its honesty rather than the machinery — with that one
+exception.
 
 ### 5.2 Detection is a commodity; steering is prior art; what the corrected write shows
 
 The structural finding stands: a text classifier can match or exceed ConceptGate at detection while being
 simpler to deploy, so if detection were the objective there would be little reason to prefer an internal
 method. It is tempting to say next that the read side's contribution is deciding *when* to write, and that
-gating the write therefore beats writing everywhere. The measurements do not support it. Conditioning a write
+gating the write therefore beats writing everywhere. The measurements do not support it *for the concept
+read*, which is the read this system was built around. Conditioning a write
 on an activation detector is CAST and DSAS <span class="cite" data-ref="Lee, B. W., et al. (2024). Programming Refusal with Conditional Activation Steering. ICLR 2025. arXiv:2409.05907."><a href="#ref-cast">[15]</a></span><span class="cite" data-ref="Dynamic Steering with Activation-Space Gating (DSAS). arXiv:2512.03661."><a href="#ref-dsas">[16]</a></span>, and on correctly formatted prompts the gate fires
 on 97% of attacks and selects nothing a size-matched random subset does not (<a class="sref" href="#410-gate-conditioned-steering">§4.10</a>).
+
+A read fit to something else is a different matter. Fit to the write's own measured per-prompt effect
+rather than to concept membership, the same activations do select: ranking attacks by predicted dose beats a
+size-matched random subset at every coverage tested, raising the refusal gained per write from
+$+0.108$ to $+0.242$ while writing a fraction of the benign traffic
+(<a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>). So the honest form of
+the negative is narrower than it first appeared: gating on *presence* adds nothing, because presence is
+nearly constant on formatted attacks; gating on *predicted effect* does.
 
 What the corrected write shows is smaller and older: a direction fit from eight hand-written framings, added
 at 8% of the residual norm, moves the instruct model's refusal by about 22 points, in either direction
@@ -2854,7 +2923,10 @@ fine-tuning pays seconds-to-minutes and a fresh forward per concept — but that
 with a linear-probe bank, so what remains specific to ConceptGate is not the reading cost but that each
 entry comes with a write direction fit from the same data — a measured behavioural control for jailbreak
 framing and topical concepts, a reversal for the harm categories
-(<a class="sref" href="#410-gate-conditioned-steering">§4.10</a>). Second, the memory-minimal load mode is
+(<a class="sref" href="#410-gate-conditioned-steering">§4.10</a>) — and, where labels for a measured
+outcome exist, a third read fit to that outcome
+(<a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>), which is the only place
+the read side is shown to select better than a size-matched random subset. Second, the memory-minimal load mode is
 detection-only, and detection is the commodity half of the system, whereas the distinguishing
 capability, steering, requires the full network. The cost argument therefore applies to the guardrail
 rather than to the steerer. The defensible claim is that a read-and-write adapter can be added to a
@@ -2895,11 +2967,12 @@ false-positive rate collapsing off-distribution; harmfulness and refusal as dist
 cited where it appears.
 
 **Measured here and found not to belong to ConceptGate:** detection accuracy, single-concept efficiency,
-depth fusion, bank amortization, and any gain from conditioning the write on the read.
+depth fusion, bank amortization, and any gain from conditioning the write on the *concept* read — the
+outcome-fitted read below is the exception, and is the one positive result we keep.
 
 **Measured here and standing:** the bidirectional write and its magnitude scaling; the register
 fragility; the negative results listed in
-<a class="sref" href="#14-contributions">§1.4</a>; the caution about cheap outcome measures; and — on one
+<a class="sref" href="#14-contributions">§1.4</a> (item 1); the caution about cheap outcome measures; and — on one
 model — that per-prompt steerability is measurable and predictable before generation, which is the only
 claim here we believe to be new.
 
@@ -2953,7 +3026,7 @@ add gemma-2-2b for the multi-concept, generalization, and read/write-cosine resu
 on an Apple M4 GPU (MPS). That choice bounds how
 far the numbers extend. The qualitative findings — detection is a commodity, and the cost trade-off is real and
 model-dependent — hold on all three models we tested (the base model bounding steering quality is measured on GPT-2 and Qwen in §4.6; gemma-2-2b is steered in <a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>), and gemma-2-2b is the useful data point here: it is roughly five times Qwen2.5-0.5B and the
-qualitative pattern is unchanged, with the read/write cosine even slightly higher ($\approx0.6$ against
+qualitative pattern is unchanged *on the read side*, with the read/write cosine even slightly higher ($\approx0.6$ against
 $\approx0.5$). That is evidence, not proof, and 2B is not 8B; we expect the qualitative findings to
 survive to the 2–8B instruct scale on the strength of it, while the specific AUCs, error rates, and knee
 locations should be re-measured there before being quoted. Within these small models, the detection numbers are
@@ -2981,7 +3054,22 @@ generally <span class="cite" data-ref="Latent Adversarial Detection. arXiv:2604.
 the topic also degrades fluency, and generated text drifts out of the clean-prompt distribution as it
 grows — degenerate repetition alone can nudge a benign continuation across the gate — so a deployed
 system must tune its operating point against false-refusal and output quality, not against recall in
-isolation. None of these limitations is incidental; each corresponds to a parameter that the operating
+isolation.
+
+A fourth cluster bounds the one positive result. The per-prompt dose finding of
+<a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a> holds on **one model of
+the two tested**, and the model where it fails is not a mystery but a warning: at the magnitude we used the
+write barely moves gemma-2-2b at all, so a result of this kind is only as portable as the intervention's
+effect size on the model in question. Within the model where it does hold, the concept is fit once per
+model and the three resamples share a fixed prompt set, so the effective number of independent replicates
+is **one**; there is a single write magnitude, so each prompt's dose is a two-point difference rather than a
+fitted slope; and 98% of doses share a sign, so what is predicted is magnitude and never direction. The
+labels are not free either — each costs a round of sampled generation, which is the real price of fitting a
+gate this way. Finally, one instrument-level caution that bit us: a split-half reliability gate is **not
+comparable across sample sizes**, so a model can fail such a gate at one sample count and pass it at another
+with nothing changed but the arithmetic; compare Spearman–Brown-corrected full-sample figures instead.
+
+None of these limitations is incidental; each corresponds to a parameter that the operating
 point exposes, and they are stated here so that the results are read with appropriate caution.
 
 ## 7. Conclusion
@@ -2990,9 +3078,15 @@ A frozen model already represents many concepts of interest in its residual stre
 across depth and writes them back, from about ten examples and without training. Measured component by
 component, the reading is a commodity — no more accurate than a linear classifier and no cheaper than a
 depth-matched probe on the same taps — and the extensibility of a training-free bank, real against
-fine-tuning, is shared with a probe bank. Conditioning the write on the read, which looked like the
+fine-tuning, is shared with a probe bank. Conditioning the write on the *concept* read, which looked like the
 distinguishing capability, adds nothing: the gate
-fires on almost every attack and selects nothing a size-matched random subset does not.
+fires on almost every attack and selects nothing a size-matched random subset does not. Conditioning it on a
+read fit to the write's own measured effect is a different story, and it is the one result here we would
+defend as new: ranking prompts by predicted dose lifts the refusal gained per write from
+$+0.108$ to $+0.242$ and beats a size-matched random subset at every coverage we tested, while writing a
+fraction of the benign traffic the concept gate writes to. On one model. On the second, the same write
+barely moves the model at all, and there is correspondingly nothing to predict
+(<a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>).
 
 What the measurements do support is narrower and, we think, still worth having. The write is a real
 bidirectional lever on a frozen model: eight hand-written examples move generated refusal from
@@ -3005,7 +3099,7 @@ read from the prompt beforehand, is answerable on one of the two models we tried
 sampling-noise floor on the other
 (<a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>); saying which is more useful than the general affirmative the proxy alone would have licensed.
 
-One lesson generalizes past this system. A binary or first-token outcome near its ceiling cannot resolve an intervention in either direction, however consistent it looks across seeds; and before concluding that a per-prompt signal is absent, measure whether the instrument you are judging it by can see one at all. The interactive
+Three lessons generalize past this system. A binary or first-token outcome near its ceiling cannot resolve an intervention in either direction, however consistent it looks across seeds. Before concluding that a per-prompt signal is absent, measure whether the instrument you are judging it by can see one at all — we published a null that was our ruler's, not the model's. And a split-half reliability gate is not comparable across sample sizes: at $K$ samples it measures the reliability of a $K/2$-sample estimate, so the same model can fail such a gate at one sample count and pass it at another with nothing having changed but the arithmetic; compare Spearman–Brown-corrected full-sample figures instead. The interactive
 figures are included so that these claims can be examined directly against the underlying model runs
 rather than taken on assertion; the points at which the method is effective and the points at which it
 fails are both visible in them.
