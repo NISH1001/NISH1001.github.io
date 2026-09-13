@@ -2503,7 +2503,7 @@ of which prompts refuse anyway.
 
 <figure id="figure-17" style="margin:2rem 0">
 <svg viewBox="0 0 760 286" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The sampled instrument: split-half reliability, agreement between two scorers, and the proxy rehabilitated" font-family="ui-sans-serif,system-ui,sans-serif">
-<text x="380" y="18" text-anchor="middle" font-size="11" font-weight="600" fill="currentColor">the withdrawn claim was the instrument&#8217;s fault, not the quantity&#8217;s</text>
+<text x="380" y="18" text-anchor="middle" font-size="11" font-weight="600" fill="currentColor">the earlier null was the instrument&#8217;s, not this model&#8217;s</text>
 <text x="380" y="32" text-anchor="middle" font-size="9" fill="#889">Qwen2.5-0.5B, 164 held-out attacks; sampling the outcome instead of decoding it greedily</text>
 <text x="148" y="46" text-anchor="middle" font-size="10.5" fill="currentColor">the dose measured twice</text>
 <text x="148" y="61" text-anchor="middle" font-size="11" font-weight="600" fill="#1c7d74">&#961; = +0.70</text>
@@ -3021,7 +3021,7 @@ of which prompts refuse anyway.
 <circle cx="662.9" cy="140.5" r="2" fill="#26A99D" opacity="0.5"/>
 <line x1="542.0" y1="174.3" x2="718.0" y2="82.1" stroke="#1c7d74" stroke-width="1.2"/>
 <text x="546" y="68" font-size="8" fill="#889">the greedy rulers agreed at &#8722;0.01</text>
-<text x="630" y="227" text-anchor="middle" font-size="8.5" fill="#889">the proxy was fine; the ruler it was checked with was not</text>
+<text x="630" y="227" text-anchor="middle" font-size="8.5" fill="#889">the proxy was fine; its ruler could not resolve it</text>
 </svg>
 <figcaption><strong>Figure 17.</strong> <em>The instrument, before the result that rests on it.</em> Each
 point is one of 164 held-out attack prompts. <strong>Left:</strong> the same prompts' doses computed twice
@@ -3033,8 +3033,10 @@ per-prompt dose at $+0.88$, so the quantity is not an artefact of how refusal wa
 defined. <strong>Right:</strong> the first-token proxy this section opened with, plotted against the sampled
 behavioural dose it was once judged to have failed. It tracks it at $+0.61$. The
 withdrawal recorded earlier in this section rested on two greedy measures that agreed with each other at
--0.01; what that number described was the measures, not the
-model. Regenerate with
+-0.01. Neither had had its own reliability established, and one took three
+distinct values per prompt; what that number described was the resolving power of those measures, not the
+absence of the quantity — on this model. On gemma-2-2b the quantity really is absent at this magnitude,
+which is a separate finding and is reported below. Regenerate with
 <a href="https://github.com/NISH1001/conceptgate/blob/main/scripts/bake_dose_figure.py"><code>bake_dose_figure.py</code></a>.</figcaption>
 </figure>
 
