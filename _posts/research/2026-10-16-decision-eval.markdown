@@ -22,6 +22,22 @@ toc: true
 .de-abstract{border-left:3px solid var(--brand,#3aa99f);padding:.2rem 0 .2rem 1rem;margin:1.5rem 0;font-size:.95rem}
 .de-disclaimer{border:1px solid var(--border,#e6e4d9);background:var(--bg2,#f2f0e5);border-radius:.5rem;padding:.6rem .8rem;margin:1.2rem 0;font-size:.86rem;line-height:1.55}
 .de-fignote{font-size:.76rem;line-height:1.45;opacity:.8;text-align:right;margin:0 0 .4rem auto;max-width:34rem}
+.de-cov-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr));gap:1rem}
+.de-cov-card{border:1px solid var(--border,#e6e4d9);border-top:4px solid var(--brand,#3aa99f);border-radius:.6rem;background:var(--bg,#fffcf0);padding:.75rem .85rem .85rem;min-width:0}
+.de-paper .de-cov-card{background:#fff;border-color:#ccc}
+.de-cov-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:.2rem .6rem}
+.de-cov-head h4{margin:0;font-size:1rem;color:var(--de-ink)}
+.de-cov-sub{width:100%;font:.7rem/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;opacity:.7}
+.de-cov-tools{display:flex;gap:.3rem}
+.de-cov-legend{display:grid;gap:.15rem;margin-top:.3rem}
+.de-cov-row{display:grid;grid-template-columns:1.3rem auto 1fr auto;gap:.45rem;align-items:center;font:inherit;font-size:.8rem;text-align:left;
+  background:none;border:0;padding:.12rem .2rem;border-radius:.3rem;color:var(--de-ink);cursor:pointer}
+.de-cov-row:hover{background:var(--bg2,#f2f0e5)}
+.de-cov-row .rk{width:1.2rem;height:1.2rem;border:1.5px solid currentColor;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.66rem;font-weight:700}
+.de-cov-row .sc{font:.76rem ui-monospace,SFMono-Regular,Menlo,monospace}
+.de-cov-row small{opacity:.6}
+.de-cov-unhide{grid-template-columns:1fr;opacity:.75;font-size:.72rem}
+.de-cov-note{font-size:.72rem;line-height:1.45;opacity:.8;margin-top:.45rem}
 .de-models{font-size:.9rem}
 .de-models li{margin:.2rem 0}
 /* wide figures break out of the 48rem text column on large screens */
@@ -159,6 +175,13 @@ span[data-suite].on,span[data-task].on{display:inline}
 
 <span class="de-side">Jev reports about 75 output tokens per request even though it returns only probabilities. That suggests a generative model behind the structured interface, but TypeSafe does not say. GPT-6 Luna reports zero output tokens.</span>
 
+## 1. Coverage
+
+<figure class="de-figure de-wide" id="figure-coverage">
+<div class="de" id="de-cov"><div class="de-err">Loading…</div></div>
+<figcaption><strong>Figure 1 (interactive).</strong> Every suite at once, independent of the suite selector below. Each spoke is chance-corrected, so suites with different metrics share one scale: 0 is guessing and 1 is perfect. The number beside each model is its mean over the card's spokes. Hover a point for the raw score; click a model to hide it in every figure. Read areas loosely: a radar exaggerates differences, and the per-suite sections below have the exact numbers.</figcaption>
+</figure>
+
 <div data-suite="stem-synth" markdown="1">
 
 **Suite: STEM (synthetic).** 180 generated problems, 15 in each of 12 tiers from single-digit arithmetic through complex analysis, calculus and linear algebra to mechanics and E&M. Each problem has one correct answer and three distractors, which are common mistakes where one exists (kinetic energy without the ½, a determinant with the cofactor signs dropped, i² = +1). `noul` shows the correct answer half the time; `score` asks which order of magnitude the answer's absolute value falls in (five levels). Every model receives byte-identical requests.
@@ -186,12 +209,12 @@ span[data-suite].on,span[data-task].on{display:inline}
 <div id="de-ctl-sentinel" style="height:1px"></div>
 <div class="de de-ctl-mount" id="de-ctl-mount"></div>
 
-## 1. Accuracy
+## 2. Accuracy
 
 <figure class="de-figure de-wide" id="figure-1">
 <div class="de-fignote">"GLiNER" here is <b>GLiNER2.5-Decide</b> (fastino), run from its fp32 ONNX export, which matches the PyTorch model exactly; the int8 and fp16 exports are not shown.</div>
 <div class="de" id="de-acc"><div class="de-err">Loading…</div></div>
-<figcaption><strong>Figure 1 (interactive).</strong> <em>macro / micro / weighted</em> squeeze the categories into one bar per model: macro is the plain mean of the per-category scores, micro pools all items (each counted once), and weighted averages the categories by their size. For a plain accuracy, weighted equals micro; they differ for balanced accuracy and when an item carries several categories. <span data-task="answer">Accuracy per category for each model and question mode; switch modes in the panel. Dashed line: chance. In score mode, black ticks mark a baseline that always guesses the category's most common level. Hover a bar for counts.</span><span data-task="flag">Recall per harm category (share of harmful prompts with that label that get flagged) and false-positive rate on safe prompts, per model, at each model's threshold for the selected mode. Hover a bar for counts.</span><span data-suite="stem-synth"> Jev is near ceiling in every mode; GPT-6 Luna is clearly above chance everywhere but often picks the common-mistake distractor (a dropped ½, a flipped sign, a near-miss sum), even on multi-digit addition. GLiNER clears chance only in choice mode; both Laya checkpoints scatter around chance in every tier. Every hosted-model miss was checked against the answer key.</span><span data-suite="judgebench"> Only Jev judges well (76% of pairs right, interval 73–79%); GPT-6 Luna gets 66%. The three local models are at chance overall (50–53%); their per-category bars swing between about 30% and 80% because most categories hold only about 20 items, which is noise at that size. For Laya even the overall number is no verdict on its judging, since it never reads most of the input (see Notes).</span><span data-suite="guard-core"> Jev and GPT-6 Luna flag most attacks with the fewest false positives; score mode is the best single mode for both. GLiNER's yes/no mode also flags about a quarter of benign and two in five hard-negative prompts.</span><span data-suite="guard-ood"> On unseen data every model's false positives rise, in every mode. Jev keeps the highest recall (90–97%) but flags half or more of the hard negatives; GPT-6 Luna holds recall near its core level with far fewer false positives, though its numbers include 251 prompts where a refused question counted as a flag.</span></figcaption>
+<figcaption><strong>Figure 2 (interactive).</strong> <em>macro / micro / weighted</em> squeeze the categories into one bar per model: macro is the plain mean of the per-category scores, micro pools all items (each counted once), and weighted averages the categories by their size. For a plain accuracy, weighted equals micro; they differ for balanced accuracy and when an item carries several categories. <span data-task="answer">Accuracy per category for each model and question mode; switch modes in the panel. Dashed line: chance. In score mode, black ticks mark a baseline that always guesses the category's most common level. Hover a bar for counts.</span><span data-task="flag">Recall per harm category (share of harmful prompts with that label that get flagged) and false-positive rate on safe prompts, per model, at each model's threshold for the selected mode. Hover a bar for counts.</span><span data-suite="stem-synth"> Jev is near ceiling in every mode; GPT-6 Luna is clearly above chance everywhere but often picks the common-mistake distractor (a dropped ½, a flipped sign, a near-miss sum), even on multi-digit addition. GLiNER clears chance only in choice mode; both Laya checkpoints scatter around chance in every tier. Every hosted-model miss was checked against the answer key.</span><span data-suite="judgebench"> Only Jev judges well (76% of pairs right, interval 73–79%); GPT-6 Luna gets 66%. The three local models are at chance overall (50–53%); their per-category bars swing between about 30% and 80% because most categories hold only about 20 items, which is noise at that size. For Laya even the overall number is no verdict on its judging, since it never reads most of the input (see Notes).</span><span data-suite="guard-core"> Jev and GPT-6 Luna flag most attacks with the fewest false positives; score mode is the best single mode for both. GLiNER's yes/no mode also flags about a quarter of benign and two in five hard-negative prompts.</span><span data-suite="guard-ood"> On unseen data every model's false positives rise, in every mode. Jev keeps the highest recall (90–97%) but flags half or more of the hard negatives; GPT-6 Luna holds recall near its core level with far fewer false positives, though its numbers include 251 prompts where a refused question counted as a flag.</span></figcaption>
 </figure>
 
 <figure class="de-figure de-wide" id="table-1">
@@ -201,14 +224,14 @@ span[data-suite].on,span[data-task].on{display:inline}
 
 <figure class="de-figure de-wide" id="figure-2">
 <div class="de" id="de-ver"></div>
-<figcaption><strong>Figure 2 (interactive).</strong> <span data-task="flag">P(flag) per prompt, in lanes by what the prompt actually is; the dashed tick is that model's threshold for the mode. A good guard puts harmful prompts right of its threshold and both safe lanes left of it. Hover a dot for the prompt.</span><span data-task="answer">Verification in noul mode. Each dot is one item: the model's P(yes) that the answer shown with the problem is correct, in the lane for whether it actually was. A useful verifier puts the top lane right of the dashed line and the bottom lane left of it. Hover a dot for the item. <span data-suite="judgebench">Jev separates correct from incorrect responses best (AUC 0.78), then GPT-6 Luna (0.69); the local models are at chance (0.47–0.52). Every model leans towards "no": half the shown responses are correct, but GPT-6 Luna says yes to 23% and GLiNER to 13%. </span><span data-suite="stem-synth">Both Laya checkpoints say yes to about 90% of statements and GLiNER says no to all of them. Jev separates the lanes almost perfectly (AUC 0.99) and GPT-6 Luna well (AUC 0.92). Constant answers give exactly chance-level balanced accuracy, which is why three different behaviours share 50% in Table 1.</span></span></figcaption>
+<figcaption><strong>Figure 3 (interactive).</strong> <span data-task="flag">P(flag) per prompt, in lanes by what the prompt actually is; the dashed tick is that model's threshold for the mode. A good guard puts harmful prompts right of its threshold and both safe lanes left of it. Hover a dot for the prompt.</span><span data-task="answer">Verification in noul mode. Each dot is one item: the model's P(yes) that the answer shown with the problem is correct, in the lane for whether it actually was. A useful verifier puts the top lane right of the dashed line and the bottom lane left of it. Hover a dot for the item. <span data-suite="judgebench">Jev separates correct from incorrect responses best (AUC 0.78), then GPT-6 Luna (0.69); the local models are at chance (0.47–0.52). Every model leans towards "no": half the shown responses are correct, but GPT-6 Luna says yes to 23% and GLiNER to 13%. </span><span data-suite="stem-synth">Both Laya checkpoints say yes to about 90% of statements and GLiNER says no to all of them. Jev separates the lanes almost perfectly (AUC 0.99) and GPT-6 Luna well (AUC 0.92). Constant answers give exactly chance-level balanced accuracy, which is why three different behaviours share 50% in Table 1.</span></span></figcaption>
 </figure>
 
-## 2. Latency and cost
+## 3. Latency and cost
 
 <figure class="de-figure de-wide" id="figure-3">
 <div class="de" id="de-lat"></div>
-<figcaption><strong>Figure 3 (interactive).</strong> <span data-task="flag">F1 for the selected mode against median latency per prompt in that mode (log scale). Vertical bars: 95% interval on F1. Horizontal bars: interquartile range of latency. Dashed: the F1 of flagging everything. Labels: cost per thousand prompts for all three modes. Local guards ran on an Apple-silicon laptop (Laya on MPS, GLiNER on CPU); hosted latency includes the network round trip.</span><span data-task="answer">Score against median latency per item (log scale) with every question answered in one request. Vertical bars: 95% interval on the score. Horizontal bars: interquartile range of latency. Labels: cost per thousand items at the price billed. Up and to the left is better.<span data-suite="stem-synth"> Local models ran on an Apple-silicon laptop; hosted latency includes the network round trip (Jev via OpenRouter, GPT-6 Luna via OpenAI), measured from the same machine with 8 requests in flight.</span><span data-suite="judgebench"> Laya ran on the Mac's GPU (Metal), GLiNER on its CPU. GLiNER's JudgeBench latency is inflated: the machine was short of memory and swapping during that run.</span></span></figcaption>
+<figcaption><strong>Figure 4 (interactive).</strong> <span data-task="flag">F1 for the selected mode against median latency per prompt in that mode (log scale). Vertical bars: 95% interval on F1. Horizontal bars: interquartile range of latency. Dashed: the F1 of flagging everything. Labels: cost per thousand prompts for all three modes. Local guards ran on an Apple-silicon laptop (Laya on MPS, GLiNER on CPU); hosted latency includes the network round trip.</span><span data-task="answer">Score against median latency per item (log scale) with every question answered in one request. Vertical bars: 95% interval on the score. Horizontal bars: interquartile range of latency. Labels: cost per thousand items at the price billed. Up and to the left is better.<span data-suite="stem-synth"> Local models ran on an Apple-silicon laptop; hosted latency includes the network round trip (Jev via OpenRouter, GPT-6 Luna via OpenAI), measured from the same machine with 8 requests in flight.</span><span data-suite="judgebench"> Laya ran on the Mac's GPU (Metal), GLiNER on its CPU. GLiNER's JudgeBench latency is inflated: the machine was short of memory and swapping during that run.</span></span></figcaption>
 </figure>
 
 <figure class="de-figure de-wide" id="table-2">
@@ -216,20 +239,20 @@ span[data-suite].on,span[data-task].on{display:inline}
 <figcaption><strong>Table 2.</strong> <span data-task="flag">Median latency per prompt in each mode, and what each hosted model's run over this set cost, from reflex-guard's run logs (requests include one warm-up per mode pass). Jev's cost is OpenRouter's billed amount. OpenAI's native API reports no cost, so GPT-6 Luna's is input tokens at USD 0.10 per million; its totals include re-running requests that had refusals, and an earlier partial run through OpenRouter (about USD 0.22) was discarded. Output tokens were not recorded in this eval.</span><span data-task="answer">Latency per item, tokens and what the run cost, with the exact model version each API reported. Tokens and cost come from each response's usage field; GPT-6 Luna's cost is its input tokens at the list price, since the Decisions endpoint bills input only. Local models cost only the hardware they run on.<span data-suite="stem-synth"> Jev was run twice; its two runs agree on 177 of 180 choice picks, so hosted results can move by a point between runs.</span></span></figcaption>
 </figure>
 
-## 3. Calibration
+## 4. Calibration
 
 <p data-task="flag"><em>Not shown for the guardrail suites: their thresholds are tuned per model, so P(flag) is used to rank prompts (AUC in Table 1), not read as a probability.</em></p>
 
 <figure class="de-figure" id="figure-4" data-task="answer">
 <div class="de" id="de-cal"></div>
-<figcaption><strong>Figure 4 (interactive).</strong> Reliability diagram for choice mode. Items are binned by the probability of the option picked; each point is a bin's mean confidence against its accuracy. Dashed: perfect calibration. ECE <span class="de-cite" data-ref="Guo, C., Pleiss, G., Sun, Y., &amp; Weinberger, K. Q. (2017). On Calibration of Modern Neural Networks. ICML 2017."><a href="#de-ref-guo">[6]</a></span>: the confidence–accuracy gap averaged over bins, weighted by size.<span data-suite="stem-synth"> Jev is accurate and calibrated. GPT-6 Luna is reliable when it is sure (93% right on its 103 answers given with ≥0.9 confidence) but overconfident in the middle range (ECE 0.10). Laya's curve is flat, so its confidence says nothing about correctness. Laya typed's low ECE comes from being unconfident and at chance, not from being right.</span></figcaption>
+<figcaption><strong>Figure 5 (interactive).</strong> Reliability diagram for choice mode. Items are binned by the probability of the option picked; each point is a bin's mean confidence against its accuracy. Dashed: perfect calibration. ECE <span class="de-cite" data-ref="Guo, C., Pleiss, G., Sun, Y., &amp; Weinberger, K. Q. (2017). On Calibration of Modern Neural Networks. ICML 2017."><a href="#de-ref-guo">[6]</a></span>: the confidence–accuracy gap averaged over bins, weighted by size.<span data-suite="stem-synth"> Jev is accurate and calibrated. GPT-6 Luna is reliable when it is sure (93% right on its 103 answers given with ≥0.9 confidence) but overconfident in the middle range (ECE 0.10). Laya's curve is flat, so its confidence says nothing about correctness. Laya typed's low ECE comes from being unconfident and at chance, not from being right.</span></figcaption>
 </figure>
 
-## 4. Dataset explorer
+## 5. Dataset explorer
 
 <figure class="de-figure de-wide" id="figure-5">
 <div class="de" id="de-ex"></div>
-<figcaption><strong>Figure 5 (interactive).</strong> <span data-task="answer">Every item and every model's answer in every mode. Filter by category, by who got it wrong, or search. The outlined option is the correct answer.</span><span data-task="flag">Every prompt with each model's P(flag) and decision in every mode. Filter by prompt kind, by who got it wrong, or by refusals, or search.</span></figcaption>
+<figcaption><strong>Figure 6 (interactive).</strong> <span data-task="answer">Every item and every model's answer in every mode. Filter by category, by who got it wrong, or search. The outlined option is the correct answer.</span><span data-task="flag">Every prompt with each model's P(flag) and decision in every mode. Filter by prompt kind, by who got it wrong, or by refusals, or search.</span></figcaption>
 </figure>
 
 <div class="de" id="de-dl"></div>
@@ -592,7 +615,7 @@ Plain text:
     compensate();
   }
 
-  // ---------- Figure 1: per-category bars that can squeeze into one aggregate bar per model.
+  // ---------- Figure 2: per-category bars that can squeeze into one aggregate bar per model.
   // A spec lists rows ({id, group, label, agg, value(m), tip(m), tick}) and aggregates ({macro, micro, weighted}:
   // {value(m), tip(m), label}). layoutBars() turns a spec into keyed elements for one view; switching views animates
   // every element present in both layouts from its old geometry to its new one (bars of every category of a model
@@ -827,7 +850,7 @@ Plain text:
     f.tools.appendChild(tex);
   }
 
-  // ---------- Figure 2: P(yes), correct vs wrong statements
+  // ---------- Figure 3: P(yes), correct vs wrong statements
   function figVerify() {
     var fig = mount('figure-2');
     if (!has('noul')) { if (fig) fig.style.display = 'none'; return; }
@@ -867,7 +890,7 @@ Plain text:
     f.body.appendChild(svg);
   }
 
-  // ---------- Figure 3: score against latency
+  // ---------- Figure 4: score against latency
   function figLatency() {
     var mode = state.mode, f = frame('de-lat', MODES[mode].label + ' against latency', {modes: true, legend: true, svgName: 'accuracy-vs-latency'});
     var W = width(f.body, 320, 900), H = Math.round(Math.min(420, Math.max(270, W * 0.5))), L = 46, R = W < 520 ? 100 : 150, Tp = 12, B = 40;
@@ -937,7 +960,7 @@ Plain text:
     f.body.appendChild(el('div', {'class': 'de-scroll'}, '<table><thead><tr><th>Model · version</th><th style="text-align:left">Deployment</th><th>Median</th><th>p90</th><th>Input tok / req</th><th>Output tok / req</th><th>Run cost</th><th>Per request</th><th>Per 1k items</th></tr></thead><tbody>' + rows + '</tbody></table>'));
   }
 
-  // ---------- Figure 4: calibration
+  // ---------- Figure 5: calibration
   function figCalibration() {
     var fig = mount('figure-4');
     if (!has('choice')) { if (fig) fig.style.display = 'none'; return; }
@@ -967,7 +990,7 @@ Plain text:
     f.body.appendChild(svg);
   }
 
-  // ---------- Figure 5: explorer
+  // ---------- Figure 6: explorer
   var ex = {cat: 'all', filter: 'all', q: '', page: 0};
   function filters() {
     var f = {all: ['All items', function () { return true; }]};
@@ -1267,6 +1290,173 @@ Plain text:
     }
   }
 
+  // ---------- Coverage: radar cards across every suite (independent of the suite selector).
+  // Spokes are chance-corrected so suites with different metrics share one scale: 0 = guessing, 1 = perfect.
+  //   choice / score: (accuracy - chance) / (1 - chance);  verify and flag suites: 2 x balanced accuracy - 1.
+  // Values below 0 are drawn at 0 (the tooltip has the real number); a model a suite did not run leaves a gap.
+  var COV_SHORT = {'stem-synth': 'STEM', 'judgebench': 'JudgeBench', 'guard-core': 'Guard core', 'guard-ood': 'Guard OOD'};
+  function covSuite(id) { return ALL.suites.filter(function (s) { return s.id === id; })[0]; }
+  function covModel(s, key) { return s ? s.models.filter(function (m) { return m.key === key; })[0] : null; }
+  function covBal(pairs) {  // pairs: [[predictedYes, truth]] -> balanced accuracy over the truth classes present
+    return mean([true, false].map(function (t) {
+      var sub = pairs.filter(function (p) { return p[1] === t; });
+      return sub.length ? mean(sub.map(function (p) { return p[0] === t ? 1 : 0; })) : null;
+    }).filter(function (v) { return v !== null; }));
+  }
+  function covFlagJ(s, m, mode) {  // flag suites: TPR + TNR - 1 at the model's threshold
+    var su = m.summary[mode], k = s.meta.kinds, neg = k.benign + k.hard_negative;
+    var spec = 1 - (su.benign_fp * k.benign + su.hard_fp * k.hard_negative) / neg;
+    return su.recall[0] + spec - 1;
+  }
+  function covCards() {
+    var cards = [], all = [], keys = {};
+    ALL.suites.forEach(function (s) { s.models.forEach(function (m) { if (!keys[m.key]) { keys[m.key] = 1; all.push(m); } }); });
+    // card 1: one spoke per suite and mode (flag suites: one spoke, mean over their modes)
+    var order = ['stem-synth', 'judgebench', 'guard-core', 'guard-ood'], spokes = [];
+    order.forEach(function (id) {
+      var s = covSuite(id);
+      if (!s) return;
+      if (s.meta.task === 'flag') {
+        spokes.push({label: COV_SHORT[id], value: function (m) { var mm = covModel(s, m.key); return mm ? mean(s.meta.modes.map(function (md) { return covFlagJ(s, mm, md); })) : NaN; },
+          raw: function (m) { var mm = covModel(s, m.key); return mm ? 'F1 ' + s.meta.modes.map(function (md) { return mm.summary[md].f1[0].toFixed(2); }).join(' / ') + ' (verify / choice / score)' : 'not run'; }});
+      } else {
+        s.meta.modes.forEach(function (md) {
+          var c = s.meta.chance[md];
+          spokes.push({label: COV_SHORT[id] + ' · ' + MODES[md].short, value: function (m) {
+            var mm = covModel(s, m.key); if (!mm) return NaN; var v = mm.summary[md][0];
+            return md === 'noul' ? 2 * v - 1 : (v - c) / (1 - c);
+          }, raw: function (m) { var mm = covModel(s, m.key); return mm ? MODES[md].label + ' ' + pct(mm.summary[md][0], 1) + ' (chance ' + pct(c) + ')' : 'not run'; }});
+        });
+      }
+    });
+    cards.push({id: 'all', title: 'All suites', sub: 'chance-corrected · one spoke per suite and mode', models: all, spokes: spokes, accent: 'var(--brand,#3aa99f)',
+      note: spokes.length + ' spokes. Choice and score: (accuracy − chance) / (1 − chance); verify and the guardrail sets: 2 × balanced accuracy − 1, averaged over the three modes for the guardrail sets. 0 is guessing, 1 is perfect; below-chance values sit at the centre.'});
+    // card 2: STEM tiers, choice mode
+    var st = covSuite('stem-synth');
+    if (st) cards.push({id: 'stem', title: 'STEM tiers', sub: 'chance-corrected choice accuracy', models: st.models, accent: 'var(--m0)',
+      spokes: st.meta.categories.map(function (cat) {
+        var idx = []; st.items.forEach(function (r, i) { if (r[0] === cat) idx.push(i); });
+        function acc(mm) { return mean(idx.map(function (i) { return mm.preds[i][0] === st.items[i][3] ? 1 : 0; })); }
+        return {label: short(cat), value: function (m) { var mm = covModel(st, m.key); return mm ? (acc(mm) - 0.25) / 0.75 : NaN; },
+          raw: function (m) { var mm = covModel(st, m.key); return mm ? 'choice accuracy ' + pct(acc(mm)) + ' on ' + idx.length + ' items' : 'not run'; }};
+      }), note: st.meta.categories.length + ' spokes, one per tier, ' + Math.round(st.meta.n / st.meta.categories.length) + ' items each: (accuracy − 25%) / 75%.'});
+    // card 3: JudgeBench, group x mode
+    var jb = covSuite('judgebench');
+    if (jb) {
+      var jsp = [];
+      Object.keys(jb.meta.groups).forEach(function (g) {
+        var cats = jb.meta.groups[g], idx = [];
+        jb.items.forEach(function (r, i) { if (cats.indexOf(r[0]) >= 0) idx.push(i); });
+        var gname = g.split(' (')[0];
+        jsp.push({label: gname + ' · choice', value: function (m) { var mm = covModel(jb, m.key); return mm ? 2 * mean(idx.map(function (i) { return mm.preds[i][0] === jb.items[i][3] ? 1 : 0; })) - 1 : NaN; },
+          raw: function (m) { var mm = covModel(jb, m.key); return mm ? 'choice accuracy ' + pct(mean(idx.map(function (i) { return mm.preds[i][0] === jb.items[i][3] ? 1 : 0; }))) + ' on ' + idx.length + ' pairs' : 'not run'; }});
+        jsp.push({label: gname + ' · verify', value: function (m) { var mm = covModel(jb, m.key); return mm ? 2 * covBal(idx.map(function (i) { return [mm.preds[i][3] >= 0.5, jb.items[i][5]]; })) - 1 : NaN; },
+          raw: function (m) { var mm = covModel(jb, m.key); return mm ? 'verify balanced accuracy ' + pct(covBal(idx.map(function (i) { return [mm.preds[i][3] >= 0.5, jb.items[i][5]]; }))) + ' on ' + idx.length + ' pairs' : 'not run'; }});
+      });
+      cards.push({id: 'judgebench', title: 'JudgeBench', sub: 'chance-corrected · source × mode', models: jb.models, accent: 'var(--m3)', spokes: jsp,
+        note: jsp.length + ' spokes: each question source (MMLU-Pro knowledge, LiveBench reasoning and math, LiveCodeBench coding) in both modes; chance is 50%, so the score is 2 × accuracy − 1.'});
+    }
+    // card 4: guardrails core, recall per harm category, mean over modes
+    var gc = covSuite('guard-core');
+    if (gc) {
+      var MI2 = {noul: 0, choice: 1, score: 2};
+      cards.push({id: 'guard', title: 'Guardrails: core', sub: 'recall per harm category · mean over modes', models: gc.models, accent: 'var(--m4)',
+        spokes: gc.meta.categories.map(function (c) {
+          var idx = []; gc.items.forEach(function (r, i) { if (r[0] === 'harmful' && r[2].indexOf(c) >= 0) idx.push(i); });
+          function rec(mm) { return mean(gc.meta.modes.map(function (md) { return mean(idx.map(function (i) { return mm.preds[i][MI2[md]] >= mm.summary[md].threshold ? 1 : 0; })); })); }
+          if (!idx.length) return null;  // a category with no harmful prompt in this set has nothing to recall
+          return {label: c.replace(/_/g, ' ') + ' (' + idx.length + ')', value: function (m) { var mm = covModel(gc, m.key); return mm ? rec(mm) : NaN; },
+            raw: function (m) { var mm = covModel(gc, m.key); return mm ? 'recall ' + pct(rec(mm)) + ' on ' + idx.length + ' harmful prompts' : 'not run'; }};
+        }).filter(Boolean),
+        note: 'Recall (share of harmful prompts flagged) per labelled harm category, averaged over the three modes at each model\'s thresholds. Not chance-corrected: recall alone ignores false positives, which Figure 2 shows. Content categories hold 3 to 8 prompts each.'});
+    }
+    return cards;
+  }
+  function radar(card, W) {
+    var narrow = W < 400, n = card.spokes.length, H = Math.round(W * (narrow ? 0.9 : 0.8)), cx = W / 2, cy = H / 2 + 2;
+    var R = Math.min(W, H) / 2 - (narrow ? 58 : 82);  // room around the radar for spoke labels
+    var svg = newSvg(W, H, card.title + ' radar'), ang = function (i) { return -Math.PI / 2 + i * 2 * Math.PI / n; };
+    function P(i, v) { var r = R * Math.max(0, Math.min(1, isNaN(v) ? 0 : v)); return [cx + r * Math.cos(ang(i)), cy + r * Math.sin(ang(i))]; }
+    [0.25, 0.5, 0.75, 1].forEach(function (f) {
+      sv('polygon', {points: card.spokes.map(function (_, i) { var p = P(i, f); return p[0] + ',' + p[1]; }).join(' '), style: 'fill:' + (f === 1 ? (state.view === 'paper' ? '#f6f6f6' : 'var(--bg2,#f2f0e5)') : 'none') + ';stroke:' + T.grid + ';stroke-width:1'}, svg);
+    });
+    card.spokes.forEach(function (sp, i) {
+      var e = P(i, 1); line(svg, cx, cy, e[0], e[1], gridSt());
+      var a = ang(i), lx = cx + (R + 10) * Math.cos(a), ly = cy + (R + 10) * Math.sin(a), c = Math.cos(a);
+      txt(svg, lx, ly + (Math.sin(a) > 0.3 ? 11 : Math.sin(a) < -0.3 ? -3 : 4), sp.label, {anchor: c > 0.25 ? 'start' : c < -0.25 ? 'end' : 'middle', size: narrow ? 9.5 : 11.5, ink: true});
+    });
+    // ring values just inside the rings, beside the top spoke, so they never meet its label
+    txt(svg, cx + 4, cy - R * 0.5 + 11, '0.5', {size: 9}); txt(svg, cx + 4, cy - R + 11, '1', {size: 9});
+    var ranked = covRank(card).slice().reverse();  // best drawn last, on top
+    ranked.forEach(function (o) {
+      var m = o.m, j = jOf(m), vals = card.spokes.map(function (sp) { return sp.value(m); }), d = '', complete = vals.every(function (v) { return !isNaN(v); });
+      for (var i = 0; i <= n; i++) {
+        var k = i % n, prev = (k - 1 + n) % n;
+        if (isNaN(vals[k]) || (i === n && !complete && isNaN(vals[0]))) continue;
+        var p = P(k, vals[k]);
+        d += (i === 0 || isNaN(vals[prev]) ? 'M' : 'L') + p[0].toFixed(1) + ',' + p[1].toFixed(1);
+        if (i === n) break;
+      }
+      var g = sv('g', {}, svg);
+      if (complete) sv('path', {d: d + 'Z', style: 'fill:' + T.m[j] + ';fill-opacity:.07;stroke:none'}, g);
+      sv('path', {d: d, style: 'fill:none;stroke:' + T.m[j] + ';stroke-width:' + (state.view === 'paper' ? 1.4 : 2) + ';stroke-linejoin:round'}, g);
+      vals.forEach(function (v, i) {
+        if (isNaN(v)) return;
+        var p = P(i, v), sp = card.spokes[i];
+        marker(g, j, p[0], p[1], 3.6);
+        var hit = sv('circle', {cx: p[0], cy: p[1], r: 9, style: 'fill:transparent;cursor:pointer'}, g);
+        bindTip(hit, function () { return '<b>' + esc(m.name) + '</b> · ' + esc(sp.label) + '<br>score <b>' + v.toFixed(2) + '</b>' + (v < 0 ? ' (below chance; drawn at 0)' : '') + '<br>' + esc(sp.raw(m)); });
+      });
+    });
+    return svg;
+  }
+  function covRank(card) {
+    return card.models.filter(function (m) { return !state.hidden[m.key]; }).map(function (m) {
+      var vs = card.spokes.map(function (sp) { return sp.value(m); }).filter(function (v) { return !isNaN(v); });
+      return {m: m, mean: vs.length ? mean(vs) : NaN, n: vs.length};
+    }).sort(function (a, b) { return (isNaN(b.mean) ? -9 : b.mean) - (isNaN(a.mean) ? -9 : a.mean); });
+  }
+  function renderCoverage() {
+    var root = mount('de-cov');
+    if (!root || !ALL) return;
+    root.innerHTML = '';
+    var grid = el('div', {'class': 'de-cov-grid'});
+    root.appendChild(grid);
+    covCards().forEach(function (card) {
+      var c = el('div', {'class': 'de-cov-card', style: 'border-top-color:' + card.accent});
+      var head = el('div', {'class': 'de-cov-head'}, '<h4>' + esc(card.title) + '</h4><div class="de-cov-sub">' + esc(card.sub) + '</div>');
+      c.appendChild(head); grid.appendChild(c);
+      var body = el('div', {});
+      c.appendChild(body);
+      var svg = radar(card, Math.max(260, Math.min(560, Math.floor(c.clientWidth) - 4)));
+      body.appendChild(svg);
+      if (state.view === 'paper') {
+        var tools = el('div', {'class': 'de-cov-tools'});
+        ['SVG', 'PNG'].forEach(function (fmt) {
+          var b = el('button', {'class': 'de-btn', title: 'Download this card\'s radar as ' + fmt}, fmt);
+          b.onclick = function () { (fmt === 'SVG' ? downloadSvg : downloadPng)(svg, 'coverage-' + card.id); };
+          tools.appendChild(b);
+        });
+        head.appendChild(tools);
+      }
+      var lg = el('div', {'class': 'de-cov-legend'});
+      covRank(card).forEach(function (o, r) {
+        var row = el('button', {'class': 'de-cov-row', title: 'Hide ' + o.m.name + ' everywhere'},
+          '<span class="rk">' + (r + 1) + '</span>' + sw(jOf(o.m)) + '<span class="nm">' + esc(o.m.name) + (o.n < card.spokes.length ? ' <small>(' + o.n + '/' + card.spokes.length + ' spokes)</small>' : '') + '</span><span class="sc">' + (isNaN(o.mean) ? '–' : (o.mean * 100).toFixed(1)) + '</span>');
+        row.onclick = function () { state.hidden[o.m.key] = true; renderFigures(); };
+        lg.appendChild(row);
+      });
+      var hidden = card.models.filter(function (m) { return state.hidden[m.key]; });
+      if (hidden.length) {
+        var un = el('button', {'class': 'de-cov-row de-cov-unhide'}, 'show ' + hidden.map(function (m) { return esc(m.name); }).join(', '));
+        un.onclick = function () { hidden.forEach(function (m) { state.hidden[m.key] = false; }); renderFigures(); };
+        lg.appendChild(un);
+      }
+      c.appendChild(lg);
+      c.appendChild(el('div', {'class': 'de-cov-note'}, esc(card.note)));
+    });
+  }
+
   // ---------- state in the query string (?suite=…&view=paper&mode=noul), so the #hash stays free for section
   // links such as #1-accuracy. Only non-default values are written, so a plain link stays plain.
   function readHash() {
@@ -1287,6 +1477,7 @@ Plain text:
   }
   function isFlag() { return S.meta.task === 'flag'; }
   function renderFigures() {
+    renderCoverage();
     if (isFlag()) { figAccuracyFlag(); figVerifyFlag(); figLatencyFlag(); return; }
     figAccuracy(); figVerify(); figLatency(); figCalibration();
   }
