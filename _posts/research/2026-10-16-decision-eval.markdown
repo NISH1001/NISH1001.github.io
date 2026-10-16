@@ -35,9 +35,15 @@ toc: true
 figure.de-figure{margin:2rem 0}
 figure.de-figure figcaption{font-size:.85rem;line-height:1.5;color:var(--text,#666);opacity:.85;margin-top:.55rem}
 /* control bar */
-.de-ctl{position:sticky;top:0;z-index:30;display:flex;flex-wrap:wrap;gap:.5rem .9rem;align-items:center;
-  padding:.5rem .7rem;margin:1.4rem 0;border:1px solid var(--border,#e6e4d9);border-radius:.5rem;
-  background:var(--bg2,#f2f0e5);font-size:.78rem}
+.de-ctl-mount{position:sticky;top:0;z-index:40;margin:1.4rem 0}
+.de-ctl{display:flex;flex-wrap:wrap;gap:.5rem .9rem;align-items:center;
+  padding:.5rem .7rem;border:1px solid var(--border,#e6e4d9);border-radius:.5rem;
+  background:var(--bg2,#f2f0e5);font-size:.78rem;transition:padding .15s,box-shadow .15s,border-radius .15s}
+/* once stuck to the top while scrolling: tighter, with a shadow so it reads as floating over the figures */
+.de-stuck .de-ctl{padding:.3rem .55rem;gap:.35rem .6rem;border-top-left-radius:0;border-top-right-radius:0;
+  box-shadow:0 6px 18px rgba(0,0,0,.12)}
+.de-stuck .de-ctl .lab,.de-stuck .de-ctl .hint{display:none}
+@media (min-width:1100px){.de-stuck .de-ctl{position:relative;left:50%;transform:translateX(-50%);width:min(64rem,calc(100vw - 3rem));flex-wrap:nowrap}}
 .de-ctl .lab{opacity:.7;margin-right:.1rem}
 .de-seg{display:inline-flex;flex-wrap:wrap;max-width:100%;border:1px solid var(--border,#e6e4d9);border-radius:.35rem;overflow:hidden;background:var(--bg2,#f2f0e5)}
 .de-seg button,.de-btn{font:inherit;font-size:.75rem;padding:.22rem .6rem;border:0;background:transparent;color:var(--text,#6f6e69);cursor:pointer}
@@ -162,7 +168,8 @@ span[data-suite].on,span[data-task].on{display:inline}
 
 </div>
 
-<div class="de" id="de-ctl-mount"></div>
+<div id="de-ctl-sentinel" style="height:1px"></div>
+<div class="de de-ctl-mount" id="de-ctl-mount"></div>
 
 ## 1. Accuracy
 
@@ -466,11 +473,16 @@ Plain text:
     });
     container.appendChild(lg);
   }
+  function setMode(k) {
+    if (state.mode === k) return;
+    state.mode = k; writeHash(); renderControls(); renderFigures();
+    if (isFlag()) { table1Flag(); explorerFlag(); }
+  }
   function modeSwitch() {
     var seg = el('div', {'class': 'de-seg', role: 'group', 'aria-label': 'Question mode'});
     S.meta.modes.forEach(function (k) {
       var b = el('button', {'aria-pressed': state.mode === k ? 'true' : 'false'}, MODES[k].short);
-      b.onclick = function () { state.mode = k; writeHash(); renderFigures(); };
+      b.onclick = function () { setMode(k); };
       seg.appendChild(b);
     });
     return seg;
@@ -499,7 +511,7 @@ Plain text:
   function renderControls() {
     var root = mount('de-ctl-mount');
     root.innerHTML = '';
-    var bar = el('div', {'class': 'de-ctl', role: 'toolbar', 'aria-label': 'Suite and view'});
+    var bar = el('div', {'class': 'de-ctl', role: 'toolbar', 'aria-label': 'Suite, mode and view'});
     var ids = ALL.suites.map(function (s) { return s.id; });
     var list = PLANNED.concat(ALL.suites.filter(function (s) { return !PLANNED.some(function (p) { return p.id === s.id; }); }));
     var seg = el('div', {'class': 'de-seg', role: 'group', 'aria-label': 'Suite'});
@@ -518,9 +530,16 @@ Plain text:
       b.onclick = function () { state.view = p[0]; writeHash(); boot(); };
       v.appendChild(b);
     });
+    bar.appendChild(el('span', {'class': 'lab', style: 'margin-left:.4rem'}, 'Mode')); bar.appendChild(modeSwitch());
     bar.appendChild(el('span', {'class': 'lab', style: 'margin-left:.4rem'}, 'View')); bar.appendChild(v);
-    if (state.view === 'paper') bar.appendChild(el('span', {style: 'font-size:.72rem;opacity:.75'}, 'Print styling · SVG / PNG on each figure · LaTeX for Table 1'));
+    if (state.view === 'paper') bar.appendChild(el('span', {'class': 'hint', style: 'font-size:.72rem;opacity:.75'}, 'Print styling · SVG / PNG on each figure · LaTeX for Table 1'));
     root.appendChild(bar);
+    // the bar floats over the page once scrolled past; a 1px sentinel above it tells us when that happens
+    var sentinel = mount('de-ctl-sentinel');
+    if (sentinel && window.IntersectionObserver && !root._observed) {
+      root._observed = true;
+      new IntersectionObserver(function (es) { root.classList.toggle('de-stuck', !es[0].isIntersecting); }).observe(sentinel);
+    }
   }
 
   // ---------- Figure 1: per-category bars that can squeeze into one aggregate bar per model.
