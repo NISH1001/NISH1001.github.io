@@ -169,7 +169,7 @@ span[data-suite].on,span[data-task].on{display:inline}
 <figure class="de-figure de-wide" id="figure-1">
 <div class="de-fignote">"GLiNER" here is <b>GLiNER2.5-Decide</b> (fastino), run from its fp32 ONNX export, which matches the PyTorch model exactly; the int8 and fp16 exports are not shown.</div>
 <div class="de" id="de-acc"><div class="de-err">Loading…</div></div>
-<figcaption><strong>Figure 1 (interactive).</strong> <span data-task="answer">Accuracy per category for each model and question mode; switch modes in the panel. Dashed line: chance. In score mode, black ticks mark a baseline that always guesses the category's most common level. Hover a bar for counts.</span><span data-task="flag">Recall per harm category (share of harmful prompts with that label that get flagged) and false-positive rate on safe prompts, per model, at each model's threshold for the selected mode. Hover a bar for counts.</span><span data-suite="stem-synth"> Jev is near ceiling in every mode; GPT-6 Luna is clearly above chance everywhere but often picks the common-mistake distractor (a dropped ½, a flipped sign, a near-miss sum), even on multi-digit addition. GLiNER clears chance only in choice mode; both Laya checkpoints scatter around chance in every tier. Every hosted-model miss was checked against the answer key.</span><span data-suite="guard-core"> Jev and GPT-6 Luna flag most attacks with the fewest false positives; score mode is the best single mode for both. GLiNER's yes/no mode also flags about a quarter of benign and two in five hard-negative prompts.</span><span data-suite="guard-ood"> On unseen data every model's false positives rise, in every mode. Jev keeps the highest recall (90–97%) but flags half or more of the hard negatives; GPT-6 Luna holds recall near its core level with far fewer false positives, though its numbers include 251 prompts where a refused question counted as a flag.</span></figcaption>
+<figcaption><strong>Figure 1 (interactive).</strong> <em>macro / micro / weighted</em> squeeze the categories into one bar per model: macro is the plain mean of the per-category scores, micro pools all items (each counted once), and weighted averages the categories by their size. For a plain accuracy, weighted equals micro; they differ for balanced accuracy and when an item carries several categories. <span data-task="answer">Accuracy per category for each model and question mode; switch modes in the panel. Dashed line: chance. In score mode, black ticks mark a baseline that always guesses the category's most common level. Hover a bar for counts.</span><span data-task="flag">Recall per harm category (share of harmful prompts with that label that get flagged) and false-positive rate on safe prompts, per model, at each model's threshold for the selected mode. Hover a bar for counts.</span><span data-suite="stem-synth"> Jev is near ceiling in every mode; GPT-6 Luna is clearly above chance everywhere but often picks the common-mistake distractor (a dropped ½, a flipped sign, a near-miss sum), even on multi-digit addition. GLiNER clears chance only in choice mode; both Laya checkpoints scatter around chance in every tier. Every hosted-model miss was checked against the answer key.</span><span data-suite="guard-core"> Jev and GPT-6 Luna flag most attacks with the fewest false positives; score mode is the best single mode for both. GLiNER's yes/no mode also flags about a quarter of benign and two in five hard-negative prompts.</span><span data-suite="guard-ood"> On unseen data every model's false positives rise, in every mode. Jev keeps the highest recall (90–97%) but flags half or more of the hard negatives; GPT-6 Luna holds recall near its core level with far fewer false positives, though its numbers include 251 prompts where a refused question counted as a flag.</span></figcaption>
 </figure>
 
 <figure class="de-figure de-wide" id="table-1">
@@ -306,7 +306,7 @@ Plain text:
     grid: 'var(--de-grid)', bg: 'var(--bg,#fffcf0)', hatch: 'var(--de-hatch)', font: 'inherit', fs: 12.5};
   var PAPER = {m: ['#0072B2', '#56B4E9', '#009E73', '#D55E00', '#CC79A7'], ink: '#111111', muted: '#333333', grid: '#dddddd',
     bg: '#ffffff', hatch: 'rgba(0,0,0,0.45)', font: "'Times New Roman',Times,STIXGeneral,serif", fs: 13};
-  var state = {suite: null, view: 'web', mode: null, hidden: {}};
+  var state = {suite: null, view: 'web', mode: null, agg: null, hidden: {}};
   var S, ITEMS, MODELS, T = WEB;
 
   // ---------- helpers
@@ -508,7 +508,7 @@ Plain text:
       var b = el('button', {'aria-pressed': p.id === state.suite ? 'true' : 'false', title: ready ? s.meta.n + ' items' : 'results pending'},
         esc(p.title) + (ready ? '' : ' · pending'));
       b.disabled = !ready;
-      b.onclick = function () { state.suite = p.id; state.mode = null; boot(); };
+      b.onclick = function () { state.suite = p.id; state.mode = null; fig1Last = null; boot(); };
       seg.appendChild(b);
     });
     bar.appendChild(el('span', {'class': 'lab'}, 'Suite')); bar.appendChild(seg);
@@ -523,47 +523,179 @@ Plain text:
     root.appendChild(bar);
   }
 
-  // ---------- Figure 1: accuracy by category
-  function figAccuracy() {
-    var mode = state.mode, f = frame('de-acc', MODES[mode].label + ' by category', {modes: true, legend: true, svgName: 'accuracy-by-category'});
-    var vis = visible(), mc = S.meta.chance[mode], groups = S.meta.groups || {'': S.meta.categories}, gnames = Object.keys(groups);
-    var W = width(f.body, 320, 1000), labelW = W < 480 ? 112 : 160, right = 44;
-    var bh = vis.length > 2 ? 10 : 14, gap = 2, groupH = vis.length * (bh + gap) + 14, headH = gnames.length > 1 ? 22 : 4;
-    var H = 26 + S.meta.categories.length * groupH + gnames.length * headH + 26;
-    var svg = newSvg(W, H, MODES[mode].label + ' by category and model'), uid = 'de' + Math.random().toString(36).slice(2, 7);
+  // ---------- Figure 1: per-category bars that can squeeze into one aggregate bar per model.
+  // A spec lists rows ({id, group, label, agg, value(m), tip(m), tick}) and aggregates ({macro, micro, weighted}:
+  // {value(m), tip(m), label}). layoutBars() turns a spec into keyed elements for one view; switching views animates
+  // every element present in both layouts from its old geometry to its new one (bars of every category of a model
+  // converge on that model's aggregate bar), fades the rest, then redraws the final view statically with tooltips.
+  var AGG_NAMES = ['macro', 'micro', 'weighted'];
+  var fig1Anim = false, fig1Last = null;
+  function layoutBars(spec, aggMode, W) {
+    var vis = visible(), labelW = W < 480 ? 118 : 184, right = 46, x0 = labelW, x1 = W - right;
+    function X(v) { return x0 + (isNaN(v) ? 0 : v) * (x1 - x0); }
+    var bh = vis.length > 2 ? 10 : 14, bh2 = Math.round(bh * 1.7), gap = 2, pad = 14, headH = 22;
+    var els = [], hits = [], seen = {}, y = 24;
+    function head(key, g) { if (!g || seen[key]) return; seen[key] = 1; els.push({key: 'grp|' + key, kind: 'text', a: {x: 0, y: y + 14}, s: {str: g, o: {ink: true, bold: true, italic: true}}}); y += headH; }
+    function bar(key, j, x, by, w, h) { els.push({key: key, kind: 'rect', a: {x: x, y: by, width: Math.max(0.5, w), height: h}, s: {j: j}}); }
+    function rowBlock(r) {
+      head(r.group, r.group);
+      var top = y, blockH = vis.length * (bh + gap);
+      els.push({key: 'lab|' + r.id, kind: 'text', a: {x: labelW - 8, y: top + blockH / 2 + 4}, s: {str: r.label, o: {anchor: 'end'}}});
+      if (r.tick != null) els.push({key: 'tick|' + r.id, kind: 'line', a: {x1: X(r.tick), y1: top - 3, x2: X(r.tick), y2: top + blockH + 1}, s: {st: 'stroke:' + T.ink + ';stroke-width:3'}});
+      vis.forEach(function (m, k) {
+        var v = r.value(m), by = top + k * (bh + gap);
+        bar('bar|' + r.id + '|' + m.key, jOf(m), x0, by, X(v) - x0, bh);
+        if (W >= 440) els.push({key: 'val|' + r.id + '|' + m.key, kind: 'text', a: {x: X(v) + 4, y: by + bh - 1.5}, s: {str: pct(v), o: {size: 10}}});
+        hits.push({y: by - gap / 2, h: bh + gap, tip: function () { return r.tip(m); }});
+      });
+      y += blockH + pad;
+    }
+    if (!aggMode) spec.rows.forEach(rowBlock);
+    else {
+      var A = spec.aggs[aggMode], aggRows = spec.rows.filter(function (r) { return r.agg; });
+      head('agg', spec.aggGroup);
+      var top = y, blockH = vis.length * (bh2 + gap);
+      els.push({key: 'agglab', kind: 'text', a: {x: labelW - 8, y: top + blockH / 2 + 4}, s: {str: A.label, o: {anchor: 'end', ink: true, bold: true}}});
+      vis.forEach(function (m, k) {
+        var v = A.value(m), by = top + k * (bh2 + gap);
+        // every category bar of this model lands on the same aggregate bar
+        aggRows.forEach(function (r) { bar('bar|' + r.id + '|' + m.key, jOf(m), x0, by, X(v) - x0, bh2); });
+        els.push({key: 'aggval|' + m.key, kind: 'text', a: {x: X(v) + 5, y: by + bh2 - 3}, s: {str: pct(v, 1), o: {size: 11.5, ink: true, bold: true}}});
+        hits.push({y: by - gap / 2, h: bh2 + gap, tip: function () { return A.tip(m); }});
+      });
+      y += blockH + pad + 6;
+      spec.rows.filter(function (r) { return !r.agg; }).forEach(rowBlock);
+    }
+    var H = y + 22;
+    [0, 0.25, 0.5, 0.75, 1].forEach(function (v) {
+      els.unshift({key: 'grid|' + v, kind: 'line', a: {x1: X(v), y1: 18, x2: X(v), y2: H - 24}, s: {st: gridSt()}});
+      els.push({key: 'gridt|' + v, kind: 'text', a: {x: X(v), y: 12}, s: {str: pct(v), o: {anchor: 'middle'}}});
+    });
+    if (spec.chance != null) {
+      els.push({key: 'chance', kind: 'line', a: {x1: X(spec.chance), y1: 18, x2: X(spec.chance), y2: H - 24}, s: {st: refSt()}});
+      els.push({key: 'chancet', kind: 'text', a: {x: X(spec.chance) + 3, y: H - 8}, s: {str: spec.chanceText, o: {ink: true, size: 10}}});
+    }
+    return {W: W, H: H, els: els, hits: hits, sig: spec.sig};
+  }
+  function drawEl(parent, e, uid) {
+    var n;
+    if (e.kind === 'rect') n = sv('rect', {rx: 1.5, fill: 'url(#' + uid + '-p' + e.s.j + ')', style: 'stroke:rgba(0,0,0,.55);stroke-width:.6'}, parent);
+    else if (e.kind === 'line') n = sv('line', {style: e.s.st}, parent);
+    else n = txt(parent, 0, 0, e.s.str, e.s.o);
+    for (var k in e.a) n.setAttribute(k, e.a[k]);
+    return n;
+  }
+  function renderBars(f, spec) {
+    var W = width(f.body, 320, 1000), to = layoutBars(spec, state.agg, W), from = fig1Last;
+    fig1Last = to;
+    var animate = fig1Anim && from && from.W === W && from.sig === to.sig &&
+      !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+    fig1Anim = false;
+    function finalDraw() {
+      f.body.querySelectorAll('svg').forEach(function (s) { s.remove(); });
+      var svg = newSvg(W, to.H, spec.title), uid = 'de' + Math.random().toString(36).slice(2, 7);
+      defs(svg, uid);
+      to.els.forEach(function (e) { drawEl(svg, e, uid); });
+      to.hits.forEach(function (h) { bindTip(sv('rect', {x: 0, y: h.y, width: W, height: h.h, style: 'fill:transparent;cursor:pointer'}, svg), h.tip); });
+      f.body.appendChild(svg);
+    }
+    if (!animate) return finalDraw();
+    var svg = newSvg(W, from.H, spec.title), uid = 'de' + Math.random().toString(36).slice(2, 7);
     defs(svg, uid);
-    var x0 = labelW, x1 = W - right;
-    function X(v) { return x0 + v * (x1 - x0); }
-    [0, 0.25, 0.5, 0.75, 1].forEach(function (v) { line(svg, X(v), 18, X(v), H - 24, gridSt()); txt(svg, X(v), 12, pct(v), {anchor: 'middle'}); });
-    var y = 24, under = sv('g', {}, svg), bars = sv('g', {}, svg);
-    gnames.forEach(function (g) {
-      if (gnames.length > 1) { txt(svg, 0, y + 14, g, {ink: true, bold: true, italic: true}); y += headH; }
+    f.body.appendChild(svg);
+    var A = {}, B = {}, keys = [];
+    from.els.forEach(function (e) { A[e.key] = e; keys.push(e.key); });
+    to.els.forEach(function (e) { B[e.key] = e; if (!(e.key in A)) keys.push(e.key); });
+    // rects first, so bars sit under labels; each key gets one node whose numeric attributes are tweened
+    keys.sort(function (a, b) { return ((A[a] || B[a]).kind === 'rect' ? 0 : 1) - ((A[b] || B[b]).kind === 'rect' ? 0 : 1); });
+    var nodes = keys.map(function (k) { return {k: k, a: A[k], b: B[k], n: drawEl(svg, B[k] || A[k], uid)}; });
+    var t0 = performance.now(), dur = 700;
+    function ease(t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+    function frameAt(now) {
+      var t = Math.min(1, (now - t0) / dur), e = ease(t), H = from.H + (to.H - from.H) * e;
+      svg.setAttribute('height', H); svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+      nodes.forEach(function (o) {
+        if (o.a && o.b) {
+          for (var k in o.b.a) o.n.setAttribute(k, (o.a.a[k] != null ? o.a.a[k] : o.b.a[k]) + ((o.b.a[k] - (o.a.a[k] != null ? o.a.a[k] : o.b.a[k])) * e));
+          if (o.b.kind === 'text' && o.a.s.str !== o.b.s.str) o.n.textContent = e < 0.5 ? o.a.s.str : o.b.s.str;
+        } else if (o.a) { for (var ka in o.a.a) o.n.setAttribute(ka, o.a.a[ka]); o.n.style.opacity = 1 - Math.min(1, e * 1.8); }
+        else o.n.style.opacity = Math.max(0, e * 1.8 - 0.8);
+      });
+      if (t < 1) requestAnimationFrame(frameAt); else finalDraw();
+    }
+    requestAnimationFrame(frameAt);
+  }
+  function aggSwitch() {
+    var seg = el('div', {'class': 'de-seg', role: 'group', 'aria-label': 'Aggregate'});
+    [[null, 'by category']].concat(AGG_NAMES.map(function (a) { return [a, a]; })).forEach(function (p) {
+      var b = el('button', {'aria-pressed': state.agg === p[0] ? 'true' : 'false', title: p[0] ? 'Squeeze the categories into one ' + p[0] + ' bar per model' : 'One bar per category'}, p[1]);
+      b.onclick = function () { if (state.agg === p[0]) return; state.agg = p[0]; fig1Anim = true; writeHash(); (isFlag() ? figAccuracyFlag : figAccuracy)(); };
+      seg.appendChild(b);
+    });
+    return seg;
+  }
+  function weightedAggs(rows, micro, unit, n, what) {
+    // rows: [{value(m), n}] per category; micro(m): the pooled score
+    function macro(m) { var v = rows.map(function (r) { return r.value(m); }).filter(function (v) { return !isNaN(v); }); return mean(v); }
+    function weighted(m) { var s = 0, w = 0; rows.forEach(function (r) { var v = r.value(m); if (!isNaN(v)) { s += r.n * v; w += r.n; } }); return w ? s / w : NaN; }
+    return {
+      macro: {value: macro, label: 'macro · ' + rows.length + ' categories', tip: function (m) { return '<b>' + esc(m.name) + '</b> · macro ' + what + ': <b>' + pct(macro(m), 1) + '</b><br>plain mean of ' + rows.length + ' per-category scores'; }},
+      micro: {value: micro, label: 'micro · ' + n + ' ' + unit, tip: function (m) { return '<b>' + esc(m.name) + '</b> · micro ' + what + ': <b>' + pct(micro(m), 1) + '</b><br>pooled over all ' + n + ' ' + unit + ', each counted once'; }},
+      weighted: {value: weighted, label: 'weighted · ' + rows.length + ' categories', tip: function (m) { return '<b>' + esc(m.name) + '</b> · weighted ' + what + ': <b>' + pct(weighted(m), 1) + '</b><br>mean of per-category scores, weighted by category size'; }}
+    };
+  }
+  function figAccuracy() {
+    var mode = state.mode, mc = S.meta.chance[mode], groups = S.meta.groups || {'': S.meta.categories};
+    var f = frame('de-acc', MODES[mode].label + (state.agg ? ' · ' + state.agg + ' aggregate' : ' by category'), {modes: true, legend: true, svgName: 'accuracy-by-category'});
+    f.tools.insertBefore(aggSwitch(), f.tools.firstChild);
+    var rows = [], all = ITEMS.map(function (_, i) { return i; });
+    Object.keys(groups).forEach(function (g) {
       groups[g].forEach(function (cat) {
-        var idx = catIdx(cat), top = y, blockH = vis.length * (bh + gap);
-        txt(svg, labelW - 8, top + blockH / 2 + 4, short(cat), {anchor: 'end'});
+        var idx = catIdx(cat), tick = null;
         if (mode === 'score') {
           var cnt = {};
           idx.forEach(function (i) { cnt[ITEMS[i].bin] = (cnt[ITEMS[i].bin] || 0) + 1; });
-          var maj = Math.max.apply(null, Object.keys(cnt).map(function (k) { return cnt[k]; })) / idx.length;
-          line(under, X(maj), top - 3, X(maj), top + blockH + 1, 'stroke:' + T.ink + ';stroke-width:3');
+          tick = Math.max.apply(null, Object.keys(cnt).map(function (k) { return cnt[k]; })) / idx.length;
         }
-        vis.forEach(function (m, r) {
-          var j = jOf(m), v = metric(m, idx, mode), by = top + r * (bh + gap);
-          var nOk = idx.filter(function (i) { return correct(m, i, mode); }).length;
-          sv('rect', {x: x0, y: by, width: Math.max(0.5, X(v) - x0), height: bh, rx: 1.5, fill: 'url(#' + uid + '-p' + j + ')', style: 'stroke:rgba(0,0,0,.55);stroke-width:.6'}, bars);
-          if (W >= 440) txt(bars, X(v) + 4, by + bh - 1.5, pct(v), {size: 10});
-          var hit = sv('rect', {x: 0, y: by - gap / 2, width: W, height: bh + gap, style: 'fill:transparent;cursor:pointer'}, bars);
-          bindTip(hit, function () {
+        rows.push({id: cat, group: Object.keys(groups).length > 1 ? g : null, label: short(cat), agg: true, n: idx.length, tick: tick,
+          value: function (m) { return metric(m, idx, mode); },
+          tip: function (m) {
+            var v = metric(m, idx, mode), nOk = idx.filter(function (i) { return correct(m, i, mode); }).length;
             var extra = mode === 'noul' ? '<br>says yes to ' + idx.filter(function (i) { return m.preds[i][3] >= 0.5; }).length + '/' + idx.length : '';
             return '<b>' + esc(m.name) + '</b> · ' + esc(short(cat)) + '<br>' + MODES[mode].label + ': <b>' + pct(v) + '</b><br>' + nOk + '/' + idx.length + ' items correct' + extra + '<br>chance ' + pct(mc);
-          });
-        });
-        y += groupH;
+          }});
       });
     });
-    line(svg, X(mc), 18, X(mc), H - 24, refSt());
-    txt(svg, X(mc) + 3, H - 8, 'chance ' + pct(mc) + (mode === 'score' ? '   ▮ most-common-level baseline' : ''), {ink: true, size: 10});
-    f.body.appendChild(svg);
+    renderBars(f, {title: MODES[mode].label + ' by category and model', rows: rows, chance: mc,
+      chanceText: 'chance ' + pct(mc) + (mode === 'score' && !state.agg ? '   ▮ most-common-level baseline' : ''),
+      aggGroup: MODES[mode].label.toLowerCase(), sig: S.id + '|' + mode + '|' + visible().map(function (m) { return m.key; }).join(),
+      aggs: weightedAggs(rows, function (m) { return metric(m, all, mode); }, 'items', all.length, MODES[mode].label.toLowerCase())});
+  }
+  function figAccuracyFlag() {
+    var mode = state.mode;
+    var f = frame('de-acc', 'Detection by category · ' + MODES[mode].short + ' mode' + (state.agg ? ' · ' + state.agg + ' recall' : ''), {modes: true, legend: true, svgName: 'detection-by-category'});
+    f.tools.insertBefore(aggSwitch(), f.tools.firstChild);
+    function rate(m, idx) { return idx.length ? idx.filter(function (i) { return flagged(m, i, mode); }).length / idx.length : NaN; }
+    function tip(label, idx, what) { return function (m) {
+      var n = idx.filter(function (i) { return flagged(m, i, mode); }).length;
+      return '<b>' + esc(m.name) + '</b> · ' + esc(label) + '<br>' + what + ': <b>' + pct(n / idx.length) + '</b> (' + n + '/' + idx.length + ' flagged)<br>threshold ' + thr(m, mode).toFixed(3);
+    }; }
+    var rows = [], cats = [], harm = kindIdx('harmful'), G1 = 'recall: harmful prompts flagged', G2 = 'false positives: safe prompts flagged (lower is better)';
+    rows.push({id: 'all-harmful', group: G1, label: 'all harmful (' + harm.length + ')', agg: true, value: function (m) { return rate(m, harm); }, tip: tip('all harmful', harm, 'recall')});
+    S.meta.categories.forEach(function (c) {
+      var idx = harm.filter(function (i) { return ITEMS[i].labels.indexOf(c) >= 0; });
+      if (!idx.length) return;
+      var lab = c.replace(/_/g, ' ') + ' (' + idx.length + ')';
+      var r = {id: c, group: G1, label: lab, agg: true, n: idx.length, value: function (m) { return rate(m, idx); }, tip: tip(lab, idx, 'recall')};
+      rows.push(r); cats.push(r);
+    });
+    ['hard_negative', 'benign'].forEach(function (k) {
+      var idx = kindIdx(k), lab = KIND_LABEL[k] + ' (' + idx.length + ')';
+      rows.push({id: k, group: G2, label: lab, agg: false, value: function (m) { return rate(m, idx); }, tip: tip(lab, idx, 'false-positive rate')});
+    });
+    renderBars(f, {title: 'Recall per harm category and false-positive rate per prompt kind', rows: rows, chance: null,
+      aggGroup: 'recall: harmful prompts flagged', sig: S.id + '|' + mode + '|' + visible().map(function (m) { return m.key; }).join(),
+      aggs: weightedAggs(cats, function (m) { return rate(m, harm); }, 'harmful prompts', harm.length, 'recall')});
   }
 
   // ---------- Table 1: overall
@@ -876,57 +1008,6 @@ Plain text:
   function kindIdx(k) { var r = []; ITEMS.forEach(function (it, i) { if (it.kind === k) r.push(i); }); return r; }
   function prevalence() { return S.meta.prevalence; }
   function perPrompt(c) { return c / S.meta.n * 1000; }
-  // horizontal grouped bars: rows = [{group, label, value(m), tip(m)}]
-  function hbars(f, rows, title) {
-    var vis = visible(), W = width(f.body, 320, 1000), labelW = W < 480 ? 120 : 190, right = 44;
-    var bh = vis.length > 2 ? 10 : 14, gap = 2, groupH = vis.length * (bh + gap) + 14, headH = 22;
-    var groups = [];
-    rows.forEach(function (r) { if (groups.indexOf(r.group) < 0) groups.push(r.group); });
-    var H = 26 + rows.length * groupH + groups.length * headH + 10;
-    var svg = newSvg(W, H, title), uid = 'de' + Math.random().toString(36).slice(2, 7);
-    defs(svg, uid);
-    var x0 = labelW, x1 = W - right;
-    function X(v) { return x0 + v * (x1 - x0); }
-    [0, 0.25, 0.5, 0.75, 1].forEach(function (v) { line(svg, X(v), 18, X(v), H - 10, gridSt()); txt(svg, X(v), 12, pct(v), {anchor: 'middle'}); });
-    var y = 24, bars = sv('g', {}, svg);
-    groups.forEach(function (g) {
-      txt(svg, 0, y + 14, g, {ink: true, bold: true, italic: true}); y += headH;
-      rows.filter(function (r) { return r.group === g; }).forEach(function (r) {
-        var top = y, blockH = vis.length * (bh + gap);
-        txt(svg, labelW - 8, top + blockH / 2 + 4, r.label, {anchor: 'end'});
-        vis.forEach(function (m, k) {
-          var j = jOf(m), v = r.value(m), by = top + k * (bh + gap);
-          sv('rect', {x: x0, y: by, width: Math.max(0.5, X(v) - x0), height: bh, rx: 1.5, fill: 'url(#' + uid + '-p' + j + ')', style: 'stroke:rgba(0,0,0,.55);stroke-width:.6'}, bars);
-          if (W >= 440) txt(bars, X(v) + 4, by + bh - 1.5, pct(v), {size: 10});
-          var hit = sv('rect', {x: 0, y: by - gap / 2, width: W, height: bh + gap, style: 'fill:transparent;cursor:pointer'}, bars);
-          bindTip(hit, function () { return r.tip(m); });
-        });
-        y += groupH;
-      });
-    });
-    f.body.appendChild(svg);
-  }
-  function figAccuracyFlag() {
-    var mode = state.mode, f = frame('de-acc', 'Detection by category · ' + MODES[mode].short + ' mode', {modes: true, legend: true, svgName: 'detection-by-category'});
-    function rate(m, idx) { return idx.length ? idx.filter(function (i) { return flagged(m, i, mode); }).length / idx.length : NaN; }
-    function tip(label, idx, what) { return function (m) {
-      var n = idx.filter(function (i) { return flagged(m, i, mode); }).length;
-      return '<b>' + esc(m.name) + '</b> · ' + esc(label) + '<br>' + what + ': <b>' + pct(n / idx.length) + '</b> (' + n + '/' + idx.length + ' flagged)<br>threshold ' + thr(m, mode).toFixed(3);
-    }; }
-    var rows = [], harm = kindIdx('harmful'), G1 = 'recall: harmful prompts flagged', G2 = 'false positives: safe prompts flagged (lower is better)';
-    rows.push({group: G1, label: 'all harmful (' + harm.length + ')', value: function (m) { return rate(m, harm); }, tip: tip('all harmful', harm, 'recall')});
-    S.meta.categories.forEach(function (c) {
-      var idx = harm.filter(function (i) { return ITEMS[i].labels.indexOf(c) >= 0; });
-      if (!idx.length) return;
-      var lab = c.replace(/_/g, ' ') + ' (' + idx.length + ')';
-      rows.push({group: G1, label: lab, value: function (m) { return rate(m, idx); }, tip: tip(lab, idx, 'recall')});
-    });
-    ['hard_negative', 'benign'].forEach(function (k) {
-      var idx = kindIdx(k), lab = KIND_LABEL[k] + ' (' + idx.length + ')';
-      rows.push({group: G2, label: lab, value: function (m) { return rate(m, idx); }, tip: tip(lab, idx, 'false-positive rate')});
-    });
-    hbars(f, rows, 'Recall per harm category and false-positive rate per prompt kind');
-  }
   var sortByF = {key: 'f1', dir: -1};
   function table1Flag() {
     var mode = state.mode, f = frame('de-t1', 'Overall · ' + esc(S.title) + ' · ' + S.meta.n + ' prompts · ' + MODES[mode].short + ' mode', {modes: true});
@@ -1121,16 +1202,17 @@ Plain text:
   // links such as #1-accuracy. Only non-default values are written, so a plain link stays plain.
   function readHash() {
     var q = new URLSearchParams(location.search), h = {};
-    ['suite', 'view', 'mode'].forEach(function (k) { if (q.get(k)) h[k] = q.get(k); });
+    ['suite', 'view', 'mode', 'agg'].forEach(function (k) { if (q.get(k)) h[k] = q.get(k); });
     return h;
   }
   function writeHash() {
     if (!history.replaceState) return;
     var q = new URLSearchParams(location.search);
-    q.delete('suite'); q.delete('view'); q.delete('mode');
+    q.delete('suite'); q.delete('view'); q.delete('mode'); q.delete('agg');
     if (state.suite !== ALL.suites[0].id) q.set('suite', state.suite);
     if (state.view !== 'web') q.set('view', state.view);
     if (state.mode !== S.meta.modes[0]) q.set('mode', state.mode);
+    if (state.agg) q.set('agg', state.agg);
     var qs = q.toString();
     history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
   }
@@ -1165,6 +1247,7 @@ Plain text:
   state.suite = h.suite || null;
   state.view = h.view === 'paper' ? 'paper' : 'web';
   state.mode = h.mode || null;
+  state.agg = AGG_NAMES.indexOf(h.agg) >= 0 ? h.agg : null;
   boot();
   var w = window.innerWidth, timer;
   window.addEventListener('resize', function () {
