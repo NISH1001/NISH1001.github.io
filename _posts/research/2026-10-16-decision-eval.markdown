@@ -152,13 +152,13 @@ span[data-suite].on,span[data-task].on{display:inline}
 
 <div data-suite="guard-core" markdown="1">
 
-**Suite: Guardrails, core.** reflex-guard's core set, test split: 322 prompts, of which 104 are harmful, 94 benign and 124 *hard negatives* (safe prompts built to look risky: trigger words, the benign twin of a harmful prompt). Science-domain requests, jailbreaks and prompt injections over 8 harm categories. Every guard asks every category in each mode; a prompt's P(flag) in a mode is its highest category score, and it is flagged at that model's threshold for the mode, chosen on the dev split (best balanced accuracy) and never on these prompts. Imported from reflex-guard's eval caches: nothing is re-run, and its own report's numbers are reproduced exactly.
+**Suite: Guardrails, core.** [reflex-guard](https://github.com/NISH1001/reflex-guard)'s core set <span class="de-cite" data-ref="Pantha, N. (2026). reflex-guard: multi-label guardrails on System One decision models (Laya, GLiNER2.5-Decide, Jev, GPT-6 Luna). github.com/NISH1001/reflex-guard, eval at commit 999d51d."><a href="#de-ref-reflexguard">[8]</a></span>, test split: 322 prompts, of which 104 are harmful, 94 benign and 124 *hard negatives* (safe prompts built to look risky: trigger words, the benign twin of a harmful prompt). Science-domain requests, jailbreaks and prompt injections over 8 harm categories. Every guard asks every category in each mode; a prompt's P(flag) in a mode is its highest category score, and it is flagged at that model's threshold for the mode, chosen on the dev split (best balanced accuracy) and never on these prompts. Imported from [reflex-guard](https://github.com/NISH1001/reflex-guard)'s eval caches: nothing is re-run, and [its own report](https://github.com/NISH1001/reflex-guard/blob/999d51d/data/eval/results.md)'s numbers are reproduced exactly.
 
 </div>
 
 <div data-suite="guard-ood" markdown="1">
 
-**Suite: Guardrails, OOD.** 988 prompts from three public safety sets, Aegis 2.0, XSTest v2 and OR-Bench: 519 harmful, 99 benign, 370 hard negatives (over-refusal bait), over 8 content categories. Nothing is tuned here: every model keeps the thresholds it got on the core dev split, so this measures how a guard transfers. Harmful prompts are over half the set, so flagging everything already scores 53% precision and accuracy; compare against the baselines in Table 1.
+**Suite: Guardrails, OOD.** [reflex-guard](https://github.com/NISH1001/reflex-guard)'s out-of-distribution set <span class="de-cite" data-ref="Pantha, N. (2026). reflex-guard: multi-label guardrails on System One decision models (Laya, GLiNER2.5-Decide, Jev, GPT-6 Luna). github.com/NISH1001/reflex-guard, eval at commit 999d51d."><a href="#de-ref-reflexguard">[8]</a></span>: 988 prompts from three public safety sets, Aegis 2.0, XSTest v2 and OR-Bench: 519 harmful, 99 benign, 370 hard negatives (over-refusal bait), over 8 content categories. Nothing is tuned here: every model keeps the thresholds it got on the core dev split, so this measures how a guard transfers. Harmful prompts are over half the set, so flagging everything already scores 53% precision and accuracy; compare against the baselines in Table 1.
 
 </div>
 
@@ -224,7 +224,7 @@ span[data-suite].on,span[data-task].on{display:inline}
 
 <div data-suite="guard-core" markdown="1">
 
-* **Source.** Imported from reflex-guard at commit `999d51d`; the thresholds, recall and false-positive rates match its own report. Precision, F1 and accuracy are computed here from the same per-prompt flags.
+* **Source.** Imported from [reflex-guard](https://github.com/NISH1001/reflex-guard) at commit [`999d51d`](https://github.com/NISH1001/reflex-guard/tree/999d51d); the thresholds, recall and false-positive rates match [its own report](https://github.com/NISH1001/reflex-guard/blob/999d51d/data/eval/results.md). Precision, F1 and accuracy are computed here from the same per-prompt flags.
 * **Thin categories.** Most harmful prompts are attacks (prompt injection, jailbreak); the content categories have 2 to 14 prompts each, so their recall bars are indicative only.
 * **Laya typed** was not part of the guardrail eval.
 
@@ -232,7 +232,7 @@ span[data-suite].on,span[data-task].on{display:inline}
 
 <div data-suite="guard-ood" markdown="1">
 
-* **Source.** Imported from reflex-guard at commit `999d51d`. "Out of distribution" means not named as training data in either local model's card; all three source sets predate both models.
+* **Source.** Imported from [reflex-guard](https://github.com/NISH1001/reflex-guard) at commit [`999d51d`](https://github.com/NISH1001/reflex-guard/tree/999d51d) ([its report](https://github.com/NISH1001/reflex-guard/blob/999d51d/data/eval/ood/results.md)). "Out of distribution" means not named as training data in either local model's card; all three source sets predate both models.
 * **Refusals.** GPT-6 Luna refused at least one question on 251 of 988 prompts, each counted as a flag (reflex-guard's policy), which raises both its recall and its false positives. The explorer can filter to them.
 * **Laya typed** was not part of the guardrail eval.
 
@@ -260,6 +260,7 @@ uvx --from "$R" decision-eval import-reflexguard --repo <reflex-guard checkout> 
 <li id="de-ref-jev">TypeSafe. Jev 1.14 (<code>typesafe/jev-1.14</code>), OpenRouter decisions API. Snapshot <code>typesafe/jev-1.14-20261014</code>.</li>
 <li id="de-ref-guo">Guo, C., Pleiss, G., Sun, Y., &amp; Weinberger, K. Q. (2017). On Calibration of Modern Neural Networks. <em>ICML 2017</em>.</li>
 <li id="de-ref-openai">OpenAI. Decisions API guide (<code>POST /v1/decisions</code>, beta). developers.openai.com/api/docs/guides/decisions. Model <code>gpt-6-luna</code>, created 2026-09-14, accessed 2026-10-16.</li>
+<li id="de-ref-reflexguard">Pantha, N. (2026). reflex-guard: multi-label guardrails on System One decision models. <a href="https://github.com/NISH1001/reflex-guard">github.com/NISH1001/reflex-guard</a>; eval sets, caches and report at commit <a href="https://github.com/NISH1001/reflex-guard/tree/999d51d">999d51d</a>.</li>
 </ol>
 
 ## Citation
