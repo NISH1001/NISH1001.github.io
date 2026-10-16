@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "decision-eval: Benchmarking Zero-Shot Decision Models"
+title:  "decision-eval: An Opinionated Benchmark for Zero-Shot Decision Models"
 date:   2026-10-16 09:00:00 +0545
 categories: research
 tags: research llm benchmark evaluation decision-models zero-shot classification calibration latency
@@ -275,7 +275,7 @@ uvx --from "$R" decision-eval import-reflexguard --repo <reflex-guard checkout> 
 ```bibtex
 @techreport{nish2026decisioneval,
   author      = {Pantha, Nishan},
-  title       = {decision-eval: Benchmarking Zero-Shot Decision Models},
+  title       = {decision-eval: An Opinionated Benchmark for Zero-Shot Decision Models},
   institution = {Bits and Paradoxes},
   type        = {Technical Report},
   year        = {2026},
@@ -286,7 +286,7 @@ uvx --from "$R" decision-eval import-reflexguard --repo <reflex-guard checkout> 
 
 Plain text:
 
-> Pantha, N. (2026). *decision-eval: Benchmarking Zero-Shot Decision Models.*
+> Pantha, N. (2026). *decision-eval: An Opinionated Benchmark for Zero-Shot Decision Models.*
 > Technical Report. <{{ site.url }}{{ page.url }}>
 
 <!-- DATA:START -->
