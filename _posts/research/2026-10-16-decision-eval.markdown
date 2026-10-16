@@ -125,11 +125,14 @@ span[data-suite].on,span[data-task].on{display:inline}
 .de-refs{font-size:.82rem}
 .de-refs li{margin:.3rem 0}
 /* citation: plain, copyable BibTeX with a copy button, as in the other reports */
-.content .language-bibtex .highlight span{color:#24292f!important;font-style:normal!important;font-weight:normal!important}
+.content .language-bibtex .highlight span{color:var(--title,#24292f)!important;font-style:normal!important;font-weight:normal!important}
 .content .language-bibtex{position:relative}
 .de-copy{position:absolute;top:.5rem;right:.5rem;font:600 .68rem/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.03em;padding:.4em .7em;border-radius:6px;border:1px solid #d0d7de;background:rgba(255,255,255,.85);color:#57606a;cursor:pointer;opacity:.8;transition:opacity .15s,background .15s,color .15s}
 .de-copy:hover{opacity:1;background:#efece2}
 .de-copy.ok{color:#1a7f37;border-color:#1a7f37}
+[data-theme="dark"] .de-copy{background:rgba(255,255,255,.08);border-color:#4a4b52;color:#c9cbd1}
+[data-theme="dark"] .de-copy:hover{background:rgba(255,255,255,.14)}
+[data-theme="dark"] .de-copy.ok{color:#56d364;border-color:#56d364}
 </style>
 
 <div class="de-disclaimer" markdown="1">
