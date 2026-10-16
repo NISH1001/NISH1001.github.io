@@ -22,7 +22,15 @@ toc: true
 .de-abstract{border-left:3px solid var(--brand,#3aa99f);padding:.2rem 0 .2rem 1rem;margin:1.5rem 0;font-size:.95rem}
 .de-disclaimer{border:1px solid var(--border,#e6e4d9);background:var(--bg2,#f2f0e5);border-radius:.5rem;padding:.6rem .8rem;margin:1.2rem 0;font-size:.86rem;line-height:1.55}
 .de-fignote{font-size:.76rem;line-height:1.45;opacity:.8;text-align:right;margin:0 0 .4rem auto;max-width:34rem}
+.de-cov-switch{display:flex;flex-wrap:wrap;gap:.4rem .7rem;align-items:center;margin:0 0 .8rem;font-size:.78rem}
+.de-cov-switch .lab{opacity:.7}
+.de-cov-hint{font-size:.72rem;opacity:.7}
 .de-cov-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr));gap:1rem}
+.de-cov-wide{grid-column:1/-1}
+.de-cov-inner{display:grid;grid-template-columns:minmax(0,1fr);gap:.6rem 1.4rem}
+@media (min-width:900px){.de-cov-wide .de-cov-inner{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}}
+.de-cov-table{margin-top:.6rem}
+.de-cov-table th,.de-cov-table td{padding:.3rem .4rem;font-size:.72rem}
 .de-cov-card{border:1px solid var(--border,#e6e4d9);border-top:4px solid var(--brand,#3aa99f);border-radius:.6rem;background:var(--bg,#fffcf0);padding:.75rem .85rem .85rem;min-width:0}
 .de-paper .de-cov-card{background:#fff;border-color:#ccc}
 .de-cov-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:.2rem .6rem}
@@ -30,7 +38,7 @@ toc: true
 .de-cov-sub{width:100%;font:.7rem/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;opacity:.7}
 .de-cov-tools{display:flex;gap:.3rem}
 .de-cov-legend{display:grid;gap:.15rem;margin-top:.3rem}
-.de-cov-row{display:grid;grid-template-columns:1.3rem auto 1fr auto;gap:.45rem;align-items:center;font:inherit;font-size:.8rem;text-align:left;
+.de-cov-row{display:grid;grid-template-columns:1.3rem auto 1fr auto;width:100%;gap:.45rem;align-items:center;font:inherit;font-size:.8rem;text-align:left;
   background:none;border:0;padding:.12rem .2rem;border-radius:.3rem;color:var(--de-ink);cursor:pointer}
 .de-cov-row:hover{background:var(--bg2,#f2f0e5)}
 .de-cov-row .rk{width:1.2rem;height:1.2rem;border:1.5px solid currentColor;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.66rem;font-weight:700}
@@ -38,6 +46,7 @@ toc: true
 .de-cov-row small{opacity:.6}
 .de-cov-unhide{grid-template-columns:1fr;opacity:.75;font-size:.72rem}
 .de-cov-note{font-size:.72rem;line-height:1.45;opacity:.8;margin-top:.45rem}
+html.de-all-on .de-not-all{display:none}
 .de-models{font-size:.9rem}
 .de-models li{margin:.2rem 0}
 /* wide figures break out of the 48rem text column on large screens */
@@ -45,6 +54,8 @@ toc: true
 /* sidenotes: right margin when there is room, inline otherwise */
 .de-side{display:block;font-size:.76rem;line-height:1.5;opacity:.85;border-left:2px solid var(--border,#e6e4d9);
   padding:.1rem 0 .1rem .7rem;margin:.6rem 0 1rem}
+/* wide figures start below any margin note still floating beside the text */
+@media (min-width:1260px){figure.de-figure.de-wide{clear:both}}
 @media (min-width:1260px){.de-side{float:right;clear:right;width:13rem;margin:.2rem -15.5rem 1rem 0;border-left:0;
   padding:.35rem 0 0;border-top:1px solid var(--border,#e6e4d9)}}
 /* figures, ConceptGate-style captions */
@@ -163,6 +174,8 @@ span[data-suite].on,span[data-task].on{display:inline}
 
 </div>
 
+<span class="de-side">Jev reports about 75 output tokens per request even though it returns only probabilities. That suggests a generative model behind the structured interface, but TypeSafe does not say. GPT-6 Luna reports zero output tokens.</span>
+
 **Models.**
 
 <ul class="de-models">
@@ -173,14 +186,14 @@ span[data-suite].on,span[data-task].on{display:inline}
 <li><b>GPT-6 Luna</b>: <a href="https://developers.openai.com/api/docs/guides/decisions">gpt-6-luna</a> on OpenAI's Decisions API (<code>POST /v1/decisions</code>, public beta) <span class="de-cite" data-ref="OpenAI. Decisions API guide (POST /v1/decisions, beta); gpt-6-luna is the only supported model. developers.openai.com/api/docs/guides/decisions"><a href="#de-ref-openai">[7]</a></span>. Hosted; architecture and size undisclosed; USD 0.10 per million input tokens, output not billed on this endpoint (list price at time of run). The API reports only the alias <code>gpt-6-luna</code>; no dated snapshot is published, so the run records the model's creation date from the models endpoint (2026-09-14) and the run date (2026-10-16). Our modes map to its question types: choice → <code>choice</code>, noul → <code>predicate</code>, score → <code>score</code>; the state is sent as its JSON text. When it refuses a question in the guardrail suites, reflex-guard scores the refusal as a flag, so a refusal never reads as safe.</li>
 </ul>
 
-<span class="de-side">Jev reports about 75 output tokens per request even though it returns only probabilities. That suggests a generative model behind the structured interface, but TypeSafe does not say. GPT-6 Luna reports zero output tokens.</span>
+<div id="de-ctl-sentinel" style="height:1px"></div>
+<div class="de de-ctl-mount" id="de-ctl-mount"></div>
 
-## 1. Coverage
+<div data-suite="all" markdown="1">
 
-<figure class="de-figure de-wide" id="figure-coverage">
-<div class="de" id="de-cov"><div class="de-err">Loading…</div></div>
-<figcaption><strong>Figure 1 (interactive).</strong> Every suite at once, independent of the suite selector below. Each spoke is chance-corrected, so suites with different metrics share one scale: 0 is guessing and 1 is perfect. The number beside each model is its mean over the card's spokes. Hover a point for the raw score; click a model to hide it in every figure. Read areas loosely: a radar exaggerates differences, and the per-suite sections below have the exact numbers.</figcaption>
-</figure>
+**All suites.** Every section below summarises across the four suites: STEM (180 generated problems), JudgeBench (620 long-form judging pairs) and the two guardrail sets (322 and 988 prompts). Scores are chance-corrected so different metrics share one scale, where 0 is guessing and 1 is perfect; each suite counts equally in a model's mean. Pick a suite in the bar for its full detail: per-category accuracy, the verification plot, calibration and every item.
+
+</div>
 
 <div data-suite="stem-synth" markdown="1">
 
@@ -206,21 +219,28 @@ span[data-suite].on,span[data-task].on{display:inline}
 
 </div>
 
-<div id="de-ctl-sentinel" style="height:1px"></div>
-<div class="de de-ctl-mount" id="de-ctl-mount"></div>
+
+## 1. Coverage
+
+<figure class="de-figure de-wide" id="figure-coverage">
+<div class="de" id="de-cov"><div class="de-err">Loading…</div></div>
+<figcaption><strong>Figure 1 (interactive).</strong> Follows the suite bar: with <em>All suites</em> (the default) one radar compares every suite and mode, with the numbers beside it; with a single suite there is one radar per question mode over that suite's categories. Every spoke is chance-corrected so different metrics share one scale, where 0 is guessing and 1 is perfect: choice and score use (accuracy − chance) / (1 − chance), verify uses 2 × balanced accuracy − 1, and guardrails use recall + specificity − 1 at each model's threshold. Values below chance sit at the centre. Ranks weight each suite equally, and a model that did not run every suite is listed but not ranked. Read shape, not size: a radar's area depends on spoke order and exaggerates differences, so use the table and the sections below for exact numbers.</figcaption>
+</figure>
 
 ## 2. Accuracy
 
 <figure class="de-figure de-wide" id="figure-1">
 <div class="de-fignote">"GLiNER" here is <b>GLiNER2.5-Decide</b> (fastino), run from its fp32 ONNX export, which matches the PyTorch model exactly; the int8 and fp16 exports are not shown.</div>
 <div class="de" id="de-acc"><div class="de-err">Loading…</div></div>
-<figcaption><strong>Figure 2 (interactive).</strong> <em>macro / micro / weighted</em> squeeze the categories into one bar per model: macro is the plain mean of the per-category scores, micro pools all items (each counted once), and weighted averages the categories by their size. For a plain accuracy, weighted equals micro; they differ for balanced accuracy and when an item carries several categories. <span data-task="answer">Accuracy per category for each model and question mode; switch modes in the panel. Dashed line: chance. In score mode, black ticks mark a baseline that always guesses the category's most common level. Hover a bar for counts.</span><span data-task="flag">Recall per harm category (share of harmful prompts with that label that get flagged) and false-positive rate on safe prompts, per model, at each model's threshold for the selected mode. Hover a bar for counts.</span><span data-suite="stem-synth"> Jev is near ceiling in every mode; GPT-6 Luna is clearly above chance everywhere but often picks the common-mistake distractor (a dropped ½, a flipped sign, a near-miss sum), even on multi-digit addition. GLiNER clears chance only in choice mode; both Laya checkpoints scatter around chance in every tier. Every hosted-model miss was checked against the answer key.</span><span data-suite="judgebench"> Only Jev judges well (76% of pairs right, interval 73–79%); GPT-6 Luna gets 66%. The three local models are at chance overall (50–53%); their per-category bars swing between about 30% and 80% because most categories hold only about 20 items, which is noise at that size. For Laya even the overall number is no verdict on its judging, since it never reads most of the input (see Notes).</span><span data-suite="guard-core"> Jev and GPT-6 Luna flag most attacks with the fewest false positives; score mode is the best single mode for both. GLiNER's yes/no mode also flags about a quarter of benign and two in five hard-negative prompts.</span><span data-suite="guard-ood"> On unseen data every model's false positives rise, in every mode. Jev keeps the highest recall (90–97%) but flags half or more of the hard negatives; GPT-6 Luna holds recall near its core level with far fewer false positives, though its numbers include 251 prompts where a refused question counted as a flag.</span></figcaption>
+<figcaption><strong>Figure 2 (interactive).</strong> <span data-task="all">Chance-corrected score for every suite and question mode (0 is guessing, 1 is perfect; bars below chance sit at 0, and the tooltip has the real value and the raw metric). Guardrail rows use recall + specificity − 1 at each model's threshold. Pick a suite for per-category detail and the macro / micro / weighted aggregates.</span><span class="de-not-all"><em>macro / micro / weighted</em> squeeze the categories into one bar per model: macro is the plain mean of the per-category scores, micro pools all items (each counted once), and weighted averages the categories by their size. For a plain accuracy, weighted equals micro; they differ for balanced accuracy and when an item carries several categories. </span><span data-task="answer">Accuracy per category for each model and question mode; switch modes in the panel. Dashed line: chance. In score mode, black ticks mark a baseline that always guesses the category's most common level. Hover a bar for counts.</span><span data-task="flag">Recall per harm category (share of harmful prompts with that label that get flagged) and false-positive rate on safe prompts, per model, at each model's threshold for the selected mode. Hover a bar for counts.</span><span data-suite="stem-synth"> Jev is near ceiling in every mode; GPT-6 Luna is clearly above chance everywhere but often picks the common-mistake distractor (a dropped ½, a flipped sign, a near-miss sum), even on multi-digit addition. GLiNER clears chance only in choice mode; both Laya checkpoints scatter around chance in every tier. Every hosted-model miss was checked against the answer key.</span><span data-suite="judgebench"> Only Jev judges well (76% of pairs right, interval 73–79%); GPT-6 Luna gets 66%. The three local models are at chance overall (50–53%); their per-category bars swing between about 30% and 80% because most categories hold only about 20 items, which is noise at that size. For Laya even the overall number is no verdict on its judging, since it never reads most of the input (see Notes).</span><span data-suite="guard-core"> Jev and GPT-6 Luna flag most attacks with the fewest false positives; score mode is the best single mode for both. GLiNER's yes/no mode also flags about a quarter of benign and two in five hard-negative prompts.</span><span data-suite="guard-ood"> On unseen data every model's false positives rise, in every mode. Jev keeps the highest recall (90–97%) but flags half or more of the hard negatives; GPT-6 Luna holds recall near its core level with far fewer false positives, though its numbers include 251 prompts where a refused question counted as a flag.</span></figcaption>
 </figure>
 
 <figure class="de-figure de-wide" id="table-1">
 <div class="de" id="de-t1"></div>
-<figcaption><strong>Table 1.</strong> <span data-task="answer">Overall scores. Brackets: 95% bootstrap interval over items (1,000 resamples). Verify uses balanced accuracy, the mean of the accuracies on correct and on wrong shown answers, so a model that always answers yes scores 50%. Click a column to sort.</span><span data-task="flag">Overall scores for the selected mode. Positives are harmful prompts; negatives are benign and hard-negative prompts. Each model and mode is thresholded as tuned on the core dev split. Brackets: 95% bootstrap interval over prompts (1,000 resamples). The grey row gives baselines: flagging everything, or always predicting the majority class. AUC is threshold-free. Click a column to sort.</span></figcaption>
+<figcaption><strong>Table 1.</strong> <span data-task="all">Each suite's chance-corrected score, the mean over its question modes, with its raw headline metric beneath; the last column weights the four suites equally. A model that did not run every suite is not ranked.</span><span data-task="answer">Overall scores. Brackets: 95% bootstrap interval over items (1,000 resamples). Verify uses balanced accuracy, the mean of the accuracies on correct and on wrong shown answers, so a model that always answers yes scores 50%. Click a column to sort.</span><span data-task="flag">Overall scores for the selected mode. Positives are harmful prompts; negatives are benign and hard-negative prompts. Each model and mode is thresholded as tuned on the core dev split. Brackets: 95% bootstrap interval over prompts (1,000 resamples). The grey row gives baselines: flagging everything, or always predicting the majority class. AUC is threshold-free. Click a column to sort.</span></figcaption>
 </figure>
+
+<p data-task="all"><em>The verification plot (Figure 3) needs a single suite: pick one in the bar.</em></p>
 
 <figure class="de-figure de-wide" id="figure-2">
 <div class="de" id="de-ver"></div>
@@ -231,15 +251,17 @@ span[data-suite].on,span[data-task].on{display:inline}
 
 <figure class="de-figure de-wide" id="figure-3">
 <div class="de" id="de-lat"></div>
-<figcaption><strong>Figure 4 (interactive).</strong> <span data-task="flag">F1 for the selected mode against median latency per prompt in that mode (log scale). Vertical bars: 95% interval on F1. Horizontal bars: interquartile range of latency. Dashed: the F1 of flagging everything. Labels: cost per thousand prompts for all three modes. Local guards ran on an Apple-silicon laptop (Laya on MPS, GLiNER on CPU); hosted latency includes the network round trip.</span><span data-task="answer">Score against median latency per item (log scale) with every question answered in one request. Vertical bars: 95% interval on the score. Horizontal bars: interquartile range of latency. Labels: cost per thousand items at the price billed. Up and to the left is better.<span data-suite="stem-synth"> Local models ran on an Apple-silicon laptop; hosted latency includes the network round trip (Jev via OpenRouter, GPT-6 Luna via OpenAI), measured from the same machine with 8 requests in flight.</span><span data-suite="judgebench"> Laya ran on the Mac's GPU (Metal), GLiNER on its CPU. GLiNER's JudgeBench latency is inflated: the machine was short of memory and swapping during that run.</span></span></figcaption>
+<figcaption><strong>Figure 4 (interactive).</strong> <span data-task="all">Each model's mean chance-corrected score (suites weighted equally) against the mean, over suites, of its median latency per item (log scale). Labels give what all of its runs cost. Pick a suite for latency spreads and confidence intervals.</span><span data-task="flag">F1 for the selected mode against median latency per prompt in that mode (log scale). Vertical bars: 95% interval on F1. Horizontal bars: interquartile range of latency. Dashed: the F1 of flagging everything. Labels: cost per thousand prompts for all three modes. Local guards ran on an Apple-silicon laptop (Laya on MPS, GLiNER on CPU); hosted latency includes the network round trip.</span><span data-task="answer">Score against median latency per item (log scale) with every question answered in one request. Vertical bars: 95% interval on the score. Horizontal bars: interquartile range of latency. Labels: cost per thousand items at the price billed. Up and to the left is better.<span data-suite="stem-synth"> Local models ran on an Apple-silicon laptop; hosted latency includes the network round trip (Jev via OpenRouter, GPT-6 Luna via OpenAI), measured from the same machine with 8 requests in flight.</span><span data-suite="judgebench"> Laya ran on the Mac's GPU (Metal), GLiNER on its CPU. GLiNER's JudgeBench latency is inflated: the machine was short of memory and swapping during that run.</span></span></figcaption>
 </figure>
 
 <figure class="de-figure de-wide" id="table-2">
 <div class="de" id="de-t2"></div>
-<figcaption><strong>Table 2.</strong> <span data-task="flag">Median latency per prompt in each mode, and what each hosted model's run over this set cost, from reflex-guard's run logs (requests include one warm-up per mode pass). Jev's cost is OpenRouter's billed amount. OpenAI's native API reports no cost, so GPT-6 Luna's is input tokens at USD 0.10 per million; its totals include re-running requests that had refusals, and an earlier partial run through OpenRouter (about USD 0.22) was discarded. Output tokens were not recorded in this eval.</span><span data-task="answer">Latency per item, tokens and what the run cost, with the exact model version each API reported. Tokens and cost come from each response's usage field; GPT-6 Luna's cost is its input tokens at the list price, since the Decisions endpoint bills input only. Local models cost only the hardware they run on.<span data-suite="stem-synth"> Jev was run twice; its two runs agree on 177 of 180 choice picks, so hosted results can move by a point between runs.</span></span></figcaption>
+<figcaption><strong>Table 2.</strong> <span data-task="all">What each model's runs cost, suite by suite and in total: requests, input tokens and USD. Local models cost only the hardware they ran on.</span><span data-task="flag">Median latency per prompt in each mode, and what each hosted model's run over this set cost, from reflex-guard's run logs (requests include one warm-up per mode pass). Jev's cost is OpenRouter's billed amount. OpenAI's native API reports no cost, so GPT-6 Luna's is input tokens at USD 0.10 per million; its totals include re-running requests that had refusals, and an earlier partial run through OpenRouter (about USD 0.22) was discarded. Output tokens were not recorded in this eval.</span><span data-task="answer">Latency per item, tokens and what the run cost, with the exact model version each API reported. Tokens and cost come from each response's usage field; GPT-6 Luna's cost is its input tokens at the list price, since the Decisions endpoint bills input only. Local models cost only the hardware they run on.<span data-suite="stem-synth"> Jev was run twice; its two runs agree on 177 of 180 choice picks, so hosted results can move by a point between runs.</span></span></figcaption>
 </figure>
 
 ## 4. Calibration
+
+<p data-task="all"><em>Calibration is shown per suite (the suites' confidence scales differ: four options in STEM, two in JudgeBench): pick one in the bar.</em></p>
 
 <p data-task="flag"><em>Not shown for the guardrail suites: their thresholds are tuned per model, so P(flag) is used to rank prompts (AUC in Table 1), not read as a probability.</em></p>
 
@@ -249,6 +271,8 @@ span[data-suite].on,span[data-task].on{display:inline}
 </figure>
 
 ## 5. Dataset explorer
+
+<p data-task="all"><em>The explorer lists one suite's items: pick a suite in the bar.</em></p>
 
 <figure class="de-figure de-wide" id="figure-5">
 <div class="de" id="de-ex"></div>
@@ -363,7 +387,7 @@ Plain text:
     grid: 'var(--de-grid)', bg: 'var(--bg,#fffcf0)', hatch: 'var(--de-hatch)', font: 'inherit', fs: 12.5};
   var PAPER = {m: ['#0072B2', '#56B4E9', '#009E73', '#D55E00', '#CC79A7'], ink: '#111111', muted: '#333333', grid: '#dddddd',
     bg: '#ffffff', hatch: 'rgba(0,0,0,0.45)', font: "'Times New Roman',Times,STIXGeneral,serif", fs: 13};
-  var state = {suite: null, view: 'web', mode: null, agg: null, hidden: {}};
+  var state = {suite: 'all', view: 'web', mode: null, agg: null, hidden: {}};
   var S, ITEMS, MODELS, T = WEB;
 
   // ---------- helpers
@@ -585,11 +609,12 @@ Plain text:
       root.classList.add('de-stuck'); compensate();
     }, 0);
     var ids = ALL.suites.map(function (s) { return s.id; });
-    var list = PLANNED.concat(ALL.suites.filter(function (s) { return !PLANNED.some(function (p) { return p.id === s.id; }); }));
+    var list = [{id: 'all', title: 'All suites'}].concat(PLANNED, ALL.suites.filter(function (s) { return !PLANNED.some(function (p) { return p.id === s.id; }); }));
+    ids.push('all');
     var seg = el('div', {'class': 'de-seg', role: 'group', 'aria-label': 'Suite'});
     list.forEach(function (p) {
       var ready = ids.indexOf(p.id) >= 0, s = ALL.suites[ids.indexOf(p.id)];
-      var b = el('button', {'aria-pressed': p.id === state.suite ? 'true' : 'false', title: ready ? s.meta.n + ' items' : 'results pending'},
+      var b = el('button', {'aria-pressed': p.id === state.suite ? 'true' : 'false', title: p.id === 'all' ? 'every suite at once' : ready ? s.meta.n + ' items' : 'results pending'},
         esc(p.title) + (ready ? '' : ' · pending'));
       b.disabled = !ready;
       b.onclick = function () { state.suite = p.id; state.mode = null; fig1Last = null; boot(); };
@@ -602,7 +627,7 @@ Plain text:
       b.onclick = function () { state.view = p[0]; writeHash(); boot(); };
       v.appendChild(b);
     });
-    bar.appendChild(el('span', {'class': 'lab', style: 'margin-left:.4rem'}, 'Mode')); bar.appendChild(modeSwitch());
+    if (!isAllSuites()) { bar.appendChild(el('span', {'class': 'lab', style: 'margin-left:.4rem'}, 'Mode')); bar.appendChild(modeSwitch()); }
     bar.appendChild(el('span', {'class': 'lab', style: 'margin-left:.4rem'}, 'View')); bar.appendChild(v);
     if (state.view === 'paper') bar.appendChild(el('span', {'class': 'hint', style: 'font-size:.72rem;opacity:.75'}, 'Print styling · SVG / PNG on each figure · LaTeX for Table 1'));
     root.appendChild(bar);
@@ -624,7 +649,8 @@ Plain text:
   var fig1Anim = false, fig1Last = null;
   function layoutBars(spec, aggMode, W) {
     var vis = visible(), labelW = W < 480 ? 118 : 184, right = 46, x0 = labelW, x1 = W - right;
-    function X(v) { return x0 + (isNaN(v) ? 0 : v) * (x1 - x0); }
+    function X(v) { return x0 + (isNaN(v) ? 0 : Math.max(0, v)) * (x1 - x0); }
+    var fmt = spec.fmt || pct, afmt = spec.axisFmt || pct;
     var bh = vis.length > 2 ? 10 : 14, bh2 = Math.round(bh * 1.7), gap = 2, pad = 14, headH = 22;
     var els = [], hits = [], seen = {}, y = 24;
     function head(key, g) { if (!g || seen[key]) return; seen[key] = 1; els.push({key: 'grp|' + key, kind: 'text', a: {x: 0, y: y + 14}, s: {str: g, o: {ink: true, bold: true, italic: true}}}); y += headH; }
@@ -637,7 +663,7 @@ Plain text:
       vis.forEach(function (m, k) {
         var v = r.value(m), by = top + k * (bh + gap);
         bar('bar|' + r.id + '|' + m.key, jOf(m), x0, by, X(v) - x0, bh);
-        if (W >= 440) els.push({key: 'val|' + r.id + '|' + m.key, kind: 'text', a: {x: X(v) + 4, y: by + bh - 1.5}, s: {str: pct(v), o: {size: 10}}});
+        if (W >= 440) els.push({key: 'val|' + r.id + '|' + m.key, kind: 'text', a: {x: X(v) + 4, y: by + bh - 1.5}, s: {str: fmt(v), o: {size: 10}}});
         hits.push({y: by - gap / 2, h: bh + gap, tip: function () { return r.tip(m); }});
       });
       y += blockH + pad;
@@ -661,7 +687,7 @@ Plain text:
     var H = y + 22;
     [0, 0.25, 0.5, 0.75, 1].forEach(function (v) {
       els.unshift({key: 'grid|' + v, kind: 'line', a: {x1: X(v), y1: 18, x2: X(v), y2: H - 24}, s: {st: gridSt()}});
-      els.push({key: 'gridt|' + v, kind: 'text', a: {x: X(v), y: 12}, s: {str: pct(v), o: {anchor: 'middle'}}});
+      els.push({key: 'gridt|' + v, kind: 'text', a: {x: X(v), y: 12}, s: {str: afmt(v), o: {anchor: 'middle'}}});
     });
     if (spec.chance != null) {
       els.push({key: 'chance', kind: 'line', a: {x1: X(spec.chance), y1: 18, x2: X(spec.chance), y2: H - 24}, s: {st: refSt()}});
@@ -678,7 +704,7 @@ Plain text:
     return n;
   }
   function renderBars(f, spec) {
-    var W = width(f.body, 320, 1000), to = layoutBars(spec, state.agg, W), from = fig1Last;
+    var W = width(f.body, 320, 1000), to = layoutBars(spec, spec.aggs ? state.agg : null, W), from = fig1Last;
     fig1Last = to;
     var animate = fig1Anim && from && from.W === W && from.sig === to.sig &&
       !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -1054,6 +1080,12 @@ Plain text:
   function downloads() {
     var root = mount('de-dl');
     root.innerHTML = '';
+    if (isAllSuites()) {
+      var ra = el('div', {style: 'display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;margin:-1rem 0 1.5rem;font-size:.78rem'}, '<span style="opacity:.75">Download every suite, built from the data in this page:</span>');
+      var ba = el('button', {'class': 'de-btn'}, 'JSON (all suites)');
+      ba.onclick = function () { save(new Blob([JSON.stringify(ALL)], {type: 'application/json'}), 'decision-eval-all-suites.json'); };
+      ra.appendChild(ba); root.appendChild(ra); return;
+    }
     var row = el('div', {style: 'display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;margin:-1rem 0 1.5rem;font-size:.78rem'}, '<span style="opacity:.75">Download this suite, built from the data in this page:</span>');
     var bj = el('button', {'class': 'de-btn'}, 'JSON');
     bj.onclick = function () { save(new Blob([JSON.stringify(S, null, 1)], {type: 'application/json'}), S.id + '.json'); };
@@ -1290,87 +1322,95 @@ Plain text:
     }
   }
 
-  // ---------- Coverage: radar cards across every suite (independent of the suite selector).
-  // Spokes are chance-corrected so suites with different metrics share one scale: 0 = guessing, 1 = perfect.
-  //   choice / score: (accuracy - chance) / (1 - chance);  verify and flag suites: 2 x balanced accuracy - 1.
-  // Values below 0 are drawn at 0 (the tooltip has the real number); a model a suite did not run leaves a gap.
+  // ---------- Overview: radar cards across suites, with a local switch (All suites / one suite) that does not touch
+  // the sticky suite selector. Every spoke is chance-corrected, so different metrics share one scale (0 = guessing,
+  // 1 = perfect):  choice / score: (accuracy - chance) / (1 - chance);  verify: 2 x balanced accuracy - 1;
+  // guardrails: true-positive rate + true-negative rate - 1 at the model's threshold (for one harm category: recall
+  // on its harmful prompts + specificity on all safe prompts - 1). Below-zero values are drawn at the centre.
   var COV_SHORT = {'stem-synth': 'STEM', 'judgebench': 'JudgeBench', 'guard-core': 'Guard core', 'guard-ood': 'Guard OOD'};
+  var COV_ORDER = ['stem-synth', 'judgebench', 'guard-core', 'guard-ood'];
+  var TRUNCATED = {'judgebench': {laya: 1, 'laya-typed': 1}};  // inputs cut by the model's window (see Notes)
+  var MI3 = {noul: 0, choice: 1, score: 2};
   function covSuite(id) { return ALL.suites.filter(function (s) { return s.id === id; })[0]; }
   function covModel(s, key) { return s ? s.models.filter(function (m) { return m.key === key; })[0] : null; }
-  function covBal(pairs) {  // pairs: [[predictedYes, truth]] -> balanced accuracy over the truth classes present
+  function covBal(pairs) {  // [[predictedPositive, truth]] -> balanced accuracy over the classes present
     return mean([true, false].map(function (t) {
       var sub = pairs.filter(function (p) { return p[1] === t; });
       return sub.length ? mean(sub.map(function (p) { return p[0] === t ? 1 : 0; })) : null;
     }).filter(function (v) { return v !== null; }));
   }
-  function covFlagJ(s, m, mode) {  // flag suites: TPR + TNR - 1 at the model's threshold
-    var su = m.summary[mode], k = s.meta.kinds, neg = k.benign + k.hard_negative;
-    var spec = 1 - (su.benign_fp * k.benign + su.hard_fp * k.hard_negative) / neg;
-    return su.recall[0] + spec - 1;
+  function covShort(id, cat) {
+    var c = String(cat).replace(/^\d+ /, '');
+    if (id === 'judgebench') c = c.replace(/^mmlu-pro-/, '').replace('livebench-', 'LiveBench ').replace('livecodebench', 'LiveCodeBench');
+    return c.replace(/_/g, ' ');
   }
-  function covCards() {
-    var cards = [], all = [], keys = {};
-    ALL.suites.forEach(function (s) { s.models.forEach(function (m) { if (!keys[m.key]) { keys[m.key] = 1; all.push(m); } }); });
-    // card 1: one spoke per suite and mode (flag suites: one spoke, mean over their modes)
-    var order = ['stem-synth', 'judgebench', 'guard-core', 'guard-ood'], spokes = [];
-    order.forEach(function (id) {
-      var s = covSuite(id);
-      if (!s) return;
-      if (s.meta.task === 'flag') {
-        spokes.push({label: COV_SHORT[id], value: function (m) { var mm = covModel(s, m.key); return mm ? mean(s.meta.modes.map(function (md) { return covFlagJ(s, mm, md); })) : NaN; },
-          raw: function (m) { var mm = covModel(s, m.key); return mm ? 'F1 ' + s.meta.modes.map(function (md) { return mm.summary[md].f1[0].toFixed(2); }).join(' / ') + ' (verify / choice / score)' : 'not run'; }});
-      } else {
-        s.meta.modes.forEach(function (md) {
-          var c = s.meta.chance[md];
-          spokes.push({label: COV_SHORT[id] + ' · ' + MODES[md].short, value: function (m) {
-            var mm = covModel(s, m.key); if (!mm) return NaN; var v = mm.summary[md][0];
-            return md === 'noul' ? 2 * v - 1 : (v - c) / (1 - c);
-          }, raw: function (m) { var mm = covModel(s, m.key); return mm ? MODES[md].label + ' ' + pct(mm.summary[md][0], 1) + ' (chance ' + pct(c) + ')' : 'not run'; }});
-        });
-      }
-    });
-    cards.push({id: 'all', title: 'All suites', sub: 'chance-corrected · one spoke per suite and mode', models: all, spokes: spokes, accent: 'var(--brand,#3aa99f)',
-      note: spokes.length + ' spokes. Choice and score: (accuracy − chance) / (1 − chance); verify and the guardrail sets: 2 × balanced accuracy − 1, averaged over the three modes for the guardrail sets. 0 is guessing, 1 is perfect; below-chance values sit at the centre.'});
-    // card 2: STEM tiers, choice mode
-    var st = covSuite('stem-synth');
-    if (st) cards.push({id: 'stem', title: 'STEM tiers', sub: 'chance-corrected choice accuracy', models: st.models, accent: 'var(--m0)',
-      spokes: st.meta.categories.map(function (cat) {
-        var idx = []; st.items.forEach(function (r, i) { if (r[0] === cat) idx.push(i); });
-        function acc(mm) { return mean(idx.map(function (i) { return mm.preds[i][0] === st.items[i][3] ? 1 : 0; })); }
-        return {label: short(cat), value: function (m) { var mm = covModel(st, m.key); return mm ? (acc(mm) - 0.25) / 0.75 : NaN; },
-          raw: function (m) { var mm = covModel(st, m.key); return mm ? 'choice accuracy ' + pct(acc(mm)) + ' on ' + idx.length + ' items' : 'not run'; }};
-      }), note: st.meta.categories.length + ' spokes, one per tier, ' + Math.round(st.meta.n / st.meta.categories.length) + ' items each: (accuracy − 25%) / 75%.'});
-    // card 3: JudgeBench, group x mode
-    var jb = covSuite('judgebench');
-    if (jb) {
-      var jsp = [];
-      Object.keys(jb.meta.groups).forEach(function (g) {
-        var cats = jb.meta.groups[g], idx = [];
-        jb.items.forEach(function (r, i) { if (cats.indexOf(r[0]) >= 0) idx.push(i); });
-        var gname = g.split(' (')[0];
-        jsp.push({label: gname + ' · choice', value: function (m) { var mm = covModel(jb, m.key); return mm ? 2 * mean(idx.map(function (i) { return mm.preds[i][0] === jb.items[i][3] ? 1 : 0; })) - 1 : NaN; },
-          raw: function (m) { var mm = covModel(jb, m.key); return mm ? 'choice accuracy ' + pct(mean(idx.map(function (i) { return mm.preds[i][0] === jb.items[i][3] ? 1 : 0; }))) + ' on ' + idx.length + ' pairs' : 'not run'; }});
-        jsp.push({label: gname + ' · verify', value: function (m) { var mm = covModel(jb, m.key); return mm ? 2 * covBal(idx.map(function (i) { return [mm.preds[i][3] >= 0.5, jb.items[i][5]]; })) - 1 : NaN; },
-          raw: function (m) { var mm = covModel(jb, m.key); return mm ? 'verify balanced accuracy ' + pct(covBal(idx.map(function (i) { return [mm.preds[i][3] >= 0.5, jb.items[i][5]]; }))) + ' on ' + idx.length + ' pairs' : 'not run'; }});
+  // answer suites: chance-corrected score on a subset of items, in one mode
+  function covAnswer(s, mm, idx, md) {
+    if (!idx.length) return NaN;
+    if (md === 'noul') return 2 * covBal(idx.map(function (i) { return [mm.preds[i][3] >= 0.5, s.items[i][5]]; })) - 1;
+    var c = s.meta.chance[md], ok = idx.map(function (i) { return md === 'choice' ? (mm.preds[i][0] === s.items[i][3] ? 1 : 0) : (mm.preds[i][4] === s.items[i][6] ? 1 : 0); });
+    return (mean(ok) - c) / (1 - c);
+  }
+  // flag suites: TPR on the given harmful prompts + TNR on all safe prompts - 1, in one mode
+  function covFlag(s, mm, harmIdx, md) {
+    if (!harmIdx.length) return NaN;
+    var t = mm.summary[md].threshold, k = MI3[md];
+    var tpr = mean(harmIdx.map(function (i) { return mm.preds[i][k] >= t ? 1 : 0; }));
+    var safe = []; s.items.forEach(function (r, i) { if (r[0] !== 'harmful') safe.push(i); });
+    return tpr + mean(safe.map(function (i) { return mm.preds[i][k] < t ? 1 : 0; })) - 1;
+  }
+  function covAllIdx(s) { return s.items.map(function (_, i) { return i; }); }
+  function covHarm(s, cat) { var r = []; s.items.forEach(function (it, i) { if (it[0] === 'harmful' && (!cat || it[2].indexOf(cat) >= 0)) r.push(i); }); return r; }
+  // one value per (suite, model): equal weight per suite, mean over its modes
+  function covSuiteScore(s, m) {
+    var mm = covModel(s, m.key); if (!mm) return NaN;
+    return mean(s.meta.modes.map(function (md) { return s.meta.task === 'flag' ? covFlag(s, mm, covHarm(s), md) : covAnswer(s, mm, covAllIdx(s), md); }));
+  }
+  function covAllModels() {
+    var all = [], seen = {};
+    COV_ORDER.forEach(function (id) { var s = covSuite(id); if (s) s.models.forEach(function (m) { if (!seen[m.key]) { seen[m.key] = 1; all.push(m); } }); });
+    return all;
+  }
+  function covAllCard() {
+    var spokes = [];
+    COV_ORDER.forEach(function (id) {
+      var s = covSuite(id); if (!s) return;
+      s.meta.modes.forEach(function (md) {
+        spokes.push({suite: id, label: COV_SHORT[id] + ' · ' + MODES[md].short, value: function (m) {
+          var mm = covModel(s, m.key); if (!mm) return NaN;
+          return s.meta.task === 'flag' ? covFlag(s, mm, covHarm(s), md) : covAnswer(s, mm, covAllIdx(s), md);
+        }, star: function (m) { return !!(TRUNCATED[id] && TRUNCATED[id][m.key]); }});
       });
-      cards.push({id: 'judgebench', title: 'JudgeBench', sub: 'chance-corrected · source × mode', models: jb.models, accent: 'var(--m3)', spokes: jsp,
-        note: jsp.length + ' spokes: each question source (MMLU-Pro knowledge, LiveBench reasoning and math, LiveCodeBench coding) in both modes; chance is 50%, so the score is 2 × accuracy − 1.'});
-    }
-    // card 4: guardrails core, recall per harm category, mean over modes
-    var gc = covSuite('guard-core');
-    if (gc) {
-      var MI2 = {noul: 0, choice: 1, score: 2};
-      cards.push({id: 'guard', title: 'Guardrails: core', sub: 'recall per harm category · mean over modes', models: gc.models, accent: 'var(--m4)',
-        spokes: gc.meta.categories.map(function (c) {
-          var idx = []; gc.items.forEach(function (r, i) { if (r[0] === 'harmful' && r[2].indexOf(c) >= 0) idx.push(i); });
-          function rec(mm) { return mean(gc.meta.modes.map(function (md) { return mean(idx.map(function (i) { return mm.preds[i][MI2[md]] >= mm.summary[md].threshold ? 1 : 0; })); })); }
-          if (!idx.length) return null;  // a category with no harmful prompt in this set has nothing to recall
-          return {label: c.replace(/_/g, ' ') + ' (' + idx.length + ')', value: function (m) { var mm = covModel(gc, m.key); return mm ? rec(mm) : NaN; },
-            raw: function (m) { var mm = covModel(gc, m.key); return mm ? 'recall ' + pct(rec(mm)) + ' on ' + idx.length + ' harmful prompts' : 'not run'; }};
-        }).filter(Boolean),
-        note: 'Recall (share of harmful prompts flagged) per labelled harm category, averaged over the three modes at each model\'s thresholds. Not chance-corrected: recall alone ignores false positives, which Figure 2 shows. Content categories hold 3 to 8 prompts each.'});
-    }
-    return cards;
+    });
+    return {id: 'all', title: 'All suites', sub: 'chance-corrected · one spoke per suite and mode', models: covAllModels(), spokes: spokes,
+      accent: 'var(--brand,#3aa99f)', rank: function (m) {  // equal weight per suite; unranked unless every suite was run
+        var v = COV_ORDER.filter(function (id) { return covSuite(id); }).map(function (id) { return covSuiteScore(covSuite(id), m); });
+        return v.some(isNaN) ? NaN : mean(v);
+      }, rankNote: 'mean over the four suites, each weighted equally',
+      note: spokes.length + ' spokes, one per suite and mode. A model ranks only if it ran every suite. * marks spokes where the model saw only part of each input (Laya on JudgeBench; see Notes).'};
+  }
+  function covSuiteCards(id) {
+    var s = covSuite(id); if (!s) return [];
+    return s.meta.modes.map(function (md) {
+      var spokes;
+      if (s.meta.task === 'flag') {
+        spokes = s.meta.categories.map(function (c) {
+          var idx = covHarm(s, c); if (!idx.length) return null;
+          return {label: covShort(id, c) + ' (' + idx.length + ')', value: function (m) { var mm = covModel(s, m.key); return mm ? covFlag(s, mm, idx, md) : NaN; }};
+        }).filter(Boolean);
+      } else {
+        spokes = s.meta.categories.map(function (c) {
+          var idx = []; s.items.forEach(function (r, i) { if (r[0] === c) idx.push(i); });
+          if (!idx.length) return null;
+          return {label: covShort(id, c), value: function (m) { var mm = covModel(s, m.key); return mm ? covAnswer(s, mm, idx, md) : NaN; },
+            star: function (m) { return !!(TRUNCATED[id] && TRUNCATED[id][m.key]); }};
+        }).filter(Boolean);
+      }
+      var how = s.meta.task === 'flag' ? 'recall on the category\'s harmful prompts + specificity on all safe prompts − 1' : md === 'noul' ? '2 × balanced accuracy − 1' : '(accuracy − chance) / (1 − chance), chance ' + pct(s.meta.chance[md]);
+      return {id: id + '-' + md, title: s.title + ' · ' + MODES[md].short, sub: 'chance-corrected · per ' + (s.meta.task === 'flag' ? 'harm category' : 'category'), models: s.models, spokes: spokes,
+        accent: 'var(--m' + ({choice: 0, noul: 3, score: 4}[md]) + ')', rank: function (m) { var v = spokes.map(function (sp) { return sp.value(m); }).filter(function (x) { return !isNaN(x); }); return v.length ? mean(v) : NaN; },
+        rankNote: 'mean over the spokes', note: spokes.length + ' spokes: ' + how + '.' + (id === 'judgebench' ? ' Most categories hold about 20 items, so single spokes are noisy.' : '')};
+    });
   }
   function radar(card, W) {
     var narrow = W < 400, n = card.spokes.length, H = Math.round(W * (narrow ? 0.9 : 0.8)), cx = W / 2, cy = H / 2 + 2;
@@ -1380,19 +1420,18 @@ Plain text:
     [0.25, 0.5, 0.75, 1].forEach(function (f) {
       sv('polygon', {points: card.spokes.map(function (_, i) { var p = P(i, f); return p[0] + ',' + p[1]; }).join(' '), style: 'fill:' + (f === 1 ? (state.view === 'paper' ? '#f6f6f6' : 'var(--bg2,#f2f0e5)') : 'none') + ';stroke:' + T.grid + ';stroke-width:1'}, svg);
     });
+    var fs = narrow ? (n > 12 ? 8.5 : 9.5) : (n > 12 ? 10 : 11.5);
     card.spokes.forEach(function (sp, i) {
       var e = P(i, 1); line(svg, cx, cy, e[0], e[1], gridSt());
       var a = ang(i), lx = cx + (R + 10) * Math.cos(a), ly = cy + (R + 10) * Math.sin(a), c = Math.cos(a);
-      txt(svg, lx, ly + (Math.sin(a) > 0.3 ? 11 : Math.sin(a) < -0.3 ? -3 : 4), sp.label, {anchor: c > 0.25 ? 'start' : c < -0.25 ? 'end' : 'middle', size: narrow ? 9.5 : 11.5, ink: true});
+      txt(svg, lx, ly + (Math.sin(a) > 0.3 ? 11 : Math.sin(a) < -0.3 ? -3 : 4), sp.label, {anchor: c > 0.25 ? 'start' : c < -0.25 ? 'end' : 'middle', size: fs, ink: true});
     });
-    // ring values just inside the rings, beside the top spoke, so they never meet its label
     txt(svg, cx + 4, cy - R * 0.5 + 11, '0.5', {size: 9}); txt(svg, cx + 4, cy - R + 11, '1', {size: 9});
-    var ranked = covRank(card).slice().reverse();  // best drawn last, on top
-    ranked.forEach(function (o) {
+    covRows(card).slice().reverse().forEach(function (o) {
       var m = o.m, j = jOf(m), vals = card.spokes.map(function (sp) { return sp.value(m); }), d = '', complete = vals.every(function (v) { return !isNaN(v); });
       for (var i = 0; i <= n; i++) {
         var k = i % n, prev = (k - 1 + n) % n;
-        if (isNaN(vals[k]) || (i === n && !complete && isNaN(vals[0]))) continue;
+        if (isNaN(vals[k])) continue;
         var p = P(k, vals[k]);
         d += (i === 0 || isNaN(vals[prev]) ? 'M' : 'L') + p[0].toFixed(1) + ',' + p[1].toFixed(1);
         if (i === n) break;
@@ -1402,19 +1441,69 @@ Plain text:
       sv('path', {d: d, style: 'fill:none;stroke:' + T.m[j] + ';stroke-width:' + (state.view === 'paper' ? 1.4 : 2) + ';stroke-linejoin:round'}, g);
       vals.forEach(function (v, i) {
         if (isNaN(v)) return;
-        var p = P(i, v), sp = card.spokes[i];
+        var p = P(i, v), sp = card.spokes[i], star = sp.star && sp.star(m);
         marker(g, j, p[0], p[1], 3.6);
-        var hit = sv('circle', {cx: p[0], cy: p[1], r: 9, style: 'fill:transparent;cursor:pointer'}, g);
-        bindTip(hit, function () { return '<b>' + esc(m.name) + '</b> · ' + esc(sp.label) + '<br>score <b>' + v.toFixed(2) + '</b>' + (v < 0 ? ' (below chance; drawn at 0)' : '') + '<br>' + esc(sp.raw(m)); });
+        if (star) txt(g, p[0] + 5, p[1] - 4, '*', {size: 12, ink: true, bold: true});
+        bindTip(sv('circle', {cx: p[0], cy: p[1], r: 9, style: 'fill:transparent;cursor:pointer'}, g), function () {
+          return '<b>' + esc(m.name) + '</b> · ' + esc(sp.label) + '<br>chance-corrected <b>' + v.toFixed(2) + '</b>' + (v < 0 ? ' (below chance; drawn at the centre)' : '') +
+            (star ? '<br>* saw only part of each input (truncated window)' : '');
+        });
       });
     });
     return svg;
   }
-  function covRank(card) {
-    return card.models.filter(function (m) { return !state.hidden[m.key]; }).map(function (m) {
-      var vs = card.spokes.map(function (sp) { return sp.value(m); }).filter(function (v) { return !isNaN(v); });
-      return {m: m, mean: vs.length ? mean(vs) : NaN, n: vs.length};
-    }).sort(function (a, b) { return (isNaN(b.mean) ? -9 : b.mean) - (isNaN(a.mean) ? -9 : a.mean); });
+  function covRows(card) {  // visible models, ranked when they have a rank score; unranked ones last
+    return card.models.filter(function (m) { return !state.hidden[m.key]; }).map(function (m) { return {m: m, score: card.rank(m)}; })
+      .sort(function (a, b) { return (isNaN(b.score) ? -9 : b.score) - (isNaN(a.score) ? -9 : a.score); });
+  }
+  function covTable(card) {  // the numbers behind the All-suites radar
+    var ms = covRows(card).map(function (o) { return o.m; });
+    var best = card.spokes.map(function (sp) { return Math.max.apply(null, ms.map(function (m) { var v = sp.value(m); return isNaN(v) ? -9 : v; })); });
+    var html = '<table><thead><tr><th>Model</th>' + card.spokes.map(function (sp) { return '<th>' + esc(sp.label.replace(' · ', ' ')) + '</th>'; }).join('') + '<th>Mean</th></tr></thead><tbody>' +
+      ms.map(function (m) {
+        var sc = card.rank(m);
+        return '<tr><td><span style="display:inline-flex;gap:.35rem;align-items:center">' + sw(jOf(m)) + '<span class="v">' + esc(m.name) + '</span></span></td>' +
+          card.spokes.map(function (sp, i) { var v = sp.value(m); return '<td class="' + (v === best[i] ? 'best' : '') + '"><span class="v">' + (isNaN(v) ? '–' : v.toFixed(2)) + (sp.star && sp.star(m) && !isNaN(v) ? '*' : '') + '</span></td>'; }).join('') +
+          '<td><span class="v">' + (isNaN(sc) ? 'not ranked' : sc.toFixed(2)) + '</span></td></tr>';
+      }).join('') + '</tbody></table>';
+    return el('div', {'class': 'de-scroll de-cov-table'}, html);
+  }
+  function covCard(card, grid, withTable) {
+    var c = el('div', {'class': 'de-cov-card' + (withTable ? ' de-cov-wide' : ''), style: 'border-top-color:' + card.accent});
+    var head = el('div', {'class': 'de-cov-head'}, '<h4>' + esc(card.title) + '</h4><div class="de-cov-sub">' + esc(card.sub) + '</div>');
+    c.appendChild(head); grid.appendChild(c);
+    var inner = el('div', {'class': 'de-cov-inner'}); c.appendChild(inner);
+    var left = el('div', {}); inner.appendChild(left);
+    var svg = radar(card, Math.max(260, Math.min(560, Math.floor((withTable && c.clientWidth > 900 ? c.clientWidth / 2 : c.clientWidth)) - 8)));
+    left.appendChild(svg);
+    if (state.view === 'paper') {
+      var tools = el('div', {'class': 'de-cov-tools'});
+      ['SVG', 'PNG'].forEach(function (fmt) {
+        var b = el('button', {'class': 'de-btn', title: 'Download this radar as ' + fmt}, fmt);
+        b.onclick = function () { (fmt === 'SVG' ? downloadSvg : downloadPng)(svg, 'overview-' + card.id); };
+        tools.appendChild(b);
+      });
+      head.appendChild(tools);
+    }
+    var right = el('div', {}); inner.appendChild(right);
+    var lg = el('div', {'class': 'de-cov-legend'}), r = 0;
+    covRows(card).forEach(function (o) {
+      var ranked = !isNaN(o.score);
+      var row = el('button', {'class': 'de-cov-row', title: 'Hide ' + o.m.name + ' in every figure'},
+        '<span class="rk">' + (ranked ? ++r : '–') + '</span>' + sw(jOf(o.m)) + '<span class="nm">' + esc(o.m.name) + '</span><span class="sc">' + (ranked ? (o.score * 100).toFixed(1) : 'not ranked') + '</span>');
+      row.onclick = function () { state.hidden[o.m.key] = true; renderFigures(); };
+      lg.appendChild(row);
+    });
+    var hidden = card.models.filter(function (m) { return state.hidden[m.key]; });
+    if (hidden.length) {
+      var un = el('button', {'class': 'de-cov-row de-cov-unhide'}, 'show ' + hidden.map(function (m) { return esc(m.name); }).join(', '));
+      un.onclick = function () { hidden.forEach(function (m) { state.hidden[m.key] = false; }); renderFigures(); };
+      lg.appendChild(un);
+    }
+    right.appendChild(el('div', {'class': 'de-cov-sub', style: 'margin:.2rem 0 .3rem'}, 'rank · ' + esc(card.rankNote) + ' × 100'));
+    right.appendChild(lg);
+    if (withTable) right.appendChild(covTable(card));
+    right.appendChild(el('div', {'class': 'de-cov-note'}, esc(card.note)));
   }
   function renderCoverage() {
     var root = mount('de-cov');
@@ -1422,55 +1511,131 @@ Plain text:
     root.innerHTML = '';
     var grid = el('div', {'class': 'de-cov-grid'});
     root.appendChild(grid);
-    covCards().forEach(function (card) {
-      var c = el('div', {'class': 'de-cov-card', style: 'border-top-color:' + card.accent});
-      var head = el('div', {'class': 'de-cov-head'}, '<h4>' + esc(card.title) + '</h4><div class="de-cov-sub">' + esc(card.sub) + '</div>');
-      c.appendChild(head); grid.appendChild(c);
-      var body = el('div', {});
-      c.appendChild(body);
-      var svg = radar(card, Math.max(260, Math.min(560, Math.floor(c.clientWidth) - 4)));
-      body.appendChild(svg);
-      if (state.view === 'paper') {
-        var tools = el('div', {'class': 'de-cov-tools'});
-        ['SVG', 'PNG'].forEach(function (fmt) {
-          var b = el('button', {'class': 'de-btn', title: 'Download this card\'s radar as ' + fmt}, fmt);
-          b.onclick = function () { (fmt === 'SVG' ? downloadSvg : downloadPng)(svg, 'coverage-' + card.id); };
-          tools.appendChild(b);
-        });
-        head.appendChild(tools);
-      }
-      var lg = el('div', {'class': 'de-cov-legend'});
-      covRank(card).forEach(function (o, r) {
-        var row = el('button', {'class': 'de-cov-row', title: 'Hide ' + o.m.name + ' everywhere'},
-          '<span class="rk">' + (r + 1) + '</span>' + sw(jOf(o.m)) + '<span class="nm">' + esc(o.m.name) + (o.n < card.spokes.length ? ' <small>(' + o.n + '/' + card.spokes.length + ' spokes)</small>' : '') + '</span><span class="sc">' + (isNaN(o.mean) ? '–' : (o.mean * 100).toFixed(1)) + '</span>');
-        row.onclick = function () { state.hidden[o.m.key] = true; renderFigures(); };
-        lg.appendChild(row);
-      });
-      var hidden = card.models.filter(function (m) { return state.hidden[m.key]; });
-      if (hidden.length) {
-        var un = el('button', {'class': 'de-cov-row de-cov-unhide'}, 'show ' + hidden.map(function (m) { return esc(m.name); }).join(', '));
-        un.onclick = function () { hidden.forEach(function (m) { state.hidden[m.key] = false; }); renderFigures(); };
-        lg.appendChild(un);
-      }
-      c.appendChild(lg);
-      c.appendChild(el('div', {'class': 'de-cov-note'}, esc(card.note)));
+    if (isAllSuites()) covCard(covAllCard(), grid, true);
+    else covSuiteCards(state.suite).forEach(function (card) { covCard(card, grid, false); });
+  }
+
+  // ================= "All suites": every section summarises across suites, from the same chance-corrected scores
+  function isAllSuites() { return state.suite === 'all'; }
+  function covItemLatency(s, m) {  // one number per item: answer suites ask every mode in one request; guards sum their passes
+    return m.preds.map(function (p) { return s.meta.task === 'flag' ? p[3] + p[4] + p[5] : p[5]; });
+  }
+  function covRawParts(s, m) {  // the suite's headline raw metric, one entry per mode
+    var mm = covModel(s, m.key); if (!mm) return ['not run'];
+    if (s.meta.task === 'flag') return s.meta.modes.map(function (md) { return MODES[md].short + ' F1 ' + mm.summary[md].f1[0].toFixed(2); });
+    return s.meta.modes.map(function (md) { return MODES[md].short + ' ' + pct(mm.summary[md][0], 1); });
+  }
+  function covRaw(s, m) { return covRawParts(s, m).join(' · '); }  // for tooltips
+  function allModels() { return covAllModels().filter(function (m) { return !state.hidden[m.key]; }); }
+  function figAccuracyAll() {
+    var f = frame('de-acc', 'Chance-corrected score by suite and mode', {legend: true, svgName: 'scores-by-suite'});
+    var card = covAllCard();
+    var rows = card.spokes.map(function (sp) {
+      var s = covSuite(sp.suite), md = sp.label.split(' · ')[1];
+      return {id: sp.label, group: s.title, label: md, agg: false, value: sp.value, tip: function (m) {
+        var v = sp.value(m);
+        return '<b>' + esc(m.name) + '</b> · ' + esc(sp.label) + '<br>' + (isNaN(v) ? 'not run on this suite' : 'chance-corrected <b>' + v.toFixed(2) + '</b>' + (v < 0 ? ' (below chance; bar at 0)' : '')) +
+          '<br>' + esc(covRaw(s, m)) + (sp.star && sp.star(m) ? '<br>* saw only part of each input' : '');
+      }};
     });
+    renderBars(f, {title: 'Chance-corrected score by suite and mode', rows: rows, chance: null, fmt: function (v) { return isNaN(v) ? '–' : v.toFixed(2); },
+      axisFmt: function (v) { return v.toFixed(2); }, sig: 'all|' + allModels().map(function (m) { return m.key; }).join()});
+  }
+  function figLatencyAll() {
+    var f = frame('de-lat', 'Mean chance-corrected score against latency, all suites', {legend: true, svgName: 'score-vs-latency-all'});
+    var W = width(f.body, 320, 900), H = Math.round(Math.min(420, Math.max(270, W * 0.5))), L = 46, R = W < 520 ? 100 : 150, Tp = 12, B = 40;
+    var svg = newSvg(W, H, 'Mean chance-corrected score against latency'), card = covAllCard(), pts = [];
+    allModels().forEach(function (m) {
+      var score = card.rank(m); if (isNaN(score)) return;
+      var meds = COV_ORDER.map(function (id) { var s = covSuite(id), mm = covModel(s, m.key); return mm ? quant(covItemLatency(s, mm), 0.5) : NaN; }).filter(function (v) { return !isNaN(v); });
+      pts.push({m: m, x: mean(meds), y: score, meds: meds});
+    });
+    var xs = pts.map(function (p) { return p.x; }), lo = Math.pow(10, Math.floor(Math.log10(Math.max(1, Math.min.apply(null, xs) * 0.7)))), hi = Math.pow(10, Math.ceil(Math.log10(Math.max.apply(null, xs) * 1.4)));
+    function X(v) { return L + (Math.log10(Math.max(lo, Math.min(hi, v))) - Math.log10(lo)) / (Math.log10(hi) - Math.log10(lo)) * (W - L - R); }
+    function Y(v) { return H - B - Math.max(0, v) * (H - Tp - B); }
+    [0, 0.25, 0.5, 0.75, 1].forEach(function (v) { line(svg, L, Y(v), W - R, Y(v), gridSt()); txt(svg, L - 6, Y(v) + 4, v.toFixed(2), {anchor: 'end'}); });
+    for (var e = Math.log10(lo); e <= Math.log10(hi) + 1e-9; e++) [1, 3].forEach(function (k) {
+      var v = k * Math.pow(10, e); if (v < lo || v > hi) return;
+      line(svg, X(v), Tp, X(v), H - B, gridSt()); txt(svg, X(v), H - B + 15, v >= 1000 ? (v / 1000) + ' s' : v + ' ms', {anchor: 'middle'});
+    });
+    txt(svg, (L + W - R) / 2, H - 5, 'mean over suites of the median latency per item (log scale)', {anchor: 'middle', ink: true});
+    var labels = [];
+    pts.forEach(function (p) {
+      var j = jOf(p.m), g = sv('g', {}, svg);
+      marker(g, j, X(p.x), Y(p.y), 6.5);
+      bindTip(sv('circle', {cx: X(p.x), cy: Y(p.y), r: 14, style: 'fill:transparent;cursor:pointer'}, g), function () {
+        return '<b>' + esc(p.m.name) + '</b><br>mean chance-corrected score <b>' + p.y.toFixed(2) + '</b> (each suite weighted equally)<br>median latency per suite: ' +
+          p.meds.map(function (v) { return Math.round(v) + ' ms'; }).join(' · ');
+      });
+      labels.push({m: p.m, x: X(p.x), y: Y(p.y)});
+    });
+    labels.sort(function (a, b) { return a.y - b.y; });
+    if (labels.length) labels[0].ly = labels[0].y;
+    for (var i = 1; i < labels.length; i++) labels[i].ly = Math.max(labels[i].y, labels[i - 1].ly + 26);
+    var over = labels.length ? labels[labels.length - 1].ly - (H - B - 8) : 0;
+    if (over > 0) labels.forEach(function (lb) { lb.ly -= over; });
+    labels.forEach(function (lb) {
+      var lx = W - R + 8, cost = allCost(lb.m);
+      line(svg, lb.x + 8, lb.y, lx - 3, lb.ly - 4, 'stroke:' + T.muted + ';stroke-width:.7;opacity:.6');
+      txt(svg, lx, lb.ly - 1, lb.m.name, {ink: true, bold: true});
+      txt(svg, lx, lb.ly + 11, cost.usd ? 'USD ' + cost.usd.toFixed(3) + ' total' : 'local', {size: 10});
+    });
+    f.body.appendChild(svg);
+  }
+  function allCost(m) {  // what every suite's run cost for this model
+    var out = {usd: 0, requests: 0, tokens: 0, per: []};
+    COV_ORDER.forEach(function (id) {
+      var s = covSuite(id), mm = covModel(s, m.key); if (!mm) { out.per.push(null); return; }
+      var su = mm.summary, req = su.requests || s.meta.n;
+      out.usd += su.cost_usd || 0; out.requests += req; out.tokens += su.input_tokens || 0;
+      out.per.push({usd: su.cost_usd || 0, requests: req, tokens: su.input_tokens});
+    });
+    return out;
+  }
+  function table1All() {
+    var f = frame('de-t1', 'Overall · all suites · chance-corrected');
+    var card = covAllCard(), ids = COV_ORDER.filter(function (id) { return covSuite(id); });
+    var ms = covAllModels().map(function (m) { return {m: m, score: card.rank(m)}; }).sort(function (a, b) { return (isNaN(b.score) ? -9 : b.score) - (isNaN(a.score) ? -9 : a.score); });
+    var cell = function (id, m) { return covSuiteScore(covSuite(id), m); };
+    var best = ids.map(function (id) { return Math.max.apply(null, ms.map(function (o) { var v = cell(id, o.m); return isNaN(v) ? -9 : v; })); });
+    var bestMean = Math.max.apply(null, ms.map(function (o) { return isNaN(o.score) ? -9 : o.score; }));
+    var html = '<table><thead><tr><th>Model</th>' + ids.map(function (id) { return '<th>' + esc(covSuite(id).title) + '</th>'; }).join('') + '<th>Mean</th></tr></thead><tbody>' +
+      ms.map(function (o) {
+        return '<tr><td><span style="display:inline-flex;gap:.4rem;align-items:center">' + sw(jOf(o.m)) + '<span class="v">' + esc(o.m.name) + '</span></span></td>' +
+          ids.map(function (id, k) { var v = cell(id, o.m), s = covSuite(id); return '<td class="' + (v === best[k] ? 'best' : '') + '"><span class="v">' + (isNaN(v) ? '–' : v.toFixed(2)) + '</span><br><small>' + covRawParts(s, o.m).map(esc).join('<br>') + '</small></td>'; }).join('') +
+          '<td class="' + (o.score === bestMean ? 'best' : '') + '"><span class="v">' + (isNaN(o.score) ? 'not ranked' : o.score.toFixed(2)) + '</span></td></tr>';
+      }).join('') + '</tbody></table>';
+    f.body.style.padding = '0';
+    f.body.appendChild(el('div', {'class': 'de-scroll'}, html));
+  }
+  function table2All() {
+    var f = frame('de-t2', 'Requests, tokens and cost · all suites');
+    var ids = COV_ORDER.filter(function (id) { return covSuite(id); }), fmt = function (v) { return v ? Math.round(v).toLocaleString('en-US') : '–'; };
+    var rows = covAllModels().map(function (m) {
+      var c = allCost(m);
+      return '<tr><td><span style="display:inline-flex;gap:.4rem;align-items:center">' + sw(jOf(m)) + '<span class="v">' + esc(m.name) + '</span></span><br><small>' + esc(m.runtime) + '</small></td>' +
+        c.per.map(function (p) { return '<td><span class="v">' + (!p ? 'not run' : p.usd ? 'USD ' + p.usd.toFixed(4) : 'local') + '</span>' + (p ? '<br><small>' + fmt(p.requests) + ' requests</small>' : '') + '</td>'; }).join('') +
+        '<td><span class="v">' + fmt(c.requests) + '</span></td><td><span class="v">' + fmt(c.tokens) + '</span></td><td><span class="v">' + (c.usd ? 'USD ' + c.usd.toFixed(3) : 'local') + '</span></td></tr>';
+    }).join('');
+    f.body.style.padding = '0';
+    f.body.appendChild(el('div', {'class': 'de-scroll'}, '<table><thead><tr><th>Model</th>' + ids.map(function (id) { return '<th>' + esc(covSuite(id).title) + '</th>'; }).join('') +
+      '<th>Requests</th><th>Input tokens</th><th>Total cost</th></tr></thead><tbody>' + rows + '</tbody></table>'));
   }
 
   // ---------- state in the query string (?suite=…&view=paper&mode=noul), so the #hash stays free for section
   // links such as #1-accuracy. Only non-default values are written, so a plain link stays plain.
   function readHash() {
     var q = new URLSearchParams(location.search), h = {};
-    ['suite', 'view', 'mode', 'agg'].forEach(function (k) { if (q.get(k)) h[k] = q.get(k); });
+    ['suite', 'view', 'mode', 'agg', 'cov'].forEach(function (k) { if (q.get(k)) h[k] = q.get(k); });
     return h;
   }
   function writeHash() {
     if (!history.replaceState) return;
     var q = new URLSearchParams(location.search);
-    q.delete('suite'); q.delete('view'); q.delete('mode'); q.delete('agg');
-    if (state.suite !== ALL.suites[0].id) q.set('suite', state.suite);
+    q.delete('suite'); q.delete('view'); q.delete('mode'); q.delete('agg'); q.delete('cov');
+    if (state.suite !== 'all') q.set('suite', state.suite);
     if (state.view !== 'web') q.set('view', state.view);
-    if (state.mode !== S.meta.modes[0]) q.set('mode', state.mode);
+    if (!isAllSuites() && state.mode !== S.meta.modes[0]) q.set('mode', state.mode);
     if (state.agg) q.set('agg', state.agg);
     var qs = q.toString();
     history.replaceState(null, '', location.pathname + (qs ? '?' + qs : '') + location.hash);
@@ -1478,12 +1643,29 @@ Plain text:
   function isFlag() { return S.meta.task === 'flag'; }
   function renderFigures() {
     renderCoverage();
+    if (isAllSuites()) { figAccuracyAll(); figLatencyAll(); return; }
     if (isFlag()) { figAccuracyFlag(); figVerifyFlag(); figLatencyFlag(); return; }
     figAccuracy(); figVerify(); figLatency(); figCalibration();
   }
   function boot() {
-    S = ALL.suites.filter(function (s) { return s.id === state.suite; })[0] || ALL.suites[0];
-    state.suite = S.id;
+    T = state.view === 'paper' ? PAPER : WEB;
+    var single = ALL.suites.filter(function (s) { return s.id === state.suite; })[0];
+    if (!single) {  // All suites (also the fallback for an unknown ?suite=)
+      state.suite = 'all';
+      S = {id: 'all', title: 'All suites', meta: {task: 'all', modes: [], n: 0}, models: covAllModels(), items: []};
+      ITEMS = []; MODELS = covAllModels();
+      document.querySelectorAll('.de').forEach(function (n) { n.classList.toggle('de-paper', state.view === 'paper'); });
+      document.querySelectorAll('[data-suite]').forEach(function (n) { n.classList.toggle('on', n.getAttribute('data-suite') === 'all'); });
+      document.querySelectorAll('[data-task]').forEach(function (n) { n.classList.toggle('on', n.getAttribute('data-task') === 'all'); });
+      ['figure-2', 'figure-4', 'figure-5'].forEach(function (id) { var e = mount(id); if (e) e.style.display = 'none'; });
+      document.documentElement.classList.add('de-all-on');
+      renderControls(); renderFigures(); table1All(); table2All(); downloads();
+      writeHash();
+      return;
+    }
+    ['figure-2', 'figure-4', 'figure-5'].forEach(function (id) { var e = mount(id); if (e) e.style.display = ''; });
+    document.documentElement.classList.remove('de-all-on');
+    S = single;
     if (!state.mode || !has(state.mode)) state.mode = S.meta.modes[0];
     ITEMS = S.meta.task === 'flag'
       ? S.items.map(function (r) { return {kind: r[0], cat: r[0], q: r[1], labels: r[2], domain: r[3], source: r[4]}; })
@@ -1504,7 +1686,7 @@ Plain text:
     return;
   }
   var h = readHash();
-  state.suite = h.suite || null;
+  state.suite = h.suite || h.cov || 'all';
   state.view = h.view === 'paper' ? 'paper' : 'web';
   state.mode = h.mode || null;
   state.agg = AGG_NAMES.indexOf(h.agg) >= 0 ? h.agg : null;
