@@ -171,7 +171,7 @@ span[data-suite].on,span[data-task].on{display:inline}
 
 <div class="de-disclaimer" markdown="1">
 
-**Disclaimer.** This is an opinionated, small-scale evaluation suite run by one person, not a leaderboard of record. *Opinionated* means two things. The models: the question is what is small, quick and cheap to run without managing any infrastructure. So the local models are open-weight encoders under 1B parameters that run on a laptop, and the hosted ones are cheap per-call APIs: Jev and GPT-6 Luna, because they were the talk of the town, and d1-ultra. Larger open decision models exist, such as Bespoke Labs' 9B [Nimble](https://github.com/bespokelabsai/nimble), and are likely more capable, but needing a GPU defeats the purpose, so they are left out on purpose. The suites: they are hand-picked, each task uses one prompt wording, no model was tuned, and hosted models can change behind the same name. Read the numbers as a snapshot under the protocol stated on this page.
+**Disclaimer.** This is an opinionated, small-scale evaluation suite run by one person, not a leaderboard of record. Opinionated in which models are in: an open-weight model has to be fast and cheap to run on a laptop, so larger ones (such as 9B decision models) are left out, and a closed model has to have cheap token pricing. The suites are hand-picked, each task uses one prompt wording, no model was tuned, and hosted models can change behind the same name. Read the numbers as a snapshot under the protocol stated on this page.
 
 </div>
 
