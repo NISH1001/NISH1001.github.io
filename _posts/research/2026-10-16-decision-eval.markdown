@@ -171,7 +171,9 @@ span[data-suite].on,span[data-task].on{display:inline}
 
 <div class="de-disclaimer" markdown="1">
 
-**Disclaimer.** This is an opinionated, small-scale evaluation suite run by one person, not a leaderboard of record. Opinionated in which models are in: an open-weight model has to be fast and cheap to run on a laptop, so larger ones (such as 9B decision models) are left out, and a closed model has to have cheap token pricing. The suites are hand-picked, each task uses one prompt wording, no model was tuned, and hosted models can change behind the same name. Read the numbers as a snapshot under the protocol stated on this page.
+**Disclaimer.** This is an opinionated, small-scale evaluation suite run by one person, not a leaderboard of record. Opinionated in which models are in: an open-weight model has to be fast and cheap to run on a laptop, so models above 1B parameters are left out for now, and a closed model has to have cheap token pricing. The suites are hand-picked, each task uses one prompt wording, no model was tuned, and hosted models can change behind the same name. Read the numbers as a snapshot under the protocol stated on this page.
+
+**Hardware.** Every local run was on one laptop: a MacBook Pro with an Apple M3 Max (14-core CPU) and 36 GB of memory, on macOS 15.8. Laya used the GPU through Metal (MPS), and GLiNER the CPU through ONNX Runtime. Hosted models were called from the same machine, so their latency includes the network round trip.
 
 </div>
 
