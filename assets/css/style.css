@@ -960,6 +960,11 @@ li a[href^="http://"]:after, li a[href^="https://"]:after {
   color: var(--text);
 }
 
+.post-meta .post-author {
+  color: var(--text);
+  font-style: italic;
+}
+
 .post-meta .post-tags {
   display: flex;
   flex-wrap: wrap;

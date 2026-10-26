@@ -6,6 +6,10 @@
       <span class="post-date">{{ page.date | date: "%B %d, %Y" }}</span>
     {% endif %}
 
+    {% if page.author %}
+      <span class="post-author">by {{ page.author }}</span>
+    {% endif %}
+
     {% if page.started_on or page.completed_on %}
       <span class="post-reading-dates">
         {% if page.started_on %}Started: {{ page.started_on }}{% endif %}

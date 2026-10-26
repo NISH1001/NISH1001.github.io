@@ -1,6 +1,6 @@
 <!-- Collect all tags from posts and notes -->
 {% assign all_tags = "" | split: "" %}
-{% assign all_items = site.posts | concat: site.notes %}
+{% assign all_items = site.posts | concat: site.notes | sort: "date" | reverse %}
 {% for item in all_items %}
   {% if item.tags %}
     {% assign tags_string = item.tags | join: "," %}
