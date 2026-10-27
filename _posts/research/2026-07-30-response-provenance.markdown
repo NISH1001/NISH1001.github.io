@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Response Provenance: Tracing Agent Claims Back to Their Causes"
-date:   2026-07-30 09:00:00 +0545
+date:   2026-07-30 09:00:00 -0500
 categories: research
 tags: research llm agents attribution provenance interpretability science transparency
 subtitle: "An agent writes a paragraph. Which sentence came from which file, which instruction, which earlier message? A practical method for answering that on hosted APIs, where every state-of-the-art attribution method is unavailable by construction."

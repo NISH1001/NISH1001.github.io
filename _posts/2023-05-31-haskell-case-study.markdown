@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Haskell Case Study"
-date:   2023-05-31 00:20:30 +0545
+date:   2023-05-31 00:20:30 -0500
 last_edited_on:   2023-05-31 20:40:00 +0545
 categories: programming
 tags: programming, haskell, functional-programming

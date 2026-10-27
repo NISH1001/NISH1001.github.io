@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "decision-eval: An Opinionated Benchmark for Zero-Shot Decision Models"
-date:   2026-10-16 09:00:00 +0545
+date:   2026-10-16 09:00:00 -0500
 categories: research
 tags: research llm benchmark evaluation decision-models zero-shot classification calibration latency
 subtitle: "Accuracy, latency, cost and calibration of zero-shot decision models (Laya, GLiNER2.5-Decide, Jev, GPT-6 Luna) on the same requests, suite by suite: synthetic STEM problems, long-form judging (JudgeBench) and guardrail sets."
