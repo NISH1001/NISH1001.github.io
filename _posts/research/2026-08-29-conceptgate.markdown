@@ -143,12 +143,12 @@ single-best-layer baseline under a matched-filter analysis and on synthetic data
 9.4%), but the advantage does not transfer to real models, where one layer already carries the concept.
 (iii) Modelling each class as a Gaussian mixture recovers configurations no single linear threshold
 separates, but model selection reduces the mixture to one component per class at ten-shot sizes and keeps
-doing so up to sixty-four examples per class; where a second component is eventually selected it adds at
+doing so up to sixty-four examples per class in diff-of-means mode; where a second component is eventually selected it adds at
 most 0.007 held-out AUC.
 (iv) Matched contrastive negatives reduce rather than improve accuracy; generalization to unseen harm
 categories is only partial; and steering with the concept bank's own harm-category directions lowers refusal rather than raising it (80% unsteered, 68% gated, 65% blanket), so those entries supply a write direction pointing opposite to a guardrail. (v) The one capability that distinguishes an internal adapter from a text
 classifier is **steering** — writing a direction fit from the same few-shot examples back into the residual stream — which we
-measure as a graded dose-response bounded by the competence of the base model. (vi) The write rule itself is standard activation addition, and conditioning it on an activation-read detector is prior work. Measured with prompts formatted as the model expects, the composition adds nothing on the read side of that: the model refuses 94% of attacks unsteered, the gate fires on 97% of them and so selects nothing a size-matched random subset does not, and steering *away* from the jailbreak concept **lowers** refusal by 22 points — the few-shot direction is a refusal lever — about three times a matched-norm random direction on this first-token measure — and which sign is a guardrail is the operator's choice. Whether prompts are formatted at all turns out to decide the sign of every effect in this experiment, which is a caveat for steering evaluations generally (<a class="sref" href="#410-gate-conditioned-steering">§4.10</a>). (vii) A different question — whether the size of a write's effect on a *particular* prompt is readable from
+measure as a graded dose-response bounded by the competence of the base model. (vi) The write rule itself is standard activation addition, and conditioning it on an activation-read detector is prior work. Measured with prompts formatted as the model expects, the composition adds nothing on the read side of that: the model refuses 94% of attacks unsteered, the gate fires on 97% of them and so selects nothing a size-matched random subset does not, and steering *away* from the jailbreak concept **lowers** refusal by 22 points — the few-shot direction is a refusal lever — about three times a matched-norm random direction on this first-token measure — and which sign is a guardrail is the operator's choice. Whether prompts are formatted at all turns out to decide the sign of the main effects in this experiment, which is a caveat for steering evaluations generally (<a class="sref" href="#410-gate-conditioned-steering">§4.10</a>). (vii) A different question — whether the size of a write's effect on a *particular* prompt is readable from
 that prompt beforehand — produced a strong-looking result on a first-token proxy ($\rho=+0.81$
 against a permutation null of -0.00 ± 0.10) that its own controls
 then cut down: most of the signal sits inside the concept direction the gate already computes
@@ -327,7 +327,7 @@ This paper evaluates each component of ConceptGate against a fair baseline and r
    shared with a probe bank, which ties or edges it at matched depth
    (<a class="sref" href="#482-learning-multiple-concepts">§4.8.2</a>). Matched contrastive negatives hurt
    (<a class="sref" href="#44-matched-versus-broad-negatives-a-negative-result">§4.4</a>); the mixture
-   collapses to one Gaussian at ten-shot sizes, and to sixty-four examples per class
+   collapses to one Gaussian at ten-shot sizes, and to sixty-four examples per class in diff-of-means mode
    (<a class="sref" href="#42-mixture-densities-a-constructed-hard-case-and-a-few-shot-collapse">§4.2</a>);
    a predicted paraphrase-robustness effect does not appear
    (<a class="sref" href="#47-a-paraphrase-robustness-null">§4.7</a>); generalization to an unseen harm
@@ -469,8 +469,8 @@ know this when the first version of this report was written. **Conditional Activ
 <span class="cite" data-ref="Lee, B. W., et al. (2024). Programming Refusal with Conditional Activation Steering. ICLR 2025. arXiv:2409.05907."><a href="#ref-cast">[15]</a></span> switches a refusal vector on a "condition vector" — a direction plus a threshold read from the
 prompt's activations, chosen by grid search over several thousand prompts — and reports that conditioning
 removes most of the benign over-refusal that unconditional steering causes, across seven models. DSAS
-<span class="cite" data-ref="Dynamic Steering with Activation-Space Gating (DSAS). arXiv:2512.03661."><a href="#ref-dsas">[16]</a></span> fits a per-layer logistic gate from a few dozen examples and lets it modulate the write
-continuously, on the same Qwen and gemma families used here. So the *mechanism* of
+<span class="cite" data-ref="Ferrando, A., Suau, X., González, J., & Rodriguez, P. (2025). Dynamically Scaled Activation Steering. arXiv:2512.03661."><a href="#ref-dsas">[16]</a></span> decouples when to steer from how, scaling the strength of an existing steering method per input and
+layer according to whether undesired behaviour is detected. So the *mechanism* of
 <a class="sref" href="#410-gate-conditioned-steering">§4.10</a> is not new; what
 that section can add is the set of controls around it — a size-matched random arm, the detector's
 complement, and a sign flip — and whatever those controls turn out to say.
@@ -899,7 +899,7 @@ $$a_\ell\;\leftarrow\;a_\ell+\alpha\,w^{\text{raw}}_{\ell},$$
 
 with $\alpha>0$ steering **toward** the concept and $\alpha<0$ **away** (the refusal / guardrail
 direction). The one practical subtlety is *magnitude*: a good absolute $\alpha$ on GPT-2 is wrong on
-Qwen, because their residual norms differ by about fivefold (96 vs 19 in our runs). So we set
+Qwen, because their residual norms differ by about fivefold (96 vs 18 in our runs). So we set
 $\alpha$ as a **fraction of the measured residual norm**, which transfers approximately across the three
 models tested — the coherent band is similar but not identical on each, and we have not verified it
 beyond them — empirically
@@ -1615,8 +1615,8 @@ its heads sit on the final layer, while ConceptGate ran 91% of the backbone — 
 logistic heads on ConceptGate's own taps from the cached activations, at identical cost
 ([`scripts/eval_probe_tap_bank.py`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_probe_tap_bank.py),
 reproducing the stored numbers to four decimals first). They score 0.840 on Qwen and 0.880 on gemma
-against ConceptGate's 0.832 and 0.881: a tie on gemma, ahead on 8 of 14 categories, and a slight probe
-edge on Qwen, ahead on 10 of 14 — exactly what
+against ConceptGate's 0.832 and 0.881: a tie on gemma (the probe ahead on 8 of 14 categories) and a slight probe
+edge on Qwen (ahead on 10 of 14) — exactly what
 <a class="sref" href="#481-learning-a-single-concept">§4.8.1</a> predicted. Over such a probe bank ConceptGate's cost is at worst a tie — a
 truncated forward is never more than the probe's full one, and its extra per-concept kilobytes are
 negligible — while it adds one thing the probe cannot: a *second*, write-side use of the same $K$ concepts,
@@ -1714,8 +1714,8 @@ of categories than from any one alone.
 The steering rule of <a class="sref" href="#310-steering-the-write-side">§3.10</a> is activation
 addition, and conditioning it on a detector read from the activations is established: CAST <span class="cite" data-ref="Lee, B. W., et al. (2024). Programming Refusal with Conditional Activation Steering. ICLR 2025. arXiv:2409.05907."><a href="#ref-cast">[15]</a></span>
 switches a refusal vector on a "condition vector" and reports that conditioning removes most of the
-benign over-refusal unconditional steering causes, across seven models; DSAS <span class="cite" data-ref="Dynamic Steering with Activation-Space Gating (DSAS). arXiv:2512.03661."><a href="#ref-dsas">[16]</a></span> fits a per-layer
-logistic gate from a few dozen examples and lets it modulate the write continuously. Neither reports
+benign over-refusal unconditional steering causes, across seven models; DSAS <span class="cite" data-ref="Ferrando, A., Suau, X., González, J., & Rodriguez, P. (2025). Dynamically Scaled Activation Steering. arXiv:2512.03661."><a href="#ref-dsas">[16]</a></span> scales an existing
+steering method per input and layer according to whether undesired behaviour is detected. Neither reports
 what the gate is *selecting*. This section runs three controls that answer that — a random subset of the
 same size as the gated set, the detector's complement, and a sign flip — and one comparison that turns
 out to govern all of them.
@@ -1772,9 +1772,9 @@ in-register benign prompts. That is CAST's collateral result <span class="cite" 
 register it fires on $95.8 \pm 2.9\%$ — 30 or 31 of 32 in every resample — so off-register it would
 rewrite nearly everything it saw. Fitting the same concept from the dataset's long persona templates
 instead of short framings inverts the failure: it then fires on 77% of the short attacks and 34% of the
-short benign prompts. The same collapse is documented for CAST's own condition detector, reported to
-refuse essentially every mathematics prompt while passing in-distribution benign ones <span class="cite" data-ref="AlphaSteer. arXiv:2506.07022."><a href="#ref-alphasteer">[20]</a></span>, and for
-activation probes generally <span class="cite" data-ref="Latent Adversarial Detection. arXiv:2604.28129."><a href="#ref-lad">[23]</a></span>.
+short benign prompts. A related failure is documented for CAST\'s condition rules, which AlphaSteer reports misclassify
+mathematics problems as malicious and refuse all of them <span class="cite" data-ref="Sheng, L., et al. (2025). AlphaSteer: Learning Refusal Steering with Principled Null-Space Constraint. arXiv:2506.07022."><a href="#ref-alphasteer">[20]</a></span>; activation-probe detectors have also been found to
+depend on the source distribution they were trained on <span class="cite" data-ref="Kulkarni, P. (2026). Latent Adversarial Detection: Adaptive Probing of LLM Activations for Multi-Turn Attack Detection. arXiv:2604.28129."><a href="#ref-lad">[23]</a></span>.
 
 #### A continuous outcome, against a random direction of the same norm
 
@@ -1811,9 +1811,9 @@ floor and not vastly above it. The sign-independent component is small for both 
 random on attacks), and there is no lever-versus-perturbation split by gate status: the three attacks the
 gate passed moved as much as the ninety-three it fired on, though at $n=3$ that is indicative only. The
 random direction is not inert either — a matched-norm random write moves the refusal logit by a third as
-much, which is the observation of Rogue Scalpel <span class="cite" data-ref="The Rogue Scalpel: Activation Steering Compromises LLM Safety. arXiv:2509.22067."><a href="#ref-rogue">[18]</a></span> in continuous form. Taken together this is
+much, which is the observation of Rogue Scalpel <span class="cite" data-ref="Korznikov, A., et al. (2025). The Rogue Scalpel: Activation Steering Compromises LLM Safety. arXiv:2509.22067."><a href="#ref-rogue">[18]</a></span> in continuous form. Taken together this is
 consistent with refusal riding a single direction <span class="cite" data-ref="Arditi, A., et al. (2024). Refusal in Language Models Is Mediated by a Single Direction. NeurIPS 2024. arXiv:2406.11717."><a href="#ref-arditi">[17]</a></span> and with arbitrary steering vectors moving
-refusal in proportion to their alignment with it <span class="cite" data-ref="Analysing the Safety Pitfalls of Steering Vectors. arXiv:2603.24543."><a href="#ref-pitfalls">[19]</a></span>.
+refusal in proportion to their alignment with it <span class="cite" data-ref="Li, Y., et al. (2026). Analysing the Safety Pitfalls of Steering Vectors. arXiv:2603.24543."><a href="#ref-pitfalls">[19]</a></span>.
 
 #### The same arms on the concept bank
 
@@ -2408,7 +2408,7 @@ directions gives $+0.81$ — two dimensions out of 2,688 change
 nothing. Projecting out the *fitted* direction gives
 $+0.09$, which is the informative version. The
 Cylindrical Representation Hypothesis had in any case already argued the qualitative version of that geometry
-on theoretical grounds <span class="cite" data-ref="The Cylindrical Representation Hypothesis for Language Model Steering. arXiv:2605.01844."><a href="#ref-crh">[25]</a></span>.
+on theoretical grounds <span class="cite" data-ref="Gao, L., et al. (2026). The Cylindrical Representation Hypothesis for Language Model Steering. arXiv:2605.01844."><a href="#ref-crh">[25]</a></span>.
 
 **And predictability on this outcome is not distinctive.** The identical pipeline decodes the *unsteered*
 refusal logit at $+0.86$ and the sign-*independent* component of the
@@ -3048,7 +3048,7 @@ $-0.12$ and the length-residualised dose is still predicted at $+0.57$. It is no
 separate jailbreak templates from short attacks at $+0.77$, yet the dose is predicted *within* templates alone
 ($+0.52$) and within short and bare requests alone ($+0.63$). And it is not **refusal disposition**, as above.
 Nor is it an artefact of our analysis choices: all three scorers give the same verdict (grouped CV
-$+0.54$/$+0.58$/$+0.60$, $z$ between $6.0$ and $6.5$, their out-of-fold predictions agreeing at $+0.87$), and
+$+0.54$/$+0.58$/$+0.60$, $z$ between $6.0$ and $6.7$, their out-of-fold predictions agreeing at $+0.87$), and
 the ridge penalty may vary a thousandfold for a swing of $+0.58$ to $+0.63$.
 
 **Used as a gate, the prediction selects where writing works** (<a class="sref" href="#figure-18">Figure 18</a>). This is the operational form of the result and
@@ -3079,9 +3079,9 @@ and this system was not built that way.
 
 **This is one model.** Repeating the measurement on gemma-2-2b at the same magnitude, the instrument is
 sound (split-half of the unsteered rate $+0.92$) but the effect is not: attack refusal moves
-$0.46 / 0.51 / 0.53$ across the three arms against Qwen's $0.35 / 0.56 / 0.65$ on the same
+$0.46 / 0.51 / 0.53$ across the three arms against Qwen's $0.35 / 0.55 / 0.65$ on the same
 scorer, mean $\lvert D\rvert$ is
-$0.07$ against $0.17$, and only 38% of doses are positive. The dose's split-half falls to $+0.53$, below the
+$0.07$ against $0.16$, and only 38% of doses are positive. The dose's split-half falls to $+0.53$, below the
 $0.6$ we had fixed in advance, and prediction on that unreliable target reaches only $+0.20$ at $z=2.2$.
 
 **Doubling the samples settles it, and not in our favour.** Because the reliability bar had failed, the
@@ -3306,11 +3306,11 @@ split-halves at matched half-size, never the raw statistic across different $K$.
 <line x1="542" y1="196" x2="542" y2="74" stroke="#d8d5c8"/>
 <text x="630" y="213" text-anchor="middle" font-size="9" fill="#889">write direction</text>
 <text x="512" y="135" text-anchor="middle" font-size="9" fill="#889" transform="rotate(-90 512 135)">refusal rate on attacks</text>
-<polyline points="552.6,147.2 630.0,108.2 707.4,91.9" fill="none" stroke="#1c7d74" stroke-width="1.6"/>
-<circle cx="552.6" cy="147.2" r="2.6" fill="#1c7d74"/>
-<circle cx="630.0" cy="108.2" r="2.6" fill="#1c7d74"/>
-<circle cx="707.4" cy="91.9" r="2.6" fill="#1c7d74"/>
-<text x="559" y="162" text-anchor="start" font-size="8.5" font-weight="600" fill="#1c7d74">Qwen2.5-0.5B</text>
+<polyline points="552.6,139.1 630.0,106.5 707.4,90.3" fill="none" stroke="#1c7d74" stroke-width="1.6"/>
+<circle cx="552.6" cy="139.1" r="2.6" fill="#1c7d74"/>
+<circle cx="630.0" cy="106.5" r="2.6" fill="#1c7d74"/>
+<circle cx="707.4" cy="90.3" r="2.6" fill="#1c7d74"/>
+<text x="559" y="154" text-anchor="start" font-size="8.5" font-weight="600" fill="#1c7d74">Qwen2.5-0.5B</text>
 <polyline points="552.6,121.2 630.0,113.0 707.4,109.8" fill="none" stroke="#c2703d" stroke-width="1.6"/>
 <circle cx="552.6" cy="121.2" r="2.6" fill="#c2703d"/>
 <circle cx="630.0" cy="113.0" r="2.6" fill="#c2703d"/>
@@ -3355,20 +3355,21 @@ each prompt's dose is a fitted slope rather than a two-point difference, and mor
 result shows that a magnitude which moves one model appreciably can sit at the sampling-noise floor on
 another, and at that floor nothing is predictable because nothing reliable is being measured. Two further
 limits stand regardless: the three concept
-resamples reuse one fixed prompt set with byte-identical activations, so the effective number of independent
-replicates is **one**; and 98% of doses share a sign, so only magnitude
-is at issue, never direction.
+resamples of the first-token sweep reuse one fixed prompt set with byte-identical activations, and the behavioural
+run uses a single concept fit on that set, so the effective number of independent replicates is **one**; and most
+doses share a sign (81% positive on the sampled classifier measure, 98% on the first-token proxy), so the
+prediction is mainly about magnitude rather than direction.
 
 **Prior work.** The nearest result predicts whether an intervention will under- or over-steer from internal
 states, but requires running the steered pass and decoding several tokens, predicts a three-class label, and
-uses features that are explicitly alignments with the steering vector <span class="cite" data-ref="When is Your LLM Steerable? arXiv:2606.11599."><a href="#ref-asteer">[24]</a></span>. Others predict per-instance
-intervention properties from the prompt alone but target which *layer* to steer <span class="cite" data-ref="Billa (2026). Predicting Where Steering Vectors Succeed. arXiv:2604.15557."><a href="#ref-billa">[22]</a></span>. A recent
+uses features that compare hidden states before and after steering <span class="cite" data-ref="Fan, C., et al. (2026). When is Your LLM Steerable? arXiv:2606.11599."><a href="#ref-asteer">[24]</a></span>. Others predict, per
+concept and layer, whether a steering vector will work at all, from a logit-lens diagnostic <span class="cite" data-ref="Billa, J. (2026). Predicting Where Steering Vectors Succeed. arXiv:2604.15557."><a href="#ref-billa">[22]</a></span>. A recent
 result does forecast steering outcomes from *unsteered* representations, but predicts which other behaviours
 an intervention will disturb, across a taxonomy of behaviours, rather than how far a given prompt will move
-<span class="cite" data-ref="Forecasting Side Effects of Activation Steering. arXiv:2608.11227."><a href="#ref-sideeffects">[27]</a></span>.
+<span class="cite" data-ref="Ong, C. Y., et al. (2026). Forecasting Side Effects of Activation Steering. arXiv:2608.11227."><a href="#ref-sideeffects">[27]</a></span>.
 We should also be clear about what is ours in the *measure* itself: the first-token refusal-minus-compliance
 statistic this section is built on is a basket-sum variant of the refusal–affirmation logit gap, which was
-introduced as a per-prompt safety margin and validated across thirteen models
+introduced as a per-prompt safety margin, shown to widen under alignment on 97.5–99.8% of toxic prompts across three model families
 <span class="cite" data-ref="Li, T.-L., & Liu, H. (2025). Logit-Gap Steering: A Forward-Pass Diagnostic for Alignment Robustness. arXiv:2506.24056."><a href="#ref-logitgap">[26]</a></span>.
 The instrument is theirs; the question we ask of it — whether a prompt's *response* to a write is predictable
 before the write — is the part we could not find in the literature. The methodological caution this section ends on is the part we would most want a
@@ -3428,7 +3429,7 @@ simpler to deploy, so if detection were the objective there would be little reas
 method. It is tempting to say next that the read side's contribution is deciding *when* to write, and that
 gating the write therefore beats writing everywhere. The measurements do not support it *for the concept
 read*, which is the read this system was built around. Conditioning a write
-on an activation detector is CAST and DSAS <span class="cite" data-ref="Lee, B. W., et al. (2024). Programming Refusal with Conditional Activation Steering. ICLR 2025. arXiv:2409.05907."><a href="#ref-cast">[15]</a></span><span class="cite" data-ref="Dynamic Steering with Activation-Space Gating (DSAS). arXiv:2512.03661."><a href="#ref-dsas">[16]</a></span>, and on correctly formatted prompts the gate fires
+on an activation detector is CAST and DSAS <span class="cite" data-ref="Lee, B. W., et al. (2024). Programming Refusal with Conditional Activation Steering. ICLR 2025. arXiv:2409.05907."><a href="#ref-cast">[15]</a></span><span class="cite" data-ref="Ferrando, A., Suau, X., González, J., & Rodriguez, P. (2025). Dynamically Scaled Activation Steering. arXiv:2512.03661."><a href="#ref-dsas">[16]</a></span>, and on correctly formatted prompts the gate fires
 on 97% of attacks and selects nothing a size-matched random subset does not (<a class="sref" href="#410-gate-conditioned-steering">§4.10</a>).
 
 A read fit to something else is a different matter. Fit to the write's own measured per-prompt effect
@@ -3532,7 +3533,7 @@ exactly that one-model evidence.
 
 **Still open: whether it is a fact about language models or a fact about Qwen.** It did not reproduce on
 gemma-2-2b, and the reason is specific rather than mysterious. At the magnitude we used, the write moves that
-model's refusal from $0.46$ to $0.53$ where it moves Qwen's from $0.30$ to $0.64$; with almost no per-prompt
+model's refusal from $0.46$ to $0.53$ where it moves Qwen's from $0.35$ to $0.65$; with almost no per-prompt
 variance in the outcome there is nothing for a predictor to find, and doubling the sample count made the
 apparent correlation *fall* rather than rise, which is how noise behaves and attenuated signal does not. The
 concept direction is no less special on gemma — it outperforms a matched random direction by the same
@@ -3588,8 +3589,8 @@ short override framings against eight short benign requests and run with the cha
 prompts in that same register and on **96%** of real benign prompts drawn from a different one (30 or 31 of 32 in
 every resample) — with the concept and the threshold unchanged. A ten-example concept is therefore calibrated to a
 *register* as much as to a meaning, and any deployment claim has to be made against the traffic the gate will
-actually see. The same failure is documented for CAST's condition detector <span class="cite" data-ref="AlphaSteer. arXiv:2506.07022."><a href="#ref-alphasteer">[20]</a></span> and for activation probes
-generally <span class="cite" data-ref="Latent Adversarial Detection. arXiv:2604.28129."><a href="#ref-lad">[23]</a></span>. On the write side a false fire rewrites the output rather than merely raising a flag. On the write side, steering hard enough to reliably change
+actually see. A related failure is reported for CAST\'s condition rules <span class="cite" data-ref="Sheng, L., et al. (2025). AlphaSteer: Learning Refusal Steering with Principled Null-Space Constraint. arXiv:2506.07022."><a href="#ref-alphasteer">[20]</a></span>, and activation-probe detectors are known to
+depend on the distribution they were trained on <span class="cite" data-ref="Kulkarni, P. (2026). Latent Adversarial Detection: Adaptive Probing of LLM Activations for Multi-Turn Attack Detection. arXiv:2604.28129."><a href="#ref-lad">[23]</a></span>. On the write side a false fire rewrites the output rather than merely raising a flag. On the write side, steering hard enough to reliably change
 the topic also degrades fluency, and generated text drifts out of the clean-prompt distribution as it
 grows — degenerate repetition alone can nudge a benign continuation across the gate — so a deployed
 system must tune its operating point against false-refusal and output quality, not against recall in
@@ -3602,7 +3603,8 @@ write barely moves gemma-2-2b at all, so a result of this kind is only as portab
 effect size on the model in question. Within the model where it does hold, the concept is fit once per
 model and the three resamples share a fixed prompt set, so the effective number of independent replicates
 is **one**; there is a single write magnitude, so each prompt's dose is a two-point difference rather than a
-fitted slope; and 98% of doses share a sign, so what is predicted is magnitude and never direction. The
+fitted slope; and most doses share a sign (81% positive on the sampled classifier measure, 98% on the
+first-token proxy), so what is predicted is mainly magnitude rather than direction. The
 labels are not free either — each costs a round of sampled generation, which is the real price of fitting a
 gate this way. Finally, one instrument-level caution that bit us: a split-half reliability gate is **not
 comparable across sample sizes**, so a model can fail such a gate at one sample count and pass it at another
@@ -3661,18 +3663,18 @@ fails are both visible in them.
 13. <a id="ref-gliner"></a>Zaratiana, U., Tomeh, N., Holat, P., & Charnois, T. (2023). *GLiNER: Generalist Model for Named Entity Recognition using Bidirectional Transformer.* NAACL 2024. arXiv:2311.08526.
 14. <a id="ref-beavertails"></a>Ji, J., Liu, M., Dai, J., Pan, X., Zhang, C., Bian, C., Sun, R., Wang, Y., & Yang, Y. (2023). *BeaverTails: Towards Improved Safety Alignment of LLM via a Human-Preference Dataset.* NeurIPS 2023 Datasets and Benchmarks. arXiv:2307.04657.
 15. <a id="ref-cast"></a>Lee, B. W., et al. (2024). *Programming Refusal with Conditional Activation Steering.* ICLR 2025. arXiv:2409.05907.
-16. <a id="ref-dsas"></a>*Dynamic Steering with Activation-Space Gating (DSAS).* (2025). arXiv:2512.03661.
+16. <a id="ref-dsas"></a>Ferrando, A., Suau, X., González, J., & Rodriguez, P. (2025). *Dynamically Scaled Activation Steering.* arXiv:2512.03661.
 17. <a id="ref-arditi"></a>Arditi, A., et al. (2024). *Refusal in Language Models Is Mediated by a Single Direction.* NeurIPS 2024. arXiv:2406.11717.
-18. <a id="ref-rogue"></a>*The Rogue Scalpel: Activation Steering Compromises LLM Safety.* (2025). arXiv:2509.22067.
-19. <a id="ref-pitfalls"></a>*Analysing the Safety Pitfalls of Steering Vectors.* (2026). arXiv:2603.24543.
-20. <a id="ref-alphasteer"></a>*AlphaSteer.* (2025). arXiv:2506.07022.
+18. <a id="ref-rogue"></a>Korznikov, A., Galichin, A., Dontsov, A., Rogov, O. Y., Oseledets, I., & Tutubalina, E. (2025). *The Rogue Scalpel: Activation Steering Compromises LLM Safety.* arXiv:2509.22067.
+19. <a id="ref-pitfalls"></a>Li, Y., Fastowski, A., Zaradoukas, E., Prenkaj, B., & Kasneci, G. (2026). *Analysing the Safety Pitfalls of Steering Vectors.* arXiv:2603.24543.
+20. <a id="ref-alphasteer"></a>Sheng, L., et al. (2025). *AlphaSteer: Learning Refusal Steering with Principled Null-Space Constraint.* arXiv:2506.07022.
 21. <a id="ref-harmref"></a>Zhao, J., et al. (2025). *LLMs Encode Harmfulness and Refusal Separately.* arXiv:2507.11878.
-22. <a id="ref-billa"></a>Billa (2026). *Predicting Where Steering Vectors Succeed.* arXiv:2604.15557.
-23. <a id="ref-lad"></a>*Latent Adversarial Detection.* (2026). arXiv:2604.28129.
-24. <a id="ref-asteer"></a>*When is Your LLM Steerable?* (2026). arXiv:2606.11599.
-25. <a id="ref-crh"></a>*The Cylindrical Representation Hypothesis for Language Model Steering.* (2026). arXiv:2605.01844.
+22. <a id="ref-billa"></a>Billa, J. (2026). *Predicting Where Steering Vectors Succeed.* arXiv:2604.15557.
+23. <a id="ref-lad"></a>Kulkarni, P. (2026). *Latent Adversarial Detection: Adaptive Probing of LLM Activations for Multi-Turn Attack Detection.* arXiv:2604.28129.
+24. <a id="ref-asteer"></a>Fan, C., Cheng, Y., Li, M., Feizi, S., & Zhou, T. (2026). *When is Your LLM Steerable?* arXiv:2606.11599.
+25. <a id="ref-crh"></a>Gao, L., et al. (2026). *The Cylindrical Representation Hypothesis for Language Model Steering.* arXiv:2605.01844.
 26. <a id="ref-logitgap"></a>Li, T.-L., & Liu, H. (2025). *Logit-Gap Steering: A Forward-Pass Diagnostic for Alignment Robustness.* arXiv:2506.24056.
-27. <a id="ref-sideeffects"></a>*Forecasting Side Effects of Activation Steering.* (2026). arXiv:2608.11227.
+27. <a id="ref-sideeffects"></a>Ong, C. Y., Sim, A. W. J., Zhang, P., & Sun, J. (2026). *Forecasting Side Effects of Activation Steering.* arXiv:2608.11227.
 </div>
 
 ## Citation
