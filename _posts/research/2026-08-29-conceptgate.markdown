@@ -1271,8 +1271,8 @@ the constructed case above shows that generality is not vacuous; on the concepts
 inactive at the sizes the system runs at and inert at the sizes where it activates. What this sweep does
 *not* establish is that the classes are genuinely bimodal — a component selected at $N=256$ could be
 fitting a small cluster of outlying prompts, and we did not measure the fitted component weights. The constructed case is [`scripts/toy_csg_mixture.py`](https://github.com/NISH1001/conceptgate/blob/main/scripts/toy_csg_mixture.py) and
-the GPT-2 check is [`scripts/mixture_gpt2_check.py`](https://github.com/NISH1001/conceptgate/blob/main/scripts/mixture_gpt2_check.py); the BIC sweep was run ad hoc with
-[`conceptgate/mixture.py`](https://github.com/NISH1001/conceptgate/blob/main/conceptgate/mixture.py), and there is no standalone script for it.
+the GPT-2 check is [`scripts/mixture_gpt2_check.py`](https://github.com/NISH1001/conceptgate/blob/main/scripts/mixture_gpt2_check.py); the BIC sweep uses
+[`conceptgate/mixture.py`](https://github.com/NISH1001/conceptgate/blob/main/conceptgate/mixture.py).
 
 ### 4.3 Detection on real prompts: a commodity
 
@@ -1304,10 +1304,10 @@ jailbreak persona templates differ from ordinary queries in surface style, so th
 advantage for reading activations. The AUC values in this report compare methods with each other; they do
 not show that the task is hard. The harness is [`scripts/eval_text_baseline.py`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_text_baseline.py).
 
-**Cross-dataset transfer.** Our first cross-distribution test trained on one dataset and tested on the other
-(jailbreak framing and BeaverTails harmful content). ConceptGate and a probe both fell to about chance (AUC
-0.36–0.52). These are two different concepts, so the test measured concept transfer, which fails for all
-methods. It did not measure robustness. <a class="sref" href="#49-out-of-distribution-generalization">§4.9</a> replaces it with a within-concept test.
+**Cross-dataset transfer.** A cross-dataset test trains on one dataset and tests on the other
+(jailbreak framing and BeaverTails harmful content). ConceptGate and a probe both fall to about chance (AUC
+0.36–0.52). These are two different concepts, so the test measures concept transfer, which fails for all
+methods. It does not measure robustness. <a class="sref" href="#49-out-of-distribution-generalization">§4.9</a> replaces it with a within-concept test.
 
 ### 4.4 Matched versus broad negatives (a negative result)
 
@@ -1806,9 +1806,9 @@ The multi-concept setting is where the training-free design matters. A
 *latent bank* — ConceptGate, or equally a linear-probe bank — amortizes across a taxonomy in a way that
 per-concept or monolithic fine-tuning cannot: constant inference, closed-form extension, kilobytes per
 concept, and no retraining to change the taxonomy. That is a genuine result, and it is honest that a
-detect-only probe bank shares it. The comparison in the table also handed the probe a depth advantage —
-its heads sit on the final layer, while ConceptGate ran 91% of the backbone — so we refit the same
-logistic heads on ConceptGate's own taps from the cached activations, at identical cost
+detect-only probe bank shares it. The final-layer probe has a depth advantage —
+its heads sit on the final layer, while ConceptGate runs 91% of the backbone — so the table also puts the same
+logistic heads on ConceptGate's own taps, at identical cost
 ([`scripts/eval_probe_tap_bank.py`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_probe_tap_bank.py),
 reproducing the stored numbers to four decimals first). They score 0.840 on Qwen and 0.880 on gemma
 against ConceptGate's 0.832 and 0.881: a tie on gemma (the probe ahead on 8 of 14 categories) and a slight probe
@@ -2043,8 +2043,8 @@ ranks benign-looking attacks above harmless commands.</p>
 
 It reads register. The gate above fires on 93% of harmless commands and on 53% of attacks written as
 ordinary requests. On the continuous score, harmless commands rank above benign-looking attacks (B>C
-0.22). The gate fit from the dataset templates is purer. It fires on 76% of A and 76% of C (a rerun of the 77%
-above). Intent at fixed register is at chance (A>C 0.48, B>D 0.43), and B>C is 0.10. The hand-written fit carries a weak intent
+0.22). The gate fit from the dataset templates is purer. It fires on 76% of A and 76% of C (77% above, from separate
+resamples). Intent at fixed register is at chance (A>C 0.48, B>D 0.43), and B>C is 0.10. The hand-written fit carries a weak intent
 signal (A>C 0.71, B>D 0.82). Register is still the larger axis (C>D 0.91). gemma-2-2b-it gives the
 same order on the score. B>C is 0.19 for the gate and 0.34 for the dataset fit. Register (C>D 0.96) is
 a larger axis than intent at fixed register (A>C 0.64). Its fire rates say less, because the $z=2$ threshold
@@ -2101,8 +2101,8 @@ harmful-sounding benign prompts well above plain benign ones (E>D 0.90; 0.62 on 
 the register-balanced direction reads. Transferred to real prompts, it does not separate intent inside long
 framings on Qwen (A>C 0.53, B>C 0.48). On gemma it does (B>C 0.94). But it ranks harmful-sounding benign
 prompts above real attacks (A>E 0.18). So the second axis that the balanced fit finds is harmful
-vocabulary, not intent. A balanced fit from WildGuard's own training split, eight prompts per side, is the
-fix that <a class="sref" href="#55-an-inventory-and-what-is-still-open">§5.5</a> proposes. It moves B>C to 0.63 on Qwen and 0.85 on gemma. It still cannot tell attacks
+vocabulary, not intent. A balanced fit from WildGuard's own training split, eight prompts per side,
+moves B>C to 0.63 on Qwen and 0.85 on gemma. It still cannot tell attacks
 from harmful-sounding benign prompts (A>E 0.72 and 0.52). Three surface axes, then: command register,
 adversarial framing with its length, and harmful vocabulary. A few-shot fit reads whichever of them
 separates its examples. Eight examples per side do not pin down intent on real traffic. The harnesses are [`scripts/eval_register_grid.py`](https://github.com/NISH1001/conceptgate/blob/main/scripts/eval_register_grid.py)
@@ -2173,10 +2173,10 @@ refusal. But what it adds is "a command to the model", not "an attack".
 
 **Against a system prompt.** The write is compared with an instruction in the system message, on the same
 164 attacks, with the same greedy decoding and lexicon. One system prompt asks the model to refuse harmful
-or override requests; the other asks it to answer every request and never refuse. All five arms ran again
-in one session, because greedy bfloat16 decoding on MPS changed between library versions: a new run of the
-original code gives the same text as the stored run on 114 of the 164 prompts, so the unsteered rate in
-this table is 65.2%, not 64.0%. On this 0.5B model each system prompt moves refusal by 7 points or less;
+or override requests; the other asks it to answer every request and never refuse. All five arms run
+in one session. Greedy bfloat16 decoding on MPS is not bit-stable across library versions: the same code
+gives the same text on 114 of the 164 prompts, so the unsteered rate in
+this table is 65.2%, against 64.0% above. On this 0.5B model each system prompt moves refusal by 7 points or less;
 the write moves it by 30 points away and 14 points toward. We tested one wording per direction, so a
 better prompt can possibly do more, and AxBench finds that prompting beats representation steering at both
 of its model sizes, by a wider margin on the larger one <span class="cite" data-ref="Wu, Z., et al. (2025). AxBench: Steering LLMs? Even Simple Baselines Outperform Sparse Autoencoders. ICML 2025. arXiv:2501.17148."><a href="#ref-axbench">[31]</a></span>. We do not claim that the
@@ -3939,7 +3939,7 @@ more than once.
 | benchmark needs activations | TF-IDF on raw text 0.991, above every activation method | no |
 | single-concept compute saving | real, but any latent probe gets it | not specific |
 | cheap concept bank | 30–38× cheaper than LoRA; tied with a probe bank | real, shared |
-| cross-distribution robustness | first test confounded; held-out categories partial (0.61–0.65) | partial |
+| cross-distribution robustness | cross-dataset test confounded; held-out categories partial (0.61–0.65) | partial |
 | gate selects where to write | win without chat template; reversed and vanished with it | artifact |
 | bank entries steer away from harm | lower refusal (80% → 65–68%) | reversed |
 | few-shot write is a lever | 64/35/79% generated refusal; ~3× random (first token); larger than one system prompt per direction; text stays fluent | holds; prior art |
