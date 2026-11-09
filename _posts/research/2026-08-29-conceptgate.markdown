@@ -1188,9 +1188,9 @@ validation) were exploratory: we changed the analysis as results came in. The sa
 (from the sampled instrument in §4.11 onward) followed a written plan that fixed the instrument, the
 reliability bar, the stop rules and the success criteria before the first run:
 [`docs/plans/steerability-gate.md`](https://github.com/NISH1001/conceptgate/blob/main/docs/plans/steerability-gate.md) in the repository,
-commit `31cb85f`, committed before the first results in commit `192cb6e`. Four analyses are post hoc: the text-only baseline and the duplicate check (<a class="sref" href="#43-detection-on-real-prompts-a-commodity">§4.3</a>),
+commit `31cb85f`, committed before the first results in commit `192cb6e`. Five analyses are post hoc: the text-only baseline and the duplicate check (<a class="sref" href="#43-detection-on-real-prompts-a-commodity">§4.3</a>),
 the system-prompt baseline and the fluency scores (<a class="sref" href="#410-gate-conditioned-steering">§4.10</a>), and the bootstrap intervals
-(<a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>). The last two use only stored outputs.
+(<a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>). The fluency scores and the bootstrap intervals use only stored outputs.
 
 ### 4.1 Depth fusion on synthetic data
 
@@ -2116,7 +2116,7 @@ A rate at a ceiling cannot say whether the write does anything *specific*, so we
 continuous outcome needing no generation: at the first generated position, the log-mass on
 refusal-opening tokens ("I", "Sorry", "As", "Unfortunately", "No") minus the log-mass on
 compliance-opening tokens ("Sure", "Here", "To", "Certainly", "Yes", …), one forward pass per arm. This
-is the refusal–affirmation logit gap of Li and Liu <span class="cite" data-ref="Li, T.-L., &amp; Liu, H. (2025). Logit-Gap Steering: A Forward-Pass Diagnostic for Alignment Robustness. arXiv:2506.24056."><a href="#ref-logitgap">[26]</a></span>, who introduced it as a per-prompt
+is the refusal–affirmation logit gap of Li and Liu <span class="cite" data-ref="Li, T.-L., &amp; Liu, H. (2026). Logit-Gap Steering: A Forward-Pass Diagnostic for Alignment Robustness. NeurIPS 2026. arXiv:2506.24056."><a href="#ref-logitgap">[26]</a></span>, who introduced it as a per-prompt
 safety margin and showed that alignment widens it on 97.5–99.8% of toxic prompts across three model
 families; we sum over small token baskets where they take the top token of each, and we use it to score a
 write rather than to search for a suffix that closes it. Arms:
@@ -2834,7 +2834,7 @@ validation below bounds — and, on one model, confirms — what any of this is 
 
 Everything above is measured on a first-token log-odds over two hand-chosen token baskets — five
 refusal-opening ids against thirteen compliance-opening ones. That the gap itself is a meaningful
-per-prompt margin is established elsewhere <span class="cite" data-ref="Li, T.-L., &amp; Liu, H. (2025). Logit-Gap Steering: A Forward-Pass Diagnostic for Alignment Robustness. arXiv:2506.24056."><a href="#ref-logitgap">[26]</a></span>; what is at issue here is narrower, whether its
+per-prompt margin is established elsewhere <span class="cite" data-ref="Li, T.-L., &amp; Liu, H. (2026). Logit-Gap Steering: A Forward-Pass Diagnostic for Alignment Robustness. NeurIPS 2026. arXiv:2506.24056."><a href="#ref-logitgap">[26]</a></span>; what is at issue here is narrower, whether its
 *response to a write* ranks prompts the way behaviour does. Group means were checked against generated
 text, but the per-prompt ranking, which is what the prediction result is about, was not. So we measured the
 same 164 prompts two further ways: a **teacher-forced continuation score**, the length-normalised
@@ -3775,7 +3775,7 @@ None fits a per-prompt regressor on the unsteered activations to the measured ef
 We should also be clear about what is ours in the *measure* itself: the first-token refusal-minus-compliance
 statistic this section is built on is a basket-sum variant of the refusal–affirmation logit gap, which was
 introduced as a per-prompt safety margin, shown to widen under alignment on 97.5–99.8% of toxic prompts across three model families
-<span class="cite" data-ref="Li, T.-L., & Liu, H. (2025). Logit-Gap Steering: A Forward-Pass Diagnostic for Alignment Robustness. arXiv:2506.24056."><a href="#ref-logitgap">[26]</a></span>.
+<span class="cite" data-ref="Li, T.-L., & Liu, H. (2026). Logit-Gap Steering: A Forward-Pass Diagnostic for Alignment Robustness. NeurIPS 2026. arXiv:2506.24056."><a href="#ref-logitgap">[26]</a></span>.
 The instrument is theirs; the question we ask of it — whether a prompt's *response* to a write is predictable
 before the write — is the part we could not find in the literature. The methodological caution this section ends on is the part we would most want a
 reader to take away, and it is not the one we first drew. A cheap first-token proxy turned out to track the
@@ -4181,7 +4181,7 @@ fails are both visible in them.
 23. <a id="ref-lad"></a>Kulkarni, P. (2026). *Latent Adversarial Detection: Adaptive Probing of LLM Activations for Multi-Turn Attack Detection.* arXiv:2604.28129.
 24. <a id="ref-asteer"></a>Fan, C., Cheng, Y., Li, M., Feizi, S., & Zhou, T. (2026). *When is Your LLM Steerable?* arXiv:2606.11599.
 25. <a id="ref-crh"></a>Gao, L., Zhang, J., Liu, W., Ji, F., Wang, C., Song, Z., et al. (2026). *The Cylindrical Representation Hypothesis for Language Model Steering.* ICML 2026, PMLR 306, 33925–33952. arXiv:2605.01844.
-26. <a id="ref-logitgap"></a>Li, T.-L., & Liu, H. (2025). *Logit-Gap Steering: A Forward-Pass Diagnostic for Alignment Robustness.* arXiv:2506.24056.
+26. <a id="ref-logitgap"></a>Li, T.-L., & Liu, H. (2026). *Logit-Gap Steering: A Forward-Pass Diagnostic for Alignment Robustness.* NeurIPS 2026. arXiv:2506.24056.
 27. <a id="ref-sideeffects"></a>Ong, C. Y., Sim, A. W. J., Zhang, P., & Sun, J. (2026). *Forecasting Side Effects of Activation Steering.* arXiv:2608.11227.
 28. <a id="ref-tan"></a>Tan, D., Chanin, D., Lynch, A., Kanoulas, D., Paige, B., Garriga-Alonso, A., & Kirk, R. (2024). *Analysing the Generalisation and Reliability of Steering Vectors.* NeurIPS 2024. arXiv:2407.12404.
 29. <a id="ref-braun"></a>Braun, J., Eickhoff, C., Krueger, D., Bahrainian, S. A., & Krasheninnikov, D. (2025). *Understanding (Un)Reliability of Steering Vectors in Language Models.* ICLR 2025 Workshop on Foundation Models in the Wild. arXiv:2505.22637.
