@@ -1188,9 +1188,7 @@ validation) were exploratory: we changed the analysis as results came in. The sa
 (from the sampled instrument in §4.11 onward) followed a written plan that fixed the instrument, the
 reliability bar, the stop rules and the success criteria before the first run:
 [`docs/plans/steerability-gate.md`](https://github.com/NISH1001/conceptgate/blob/main/docs/plans/steerability-gate.md) in the repository,
-commit `31cb85f`, committed before the first results in commit `192cb6e`. Five analyses are post hoc: the text-only baseline and the duplicate check (<a class="sref" href="#43-detection-on-real-prompts-a-commodity">§4.3</a>),
-the system-prompt baseline and the fluency scores (<a class="sref" href="#410-gate-conditioned-steering">§4.10</a>), and the bootstrap intervals
-(<a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>). The fluency scores and the bootstrap intervals use only stored outputs.
+commit `31cb85f`, committed before the first results in commit `192cb6e`.
 
 ### 4.1 Depth fusion on synthetic data
 
