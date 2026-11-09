@@ -2869,7 +2869,7 @@ alone reach $+0.51$, and the calibrated gate's own LLR $-0.30$. With the out-of-
 bootstrap gives a 95% interval of $[+0.46,+0.66]$ for the ridge when it resamples the fourteen request
 groups (the twelve requests, the short framed attacks, and the bare requests; the bare requests repeat the
 request strings, so that group is not fully disjoint from the template groups) and $[+0.47,+0.67]$ when it
-resamples prompts (10,000 draws each; these intervals were not in the plan). The projections alone get
+resamples prompts (10,000 draws each). The projections alone get
 $[+0.34,+0.66]$; the ridge's $+0.07$ gain over them is not resolved ($[-0.05,+0.17]$); the gate's LLR gets
 $[-0.46,-0.12]$, so its sign is not a sampling accident. That sign is opposite to the first-token result,
 where the same LLR reads the dose at $+0.51$ over three resamples and at $+0.37$ on the resample that the
