@@ -125,14 +125,15 @@ paper. Treat the results, numbers, and framing as preliminary, and expect sectio
 </p>
 
 <div class="paper-abstract" markdown="1">
-**Abstract.** Operators of deployed language models must detect and control concepts such as a jailbreak
-attempt, a topic, or a tone. Often they have few examples and cannot retrain the model. This report
-studies one residual-stream direction, fit in closed form from about ten examples per class, that both
-reads a concept and steers generation. ConceptGate reads the concept at several layers, fuses the layers
-with a learned depth filter, gates on a calibrated likelihood ratio, and writes a direction fit from the
-same examples back into the stream. We test it on GPT-2, Qwen2.5-0.5B and gemma-2-2b, with SmolLM2-360M
-and SmolLM2-1.7B in one sweep. The baselines are a logistic probe on the same layers, a TF-IDF classifier
-on the raw text, matched-norm random directions, and size-matched random selection. Three findings hold up.
+**Abstract.** Language models encode many concepts as directions in their activations, so one direction
+can both detect a concept and steer the model. Operators of deployed models want both, often from a few
+examples and without retraining. This report tests how far this goes with one residual-stream direction
+per concept, fit in closed form from about ten examples per class. ConceptGate reads the concept at
+several layers, fuses the layers with a learned depth filter, gates on a calibrated likelihood ratio,
+and writes a direction fit from the same examples back into the stream. We run it on GPT-2,
+Qwen2.5-0.5B and gemma-2-2b, with SmolLM2-360M and SmolLM2-1.7B in one sweep. The baselines are a
+logistic probe on the same layers, a TF-IDF classifier on the raw text, matched-norm random directions,
+and size-matched random selection. Three findings hold up.
 
 1. **Steering along the few-shot direction moves refusal both up and down.** On Qwen2.5-0.5B, refusal is 64%
    unsteered, 35% when we steer away, and 79% when we steer toward. A system prompt in either direction
