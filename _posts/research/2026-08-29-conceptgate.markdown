@@ -125,47 +125,46 @@ paper. Treat the results, numbers, and framing as preliminary, and expect sectio
 </p>
 
 <div class="paper-abstract" markdown="1">
-**Abstract.** As a frozen language model — or, more generally, any transformer with a residual stream —
-processes a prompt, human-nameable concepts become linearly represented in that stream, typically most
-separably at intermediate layers. We describe
-ConceptGate, a lightweight, few-shot (approximately ten examples per class), training-free adapter
-that taps the residual stream at several layers and treats a concept's projection across depth as a
-single signal: a per-layer spectrogram combined by a learned depth filter and gated by a calibrated
-likelihood-ratio test. A direction fit from the same examples is used, in the model's raw activation
-space, to steer generation toward or away from the concept — related to the detection direction but not
-identical to it (their mean cosine is 0.45–0.79 depending on model, concept, and detection mode; §3.10). We present the
-method with its derivation and evaluate each component on GPT-2, Qwen2.5-0.5B, and gemma-2-2b, with SmolLM2-360M and SmolLM2-1.7B in one
-sweep. The results are mixed, and we report the negatives as prominently as the positives. (i) As a detector
-ConceptGate is a commodity: in its logistic mode it performs comparably to a linear support-vector machine on the same
-activations, and a logistic probe on the *same tapped layers* — a depth-matched probe at identical
-compute — matches or beats it, so the single-concept compute saving is the truncated forward, a property
-of any latent probe rather than of ConceptGate, and a TF-IDF classifier on the raw prompt text scores 0.991 on the same benchmark, above every activation method. (ii) Combining evidence across depth improves on the
-single-best-layer baseline under a matched-filter analysis and on synthetic data (test error 16.1% to
-9.4%), but the advantage does not transfer to real models, where one layer already carries the concept.
-(iii) Modelling each class as a Gaussian mixture recovers configurations no single linear threshold
-separates, but model selection reduces the mixture to one component per class at ten-shot sizes and keeps
-doing so up to sixty-four examples per class in diff-of-means mode; where a second component is eventually selected it adds at
-most 0.007 held-out AUC.
-(iv) Matched contrastive negatives reduce rather than improve accuracy; generalization to unseen harm
-categories is only partial; and steering with the concept bank's own harm-category directions lowers refusal rather than raising it (80% unsteered, 68% gated, 65% blanket), so those entries supply a write direction pointing opposite to a guardrail. (v) The one capability that distinguishes an internal adapter from a text
-classifier is **steering** — writing a direction fit from the same few-shot examples back into the residual stream — which we
-measure as a graded dose-response bounded by the competence of the base model. (vi) The write rule itself is standard activation addition, and conditioning it on an activation-read detector is prior work. Measured with prompts formatted as the model expects, the composition adds nothing on the read side of that: the model refuses 94% of attacks unsteered, the gate fires on 97% of them and so selects nothing a size-matched random subset does not, and steering *away* from the jailbreak concept **lowers** refusal by 22 points — the few-shot direction is a refusal lever — about three times a matched-norm random direction on this first-token measure — and which sign is a guardrail is the operator's choice. Whether prompts are formatted at all turns out to decide the sign of the main effects in this experiment, which is a caveat for steering evaluations generally (<a class="sref" href="#410-gate-conditioned-steering">§4.10</a>). A $2\times2$ test that crosses jailbreak intent with command register, on 32 hand-written prompts per cell and on 1,725 real prompts from WildGuardMix, shows that the few-shot direction reads the surface form of an attack, not its intent, on both models. The gate fires on 93% of harmless commands to the model and on 99% of harmless roleplay prompts. It fires on 53% of attacks written as ordinary requests. Its false-positive rate changes from 18% to 96% with the register of benign traffic. A system prompt in either direction moves the greedy refusal rate by 7 points or less, where the write moves it by 30 and 14. (vii) A different question — whether the size of a write's effect on a *particular* prompt is readable from
-that prompt beforehand — produced a strong-looking result on a first-token proxy ($\rho=+0.81$
-against a permutation null of -0.00 ± 0.10) that its own controls
-then cut down: most of the signal sits inside the concept direction the gate already computes
-($+0.64$ from three projections against the gate's
-$+0.51$), and validation against behaviour fails at the prompt level — two independent
-behavioural measures correlate with each other at -0.01 — which we first
-read as a null. It was not. Neither of those measures had ever had its own reliability checked, and one took
-three distinct values per prompt. Sampling the outcome instead (sixteen continuations per arm, two
-independent scorers) makes the per-prompt dose reliable — split-half $+0.66$/$+0.70$, the scorers agreeing at
-$+0.88$ — and on Qwen2.5-0.5B it is then **predictable from the unsteered prompt** at grouped
-$\rho=+0.58$ against a permutation null of $-0.015 \pm 0.089$, $z=6.7$. The gate the system already computes
-reads that same quantity at $-0.30$, with the *wrong sign*. Used as a steering trigger, predicted
-dose beats a size-matched random subset at every coverage from 10% to 90%, lifting the refusal gained per
-write from $+0.108$ to $+0.242$ while writing 10–23% of benign prompts where the concept gate writes to all
-of them. It does **not** replicate on gemma-2-2b, where the same write barely moves refusal at all
-(<a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>). Every mechanism used here is drawn from prior work, and so is the composition. What remains is an unusually thorough account of where a few-shot concept adapter does and does not work, a bidirectional write measured on generated text, one candidate-novel positive finding — that per-prompt steerability is measurable and predictable before generation, on one of the two models tested — and three cautions for anyone evaluating a steering intervention. A reference implementation is available at
+**Abstract.** Operators of deployed language models must detect and control concepts such as a jailbreak
+attempt, a topic, or a tone. Often they have few examples and cannot retrain the model. This report
+studies one residual-stream direction, fit in closed form from about ten examples per class, that both
+reads a concept and steers generation. ConceptGate reads the concept at several layers, fuses the layers
+with a learned depth filter, gates on a calibrated likelihood ratio, and writes a direction fit from the
+same examples back into the stream. We test it on GPT-2, Qwen2.5-0.5B and gemma-2-2b, with SmolLM2-360M
+and SmolLM2-1.7B in one sweep. The baselines are a logistic probe on the same layers, a TF-IDF classifier
+on the raw text, matched-norm random directions, and size-matched random selection. Three findings hold up.
+
+1. **Steering along the few-shot direction moves refusal both up and down.** On Qwen2.5-0.5B, refusal is 64%
+   unsteered, 35% when we steer away, and 79% when we steer toward. A system prompt in either direction
+   moves the greedy refusal rate by 7 points or less. The sign that acts as a guardrail is the
+   operator's choice.
+2. **The direction reads the surface form of an attack, not its intent.** A $2\times2$ test crosses
+   jailbreak intent with command register, on 32 hand-written prompts per cell and on 1,725 real prompts
+   from WildGuardMix. On both models, the gate fires on 93% of harmless commands to the model, on 99% of
+   harmless roleplay prompts, and on 53% of attacks written as ordinary requests. Its false-positive rate
+   changes from 18% to 96% with the register of benign traffic.
+3. **Steerability is predictable per prompt.** We sample sixteen continuations per arm and score them
+   with two independent scorers. The per-prompt dose is then reliable: split-half $+0.66$/$+0.70$, with
+   the scorers in agreement at $+0.88$. On Qwen2.5-0.5B, the unsteered activations predict this dose at
+   grouped $\rho=+0.58$ against a permutation null of $-0.015 \pm 0.089$ ($z=6.7$). The concept gate reads
+   the same quantity at $-0.30$, with the *wrong sign*. As a steering trigger, predicted dose beats a
+   size-matched random subset at every coverage from 10% to 90%. It lifts the refusal gained per write
+   from $+0.108$ to $+0.242$ and writes to 10–23% of benign prompts, where the concept gate writes to all
+   of them. On gemma-2-2b the same write barely moves refusal, so the claim is untested there
+   (<a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>).
+
+The controls also show where the design adds nothing. The detector matches a logistic probe on the same
+layers, and the TF-IDF classifier scores 0.991, above every activation method. Depth fusion lowers test
+error on synthetic data (16.1% to 9.4%) but not on real models, where one layer already carries the
+concept. Model selection reduces the mixture densities to one component per class. A gate on concept
+presence fires on 97% of formatted attacks, so it selects nothing that a random subset does not.
+
+Two lessons for steering evaluations follow. First, a missing chat template reversed the sign of an
+early result that favoured the gate
+(<a class="sref" href="#410-gate-conditioned-steering">§4.10</a>). Second, an unvalidated outcome
+measure gave a false null. Two behavioural measures correlated at $-0.01$, but neither had a reliability
+check, and one took only three values per prompt. Every mechanism used here comes from prior work, and
+so does the composition. A reference implementation is available at
 [github.com/NISH1001/conceptgate](https://github.com/NISH1001/conceptgate).
 </div>
 
