@@ -125,7 +125,7 @@ paper. Treat the results, numbers, and framing as preliminary, and expect sectio
 </p>
 
 <p class="paper-links" style="margin:0 0 1rem;font-weight:600">
-📄 <a href="https://github.com/NISH1001/conceptgate/blob/main/docs/preprint/main.pdf">Paper (PDF)</a> · DOI <a href="https://doi.org/10.5281/zenodo.24287378">10.5281/zenodo.24287378</a> ·
+📄 Paper: <a href="https://doi.org/10.5281/zenodo.24287378">doi.org/10.5281/zenodo.24287378</a> (Zenodo) ·
 <a href="https://github.com/NISH1001/conceptgate">Code</a>
 </p>
 
@@ -152,8 +152,8 @@ sign of an early result, and an unvalidated outcome measure gave a false null. C
 </div>
 
 <div class="small-note" markdown="1">
-**Paper.** A condensed version of this report is a preprint ([PDF](https://github.com/NISH1001/conceptgate/blob/main/docs/preprint/main.pdf), DOI
-[10.5281/zenodo.24287378](https://doi.org/10.5281/zenodo.24287378)), with the LaTeX source under [`docs/preprint/`](https://github.com/NISH1001/conceptgate/blob/main/docs/preprint/). It adds a text-only detection baseline, a
+**Paper.** A condensed version of this report is a preprint on Zenodo, DOI
+[10.5281/zenodo.24287378](https://doi.org/10.5281/zenodo.24287378), with the LaTeX source under [`docs/preprint/`](https://github.com/NISH1001/conceptgate/blob/main/docs/preprint/). It adds a text-only detection baseline, a
 system-prompt baseline, a fluency check, bootstrap intervals, and a register × intent test of what the
 few-shot direction reads; this page now reports those too. Where the two differ, the preprint is the later
 text. The preprint's appendix lists every hand-written prompt, lexicon and token basket ([`make_appendix_prompts.py`](https://github.com/NISH1001/conceptgate/blob/main/docs/preprint/make_appendix_prompts.py)); this page does not repeat them.
