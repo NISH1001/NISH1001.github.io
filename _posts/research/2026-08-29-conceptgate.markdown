@@ -124,6 +124,11 @@ model — actively evolving and updated as the research develops, and not a fini
 paper. Treat the results, numbers, and framing as preliminary, and expect sections to change.
 </p>
 
+<p class="paper-links" style="margin:0 0 1rem;font-weight:600">
+📄 <a href="https://github.com/NISH1001/conceptgate/blob/main/docs/preprint/main.pdf">Paper (PDF)</a> · DOI <a href="https://doi.org/10.5281/zenodo.24287378">10.5281/zenodo.24287378</a> ·
+<a href="https://github.com/NISH1001/conceptgate">Code</a>
+</p>
+
 <div class="paper-abstract" markdown="1">
 **Abstract.** Language models encode many concepts as directions in their activations, so one direction
 can both detect a concept and steer the model. Operators of deployed models want both, often from a few
@@ -170,8 +175,8 @@ so does the composition. A reference implementation is available at
 </div>
 
 <div class="small-note" markdown="1">
-**Preprint.** A condensed version of this report is in the repository as a preprint, with PDF and LaTeX
-source under [`docs/preprint/`](https://github.com/NISH1001/conceptgate/blob/main/docs/preprint/). It adds a text-only detection baseline, a
+**Paper.** A condensed version of this report is a preprint ([PDF](https://github.com/NISH1001/conceptgate/blob/main/docs/preprint/main.pdf), DOI
+[10.5281/zenodo.24287378](https://doi.org/10.5281/zenodo.24287378)), with the LaTeX source under [`docs/preprint/`](https://github.com/NISH1001/conceptgate/blob/main/docs/preprint/). It adds a text-only detection baseline, a
 system-prompt baseline, a fluency check, bootstrap intervals, and a register × intent test of what the
 few-shot direction reads; this page now reports those too. Where the two differ, the preprint is the later
 text. The preprint's appendix lists every hand-written prompt, lexicon and token basket ([`make_appendix_prompts.py`](https://github.com/NISH1001/conceptgate/blob/main/docs/preprint/make_appendix_prompts.py)); this page does not repeat them.
@@ -4201,24 +4206,22 @@ fails are both visible in them.
 ## Citation
 
 ```bibtex
-@techreport{nish2026conceptgate,
-  author      = {Pantha, Nishan},
-  title       = {ConceptGate: Learning and Steering Concepts in Language Models},
-  institution = {Bits and Paradoxes},
-  type        = {Technical Report},
-  year        = {2026},
-  month       = aug,
-  url         = {https://nishparadox.com/research/conceptgate/},
-  note        = {Few-shot, training-free concept detection and steering via a
-                 depth-wise spectrogram of residual-stream projections; reference
-                 implementation at https://github.com/NISH1001/conceptgate}
+@misc{pantha2026conceptgate,
+  author    = {Pantha, Nishan},
+  title     = {ConceptGate: Few-Shot Concept Reading and Steering in Frozen Language Models},
+  year      = {2026},
+  month     = nov,
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.24287378},
+  url       = {https://doi.org/10.5281/zenodo.24287378},
+  note      = {Preprint. Code: https://github.com/NISH1001/conceptgate}
 }
 ```
 
 Plain text:
 
-> Pantha, N. (2026). *ConceptGate: Learning and Steering Concepts in Language Models.*
-> Technical Report. <https://nishparadox.com/research/conceptgate/>
+> Pantha, N. (2026). *ConceptGate: Few-Shot Concept Reading and Steering in Frozen Language Models.*
+> Preprint. Zenodo. <https://doi.org/10.5281/zenodo.24287378>
 
 ---
 
