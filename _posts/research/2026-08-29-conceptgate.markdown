@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "ConceptGate: Learning and Steering Concepts in Language Models"
+title:  "ConceptGate: Few-Shot Concept Reading and Steering in Frozen Language Models"
 date:   2026-08-29 09:00:00 -0500
-last_modified_at: 2026-11-07 22:35:16 -0600
+last_modified_at: 2026-11-16 12:00:00 -0600
 categories: research
 tags: research llm interpretability activation-steering guardrails probes representation-engineering few-shot
 subtitle: "A few-shot, training-free adapter that detects a concept from a frozen model's own layers and steers generation along a closely related direction, with interactive figures over real GPT-2, Qwen2.5-0.5B and gemma-2-2b runs."
@@ -132,46 +132,23 @@ paper. Treat the results, numbers, and framing as preliminary, and expect sectio
 <div class="paper-abstract" markdown="1">
 **Abstract.** Language models encode many concepts as directions in their activations, so one direction
 can both detect a concept and steer the model. Operators of deployed models want both, often from a few
-examples and without retraining. This report tests how far this goes with one residual-stream direction
-per concept, fit in closed form from about ten examples per class. ConceptGate reads the concept at
-several layers, fuses the layers with a learned depth filter, gates on a calibrated likelihood ratio,
-and writes a direction fit from the same examples back into the stream. We run it on GPT-2,
-Qwen2.5-0.5B and gemma-2-2b, with SmolLM2-360M and SmolLM2-1.7B in one sweep. The baselines are a
-logistic probe on the same layers, a TF-IDF classifier on the raw text, matched-norm random directions,
-and size-matched random selection. Three findings hold up.
-
-1. **Steering along the few-shot direction moves refusal both up and down.** On Qwen2.5-0.5B, refusal is 64%
-   unsteered, 35% when we steer away, and 79% when we steer toward. A system prompt in either direction
-   moves the greedy refusal rate by 7 points or less. The sign that acts as a guardrail is the
-   operator's choice.
-2. **The direction reads the surface form of an attack, not its intent.** A $2\times2$ test crosses
-   jailbreak intent with command register, on 32 hand-written prompts per cell and on 1,725 real prompts
-   from WildGuardMix. On both models, the gate fires on 93% of harmless commands to the model, on 99% of
-   harmless roleplay prompts, and on 53% of attacks written as ordinary requests. Its false-positive rate
-   changes from 18% to 96% with the register of benign traffic.
-3. **Steerability is predictable per prompt.** We sample sixteen continuations per arm and score them
-   with two independent scorers. The per-prompt dose is then reliable: split-half $+0.66$/$+0.70$, with
-   the scorers in agreement at $+0.88$. On Qwen2.5-0.5B, the unsteered activations predict this dose at
-   grouped $\rho=+0.58$ against a permutation null of $-0.015 \pm 0.089$ ($z=6.7$). The concept gate reads
-   the same quantity at $-0.30$, with the *wrong sign*. As a steering trigger, predicted dose beats a
-   size-matched random subset at every coverage from 10% to 90%. It lifts the refusal gained per write
-   from $+0.108$ to $+0.242$ and writes to 10–23% of benign prompts, where the concept gate writes to all
-   of them. On gemma-2-2b the same write barely moves refusal, so the claim is untested there
-   (<a class="sref" href="#411-what-the-per-prompt-signal-turns-out-to-be">§4.11</a>).
-
-The controls also show where the design adds nothing. The detector matches a logistic probe on the same
-layers, and the TF-IDF classifier scores 0.991, above every activation method. Depth fusion lowers test
-error on synthetic data (16.1% to 9.4%) but not on real models, where one layer already carries the
-concept. Model selection reduces the mixture densities to one component per class. A gate on concept
-presence fires on 97% of formatted attacks, so it selects nothing that a random subset does not.
-
-Two lessons for steering evaluations follow. First, a missing chat template reversed the sign of an
-early result that favoured the gate
-(<a class="sref" href="#410-gate-conditioned-steering">§4.10</a>). Second, an unvalidated outcome
-measure gave a false null. Two behavioural measures correlated at $-0.01$, but neither had a reliability
-check, and one took only three values per prompt. Every mechanism used here comes from prior work, and
-so does the composition. A reference implementation is available at
-[github.com/NISH1001/conceptgate](https://github.com/NISH1001/conceptgate).
+examples and without retraining. We test how far this goes with one residual-stream direction per
+concept, fit in closed form from about ten examples per class. On five models up to 2.6B parameters, we
+compare it with a logistic probe on the same layers, matched-norm random directions, and random
+selection. We report three findings. First, steering along the few-shot direction moves refusal both up
+and down. On Qwen2.5-0.5B, refusal is 64% unsteered, 35% when we steer away, and 79% when we steer
+toward. Second, the direction reads the surface form of an attack, not its intent. On two models and on
+1,725 real prompts, a gate on the direction fires on 93% of harmless commands to the model and on 53% of
+attacks written as ordinary requests. Its false-positive rate changes from 18% to 96% with the register
+of benign traffic. Third, steerability is predictable per prompt. On Qwen2.5-0.5B, the unsteered
+activations predict how far a fixed write moves a prompt's sampled refusal rate (Spearman $\rho=0.58$,
+permutation $z=6.7$). As a steering trigger, this predictor beats random selection at every tested
+coverage. The concept gate reads the same quantity with the wrong sign ($\rho=-0.30$). On gemma-2-2b the
+write barely moves refusal, so this claim is untested there. The controls also show where the design
+adds nothing: the detector matches the logistic probe, and depth fusion and mixture densities give no
+gain on real models. Two lessons for steering evaluations follow. A missing chat template reversed the
+sign of an early result, and an unvalidated outcome measure gave a false null. Code:
+[https://github.com/NISH1001/conceptgate](https://github.com/NISH1001/conceptgate).
 </div>
 
 <div class="small-note" markdown="1">
