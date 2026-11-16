@@ -119,9 +119,8 @@ a.sref:hover{color:var(--brand,#3aa99f)}
 </style>
 
 <p class="small-note" style="margin:0 0 1.4rem;padding:.5rem .7rem;border:1px dashed var(--border,#d8d6cc);border-radius:.35rem">
-<strong>⚠ Work in progress.</strong> This is a living technical report, co-written with a generative
-model — actively evolving and updated as the research develops, and not a finished or peer-reviewed
-paper. Treat the results, numbers, and framing as preliminary, and expect sections to change.
+<strong>⚠</strong> A living report, not peer reviewed, written with help from a generative model.
+The paper on Zenodo is the version of record.
 </p>
 
 <p class="paper-links" style="margin:0 0 1rem;font-weight:600">
