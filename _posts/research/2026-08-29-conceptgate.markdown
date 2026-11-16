@@ -126,7 +126,8 @@ paper. Treat the results, numbers, and framing as preliminary, and expect sectio
 
 <p class="paper-links" style="margin:0 0 1rem;font-weight:600">
 📄 Paper: <a href="https://doi.org/10.5281/zenodo.24287378">doi.org/10.5281/zenodo.24287378</a> (Zenodo) ·
-<a href="https://github.com/NISH1001/conceptgate">Code</a>
+<a href="https://github.com/NISH1001/conceptgate">Code</a><br>
+<span style="font-weight:400">This report is the long-form interactive companion to the paper.</span>
 </p>
 
 <div class="paper-abstract" markdown="1">
@@ -149,14 +150,6 @@ adds nothing: the detector matches the logistic probe, and depth fusion and mixt
 gain on real models. Two lessons for steering evaluations follow. A missing chat template reversed the
 sign of an early result, and an unvalidated outcome measure gave a false null. Code:
 [https://github.com/NISH1001/conceptgate](https://github.com/NISH1001/conceptgate).
-</div>
-
-<div class="small-note" markdown="1">
-**Paper.** A condensed version of this report is a preprint on Zenodo, DOI
-[10.5281/zenodo.24287378](https://doi.org/10.5281/zenodo.24287378), with the LaTeX source under [`docs/preprint/`](https://github.com/NISH1001/conceptgate/blob/main/docs/preprint/). It adds a text-only detection baseline, a
-system-prompt baseline, a fluency check, bootstrap intervals, and a register × intent test of what the
-few-shot direction reads; this page now reports those too. Where the two differ, the preprint is the later
-text. The preprint's appendix lists every hand-written prompt, lexicon and token basket ([`make_appendix_prompts.py`](https://github.com/NISH1001/conceptgate/blob/main/docs/preprint/make_appendix_prompts.py)); this page does not repeat them.
 </div>
 
 <div class="small-note" markdown="1">
