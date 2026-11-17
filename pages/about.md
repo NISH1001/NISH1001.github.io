@@ -33,8 +33,9 @@ In hindsight, I am a pile of atoms coming together to form broken thoughts. So y
 
 Let me be ego-centric just this time. If people who, in all seriousness, ask me about myself, here are few things I'd say:
 
-- I am a Computer Scientist at [NASA-IMPACT](https://earthdata.nasa.gov/esds/impact), leading the LLM team. I work on ML research & engineering for open science, particularly NLP/LLMs for scientific knowledge discovery.
+- I am a Computer Scientist at [UAH](https://www.uah.edu/essc/laboratory-for-applied-science/), where I work as the Lead Language Model Researcher at NASA's [Office of Data Science and Informatics](https://www.nasa.gov/marshall/marshall-space-flight-missions/office-of-data-science-and-informatics-odsi/) (ODSI, formerly [NASA-IMPACT](https://earthdata.nasa.gov/esds/impact)). At heart I am a research engineer: I like turning research into things that actually run. I work on adapting language models for science (a mix of training, distillation, and fine-tuning), on making them more reliable (uncertainty, guardrails), and on agentic workflows for science.
 - I am trying to exist among Chaos, Caffeine and Code (and Words)
+- I meditate. I have sat two 10-day Vipassana retreats and wrote about both: [Vipassana Re-treat]({{ site.baseurl }}/writing/vipassana-retreat/) and [Vipassana Retreat II]({{ site.baseurl }}/writing/vipassana-retreat-ii/)
 - I am interested in applied Machine Learning, NLP, Large Language Models, and designing modular, extensible, and maintainable systems
 - I tend to phase out (and in) of this world. But for the sake of arguments, assume I am right here in this blog, within randomness of words, reflecting from my mind-cave.
 - There were more things I used to be interested in. Not now. Perhaps, I might again. You will never know. :)

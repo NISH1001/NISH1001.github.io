@@ -1,14 +1,17 @@
 {%- comment -%}
   Renders one card per app in _data/ephemera.yml.
-  Card title + thumbnail link to the first (kind: live) link.
+  Card title + thumbnail link to the first link (live if there is one, else source).
+  thumb is optional: a card without one renders text-only.
   Each link kind maps to a small inline SVG, matching the site's Feather/inline-SVG style.
 {%- endcomment -%}
 <div class="ephemera-cards">
   {%- for app in site.data.ephemera -%}
   <article class="ephemera-card">
+    {%- if app.thumb -%}
     <a class="ephemera-card__thumb" href="{{ app.links[0].url }}">
       <img src="{{ app.thumb }}" alt="{{ app.name }} screenshot" loading="lazy" />
     </a>
+    {%- endif -%}
     <div class="ephemera-card__body">
       <h3 class="ephemera-card__title"><a href="{{ app.links[0].url }}">{{ app.name }}</a></h3>
       <p class="ephemera-card__tagline">{{ app.tagline }}</p>
