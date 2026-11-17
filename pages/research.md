@@ -50,7 +50,7 @@ Publications, talks, posters, and academic work in AI, ML, and NLP.
 
 ## Publications
 
-*[Google Scholar](https://scholar.google.com/citations?user=a5JbCv0AAAAJ&hl=en): 67 citations | h-index: 3 | i10-index: 3 — as of August 2026*
+*[Google Scholar](https://scholar.google.com/citations?user=a5JbCv0AAAAJ&hl=en): 74 citations | h-index: 4 | i10-index: 3 — as of November 2026*
 
 ---
 
@@ -70,9 +70,17 @@ A multi-domain dataset of **5,264** scientific repositories across five NASA SMD
 
 ---
 
+### ConceptGate [2026]
+
+**N. Pantha**, "ConceptGate: Few-Shot Concept Reading and Steering in Frozen Language Models," preprint (independent research), Zenodo, Nov. 2026. [[DOI](https://doi.org/10.5281/zenodo.24287378)] [[Write-up]({{ site.baseurl }}/research/conceptgate/)] [[Code](https://github.com/NISH1001/conceptgate)]
+
+One residual-stream direction per concept, fit in closed form from about ten examples per class, used to both detect a concept and steer a frozen language model; reported against fair baselines, negative results included.
+
+---
+
 ### INDUS [EMNLP 2024]
 
-B. Bhattacharjee, A. Trivedi, M. Muraoka, M. Ramasubramanian, T. Udagawa, I. Gurung, **N. Pantha**, et al., "INDUS: Effective and Efficient Language Models for Scientific Applications," *EMNLP 2024*, Industry Track, pp. 98–112, Miami, FL, 2024. **[25 citations]** [[Paper](https://aclanthology.org/2024.emnlp-industry.9)] [[DOI](https://doi.org/10.18653/v1/2024.emnlp-industry.9)]
+B. Bhattacharjee, A. Trivedi, M. Muraoka, M. Ramasubramanian, T. Udagawa, I. Gurung, **N. Pantha**, et al., "INDUS: Effective and Efficient Language Models for Scientific Applications," *EMNLP 2024*, Industry Track, pp. 98–112, Miami, FL, 2024. **[34 citations]** [[Paper](https://aclanthology.org/2024.emnlp-industry.9)] [[DOI](https://doi.org/10.18653/v1/2024.emnlp-industry.9)]
 
 Domain-adapted language models for Earth science, biology, physics, heliophysics, planetary sciences and astrophysics.
 
@@ -80,7 +88,7 @@ Domain-adapted language models for Earth science, biology, physics, heliophysics
 
 ### Guardrailing LLMs for Science [2024]
 
-**N. Pantha**, M. Ramasubramanian, I. Gurung, M. Maskey, R. Ramachandran, "Challenges in Guardrailing Large Language Models for Science," *arXiv preprint arXiv:2411.08181*, 2024. **[21 citations]** [[arXiv](https://arxiv.org/abs/2411.08181)]
+**N. Pantha**, M. Ramasubramanian, I. Gurung, M. Maskey, R. Ramachandran, "Challenges in Guardrailing Large Language Models for Science," *arXiv preprint arXiv:2411.08181*, 2024. **[22 citations]** [[arXiv](https://arxiv.org/abs/2411.08181)]
 
 A taxonomic framework for LLM guardrails in scientific applications.
 
@@ -88,21 +96,15 @@ A taxonomic framework for LLM guardrails in scientific applications.
 
 ### Feature Selection [IEEE SoutheastCon 2024]
 
-**N. Pantha**, M. Ramasubramanian, I. Gurung, M. Maskey, L. M. Sanders, et al., "Feature Selection in High-Dimensional Space with Applications to Gene Expression Data," *IEEE SoutheastCon 2024*, Atlanta, GA, pp. 6–15, 2024. **[3 citations]** [[DOI](https://doi.org/10.1109/SoutheastCon52093.2024.10500057)]
+**N. Pantha**, M. Ramasubramanian, I. Gurung, M. Maskey, L. M. Sanders, et al., "Feature Selection in High-Dimensional Space with Applications to Gene Expression Data," *IEEE SoutheastCon 2024*, Atlanta, GA, pp. 6–15, 2024. **[4 citations]** [[DOI](https://doi.org/10.1109/SoutheastCon52093.2024.10500057)]
 
 ---
 
 ### Blaze [IEEE CLOUD 2023]
 
-S. Marru, B. Freitag, D. Wannipurage, **N. Pantha**, et al., "Blaze: A High-Performance, Scalable, and Efficient Data Transfer Framework," *IEEE 16th International Conference on Cloud Computing (CLOUD)*, pp. 58–68, 2023. **[11 citations]**
+S. Marru, B. Freitag, D. Wannipurage, **N. Pantha**, et al., "Blaze: A High-Performance, Scalable, and Efficient Data Transfer Framework," *IEEE 16th International Conference on Cloud Computing (CLOUD)*, pp. 58–68, 2023. **[11 citations]** [[DOI](https://doi.org/10.1109/CLOUD60044.2023.00016)]
 
 Evaluated transatlantic data transfer between ESA and NASA.
-
----
-
-### Reasoning Risks Benchmark [NeurIPS 2026, under review]
-
-T. Tchrakian, A. Pascale, **N. Pantha**, J. Barry, N. Jha, R. A. Slank, A. Danehkar, E. Foshee, G. De Mel, M. Ramasubramanian, J. Carnerero-Cano, R. Ramachandran, J. Bernabe-Moreno, "A Benchmark for Reasoning Risks in Scientific Content Generation," submitted to *NeurIPS 2026*, Evaluations and Datasets Track.
 
 ---
 
@@ -230,6 +232,12 @@ G. Panthee, **N. Pantha**, S. Thapa, S. Awale, S. KC, P. Krishnappa, M. Ramasubr
 
 ---
 
+### Agentic Workflows for Gap-Aware Literature Reviews [AGU 2025]
+
+M. Moses, **N. Pantha**, M. Elkaref, J. Barry, V. Kuruvanthodi, M. Ramasubramanian, C. Watson, G. De Mel, "Agentic Workflows for Gap-Aware Literature Reviews," *AGU 2025* (IN12A-04, oral presentation), New Orleans, LA, Dec. 2025. [[Abstract](https://scixplorer.org/abs/2025AGUFMIN12A..04M/abstract)]
+
+---
+
 ### Extending INDUS for Sentence Embeddings [AGU 2025]
 
 V. Kuruvanthodi, B. Bhattacharjee, M. Elkaref, G. R. De Mel, **N. Pantha**, et al., "Extending INDUS Models for Low-Latency, High-Context Scientific Sentence Embeddings," *AGU 2025 Fall Meeting*, 2025.
@@ -248,12 +256,6 @@ M. Ramasubramanian, I. Gurung, **N. Pantha**, et al., "NLP Applications of Domai
 
 ---
 
-### INDUS [EMNLP 2024]
-
-B. Bhattacharjee, et al., **N. Pantha**, et al., "INDUS: Effective and Efficient Language Models for Scientific Applications," *EMNLP 2024*, Industry Track (poster), Miami, FL, Nov. 2024.
-
----
-
 ### Evaluation of NASA SMD Large Language Model [AGU 2023]
 
 M. Ramasubramanian, **N. Pantha**, I. Gurung, et al., "Evaluation of NASA Science Mission Directorate Large Language Model," *AGU 2023* (IN24A-01, oral presentation), San Francisco, CA, Dec. 2023. [[AGU](https://agu.confex.com/agu/fm23/meetingapp.cgi/Paper/1413324)]
@@ -262,7 +264,7 @@ M. Ramasubramanian, **N. Pantha**, I. Gurung, et al., "Evaluation of NASA Scienc
 
 ### Leveraging LLMs for NASA Search and Discovery [AGU 2023]
 
-A. Acharya, I. Gurung, A. Bhusal, C. E. Phillips, C. Davis, M. Ramasubramanian, R. Ramachandran, **N. Pantha**, et al., "Leveraging Large Language Models to Enhance NASA's Information Search and Discovery," *AGU 2023* (IN53A-05), San Francisco, CA, Dec. 2023.
+A. Acharya, I. Gurung, A. Bhusal, C. E. Phillips, C. Davis, M. Ramasubramanian, R. Ramachandran, **N. Pantha**, et al., "Leveraging Large Language Models to Enhance NASA's Information Search and Discovery," *AGU 2023* (IN53A-05), San Francisco, CA, Dec. 2023. [[Abstract](https://scixplorer.org/abs/2023AGUFMIN53A..05A/abstract)]
 
 ---
 
