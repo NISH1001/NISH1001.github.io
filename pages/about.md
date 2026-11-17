@@ -2,7 +2,7 @@
 title: "About"
 layout: post
 content-type: "static"
-permalink: /about
+permalink: /about/
 ---
 
 I mostly stare into the abyss. (Un/Re)-Learning Dasein (German translation to "Existence").

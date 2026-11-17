@@ -1,7 +1,7 @@
 ---
 title: "Tags"
 layout: post
-permalink: /tags
+permalink: /tags/
 content-type: "tags"
 ---
 

@@ -79,7 +79,7 @@
             {%- endif -%}
 
             <!--- Notes Feed Layout-->
-            {%- if page.permalink == "/notes" -%}
+            {%- if page.permalink == "/notes/" -%}
                 <h1>{{page.title}}</h1>
                 {%- include Content.html -%}
                 {%- include Feed.html type="notes" -%}
@@ -97,7 +97,7 @@
             {%- endif -%}
 
              <!--- Post Layout (exclude homepage, static, notes, tags, and feed pages) -->
-             {%- unless page.permalink == "/" or page.permalink == "/notes" or page.permalink == "/writing" -%}
+             {%- unless page.permalink == "/" or page.permalink == "/notes/" or page.permalink == "/writing/" -%}
              {%- unless page.content-type == "static" or page.content-type == "notes" or page.content-type == "tags" -%}
              {%- if page.content-type == "post" or page.layout == "post" -%}
                  <h1>{{page.title}}</h1>
@@ -124,7 +124,7 @@
             {%- endif -%}
 
             <!--- Blog Feed Layout-->
-            {%- if page.permalink == "/writing" -%}
+            {%- if page.permalink == "/writing/" -%}
                 {%- include Feed.html type="posts" -%}
                 {%- include Feed.html type="recent-notes" -%}
             {%- endif -%}

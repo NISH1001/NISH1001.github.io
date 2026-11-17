@@ -1,7 +1,7 @@
 ---
 title: "Search Results"
 layout: post
-permalink: /search
+permalink: /search/
 ---
 
 <div id="search-query-display"></div>

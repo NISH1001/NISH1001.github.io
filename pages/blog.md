@@ -1,7 +1,7 @@
 ---
 title: "Writing"
 layout: post
-permalink: /writing
+permalink: /writing/
 content-type: "static"
 ---
 

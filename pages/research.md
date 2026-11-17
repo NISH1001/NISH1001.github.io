@@ -2,7 +2,7 @@
 title: "Research"
 layout: post
 content-type: "static"
-permalink: /research
+permalink: /research/
 toc: true
 ---
 
